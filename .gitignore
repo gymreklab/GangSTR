@@ -16,7 +16,9 @@ src/Makefile.in
 GangSTR
 src/.deps/
 *.o
+*.a
 *.tar.gz
 depcomp
 install-sh
 missing
+ar-lib

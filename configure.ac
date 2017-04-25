@@ -2,6 +2,22 @@ AC_INIT([GangSTR], [1.0], [mgymrek@ucsd.edu])
 AM_INIT_AUTOMAKE([foreign -Wall -Werror])
 AC_PROG_CC
 AC_PROG_CXX
+AC_PROG_RANLIB
+AM_PROG_AR
+
+# Set variables using shell commands
+GIT_VERSION=${PACKAGE_VERSION}
+AC_SUBST(GIT_VERSION)
+MACHTYPE=`uname -m`
+AC_SUBST(MACHTYPE)
+
+# Custom Flags to add to CFLAGS/CXXFLAGS
+GANGSTR_CFLAGS="-D_GIT_VERSION=\"\\\"${GIT_VERSION}\\\"\" -D_MACHTYPE=\"\\\"${MACHTYPE}\\\"\""
+
+# Set the final value for CFLAGS/CXXFLAGS
+CFLAGS="$CFLAGS $GANGSTR_CFLAGS"
+CXXFLAGS="$CXXFLAGS $GANGSTR_CFLAGS"
+
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_FILES([Makefile src/Makefile])
 AC_OUTPUT
