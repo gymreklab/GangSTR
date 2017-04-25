@@ -18,23 +18,18 @@ You should have received a copy of the GNU General Public License
 along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef SRC_OPTIONS_H__
-#define SRC_OPTIONS_H__
+#include "src/locus.h"
 
-#include <vector>
-#include <string>
+using namespace std;
 
-class Options {
- public:
-  Options();
-  virtual ~Options();
+Locus::Locus(const std::string& _chrom,
+	     const int& _start,
+	     const int& _end,
+	     const int& _period) {
+  chrom = _chrom;
+  start = _start;
+  end = _end;
+  period = _period;
+}
 
-  // User defined options
-  std::vector<std::string> bamfiles;
-  std::string reffa;
-  std::string regionsfile;
-  std::string outprefix;
-  bool verbose;
-};
-
-#endif  // SRC_OPTIONS_H__
+Locus::~Locus() {}

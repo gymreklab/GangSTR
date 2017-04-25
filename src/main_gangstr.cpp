@@ -34,7 +34,7 @@ void show_help() {
   help_msg << "\nGangSTR [OPTIONS] "
 	   << "--bam <file1[,file2,...]> "
 	   << "--ref <reference.fa> "
-	   << "--loci <strref.tab> "
+	   << "--regions <regions.bed> "
 	   << "--out <outprefix> "
 	   << "\n\nOptions:\n"
 	   << "-h,--help      display this help screen\n"
@@ -50,7 +50,7 @@ void parse_commandline_options(int argc, char* argv[], Options* options) {
   enum LONG_OPTIONS {
     OPT_BAMFILES,
     OPT_REFFA,
-    OPT_LOCI,
+    OPT_REGIONS,
     OPT_OUT,
     OPT_HELP,
     OPT_VERBOSE,
@@ -59,7 +59,7 @@ void parse_commandline_options(int argc, char* argv[], Options* options) {
   static struct option long_options[] = {
     {"bam", 1, 0, OPT_BAMFILES},
     {"ref", 1, 0, OPT_REFFA},
-    {"loci", 1, 0, OPT_LOCI},
+    {"regions", 1, 0, OPT_REGIONS},
     {"out", 1, 0, OPT_OUT},
     {"help", 0, 0, OPT_HELP},
     {"verbose", 0, 0, OPT_VERBOSE},
@@ -79,8 +79,8 @@ void parse_commandline_options(int argc, char* argv[], Options* options) {
     case OPT_REFFA:
       options->reffa = optarg;
       break;
-    case OPT_LOCI:
-      options->locifile = optarg;
+    case OPT_REGIONS:
+      options->regionsfile = optarg;
       break;
     case OPT_OUT:
       options->outprefix = optarg;
@@ -111,8 +111,8 @@ void parse_commandline_options(int argc, char* argv[], Options* options) {
   if (options->bamfiles.empty()) {
     PrintMessageDieOnError("No --bam files specified", ERROR);
   }
-  if (options->locifile.empty()) {
-    PrintMessageDieOnError("No --loci option specified", ERROR);
+  if (options->regionsfile.empty()) {
+    PrintMessageDieOnError("No --regions option specified", ERROR);
   }
   if (options->reffa.empty()) {
     PrintMessageDieOnError("No --ref option specified", ERROR);

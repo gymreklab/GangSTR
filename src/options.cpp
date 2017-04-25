@@ -25,7 +25,7 @@ using namespace std;
 Options::Options() {
   // initialize options
   reffa = "";
-  locifile = "";
+  regionsfile = "";
   outprefix = "";
   verbose = false;
 }
