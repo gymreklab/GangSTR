@@ -22,14 +22,11 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 
 using namespace std;
 
-Locus::Locus(const std::string& _chrom,
-	     const int& _start,
-	     const int& _end,
-	     const int& _period) {
-  chrom = _chrom;
-  start = _start;
-  end = _end;
-  period = _period;
+Locus::Locus() {
+  chrom = "";
+  start = -1;
+  end = -1;
+  period = -1;
 }
 
 Locus::~Locus() {}

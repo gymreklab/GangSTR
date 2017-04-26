@@ -26,6 +26,7 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "src/common.h"
 #include "src/options.h"
+#include "src/region_reader.h"
 
 using namespace std;
 
@@ -123,6 +124,14 @@ void parse_commandline_options(int argc, char* argv[], Options* options) {
 }
 
 int main(int argc, char* argv[]) {
+  // Set up
   Options options;
   parse_commandline_options(argc, argv, &options);
+
+  // Process each region
+  RegionReader region_reader(options.regionsfile);
+  Locus locus;
+  while (region_reader.GetNextRegion(&locus)) {
+    // TODO
+  };
 }

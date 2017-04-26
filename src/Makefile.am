@@ -23,7 +23,8 @@ noinst_LIBRARIES = libgangstr.a
 libgangstr_a_SOURCES = \
 	common.h common.cpp \
 	options.h options.cpp \
-	locus.h locus.cpp
+	locus.h locus.cpp \
+	region_reader.h region_reader.cpp
 
 GangSTR_SOURCES = main_gangstr.cpp
 GangSTR_LDADD = libgangstr.a

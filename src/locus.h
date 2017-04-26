@@ -25,13 +25,9 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 
 class Locus {
  public:
-  Locus(const std::string& _chrom,
-	const int& _start,
-	const int& _end,
-	const int& _period);
+  Locus();
   virtual ~Locus();
 
- private:
   std::string chrom;
   int start;
   int end;
