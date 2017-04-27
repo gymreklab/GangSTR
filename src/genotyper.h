@@ -36,6 +36,9 @@ class Genotyper {
   virtual ~Genotyper();
 
   bool ProcessLocus(Locus* locus);
+
+ private:
+  const RefGenome* refgenome;
 };
 
 #endif  // SRC_GENOTYPER_H__

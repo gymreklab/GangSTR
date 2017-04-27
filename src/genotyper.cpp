@@ -25,6 +25,7 @@ using namespace std;
 Genotyper::Genotyper(const BamReader& _bamreader,
 		     const RefGenome& _refgenome,
 		     const Options& _options) {
+  refgenome = &_refgenome;
   // TODO
 }
 

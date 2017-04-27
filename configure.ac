@@ -32,6 +32,12 @@ AC_SUBST(MACHTYPE)
 # Custom Flags to add to CFLAGS/CXXFLAGS
 GANGSTR_CFLAGS="-D_GIT_VERSION=\"\\\"${GIT_VERSION}\\\"\" -D_MACHTYPE=\"\\\"${MACHTYPE}\\\"\""
 
+# Set flags for external libraries
+HTS_CPPFLAGS="-I/usr/local/include/htslib"
+HTS_LDFLAGS="-L/usr/local/lib/ -l hts"
+AC_SUBST(HTS_CPPFLAGS)
+AC_SUBST(HTS_LDFLAGS)
+
 # Set the final value for CFLAGS/CXXFLAGS
 CFLAGS="$CFLAGS $GANGSTR_CFLAGS"
 CXXFLAGS="$CXXFLAGS $GANGSTR_CFLAGS"

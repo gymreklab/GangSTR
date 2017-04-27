@@ -16,6 +16,9 @@
 # You should have received a copy of the GNU General Public License
 # along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 
+AM_CPPFLAGS = -I$(top_srcdir) $(HTS_CPPFLAGS)
+AM_LDFLAGS = ${HTS_LDFLAGS}
+
 bin_PROGRAMS = GangSTR
 
 noinst_LIBRARIES = libgangstr.a
@@ -29,5 +32,6 @@ libgangstr_a_SOURCES = \
 	ref_genome.h ref_genome.cpp \
 	genotyper.h genotyper.cpp
 
+GangSTR_LDFLAGS = ${AM_LDFLAGS}
 GangSTR_SOURCES = main_gangstr.cpp
 GangSTR_LDADD = libgangstr.a

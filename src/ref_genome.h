@@ -21,12 +21,28 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef SRC_REF_GENOME_H__
 #define SRC_REF_GENOME_H__
 
+#include "faidx.h"
+
+#include <stdint.h>
+#include <unistd.h>
+
 #include <string>
 
 class RefGenome {
  public:
-  RefGenome(std::string _reffa);
+  RefGenome(const std::string& _reffa);
   virtual ~RefGenome();
+
+  bool GetSequence(const std::string& _chrom,
+		   const int32_t& _start,
+		   const int32_t& _end,
+		   std::string* seq);
+ private:
+  bool file_exists(std::string path) const {
+    return (access(path.c_str(), F_OK) != -1);
+  }
+
+  faidx_t* refindex;
 };
 
 #endif  // SRC_REF_GENOME_H__

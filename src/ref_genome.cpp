@@ -18,12 +18,47 @@ You should have received a copy of the GNU General Public License
 along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <stdlib.h>
+
+#include <sstream>
+
+#include "src/common.h"
 #include "src/ref_genome.h"
 
 using namespace std;
 
-RefGenome::RefGenome(std::string _reffa) {
-  // TODO
+RefGenome::RefGenome(const std::string& _reffa) {
+  // Check if file exists
+  if (!file_exists(_reffa)) {
+    PrintMessageDieOnError("FASTA file " + _reffa + " does not exist", ERROR);
+  }
+
+  // Check for index
+  if (!file_exists(_reffa + ".fai")) {
+    PrintMessageDieOnError("No index for FASTA file " + _reffa, ERROR);
+  }
+
+  // Load index
+  refindex = fai_load(_reffa.c_str());
+  if (refindex == NULL) {
+    PrintMessageDieOnError("Failed to load FASTA index", ERROR);
+  }
+}
+
+bool RefGenome::GetSequence(const std::string& _chrom,
+			    const int32_t& _start,
+			    const int32_t& _end,
+			    std::string* seq) {
+  int length;
+  char* result = faidx_fetch_seq(refindex, _chrom.c_str(), _start, _end, &length);
+  if (result == NULL) {
+    stringstream ss;
+    ss << "Error fetching reference sequence for " << _chrom << ":" << _start;
+    PrintMessageDieOnError(ss.str(), ERROR);
+  }
+  seq->assign(result, length);
+  free((void *)result);
+  return true;
 }
 
 RefGenome::~RefGenome() {}
