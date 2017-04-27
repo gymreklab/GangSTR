@@ -24,10 +24,19 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 #include <vector>
 #include <string>
 
-class BamReader {
+#include "api/BamMultiReader.h"
+
+using namespace BamTools;
+
+class GBamReader {
  public:
-  BamReader(std::vector<std::string> _bamfiles);
-  virtual ~BamReader();
+  GBamReader(std::vector<std::string> _bamfiles);
+  virtual ~GBamReader();
+
+  std::string GetTestRead();
+
+ private:
+  BamMultiReader* reader;
 };
 
 #endif  // SRC_BAM_READER_H__

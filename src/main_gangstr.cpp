@@ -134,7 +134,7 @@ int main(int argc, char* argv[]) {
   // Process each region
   RegionReader region_reader(options.regionsfile);
   Locus locus;
-  BamReader bamreader(options.bamfiles);
+  GBamReader bamreader(options.bamfiles);
   RefGenome refgenome(options.reffa);
   Genotyper genotyper(bamreader, refgenome, options);
   genotyper.Debug(); // TODO remove

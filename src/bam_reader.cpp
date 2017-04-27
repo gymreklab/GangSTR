@@ -18,12 +18,26 @@ You should have received a copy of the GNU General Public License
 along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "common.h"
 #include "src/bam_reader.h"
 
 using namespace std;
 
-BamReader::BamReader(std::vector<std::string> bamfiles) {
-  // TODO
+GBamReader::GBamReader(std::vector<std::string> bamfiles) {
+  reader = new BamMultiReader();
+  // Try to open the files
+  if (!reader->Open(bamfiles)) {
+    PrintMessageDieOnError("Could not open BAM files", ERROR);
+  }
+  if (!reader->LocateIndexes()) {
+    reader->CreateIndexes();
+  }
 }
 
-BamReader::~BamReader() {}
+std::string GBamReader::GetTestRead() {
+  BamAlignment aln;
+  reader->GetNextAlignment(aln);
+  return aln.QueryBases;
+}
+
+GBamReader::~GBamReader() {}

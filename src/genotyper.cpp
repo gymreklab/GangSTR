@@ -24,11 +24,12 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 
 using namespace std;
 
-Genotyper::Genotyper(const BamReader& _bamreader,
+Genotyper::Genotyper(GBamReader _bamreader,
 		     RefGenome _refgenome,
 		     const Options& _options) {
   refgenome = &_refgenome;
-  // TODO
+  bamreader = &_bamreader;
+  options = &_options;
 }
 
 bool Genotyper::ProcessLocus(Locus* locus) {
@@ -40,6 +41,9 @@ void Genotyper::Debug() {
   std::string seq;
   refgenome->GetSequence("3", 63898361, 63898392, &seq);
   cerr << seq << endl;
+  cerr << "testing bam" << endl;
+  std::string testread = bamreader->GetTestRead();
+  cerr << testread << endl;
 }
 
 Genotyper::~Genotyper() {}

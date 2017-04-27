@@ -16,8 +16,8 @@
 # You should have received a copy of the GNU General Public License
 # along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 
-AM_CPPFLAGS = -I$(top_srcdir) $(HTS_CPPFLAGS)
-AM_LDFLAGS = ${HTS_LDFLAGS}
+AM_CPPFLAGS = -I$(top_srcdir) $(HTS_CPPFLAGS) ${BAM_CPPFLAGS}
+AM_LDFLAGS = ${BAM_LDFLAGS} ${HTS_LDFLAGS}
 
 bin_PROGRAMS = GangSTR
 
