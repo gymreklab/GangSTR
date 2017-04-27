@@ -31,14 +31,15 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 class Genotyper {
  public:
   Genotyper(const BamReader& _bamreader,
-	    const RefGenome& _refgenome,
+	    RefGenome _refgenome,
 	    const Options& _options);
   virtual ~Genotyper();
 
   bool ProcessLocus(Locus* locus);
 
+  void Debug(); // For testing member classes. can remove later
  private:
-  const RefGenome* refgenome;
+  RefGenome* refgenome;
 };
 
 #endif  // SRC_GENOTYPER_H__

@@ -18,12 +18,14 @@ You should have received a copy of the GNU General Public License
 along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <iostream>
+
 #include "src/genotyper.h"
 
 using namespace std;
 
 Genotyper::Genotyper(const BamReader& _bamreader,
-		     const RefGenome& _refgenome,
+		     RefGenome _refgenome,
 		     const Options& _options) {
   refgenome = &_refgenome;
   // TODO
@@ -31,6 +33,13 @@ Genotyper::Genotyper(const BamReader& _bamreader,
 
 bool Genotyper::ProcessLocus(Locus* locus) {
   return false; // TODO
+}
+
+void Genotyper::Debug() {
+  cerr << "testing refgenome" << endl;
+  std::string seq;
+  refgenome->GetSequence("3", 63898361, 63898392, &seq);
+  cerr << seq << endl;
 }
 
 Genotyper::~Genotyper() {}

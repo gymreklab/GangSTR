@@ -137,6 +137,7 @@ int main(int argc, char* argv[]) {
   BamReader bamreader(options.bamfiles);
   RefGenome refgenome(options.reffa);
   Genotyper genotyper(bamreader, refgenome, options);
+  genotyper.Debug(); // TODO remove
   while (region_reader.GetNextRegion(&locus)) {
     stringstream ss;
     ss << "Processing " << locus.chrom << ":" << locus.start;
