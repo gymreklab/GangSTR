@@ -18,23 +18,12 @@ You should have received a copy of the GNU General Public License
 along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef SRC_REGION_READER_H__
-#define SRC_REGION_READER_H__
+#include "src/bam_reader.h"
 
-#include <fstream>
-#include <string>
+using namespace std;
 
-#include "src/locus.h"
+BamReader::BamReader(std::vector<std::string> bamfiles) {
+  // TODO
+}
 
-class RegionReader {
- public:
-  RegionReader(const std::string& filename);
-  virtual ~RegionReader();
-
-  bool GetNextRegion(Locus* locus);
-
- private:
-  std::ifstream* freader;
-};
-
-#endif  // SRC_REGION_READER_H__
+BamReader::~BamReader() {}

@@ -24,8 +24,11 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 #include <iostream>
 #include <sstream>
 
+#include "src/bam_reader.h"
 #include "src/common.h"
+#include "src/genotyper.h"
 #include "src/options.h"
+#include "src/ref_genome.h"
 #include "src/region_reader.h"
 
 using namespace std;
@@ -131,7 +134,13 @@ int main(int argc, char* argv[]) {
   // Process each region
   RegionReader region_reader(options.regionsfile);
   Locus locus;
+  BamReader bamreader(options.bamfiles);
+  RefGenome refgenome(options.reffa);
+  Genotyper genotyper(bamreader, refgenome, options);
   while (region_reader.GetNextRegion(&locus)) {
-    // TODO
+    stringstream ss;
+    ss << "Processing " << locus.chrom << ":" << locus.start;
+    PrintMessageDieOnError(ss.str(), PROGRESS);
+    genotyper.ProcessLocus(&locus);
   };
 }

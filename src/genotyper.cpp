@@ -18,23 +18,18 @@ You should have received a copy of the GNU General Public License
 along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef SRC_REGION_READER_H__
-#define SRC_REGION_READER_H__
+#include "src/genotyper.h"
 
-#include <fstream>
-#include <string>
+using namespace std;
 
-#include "src/locus.h"
+Genotyper::Genotyper(const BamReader& _bamreader,
+		     const RefGenome& _refgenome,
+		     const Options& _options) {
+  // TODO
+}
 
-class RegionReader {
- public:
-  RegionReader(const std::string& filename);
-  virtual ~RegionReader();
+bool Genotyper::ProcessLocus(Locus* locus) {
+  return false; // TODO
+}
 
-  bool GetNextRegion(Locus* locus);
-
- private:
-  std::ifstream* freader;
-};
-
-#endif  // SRC_REGION_READER_H__
+Genotyper::~Genotyper() {}

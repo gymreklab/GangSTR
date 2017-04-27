@@ -18,12 +18,18 @@ You should have received a copy of the GNU General Public License
 along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <stdlib.h>
+
+#include "src/common.h"
 #include "src/region_reader.h"
 
 using namespace std;
 
 RegionReader::RegionReader(const std::string& filename) {
-  // TODO
+  freader = new std::ifstream(filename.c_str());
+  if (!freader->is_open()) {
+    PrintMessageDieOnError("Could not open regions file", ERROR);
+  }
 }
 
 /*
@@ -31,7 +37,22 @@ RegionReader::RegionReader(const std::string& filename) {
   Return true if successful, false if no more regions
  */
 bool RegionReader::GetNextRegion(Locus* locus) {
-  return false; // TODO
+  std::string line;
+  std::vector<std::string> items;
+  if (!std::getline(*freader, line)) {
+    return false;
+  }
+  split_by_delim(line, '\t', items);
+  if (items.size() < 4) {
+    PrintMessageDieOnError("Regions file not formatted correctly", ERROR);
+  }
+  locus->chrom = items[0];
+  locus->start = atoi(items[1].c_str());
+  locus->end = atoi(items[2].c_str());
+  locus->period = atoi(items[3].c_str());
+  return true;
 }
 
-RegionReader::~RegionReader() {}
+RegionReader::~RegionReader() {
+  freader->close();
+}

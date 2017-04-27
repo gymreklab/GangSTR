@@ -24,7 +24,10 @@ libgangstr_a_SOURCES = \
 	common.h common.cpp \
 	options.h options.cpp \
 	locus.h locus.cpp \
-	region_reader.h region_reader.cpp
+	region_reader.h region_reader.cpp \
+	bam_reader.h bam_reader.cpp \
+	ref_genome.h ref_genome.cpp \
+	genotyper.h genotyper.cpp
 
 GangSTR_SOURCES = main_gangstr.cpp
 GangSTR_LDADD = libgangstr.a
