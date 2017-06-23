@@ -46,6 +46,8 @@ class ReadClass {
   bool GetClassLogLikelihood(const int32_t& allele1, const int32_t& allele2, double* class_ll);
   // Clear all data from the class
   void Reset();
+  // Check how many data points
+  std::size_t GetDataSize();
 
  private:
   // Calculate log probability P(datapoint | allele)

@@ -37,6 +37,16 @@ void LikelihoodMaximizer::AddSpanningData(const int32_t& data) {
 void LikelihoodMaximizer::AddFRRData(const int32_t& data) {
   frr_class_.AddData(data);
 }
+std::size_t LikelihoodMaximizer::GetEnclosingDataSize() {
+  return enclosing_class_.GetDataSize();
+}
+std::size_t LikelihoodMaximizer::GetSpanningDataSize() {
+  return spanning_class_.GetDataSize();
+}
+std::size_t LikelihoodMaximizer::GetFRRDataSize() {
+  return frr_class_.GetDataSize();
+}
+
 
 bool LikelihoodMaximizer::GetGenotypeNegLogLikelihood(const int32_t& allele1,
 						      const int32_t& allele2,

@@ -37,6 +37,10 @@ class LikelihoodMaximizer {
   void AddEnclosingData(const int32_t& data);
   void AddSpanningData(const int32_t& data);
   void AddFRRData(const int32_t& data);
+  // Check data size
+  std::size_t GetEnclosingDataSize();
+  std::size_t GetSpanningDataSize();
+  std::size_t GetFRRDataSize();
   // Main likelihood function
   bool GetGenotypeNegLogLikelihood(const int32_t& allele1, const int32_t& allele2, double* gt_ll);
 

@@ -47,8 +47,15 @@ TESTS = GangSTRTests
 AUTOMAKE_OPTIONS = serial-tests
 check_PROGRAMS=$(TESTS)
 GangSTRTests_SOURCES = \
+	read_class.h read_class.cpp \
+	enclosing_class.h enclosing_class.cpp \
+	frr_class.h frr_class.cpp \
+	spanning_class.h spanning_class.cpp \
+	mathops.h mathops.cpp \
+	fastonebigheader.h \
+	likelihood_maximizer.h likelihood_maximizer.cpp \
 	tests/ReadClass_test.h tests/ReadClass_test.cpp \
-	tests/LikelihoodMaximizer_test.sh tests/LikelihoodMaximizer_test.cpp \
+	tests/LiketestslihoodMaximizer_test.sh tests/LikelihoodMaximizer_test.cpp \
 	tests/main_test.cpp
 GangSTRTests_CXXFLAGS = $(CPPUNIT_CFLAGS)
 GangSTRTests_LDFLAGS = $(CPPUNIT_LIBS) -ldl

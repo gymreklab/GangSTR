@@ -23,15 +23,28 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <cppunit/extensions/HelperMacros.h>
 
+#include "src/likelihood_maximizer.h"
+
 class LikelihoodMaximizerTest: public CppUnit::TestFixture {
   CPPUNIT_TEST_SUITE(LikelihoodMaximizerTest);
   CPPUNIT_TEST(test_Reset);
+  CPPUNIT_TEST(test_AddEnclosingData);
+  CPPUNIT_TEST(test_AddSpanningData);
+  CPPUNIT_TEST(test_AddFRRData);
+  CPPUNIT_TEST(test_GetGenotypeNegLogLikelihood);
   CPPUNIT_TEST_SUITE_END();
 
  public:
   void setUp();
   void tearDown();
   void test_Reset();
+  void test_AddEnclosingData();
+  void test_AddSpanningData();
+  void test_AddFRRData();
+  void test_GetGenotypeNegLogLikelihood();
+
+ private:
+  LikelihoodMaximizer likelihood_maximizer_;
 };
 
 #endif //  SRC_TESTS_LIKELIHOODMAXIMIZER_H_

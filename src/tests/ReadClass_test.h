@@ -23,10 +23,22 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <cppunit/extensions/HelperMacros.h>
 
+#include "src/enclosing_class.h"
+#include "src/spanning_class.h"
+#include "src/frr_class.h"
+
 class ReadClassTest: public CppUnit::TestFixture {
   CPPUNIT_TEST_SUITE(ReadClassTest);
   CPPUNIT_TEST(test_AddData);
   CPPUNIT_TEST(test_Reset);
+  CPPUNIT_TEST(test_SpanClassProb);
+  CPPUNIT_TEST(test_SpanReadProb);
+  CPPUNIT_TEST(test_FRRClassProb);
+  CPPUNIT_TEST(test_FRRReadProb);
+  CPPUNIT_TEST(test_EnclosingClassProb);
+  CPPUNIT_TEST(test_EnclosingReadProb);
+  CPPUNIT_TEST(test_GetClassLogLikelihood);
+  CPPUNIT_TEST(test_GetAlleleLogLikelihood);
   CPPUNIT_TEST_SUITE_END();
 
  public:
@@ -34,6 +46,18 @@ class ReadClassTest: public CppUnit::TestFixture {
   void tearDown();
   void test_AddData();
   void test_Reset();
+  void test_SpanClassProb();
+  void test_SpanReadProb();
+  void test_FRRClassProb();
+  void test_FRRReadProb();
+  void test_EnclosingClassProb();
+  void test_EnclosingReadProb();
+  void test_GetClassLogLikelihood();
+  void test_GetAlleleLogLikelihood();
+ private:
+  EnclosingClass encl_class_;
+  SpanningClass span_class_;
+  FRRClass frr_class_;
 };
 
 #endif //  SRC_TESTS_READCLASS_H_
