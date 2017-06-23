@@ -30,7 +30,10 @@ libgangstr_a_SOURCES = \
 	region_reader.h region_reader.cpp \
 	bam_reader.h bam_reader.cpp \
 	ref_genome.h ref_genome.cpp \
-	genotyper.h genotyper.cpp
+	genotyper.h genotyper.cpp \
+	read_class.h read_class.cpp \
+	mathops.h mathops.cpp \
+	fastonebigheader.h
 
 GangSTR_LDFLAGS = ${AM_LDFLAGS}
 GangSTR_SOURCES = main_gangstr.cpp
