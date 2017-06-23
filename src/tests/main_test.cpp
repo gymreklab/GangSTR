@@ -30,10 +30,6 @@ int main() {
   CppUnit::TextUi::TestRunner runner;
   runner.addTest(suite);
 
-  // Change the default outputter to a compiler error format outputter
-  runner.setOutputter( new CppUnit::CompilerOutputter( &runner.result(),
-                                                       std::cerr ) );
-
   // Run the tests
   bool wasSuccessful = runner.run();
 

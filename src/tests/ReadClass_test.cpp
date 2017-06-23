@@ -30,6 +30,10 @@ void ReadClassTest::tearDown() {
 }
 
 void ReadClassTest::test_AddData() {
-  CPPUNIT_FAIL( "not implemented" );
+  CPPUNIT_FAIL( "test_AddData not implemented" );
+}
+
+void ReadClassTest::test_Reset() {
+  CPPUNIT_FAIL( "test_Reset not implemented" );
 }
 

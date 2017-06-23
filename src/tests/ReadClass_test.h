@@ -26,12 +26,14 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 class ReadClassTest: public CppUnit::TestFixture {
   CPPUNIT_TEST_SUITE(ReadClassTest);
   CPPUNIT_TEST(test_AddData);
+  CPPUNIT_TEST(test_Reset);
   CPPUNIT_TEST_SUITE_END();
 
  public:
   void setUp();
   void tearDown();
   void test_AddData();
+  void test_Reset();
 };
 
 #endif //  SRC_TESTS_READCLASS_H_

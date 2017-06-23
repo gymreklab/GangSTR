@@ -44,9 +44,11 @@ GangSTR_SOURCES = main_gangstr.cpp
 GangSTR_LDADD = libgangstr.a
 
 TESTS = GangSTRTests
+AUTOMAKE_OPTIONS = serial-tests
 check_PROGRAMS=$(TESTS)
 GangSTRTests_SOURCES = \
 	tests/ReadClass_test.h tests/ReadClass_test.cpp \
+	tests/LikelihoodMaximizer_test.sh tests/LikelihoodMaximizer_test.cpp \
 	tests/main_test.cpp
 GangSTRTests_CXXFLAGS = $(CPPUNIT_CFLAGS)
 GangSTRTests_LDFLAGS = $(CPPUNIT_LIBS) -ldl
