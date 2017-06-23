@@ -25,21 +25,39 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <vector>
 
+/*
+
+Parent ReadClass
+Individual read classes (FRR, enclosing, spanning) inherit
+from this and implement their own read and class probability functions
+
+A read class consists of:
+- data (a vector of relevant values, e.g. copy number, insert size)
+- a method to calculate the class log likelihood for a diploid genotype
+ */
 class ReadClass {
  public:
   ReadClass();
-  void AddData(const int32_t& data);
-  bool GetClassLogLikelihood(const int32_t& allele1, const int32_t& allele2, float* class_ll);
   virtual ~ReadClass();
 
- private:
-  bool GetAlleleLogLikelihood(const int32_t& allele, const int32_t& data, float* allele_ll);
-  bool GetLogClassProb(const int32_t& allele, float* log_class_prob);
-  bool GetLogReadProb(const int32_t& allele, const int32_t& data, float* log_allele_prob);
+  // Add a data point to the class data vector
+  void AddData(const int32_t& data);
+  // Calculate class log likelihood for diploid genotype P(data|<A,B>)
+  bool GetClassLogLikelihood(const int32_t& allele1, const int32_t& allele2, double* class_ll);
 
-  std::vector<int32_t> read_class_data_; 
-  const static float allele1_weight_ = 0.5;
-  const static float allele2_weight_ = 0.5;
+ private:
+  // Calculate log probability P(datapoint | allele)
+  bool GetAlleleLogLikelihood(const int32_t& allele, const int32_t& data, double* allele_ll);
+  // Calculate class probability for an allele - implemented in children classes
+  bool GetLogClassProb(const int32_t& allele, double* log_class_prob);
+  // Calculate read probability - implemented in children classes
+  bool GetLogReadProb(const int32_t& allele, const int32_t& data, double* log_allele_prob);
+
+  // Store vector of data for this class
+  std::vector<int32_t> read_class_data_;
+  // Allele weights. TODO: change if phasing available, would need per-read weights
+  const static double allele1_weight_ = 0.5;
+  const static double allele2_weight_ = 0.5;
 };
 
 #endif  // SRC_READ_CLASS_H__

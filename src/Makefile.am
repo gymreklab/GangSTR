@@ -32,6 +32,9 @@ libgangstr_a_SOURCES = \
 	ref_genome.h ref_genome.cpp \
 	genotyper.h genotyper.cpp \
 	read_class.h read_class.cpp \
+	frr_class.h frr_class.cpp \
+	enclosing_class.h enclosing_class.cpp \
+	spanning_class.h spanning_class.cpp \
 	mathops.h mathops.cpp \
 	fastonebigheader.h
 

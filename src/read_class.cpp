@@ -31,11 +31,19 @@ void ReadClass::AddData(const int32_t& data) {
   read_class_data_.push_back(data);
 }
 
+/*
+  Calculates log10 P(read_class_data_ | <allele1, allele2>) and sets class_ll
+
+  log10 P(data|<allelele1, allele2>) = sum_i log10 P(data_i | <allele1, allele2>)
+  P(data_i | <allele1, allele2> = allele1_weight*P(data_i|allele1) + allele2_weight*P(data_i|allele2)
+
+  Return false if something goes wrong.
+ */
 bool ReadClass::GetClassLogLikelihood(const int32_t& allele1,
-				   const int32_t& allele2,
-				   float* class_ll) {
+				      const int32_t& allele2,
+				      double* class_ll) {
   *class_ll = 0;
-  float samp_log_likelihood, a1_ll, a2_ll;
+  double samp_log_likelihood, a1_ll, a2_ll;
   for (std::vector<int32_t>::iterator data_it = read_class_data_.begin();
        data_it != read_class_data_.end();
        data_it++) {
@@ -50,10 +58,15 @@ bool ReadClass::GetClassLogLikelihood(const int32_t& allele1,
   return true;
 }
 
+/*
+  Calculates log10P(data_i|allele) and sets allele_ll
+
+  Return false if something goes wrong.
+ */
 bool ReadClass::GetAlleleLogLikelihood(const int32_t& allele,
 				       const int32_t& data,
-				       float* allele_ll) {
-  float log_class_prob, log_read_prob;
+				       double* allele_ll) {
+  double log_class_prob, log_read_prob;
   if (!GetLogClassProb(allele, &log_class_prob)) {
     return false;
   }
@@ -65,13 +78,13 @@ bool ReadClass::GetAlleleLogLikelihood(const int32_t& allele,
 }
 
 bool ReadClass::GetLogClassProb(const int32_t& allele,
-				  float* log_class_prob) {
+				double* log_class_prob) {
   return false; // Implement in child classes
 }
 
 bool ReadClass::GetLogReadProb(const int32_t& allele,
-				 const int32_t& data,
-				 float* log_allele_prob) {
+			       const int32_t& data,
+			       double* log_allele_prob) {
   return false; // Implement in child classes
 }
 
