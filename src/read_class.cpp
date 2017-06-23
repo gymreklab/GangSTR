@@ -88,4 +88,7 @@ bool ReadClass::GetLogReadProb(const int32_t& allele,
   return false; // Implement in child classes
 }
 
+void ReadClass::Reset() {
+  read_class_data_.clear();
+}
 ReadClass::~ReadClass() {}

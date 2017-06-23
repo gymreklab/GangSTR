@@ -44,6 +44,8 @@ class ReadClass {
   void AddData(const int32_t& data);
   // Calculate class log likelihood for diploid genotype P(data|<A,B>)
   bool GetClassLogLikelihood(const int32_t& allele1, const int32_t& allele2, double* class_ll);
+  // Clear all data from the class
+  void Reset();
 
  private:
   // Calculate log probability P(datapoint | allele)

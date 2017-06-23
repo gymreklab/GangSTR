@@ -35,9 +35,18 @@ libgangstr_a_SOURCES = \
 	frr_class.h frr_class.cpp \
 	enclosing_class.h enclosing_class.cpp \
 	spanning_class.h spanning_class.cpp \
+	likelihood_maximizer.h likelihood_maximizer.cpp \
 	mathops.h mathops.cpp \
 	fastonebigheader.h
 
 GangSTR_LDFLAGS = ${AM_LDFLAGS}
 GangSTR_SOURCES = main_gangstr.cpp
 GangSTR_LDADD = libgangstr.a
+
+TESTS = GangSTRTests
+check_PROGRAMS=$(TESTS)
+GangSTRTests_SOURCES = \
+	tests/ReadClass_test.h tests/ReadClass_test.cpp \
+	tests/main_test.cpp
+GangSTRTests_CXXFLAGS = $(CPPUNIT_CFLAGS)
+GangSTRTests_LDFLAGS = $(CPPUNIT_LIBS) -ldl

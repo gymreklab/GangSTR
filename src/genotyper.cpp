@@ -33,6 +33,7 @@ Genotyper::Genotyper(GBamReader _bamreader,
 }
 
 bool Genotyper::ProcessLocus(Locus* locus) {
+  likelihood_maximizer.Reset();
   return false; // TODO
 }
 

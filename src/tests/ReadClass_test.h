@@ -18,32 +18,20 @@ You should have received a copy of the GNU General Public License
 along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef SRC_GENOTYPER_H__
-#define SRC_GENOTYPER_H__
+#ifndef SRC_TESTS_READCLASS_H__
+#define SRC_TESTS_READCLASS_H__
 
-#include <string>
+#include <cppunit/extensions/HelperMacros.h>
 
-#include "src/bam_reader.h"
-#include "src/likelihood_maximizer.h"
-#include "src/locus.h"
-#include "src/options.h"
-#include "src/ref_genome.h"
+class ReadClassTest: public CppUnit::TestFixture {
+  CPPUNIT_TEST_SUITE(ReadClassTest);
+  CPPUNIT_TEST(test_AddData);
+  CPPUNIT_TEST_SUITE_END();
 
-class Genotyper {
  public:
-  Genotyper(GBamReader _bamreader,
-	    RefGenome _refgenome,
-	    const Options& _options);
-  virtual ~Genotyper();
-
-  bool ProcessLocus(Locus* locus);
-
-  void Debug(); // For testing member classes. can remove later
- private:
-  RefGenome* refgenome;
-  GBamReader* bamreader;
-  const Options* options;
-  LikelihoodMaximizer likelihood_maximizer;
+  void setUp();
+  void tearDown();
+  void test_AddData();
 };
 
-#endif  // SRC_GENOTYPER_H__
+#endif //  SRC_TESTS_READCLASS_H_

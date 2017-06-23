@@ -29,6 +29,10 @@ AC_SUBST(GIT_VERSION)
 MACHTYPE=`uname -m`
 AC_SUBST(MACHTYPE)
 
+# Check for installed packages
+#PKG_CHECK_MODULES([CPPUNIT],[cppunit])
+AM_PATH_CPPUNIT(1.9.6)
+
 # Custom Flags to add to CFLAGS/CXXFLAGS
 GANGSTR_CFLAGS="-D_GIT_VERSION=\"\\\"${GIT_VERSION}\\\"\" -D_MACHTYPE=\"\\\"${MACHTYPE}\\\"\""
 

@@ -18,32 +18,18 @@ You should have received a copy of the GNU General Public License
 along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef SRC_GENOTYPER_H__
-#define SRC_GENOTYPER_H__
+#include "src/tests/ReadClass_test.h"
 
-#include <string>
+// Registers the fixture into the 'registry'
+CPPUNIT_TEST_SUITE_REGISTRATION(ReadClassTest);
 
-#include "src/bam_reader.h"
-#include "src/likelihood_maximizer.h"
-#include "src/locus.h"
-#include "src/options.h"
-#include "src/ref_genome.h"
+void ReadClassTest::setUp() {
+}
 
-class Genotyper {
- public:
-  Genotyper(GBamReader _bamreader,
-	    RefGenome _refgenome,
-	    const Options& _options);
-  virtual ~Genotyper();
+void ReadClassTest::tearDown() {
+}
 
-  bool ProcessLocus(Locus* locus);
+void ReadClassTest::test_AddData() {
+  CPPUNIT_FAIL( "not implemented" );
+}
 
-  void Debug(); // For testing member classes. can remove later
- private:
-  RefGenome* refgenome;
-  GBamReader* bamreader;
-  const Options* options;
-  LikelihoodMaximizer likelihood_maximizer;
-};
-
-#endif  // SRC_GENOTYPER_H__

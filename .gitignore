@@ -1,3 +1,9 @@
+*.log
+test-driver
+*.trs
+misc/
+*#*
+GangSTRTests
 *~
 *#
 autom4te.cache/*
