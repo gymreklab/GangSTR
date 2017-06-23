@@ -25,9 +25,7 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 
 using namespace std;
 
-ReadClass::ReadClass() {
-  // TODO
-}
+ReadClass::ReadClass() {}
 
 void ReadClass::AddData(const int32_t& data) {
   read_class_data_.push_back(data);
