@@ -33,8 +33,18 @@ Genotyper::Genotyper(GBamReader _bamreader,
 }
 
 bool Genotyper::ProcessLocus(Locus* locus) {
+  // Load all read data
   likelihood_maximizer.Reset();
-  return false; // TODO
+  if (!read_extractor.ExtractReads(*bamreader, &likelihood_maximizer)) {
+    return false;
+  }
+  // Maximize the likelihood
+  int32_t allele1, allele2;
+  if (!likelihood_maximizer.OptimizeLikelihood(&allele1, &allele2)) {
+    return false;
+  }
+  // Write VCF Output - TODO
+  return true;
 }
 
 void Genotyper::Debug() {

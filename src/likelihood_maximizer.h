@@ -43,6 +43,8 @@ class LikelihoodMaximizer {
   std::size_t GetFRRDataSize();
   // Main likelihood function
   bool GetGenotypeNegLogLikelihood(const int32_t& allele1, const int32_t& allele2, double* gt_ll);
+  // Main optimization function - TODO also return other data
+  bool OptimizeLikelihood(int32_t* allele1, int32_t* allele2);
 
  private:
   EnclosingClass enclosing_class_;

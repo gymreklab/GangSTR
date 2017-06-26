@@ -18,34 +18,14 @@ You should have received a copy of the GNU General Public License
 along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef SRC_GENOTYPER_H__
-#define SRC_GENOTYPER_H__
-
-#include <string>
-
-#include "src/bam_reader.h"
-#include "src/likelihood_maximizer.h"
-#include "src/locus.h"
-#include "src/options.h"
 #include "src/read_extractor.h"
-#include "src/ref_genome.h"
 
-class Genotyper {
- public:
-  Genotyper(GBamReader _bamreader,
-	    RefGenome _refgenome,
-	    const Options& _options);
-  virtual ~Genotyper();
+ReadExtractor::ReadExtractor() {}
 
-  bool ProcessLocus(Locus* locus);
+bool ReadExtractor::ExtractReads(GBamReader bamreader,
+				 LikelihoodMaximizer* likelihood_maximizer) {
+  // TODO
+  return false;
+}
 
-  void Debug(); // For testing member classes. can remove later
- private:
-  RefGenome* refgenome;
-  GBamReader* bamreader;
-  const Options* options;
-  LikelihoodMaximizer likelihood_maximizer;
-  ReadExtractor read_extractor;
-};
-
-#endif  // SRC_GENOTYPER_H__
+ReadExtractor::~ReadExtractor() {}

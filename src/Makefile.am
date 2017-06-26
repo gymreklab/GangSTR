@@ -37,7 +37,8 @@ libgangstr_a_SOURCES = \
 	spanning_class.h spanning_class.cpp \
 	likelihood_maximizer.h likelihood_maximizer.cpp \
 	mathops.h mathops.cpp \
-	fastonebigheader.h
+	fastonebigheader.h \
+	read_extractor.h read_extractor.cpp
 
 GangSTR_LDFLAGS = ${AM_LDFLAGS}
 GangSTR_SOURCES = main_gangstr.cpp

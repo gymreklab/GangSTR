@@ -58,4 +58,9 @@ bool LikelihoodMaximizer::GetGenotypeNegLogLikelihood(const int32_t& allele1,
   *gt_ll = -1*(frr_weight_*frr_ll + spanning_weight_*span_ll + enclosing_weight_*encl_ll);
 }
 
+bool LikelihoodMaximizer::OptimizeLikelihood(int32_t* allele1,
+					     int32_t* allele2) {
+  // TODO
+  return false;
+}
 LikelihoodMaximizer::~LikelihoodMaximizer() {}
