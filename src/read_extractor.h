@@ -36,6 +36,8 @@ class ReadExtractor {
 		    const Locus& locus,
 		    LikelihoodMaximizer* likelihood_maximizer);
  private:
+  // Trim alignment read names
+  std::string trim_alignment_name(const BamAlignment& aln) const;
 };
 
 #endif  // SRC_READ_EXTRACTOR_H__
