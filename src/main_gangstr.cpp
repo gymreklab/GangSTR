@@ -139,12 +139,12 @@ int main(int argc, char* argv[]) {
   int merge_type = BamCramMultiReader::ORDER_ALNS_BY_FILE;
   BamCramMultiReader bamreader(options.bamfiles, options.reffa, merge_type);
   RefGenome refgenome(options.reffa);
-  Genotyper genotyper(bamreader, refgenome, options);
-  genotyper.Debug(); // TODO remove
+  Genotyper genotyper(refgenome, options);
+  genotyper.Debug(&bamreader); // TODO remove
   while (region_reader.GetNextRegion(&locus)) {
     stringstream ss;
     ss << "Processing " << locus.chrom << ":" << locus.start;
     PrintMessageDieOnError(ss.str(), M_PROGRESS);
-    genotyper.ProcessLocus(&locus);
+    genotyper.ProcessLocus(&bamreader, &locus);
   };
 }

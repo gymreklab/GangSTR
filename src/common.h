@@ -27,9 +27,9 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 // Print msg, exit if error
 enum MSGTYPE {
   M_ERROR = 0,
-  M_WARNING,
-  M_DEBUG,
-  M_PROGRESS
+  M_WARNING = 1,
+  M_DEBUG = 2,
+  M_PROGRESS = 3
 };
 void PrintMessageDieOnError(const std::string& msg,
                             MSGTYPE msgtype);

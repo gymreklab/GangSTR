@@ -18,12 +18,41 @@ You should have received a copy of the GNU General Public License
 along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <map>
+
 #include "src/read_extractor.h"
+#include "src/read_pair.h"
 
 ReadExtractor::ReadExtractor() {}
 
-bool ReadExtractor::ExtractReads(const BamCramMultiReader& bamreader,
+/*
+  Extracts relevant reads from bamfile and 
+  populates data in the likelihood_maximizer
+ */
+bool ReadExtractor::ExtractReads(BamCramMultiReader* bamreader,
+				 const Locus& locus,
 				 LikelihoodMaximizer* likelihood_maximizer) {
+  // This will keep track of information for each read pair
+  std::map<std::string, ReadPair> read_pairs;
+
+  // Get bam alignments from the relevant region
+  bamreader->SetRegion(locus.chrom, locus.start-REGIONSIZE, locus.end+REGIONSIZE);
+
+  // Go through each alignment in the region
+  BamAlignment alignment;
+  while (bamreader->GetNextAlignment(alignment)) {
+    // Check if read's mate already processed
+    // TODO
+
+    // Discard read pair if position is irrelevant
+    // (e.g. both mates on same side of the STR)
+    // TODO
+
+    // Check if read is spanning
+    // TODO
+
+  }
+
   // TODO
   return false;
 }

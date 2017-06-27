@@ -41,7 +41,8 @@ libgangstr_a_SOURCES = \
 	fastonebigheader.h \
 	read_extractor.h read_extractor.cpp \
 	bam_io.h bam_io.cpp \
-	stringops.h stringops.cpp
+	stringops.h stringops.cpp \
+	read_pair.h read_pair.cpp
 
 GangSTR_LDFLAGS = $(AM_LDFLAGS) $(HTS_LIBS)
 GangSTR_SOURCES = main_gangstr.cpp

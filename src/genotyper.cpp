@@ -24,18 +24,16 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 
 using namespace std;
 
-Genotyper::Genotyper(BamCramMultiReader& _bamreader,
-		     RefGenome _refgenome,
+Genotyper::Genotyper(RefGenome _refgenome,
 		     const Options& _options) {
   refgenome = &_refgenome;
-  bamreader = &_bamreader;
   options = &_options;
 }
 
-bool Genotyper::ProcessLocus(Locus* locus) {
+bool Genotyper::ProcessLocus(BamCramMultiReader* bamreader, Locus* locus) {
   // Load all read data
   likelihood_maximizer.Reset();
-  if (!read_extractor.ExtractReads(*bamreader, &likelihood_maximizer)) {
+  if (!read_extractor.ExtractReads(bamreader, *locus, &likelihood_maximizer)) {
     return false;
   }
   // Maximize the likelihood
@@ -43,11 +41,11 @@ bool Genotyper::ProcessLocus(Locus* locus) {
   if (!likelihood_maximizer.OptimizeLikelihood(&allele1, &allele2)) {
     return false;
   }
-  // Write VCF Output - TODO
+  // Fill in locus with relevant information
   return true;
 }
 
-void Genotyper::Debug() {
+void Genotyper::Debug(BamCramMultiReader* bamreader) {
   cerr << "testing refgenome" << endl;
   std::string seq;
   refgenome->GetSequence("3", 63898361, 63898392, &seq);

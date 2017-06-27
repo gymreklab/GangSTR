@@ -22,15 +22,18 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 #define SRC_READ_EXTRACTOR_H__
 
 #include "src/bam_io.h"
+#include "src/locus.h"
 #include "src/likelihood_maximizer.h"
 
 class ReadExtractor {
+  const static int32_t REGIONSIZE = 5000; // TODO what should this be
  public:
   ReadExtractor();
   virtual ~ReadExtractor();
 
   // Main function to extract reads of each class
-  bool ExtractReads(const BamCramMultiReader& bamreader,
+  bool ExtractReads(BamCramMultiReader* bamreader,
+		    const Locus& locus,
 		    LikelihoodMaximizer* likelihood_maximizer);
  private:
 };
