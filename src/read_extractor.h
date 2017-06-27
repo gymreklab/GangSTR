@@ -38,6 +38,15 @@ class ReadExtractor {
  private:
   // Trim alignment read names
   std::string trim_alignment_name(const BamAlignment& aln) const;
+  // Check if read should be discarded
+  bool FindDiscardedRead(BamAlignment alignment,
+			 const int32_t& chrom_ref_id,
+			 const Locus& locus);
+  // Check if read is spanning class
+  bool FindSpanningRead(BamAlignment alignment,
+			const int32_t& chrom_ref_id,
+			const Locus& locus,
+			int32_t* insert_size);
 };
 
 #endif  // SRC_READ_EXTRACTOR_H__

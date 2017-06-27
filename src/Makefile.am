@@ -18,7 +18,8 @@
 
 HTS_LIBS = -Ilib/htslib -lhts
 
-AM_CPPFLAGS = -I$(top_srcdir) 
+AM_CPPFLAGS = -I$(top_srcdir) $(GSL_CFLAGS)
+AM_LDFLAGS = $(GSL_LIBS)
 
 bin_PROGRAMS = GangSTR
 
@@ -49,7 +50,7 @@ GangSTR_SOURCES = main_gangstr.cpp
 GangSTR_CPPFLAGS = $(AM_CPPFLAGS)
 GangSTR_CFLAGS = $(AM_CFLAGS)
 GangSTR_CXXFLAGS = $(AM_CXXFLAGS)
-GangSTR_LDADD = libgangstr.a 
+GangSTR_LDADD = libgangstr.a $(GSL_LIBS)
 
 TESTS = GangSTRTests
 AUTOMAKE_OPTIONS = serial-tests
