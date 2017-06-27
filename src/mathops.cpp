@@ -11,3 +11,6 @@ double fast_log_sum_exp(double log_v1, double log_v2){
   }
 }
 
+double normal_cdf(double mean, double stdev, double x){
+	
+}

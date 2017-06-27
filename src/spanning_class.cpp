@@ -27,7 +27,31 @@ using namespace std;
 
 bool SpanningClass::GetLogClassProb(const int32_t& allele,
 				double* log_class_prob) {
-  return false; // TODO
+	int dist_mean = 500;		// arg_dict['read_ins_mean'] 		// (\mu)
+	int dist_sdev = 50;		// arg_dict['read_ins_stddev']		// (\sigma)
+	int flank_len = 3000;	// arg_dict['flank_len']			// (F)
+	int read_len =  100;		// arg_dict['read_len']				// (r)
+	int motif_len = 3;		// arg_dict['motif']
+	int str_len = allele * motif_len;					// (L)
+	
+	double norm_const = gsl_cdf_gaussian_P(2 * flank_len + str_len - dist_mean, dist_sdev) -
+						gsl_cdf_gaussian_P(2 * read_len - dist_mean, dist_sdev);  
+	//gsl_ran_gaussian_pdf
+
+	*log_class_prob = norm_const;
+	// int rv_dist = norm(loc = dist_mean, scale = dist_sdev)
+	// norm_const = rv_dist.cdf(2 * flank_len + str_len) - rv_dist.cdf(2 * read_len)
+
+	// coef0 = 1.0 / norm_const / float(2 * flank_len + str_len - 2 * read_len)
+
+	// coef1 = float(dist_mean - str_len)
+	// term1 = rv_dist.cdf(2 * flank_len + str_len) - rv_dist.cdf(max(2 * read_len, str_len))
+	// coef2 = - float(dist_sdev ** 2)
+	// term2 = rv_dist.pdf(2 * flank_len + str_len) - rv_dist.pdf(max(2 * read_len, str_len))
+
+	// return_value = coef0 * (coef1 * term1 + coef2 * term2)
+	// *log_class_prob = allele / 100.0;
+  	return false; // TODO
 }
 
 bool SpanningClass::GetLogReadProb(const int32_t& allele,
