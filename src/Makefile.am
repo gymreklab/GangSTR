@@ -16,19 +16,18 @@
 # You should have received a copy of the GNU General Public License
 # along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 
-AM_CPPFLAGS = -I$(top_srcdir) $(HTS_CPPFLAGS) ${BAM_CPPFLAGS}
-AM_LDFLAGS = ${BAM_LDFLAGS} ${HTS_LDFLAGS}
+AM_CPPFLAGS = -I$(top_srcdir) 
 
 bin_PROGRAMS = GangSTR
 
 noinst_LIBRARIES = libgangstr.a
 
+libgangstr_a_CPPFLAGS = $(AM_CPPFLAGS)
 libgangstr_a_SOURCES = \
 	common.h common.cpp \
 	options.h options.cpp \
 	locus.h locus.cpp \
 	region_reader.h region_reader.cpp \
-	bam_reader.h bam_reader.cpp \
 	ref_genome.h ref_genome.cpp \
 	genotyper.h genotyper.cpp \
 	read_class.h read_class.cpp \
@@ -38,10 +37,15 @@ libgangstr_a_SOURCES = \
 	likelihood_maximizer.h likelihood_maximizer.cpp \
 	mathops.h mathops.cpp \
 	fastonebigheader.h \
-	read_extractor.h read_extractor.cpp
+	read_extractor.h read_extractor.cpp \
+	bam_io.h bam_io.cpp \
+	stringops.h stringops.cpp
 
-GangSTR_LDFLAGS = ${AM_LDFLAGS}
+GangSTR_LDFLAGS = $(AM_LDFLAGS)
 GangSTR_SOURCES = main_gangstr.cpp
+GangSTR_CPPFLAGS = $(AM_CPPFLAGS)
+GangSTR_CFLAGS = $(AM_CFLAGS)
+GangSTR_CXXFLAGS = $(AM_CXXFLAGS)
 GangSTR_LDADD = libgangstr.a
 
 TESTS = GangSTRTests

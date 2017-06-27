@@ -21,7 +21,7 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef SRC_REF_GENOME_H__
 #define SRC_REF_GENOME_H__
 
-#include "faidx.h"
+#include "htslib/faidx.h"
 
 #include <stdint.h>
 #include <unistd.h>

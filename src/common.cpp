@@ -31,16 +31,16 @@ using namespace std;
 void PrintMessageDieOnError(const string& msg, MSGTYPE msgtype) {
   string typestring = "";
   switch (msgtype) {
-  case ERROR:
+  case M_ERROR:
     typestring = "ERROR: ";
     break;
-  case WARNING:
+  case M_WARNING:
     typestring = "WARNING: ";
     break;
-  case PROGRESS:
+  case M_PROGRESS:
     typestring = "ProgressMeter: ";
     break;
-  case DEBUG:
+  case M_DEBUG:
     typestring = "DEBUG: ";
     break;
   default:
@@ -51,15 +51,7 @@ void PrintMessageDieOnError(const string& msg, MSGTYPE msgtype) {
       << "-" << _GIT_VERSION << "] " << typestring << msg << endl;
   cerr << ss.str();
 
-  if (msgtype == ERROR) {
+  if (msgtype == M_ERROR) {
     exit(1);
   }
-}
-
-void split_by_delim(const std::string &s, char delim, 
-		    std::vector<std::string>& substrings){
-  std::stringstream ss(s);
-  std::string item;
-  while (std::getline(ss, item, delim))
-    substrings.push_back(item);
 }

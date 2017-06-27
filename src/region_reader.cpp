@@ -22,13 +22,14 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "src/common.h"
 #include "src/region_reader.h"
+#include "src/stringops.h"
 
 using namespace std;
 
 RegionReader::RegionReader(const std::string& filename) {
   freader = new std::ifstream(filename.c_str());
   if (!freader->is_open()) {
-    PrintMessageDieOnError("Could not open regions file", ERROR);
+    PrintMessageDieOnError("Could not open regions file", M_ERROR);
   }
 }
 
@@ -44,7 +45,7 @@ bool RegionReader::GetNextRegion(Locus* locus) {
   }
   split_by_delim(line, '\t', items);
   if (items.size() < 4) {
-    PrintMessageDieOnError("Regions file not formatted correctly", ERROR);
+    PrintMessageDieOnError("Regions file not formatted correctly", M_ERROR);
   }
   locus->chrom = items[0];
   locus->start = atoi(items[1].c_str());

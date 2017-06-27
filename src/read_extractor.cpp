@@ -22,7 +22,7 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 
 ReadExtractor::ReadExtractor() {}
 
-bool ReadExtractor::ExtractReads(GBamReader bamreader,
+bool ReadExtractor::ExtractReads(const BamCramMultiReader& bamreader,
 				 LikelihoodMaximizer* likelihood_maximizer) {
   // TODO
   return false;

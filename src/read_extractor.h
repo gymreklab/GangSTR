@@ -21,7 +21,7 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef SRC_READ_EXTRACTOR_H__
 #define SRC_READ_EXTRACTOR_H__
 
-#include "src/bam_reader.h"
+#include "src/bam_io.h"
 #include "src/likelihood_maximizer.h"
 
 class ReadExtractor {
@@ -30,7 +30,7 @@ class ReadExtractor {
   virtual ~ReadExtractor();
 
   // Main function to extract reads of each class
-  bool ExtractReads(GBamReader bamreader,
+  bool ExtractReads(const BamCramMultiReader& bamreader,
 		    LikelihoodMaximizer* likelihood_maximizer);
  private:
 };

@@ -26,16 +26,12 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 
 // Print msg, exit if error
 enum MSGTYPE {
-  ERROR = 0,
-  WARNING,
-  DEBUG,
-  PROGRESS
+  M_ERROR = 0,
+  M_WARNING,
+  M_DEBUG,
+  M_PROGRESS
 };
 void PrintMessageDieOnError(const std::string& msg,
                             MSGTYPE msgtype);
-
-// String split
-void split_by_delim(const std::string &s, char delim, 
-		    std::vector<std::string>& substrings);
 
 #endif  // SRC_COMMON_H__

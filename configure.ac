@@ -37,14 +37,14 @@ AM_PATH_CPPUNIT(1.9.6)
 GANGSTR_CFLAGS="-D_GIT_VERSION=\"\\\"${GIT_VERSION}\\\"\" -D_MACHTYPE=\"\\\"${MACHTYPE}\\\"\""
 
 # Set flags for external libraries
-HTS_CPPFLAGS="-I/usr/local/include/htslib"
-HTS_LDFLAGS="-L/usr/local/lib/ -l hts"
-BAM_CPPFLAGS="-I/usr/local/include/bamtools"
-BAM_LDFLAGS="-L/usr/local/lib/bamtools -l bamtools"
-AC_SUBST(HTS_CPPFLAGS)
-AC_SUBST(HTS_LDFLAGS)
-AC_SUBST(BAM_CPPFLAGS)
-AC_SUBST(BAM_LDFLAGS)
+#HTS_CPPFLAGS="-I/usr/local/include/htslib"
+#HTS_LDFLAGS="-L/usr/local/lib/ -l hts"
+#BAM_CPPFLAGS="-I/usr/local/include/bamtools"
+#BAM_LDFLAGS="-L/usr/local/lib/bamtools -l bamtools"
+#AC_SUBST(HTS_CPPFLAGS)
+#AC_SUBST(HTS_LDFLAGS)
+#AC_SUBST(BAM_CPPFLAGS)
+#AC_SUBST(BAM_LDFLAGS)
 
 # Set the final value for CFLAGS/CXXFLAGS
 CFLAGS="$CFLAGS $GANGSTR_CFLAGS"

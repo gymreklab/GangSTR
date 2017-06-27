@@ -30,18 +30,18 @@ using namespace std;
 RefGenome::RefGenome(const std::string& _reffa) {
   // Check if file exists
   if (!file_exists(_reffa)) {
-    PrintMessageDieOnError("FASTA file " + _reffa + " does not exist", ERROR);
+    PrintMessageDieOnError("FASTA file " + _reffa + " does not exist", M_ERROR);
   }
 
   // Check for index
   if (!file_exists(_reffa + ".fai")) {
-    PrintMessageDieOnError("No index for FASTA file " + _reffa, ERROR);
+    PrintMessageDieOnError("No index for FASTA file " + _reffa, M_ERROR);
   }
 
   // Load index
   refindex = fai_load(_reffa.c_str());
   if (refindex == NULL) {
-    PrintMessageDieOnError("Failed to load FASTA index", ERROR);
+    PrintMessageDieOnError("Failed to load FASTA index", M_ERROR);
   }
 }
 
@@ -54,7 +54,7 @@ bool RefGenome::GetSequence(const std::string& _chrom,
   if (result == NULL) {
     stringstream ss;
     ss << "Error fetching reference sequence for " << _chrom << ":" << _start;
-    PrintMessageDieOnError(ss.str(), ERROR);
+    PrintMessageDieOnError(ss.str(), M_ERROR);
   }
   seq->assign(result, length);
   free((void *)result);

@@ -23,7 +23,8 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <string>
 
-#include "src/bam_reader.h"
+//#include "src/bam_reader.h"
+#include "src/bam_io.h"
 #include "src/likelihood_maximizer.h"
 #include "src/locus.h"
 #include "src/options.h"
@@ -32,7 +33,7 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 
 class Genotyper {
  public:
-  Genotyper(GBamReader _bamreader,
+  Genotyper(const BamCramMultiReader& _bamreader,
 	    RefGenome _refgenome,
 	    const Options& _options);
   virtual ~Genotyper();
@@ -42,7 +43,7 @@ class Genotyper {
   void Debug(); // For testing member classes. can remove later
  private:
   RefGenome* refgenome;
-  GBamReader* bamreader;
+  const BamCramMultiReader* bamreader;
   const Options* options;
   LikelihoodMaximizer likelihood_maximizer;
   ReadExtractor read_extractor;

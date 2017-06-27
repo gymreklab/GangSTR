@@ -24,14 +24,14 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 using namespace std;
 
 GBamReader::GBamReader(std::vector<std::string> bamfiles) {
-  reader = new BamMultiReader();
+  reader = new BamCramMultiReader();
   // Try to open the files
-  if (!reader->Open(bamfiles)) {
-    PrintMessageDieOnError("Could not open BAM files", ERROR);
+  /*  if (!reader->Open(bamfiles)) {
+    PrintMessageDieOnError("Could not open BAM files", M_ERROR);
   }
   if (!reader->LocateIndexes()) {
     reader->CreateIndexes();
-  }
+    }*/
 }
 
 std::string GBamReader::GetTestRead() {

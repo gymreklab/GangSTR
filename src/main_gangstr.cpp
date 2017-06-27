@@ -24,12 +24,14 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 #include <iostream>
 #include <sstream>
 
-#include "src/bam_reader.h"
+//#include "src/bam_reader.h"
+#include "src/bam_io.h"
 #include "src/common.h"
 #include "src/genotyper.h"
 #include "src/options.h"
 #include "src/ref_genome.h"
 #include "src/region_reader.h"
+#include "src/stringops.h"
 
 using namespace std;
 
@@ -109,20 +111,20 @@ void parse_commandline_options(int argc, char* argv[], Options* options) {
   };
   // Leftover arguments are errors
   if (optind < argc) {
-    PrintMessageDieOnError("Unnecessary leftover arguments", ERROR);
+    PrintMessageDieOnError("Unnecessary leftover arguments", M_ERROR);
   }
   // Perform other error checking
   if (options->bamfiles.empty()) {
-    PrintMessageDieOnError("No --bam files specified", ERROR);
+    PrintMessageDieOnError("No --bam files specified", M_ERROR);
   }
   if (options->regionsfile.empty()) {
-    PrintMessageDieOnError("No --regions option specified", ERROR);
+    PrintMessageDieOnError("No --regions option specified", M_ERROR);
   }
   if (options->reffa.empty()) {
-    PrintMessageDieOnError("No --ref option specified", ERROR);
+    PrintMessageDieOnError("No --ref option specified", M_ERROR);
   }
   if (options->outprefix.empty()) {
-    PrintMessageDieOnError("No --out option specified", ERROR);
+    PrintMessageDieOnError("No --out option specified", M_ERROR);
   }
 }
 
@@ -134,14 +136,14 @@ int main(int argc, char* argv[]) {
   // Process each region
   RegionReader region_reader(options.regionsfile);
   Locus locus;
-  GBamReader bamreader(options.bamfiles);
+  BamCramMultiReader bamreader(options.bamfiles);
   RefGenome refgenome(options.reffa);
   Genotyper genotyper(bamreader, refgenome, options);
   genotyper.Debug(); // TODO remove
   while (region_reader.GetNextRegion(&locus)) {
     stringstream ss;
     ss << "Processing " << locus.chrom << ":" << locus.start;
-    PrintMessageDieOnError(ss.str(), PROGRESS);
+    PrintMessageDieOnError(ss.str(), M_PROGRESS);
     genotyper.ProcessLocus(&locus);
   };
 }
