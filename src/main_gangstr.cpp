@@ -136,7 +136,8 @@ int main(int argc, char* argv[]) {
   // Process each region
   RegionReader region_reader(options.regionsfile);
   Locus locus;
-  BamCramMultiReader bamreader(options.bamfiles);
+  int merge_type = BamCramMultiReader::ORDER_ALNS_BY_FILE;
+  BamCramMultiReader bamreader(options.bamfiles, options.reffa, merge_type);
   RefGenome refgenome(options.reffa);
   Genotyper genotyper(bamreader, refgenome, options);
   genotyper.Debug(); // TODO remove

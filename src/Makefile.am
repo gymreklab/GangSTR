@@ -16,6 +16,8 @@
 # You should have received a copy of the GNU General Public License
 # along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 
+HTS_LIBS = -Ilib/htslib -lhts
+
 AM_CPPFLAGS = -I$(top_srcdir) 
 
 bin_PROGRAMS = GangSTR
@@ -41,12 +43,12 @@ libgangstr_a_SOURCES = \
 	bam_io.h bam_io.cpp \
 	stringops.h stringops.cpp
 
-GangSTR_LDFLAGS = $(AM_LDFLAGS)
+GangSTR_LDFLAGS = $(AM_LDFLAGS) $(HTS_LIBS)
 GangSTR_SOURCES = main_gangstr.cpp
 GangSTR_CPPFLAGS = $(AM_CPPFLAGS)
 GangSTR_CFLAGS = $(AM_CFLAGS)
 GangSTR_CXXFLAGS = $(AM_CXXFLAGS)
-GangSTR_LDADD = libgangstr.a
+GangSTR_LDADD = libgangstr.a 
 
 TESTS = GangSTRTests
 AUTOMAKE_OPTIONS = serial-tests

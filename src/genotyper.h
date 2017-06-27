@@ -33,7 +33,7 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 
 class Genotyper {
  public:
-  Genotyper(const BamCramMultiReader& _bamreader,
+  Genotyper(BamCramMultiReader& _bamreader,
 	    RefGenome _refgenome,
 	    const Options& _options);
   virtual ~Genotyper();
@@ -43,7 +43,7 @@ class Genotyper {
   void Debug(); // For testing member classes. can remove later
  private:
   RefGenome* refgenome;
-  const BamCramMultiReader* bamreader;
+  BamCramMultiReader* bamreader;
   const Options* options;
   LikelihoodMaximizer likelihood_maximizer;
   ReadExtractor read_extractor;
