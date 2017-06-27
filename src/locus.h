@@ -32,6 +32,7 @@ class Locus {
   int start;
   int end;
   int period;
+  std::string motif;
 };
 
 #endif  // SRC_LOCUS_H__

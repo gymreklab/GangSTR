@@ -44,13 +44,14 @@ bool RegionReader::GetNextRegion(Locus* locus) {
     return false;
   }
   split_by_delim(line, '\t', items);
-  if (items.size() < 4) {
+  if (items.size() < 5) {
     PrintMessageDieOnError("Regions file not formatted correctly", M_ERROR);
   }
   locus->chrom = items[0];
   locus->start = atoi(items[1].c_str());
   locus->end = atoi(items[2].c_str());
   locus->period = atoi(items[3].c_str());
+  locus->motif = items[4];
   return true;
 }
 
