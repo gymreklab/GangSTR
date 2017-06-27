@@ -99,6 +99,9 @@ class BamAlignment {
   /* Non-inclusive end position of alignment */
   int32_t GetEndPosition()      const { return end_pos_; }
 
+  /* Template length */
+  int32_t TemplateLength()      const { return bam_ins_size(b_); }
+
   /* Name of the read */
   std::string Name()            const { return std::string(bam_get_qname(b_)); }
 

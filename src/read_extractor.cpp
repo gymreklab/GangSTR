@@ -100,10 +100,19 @@ bool ReadExtractor::ExtractReads(BamCramMultiReader* bamreader,
       read_pairs.insert(std::pair<std::string, ReadPair>(aln_key, read_pair));
       continue;
     }
-    
-    // TODO
 
     // Check if read is spanning
+    // Similar to 5.2_filter_spanning_only_core.py:57
+    if (alignment.RefID() == chrom_ref_id && alignment.GetEndPosition() <= locus.start &&
+	alignment.MateRefID() == chrom_ref_id && alignment.MatePosition() >= locus.end) {
+      int32_t insert_size = alignment.TemplateLength();
+      ReadPair read_pair;
+      read_pair.read_type = RC_SPAN;
+      read_pair.read1 = alignment;
+      read_pair.data_value = abs(insert_size);
+      read_pairs.insert(std::pair<std::string, ReadPair>(aln_key, read_pair));
+      continue;
+    }
     // TODO
 
     // Check if read is enclosing
