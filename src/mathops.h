@@ -7,6 +7,9 @@
 
 #include <vector>
 
+// Testing gsl
+double TestGSL();
+
 // To accelerate logsumexp, ignore values if they're 1/1000th or less than the maximum value
 const double LOG_THRESH = log(0.001);
 

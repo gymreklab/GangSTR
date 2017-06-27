@@ -31,6 +31,7 @@ AC_SUBST(MACHTYPE)
 
 # Check for installed packages
 #PKG_CHECK_MODULES([CPPUNIT],[cppunit])
+PKG_CHECK_MODULES([GSL],[gsl])
 AM_PATH_CPPUNIT(1.9.6)
 
 # Custom Flags to add to CFLAGS/CXXFLAGS

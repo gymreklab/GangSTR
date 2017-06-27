@@ -61,39 +61,24 @@ bool ReadExtractor::ExtractReads(BamCramMultiReader* bamreader,
     // Set key to keep track of this mate pair
     std::string aln_key = file_label + trim_alignment_name(alignment);
 
-    // Get read length info
-    int32_t read_length = (int32_t)alignment.QueryBases().size();
-
-    // Check if read's mate already processed
+    /*  Check if read's mate already processed */
     std::map<std::string, ReadPair>::iterator rp_iter = read_pairs.find(aln_key);
     if (rp_iter != read_pairs.end()) {
-      // If spanning: TODO
-      // If enclosing: TODO
-      // If FRR: TODO
-
-      // If Discard
-      if (rp_iter->second.read_type == RC_DISCARD) {
+      if (rp_iter->second.read_type == RC_SPAN || 
+	  rp_iter->second.read_type == RC_ENCL ||
+	  rp_iter->second.read_type == RC_DISCARD) {
+	// If spanning, enclosing, or discard already : nothing to do, just add read 2
 	rp_iter->second.read2 = alignment;
+      } else if (rp_iter->second.read_type == RC_FRR) {
+	// If FRR: TODO
+      } else {
+	// If unknown: TODO
       }
-
-      // If unknown: TODO
-
       continue; // move on to next read
     }
-
-    // Discard read pair if position is irrelevant
-    // (e.g. both mates on same side of the STR)
-    // Similar to 5.2_filter_spanning_only_core.py:65
-    if (alignment.RefID() == chrom_ref_id && alignment.Position() <= locus.start-read_length &&
-	alignment.MateRefID() == chrom_ref_id && alignment.MatePosition() <= locus.start-read_length) {
-      ReadPair read_pair;
-      read_pair.read_type = RC_DISCARD;
-      read_pair.read1 = alignment;
-      read_pairs.insert(std::pair<std::string, ReadPair>(aln_key, read_pair));
-      continue;
-    }
-    if (alignment.RefID() == chrom_ref_id && alignment.Position() >= locus.end &&
-	alignment.MateRefID() == chrom_ref_id && alignment.MatePosition() >= locus.end) {
+  
+    /* Discard read pair if position is irrelevant */
+    if (FindDiscardedRead(alignment, chrom_ref_id, locus)) {
       ReadPair read_pair;
       read_pair.read_type = RC_DISCARD;
       read_pair.read1 = alignment;
@@ -101,30 +86,26 @@ bool ReadExtractor::ExtractReads(BamCramMultiReader* bamreader,
       continue;
     }
 
-    // Check if read is spanning
-    // Similar to 5.2_filter_spanning_only_core.py:57
-    if (alignment.RefID() == chrom_ref_id && alignment.GetEndPosition() <= locus.start &&
-	alignment.MateRefID() == chrom_ref_id && alignment.MatePosition() >= locus.end) {
-      int32_t insert_size = alignment.TemplateLength();
+    /* Check if read is spanning */
+    int32_t insert_size;
+    if (FindSpanningRead(alignment, chrom_ref_id, locus, &insert_size)) {
       ReadPair read_pair;
       read_pair.read_type = RC_SPAN;
       read_pair.read1 = alignment;
-      read_pair.data_value = abs(insert_size);
+      read_pair.data_value = insert_size;
       read_pairs.insert(std::pair<std::string, ReadPair>(aln_key, read_pair));
-      continue;
     }
+
+    /* Check if read is enclosing */
     // TODO
 
-    // Check if read is enclosing
-    // TODO
-
-    // Check if read is FRR
+    /* Check if read is FRR */
     // TODO
   }
-  // Second pass through potential FRR reads
+  /*  Second pass through potential FRR reads */
   // TODO
 
-  // Load data into likelihood maximizer
+  /* Load data into likelihood maximizer */
   for (std::map<std::string, ReadPair>::const_iterator iter = read_pairs.begin();
        iter != read_pairs.end(); iter++) {
     if (iter->second.read_type == RC_SPAN) {
@@ -137,6 +118,56 @@ bool ReadExtractor::ExtractReads(BamCramMultiReader* bamreader,
       continue;
     }
   }
+  return false;
+}
+
+/*
+  Check if read should be discarded
+  Discard reads if both mates fall on same
+  side of the STR.
+  See 5.2_filter_spanning_only_core.py second case
+  Return true if yes
+*/
+bool ReadExtractor::FindDiscardedRead(BamAlignment alignment,
+				      const int32_t& chrom_ref_id,
+				      const Locus& locus) {
+  // Get read length
+  int32_t read_length = (int32_t)alignment.QueryBases().size();
+
+  // 5.2_filter_spanning_only_core.py 
+  bool discard1 = alignment.RefID() == chrom_ref_id && alignment.Position() <= locus.start-read_length &&
+    alignment.MateRefID() == chrom_ref_id && alignment.MatePosition() <= locus.start-read_length;
+  bool discard2 = alignment.RefID() == chrom_ref_id && alignment.Position() >= locus.end &&
+    alignment.MateRefID() == chrom_ref_id && alignment.MatePosition() >= locus.end;
+  return discard1 || discard2;
+}
+
+/*
+  Check if read is spanning
+   See 5.2_filter_spanning_only_core.py
+   Return true if yes
+*/
+bool ReadExtractor::FindSpanningRead(BamAlignment alignment,
+				     const int32_t& chrom_ref_id,
+				     const Locus& locus,
+				     int32_t* insert_size) {
+  // Get read length info
+  int32_t read_length = (int32_t)alignment.QueryBases().size();
+
+  // Similar to 5.2_filter_spanning_only_core.py:57  
+  bool span1 = alignment.RefID() == chrom_ref_id && alignment.GetEndPosition() <= locus.start &&
+    alignment.MateRefID() == chrom_ref_id && alignment.MatePosition() >= locus.end;
+  bool span2 = alignment.RefID() == chrom_ref_id && alignment.Position() >= locus.end &&
+    alignment.MateRefID() == chrom_ref_id && alignment.MatePosition() >= locus.start-read_length;
+  if (span1 || span2) {
+    *insert_size = abs(alignment.TemplateLength());
+    return true;
+  }
+
+  // Similar to 5.2_filter_spanning_only_core.py:69
+  // Allow flanking from both sides, but one side should be 
+  // mapped to the correct location for this to work
+  // TODO
   return false;
 }
 

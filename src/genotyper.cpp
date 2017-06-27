@@ -21,6 +21,7 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 #include <iostream>
 
 #include "src/genotyper.h"
+#include "src/mathops.h"
 
 using namespace std;
 
@@ -59,6 +60,9 @@ void Genotyper::Debug(BamCramMultiReader* bamreader) {
   } else {
     cerr << "testing bam failed" << endl;
   }
+  cerr << "testing GSL" << endl;
+  double x = TestGSL();
+  cerr << "gsl_ran_gaussian_pdf(0, 1) " << x << endl;
 }
 
 Genotyper::~Genotyper() {}
