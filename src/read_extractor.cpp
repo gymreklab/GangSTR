@@ -20,8 +20,8 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <map>
 
+#include "src/stringops.h"
 #include "src/read_extractor.h"
-#include "src/read_pair.h"
 #include "src/realignment.h"
 
 ReadExtractor::ReadExtractor() {}
@@ -97,11 +97,13 @@ bool ReadExtractor::ExtractReads(BamCramMultiReader* bamreader,
       read_pairs.insert(std::pair<std::string, ReadPair>(aln_key, read_pair));
     }
 
-    /* Perform realignment to determine read type */    
+    /* Perform realignment to determine read type */
+    int32_t nCopy;
+    ReadType read_type;
+    ProcessSingleRead(alignment, locus, &nCopy, &insert_size, &read_type);
     // TODO
     // This will decide if the read is enclosing, IRR, postflank, preflank, unknown
     // Use results to determine which read class to add it as
-    // Maybe pull this out to another function
   }
   /*  Second pass through potential FRR reads */
   // TODO ? not sure we need this
@@ -165,6 +167,48 @@ bool ReadExtractor::FindSpanningRead(BamAlignment alignment,
     return true;
   }
   return false;
+}
+
+/*
+  Process a single read using realignment
+  
+  Return false if something goes wrong
+ */
+bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
+				      const Locus& locus,
+				      int32_t* nCopy, int32_t* insert_size,
+				      ReadType* read_type) {
+  int32_t pos, pos_rev;
+  double score, score_rev;
+  int32_t guess_nCopy, guess_nCopy_rev;
+  std::string seq = alignment.QueryBases();
+  std::string seq_rev = reverse_complement(seq);
+  // Taken from 5.2_filter_spanning_only_core.py:67 (and elsewhere)
+  if (!expansion_aware_realign(seq, locus.pre_flank, locus.post_flank, locus.motif,
+			       &guess_nCopy, &pos, &score)) {
+    return false;
+  }
+  if (!expansion_aware_realign(seq_rev, locus.pre_flank, locus.post_flank, locus.motif,
+			       &guess_nCopy_rev, &pos_rev, &score_rev)) {
+    return false;
+  }
+  if (score_rev > score) {
+    *nCopy = guess_nCopy_rev;
+    pos = pos_rev;
+    score = score_rev;
+    seq = seq_rev;
+  }
+  SingleReadType srt;
+  if (!classify_realigned_read(seq, locus.motif, *nCopy, score,
+			       (int32_t)seq.size(), &srt)) {
+    return false;
+  }
+  // Process according to guessed read type
+  if (srt == SR_ENCLOSING) {
+    *read_type = RC_ENCL;
+    return true;
+  }
+  return true; // TODO
 }
 
 std::string ReadExtractor::trim_alignment_name(const BamAlignment& aln) const {

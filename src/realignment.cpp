@@ -18,23 +18,21 @@ You should have received a copy of the GNU General Public License
 along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef SRC_LOCUS_H__
-#define SRC_LOCUS_H__
+#include "src/realignment.h"
 
-#include <string>
+bool expansion_aware_realign(const std::string& seq,
+			     const std::string& pre_flank,
+			     const std::string& post_flank,
+			     const std::string& motif,
+			     int32_t* nCopy, int32_t* pos, double* score) {
+  return false; // TODO
+}
 
-class Locus {
- public:
-  Locus();
-  virtual ~Locus();
-
-  std::string chrom;
-  int start;
-  int end;
-  int period;
-  std::string motif;
-  std::string pre_flank;
-  std::string post_flank;
-};
-
-#endif  // SRC_LOCUS_H__
+bool classify_realigned_read(const std::string& seq,
+			     const std::string& motif,
+			     const int32_t& nCopy,
+			     const double& score,
+			     const int32_t read_length,
+			     SingleReadType* single_read_class) {
+  return false; // TODO
+}

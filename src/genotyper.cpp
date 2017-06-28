@@ -32,6 +32,9 @@ Genotyper::Genotyper(RefGenome _refgenome,
 }
 
 bool Genotyper::ProcessLocus(BamCramMultiReader* bamreader, Locus* locus) {
+  // Load preflank and postflank to locus
+  // TODO
+
   // Load all read data
   likelihood_maximizer.Reset();
   if (!read_extractor.ExtractReads(bamreader, *locus, &likelihood_maximizer)) {

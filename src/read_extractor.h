@@ -24,6 +24,7 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 #include "src/bam_io.h"
 #include "src/locus.h"
 #include "src/likelihood_maximizer.h"
+#include "src/read_pair.h"
 
 class ReadExtractor {
   const static int32_t REGIONSIZE = 5000; // TODO what should this be
@@ -47,6 +48,10 @@ class ReadExtractor {
 			const int32_t& chrom_ref_id,
 			const Locus& locus,
 			int32_t* insert_size);
+  // Check single read overlapping repeat area
+  bool ProcessSingleRead(BamAlignment alignment,
+			 const Locus& locus,
+			 int32_t* nCopy, int32_t* insert_size, ReadType* read_type);
 };
 
 #endif  // SRC_READ_EXTRACTOR_H__
