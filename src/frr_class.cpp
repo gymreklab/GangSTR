@@ -31,6 +31,7 @@ using namespace std;
 
 bool FRRClass::GetLogClassProb(const int32_t& allele,
 			       double* log_class_prob) {
+	double neg_inf = -100;
 	int dist_mean = 400;
 	int dist_sdev = 50;
 	int flank_len = 2000;
@@ -39,7 +40,7 @@ bool FRRClass::GetLogClassProb(const int32_t& allele,
 	int str_len = allele * motif_len;
 
 	if (str_len < read_len){		// condition: L > r for this read to be possible
-		*log_class_prob = 0;
+		*log_class_prob = neg_inf;
 		return false;
 	}
 	// Compute normalization constant norm_const
@@ -55,17 +56,28 @@ bool FRRClass::GetLogClassProb(const int32_t& allele,
 	double coef3 = str_len - read_len;
 	double term3 = gsl_cdf_gaussian_P(2 * flank_len + str_len - dist_mean, dist_sdev) - 
 					gsl_cdf_gaussian_P(str_len - dist_mean, dist_sdev);
-	
+	double class_prob;
 	if (str_len >= 2 * read_len)
-		*log_class_prob = coef0 * (coef1 * term1 + coef2 * term2 + coef3 * term3);
+		class_prob = coef0 * (coef1 * term1 + coef2 * term2 + coef3 * term3);
 	else
-		*log_class_prob = coef0 * coef3 * term3;
-  	return false; // TODO
+		class_prob = coef0 * coef3 * term3;
+
+	if (class_prob > 0){
+		*log_class_prob = log(class_prob);
+		return true;
+	}
+	else if (class_prob == 0){
+		*log_class_prob = neg_inf;
+		return true;
+	}
+	else
+		return false;
 }
 
 bool FRRClass::GetLogReadProb(const int32_t& allele,
 			      const int32_t& data,
 			      double* log_allele_prob) {
+	double neg_inf = -100;
 	int dist_mean = 400;
 	int dist_sdev = 50;
 	int flank_len = 2000;
@@ -78,7 +90,6 @@ bool FRRClass::GetLogReadProb(const int32_t& allele,
 	// 	return false;
 	// }
 
-
 	// Compute normalization constant norm_const
 	double norm_const = gsl_cdf_gaussian_P(2 * flank_len + str_len - dist_mean, dist_sdev) -
 						gsl_cdf_gaussian_P(2 * read_len - dist_mean, dist_sdev); 
@@ -86,7 +97,15 @@ bool FRRClass::GetLogReadProb(const int32_t& allele,
 	double term1 = gsl_cdf_gaussian_P(read_len + data + str_len - dist_mean, dist_sdev) - 
 			gsl_cdf_gaussian_P(2 * read_len + data - dist_mean, dist_sdev);
 
-	*log_allele_prob = 1 / norm_const * term1;
-
-  	return false; // TODO
+	double allele_prob = 1 / norm_const * term1;
+	if (allele_prob > 0){
+		*log_allele_prob = log(allele_prob);
+		return true;
+	}
+	else if (allele_prob == 0){
+		*log_allele_prob = neg_inf;
+		return true;
+	}
+	else
+		return false;
 }

@@ -30,6 +30,7 @@ using namespace std;
 
 bool SpanningClass::GetLogClassProb(const int32_t& allele,
 				double* log_class_prob) {
+	double neg_inf = -100;
 	int dist_mean = 400;		// arg_dict['read_ins_mean'] 		// (\mu)
 	int dist_sdev = 50;		// arg_dict['read_ins_stddev']		// (\sigma)
 	int flank_len = 2000;	// arg_dict['flank_len']			// (F)
@@ -63,14 +64,23 @@ bool SpanningClass::GetLogClassProb(const int32_t& allele,
 	}
 
 	
-	*log_class_prob = coef0 * (coef1 * term1 + coef2 * term2);
-	// *log_class_prob = coef2;
-  	return false; // TODO
+	double class_prob = coef0 * (coef1 * term1 + coef2 * term2);
+	if (class_prob > 0){
+		*log_class_prob = log(class_prob);
+		return true;
+	}
+	else if (class_prob == 0){
+		*log_class_prob = neg_inf;
+		return true;
+	}
+	else
+		return false;
 }
 
 bool SpanningClass::GetLogReadProb(const int32_t& allele,
 			       const int32_t& data,
 			       double* log_allele_prob) {
+	double neg_inf = -100;
 	int dist_mean = 400;
 	int dist_sdev = 50;
 	int motif_len = 3;
@@ -78,6 +88,15 @@ bool SpanningClass::GetLogReadProb(const int32_t& allele,
 
 	int mean_A = dist_mean - motif_len * (allele - ref_count);
 
-	*log_allele_prob = gsl_ran_gaussian_pdf(data - mean_A, dist_sdev);
-  	return false; // TODO
+	double allele_prob = gsl_ran_gaussian_pdf(data - mean_A, dist_sdev);
+	if (allele_prob > 0){
+		*log_allele_prob = log(allele_prob);
+		return true;
+	}
+	else if (allele_prob == 0){
+		*log_allele_prob = neg_inf;
+		return true;
+	}
+	else
+		return false;
 }
