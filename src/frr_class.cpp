@@ -31,7 +31,7 @@ using namespace std;
 
 bool FRRClass::GetLogClassProb(const int32_t& allele,
 			       double* log_class_prob) {
-	double neg_inf = -100;
+	double neg_inf = -100; //TODO
 	int dist_mean = 400;
 	int dist_sdev = 50;
 	int flank_len = 2000;
@@ -77,7 +77,7 @@ bool FRRClass::GetLogClassProb(const int32_t& allele,
 bool FRRClass::GetLogReadProb(const int32_t& allele,
 			      const int32_t& data,
 			      double* log_allele_prob) {
-	double neg_inf = -100;
+	double neg_inf = -100; //TODO
 	int dist_mean = 400;
 	int dist_sdev = 50;
 	int flank_len = 2000;

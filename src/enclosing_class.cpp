@@ -27,7 +27,7 @@ using namespace std;
 
 bool EnclosingClass::GetLogClassProb(const int32_t& allele,
 				     double* log_class_prob) {
-	double neg_inf = -100;
+	double neg_inf = -100; //TODO
 	int flank_len = 2000;	// arg_dict['flank_len']			// (F)
 	int read_len =  100;		// arg_dict['read_len']				// (r)
 	int motif_len = 3;		// arg_dict['motif']
@@ -53,7 +53,7 @@ bool EnclosingClass::GetLogClassProb(const int32_t& allele,
 bool EnclosingClass::GetLogReadProb(const int32_t& allele,
 				    const int32_t& data,
 				    double* log_allele_prob) {
-	double neg_inf = -100;
+	double neg_inf = -100; //TODO
 	// FILLLLLL INNNNN Stutter model
 	double u = 0.01;
 	double d = 0.02;

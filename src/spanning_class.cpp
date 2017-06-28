@@ -30,7 +30,7 @@ using namespace std;
 
 bool SpanningClass::GetLogClassProb(const int32_t& allele,
 				double* log_class_prob) {
-	double neg_inf = -100;
+	double neg_inf = -100; //TODO
 	int dist_mean = 400;		// arg_dict['read_ins_mean'] 		// (\mu)
 	int dist_sdev = 50;		// arg_dict['read_ins_stddev']		// (\sigma)
 	int flank_len = 2000;	// arg_dict['flank_len']			// (F)
@@ -80,7 +80,7 @@ bool SpanningClass::GetLogClassProb(const int32_t& allele,
 bool SpanningClass::GetLogReadProb(const int32_t& allele,
 			       const int32_t& data,
 			       double* log_allele_prob) {
-	double neg_inf = -100;
+	double neg_inf = -100; //TODO
 	int dist_mean = 400;
 	int dist_sdev = 50;
 	int motif_len = 3;
