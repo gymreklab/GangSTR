@@ -22,16 +22,61 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 #include "src/spanning_class.h"
 
 #include <math.h>
-
+#include <gsl/gsl_math.h>
+#include <gsl/gsl_rng.h>
+#include <gsl/gsl_randist.h>
+#include <gsl/gsl_cdf.h>
 using namespace std;
 
 bool SpanningClass::GetLogClassProb(const int32_t& allele,
 				double* log_class_prob) {
-  return false; // TODO
+	int dist_mean = 500;		// arg_dict['read_ins_mean'] 		// (\mu)
+	int dist_sdev = 50;		// arg_dict['read_ins_stddev']		// (\sigma)
+	int flank_len = 3000;	// arg_dict['flank_len']			// (F)
+	int read_len =  100;		// arg_dict['read_len']				// (r)
+	int motif_len = 3;		// arg_dict['motif']
+	int str_len = allele * motif_len;					// (L)
+	
+	double norm_const = gsl_cdf_gaussian_P(2 * flank_len + str_len - dist_mean, dist_sdev) -
+						gsl_cdf_gaussian_P(2 * read_len - dist_mean, dist_sdev);  
+	//gsl_ran_gaussian_pdf
+
+	// int rv_dist = norm(loc = dist_mean, scale = dist_sdev)
+
+	double coef0 = 1.0 / norm_const / double(2 * flank_len + str_len - 2 * read_len);
+
+	double coef1 = double(dist_mean - str_len);
+	double coef2 = - double(dist_sdev ^ 2);
+
+	double term1, term2;
+	if (2 * read_len >= str_len){
+		term1 = gsl_cdf_gaussian_P(2 * flank_len + str_len - dist_mean, dist_sdev) - 
+					gsl_cdf_gaussian_P(2 * read_len - dist_mean, dist_sdev);
+		term2 = gsl_ran_gaussian_pdf(2 * flank_len + str_len - dist_mean, dist_sdev) -
+					gsl_ran_gaussian_pdf(2 * read_len - dist_mean, dist_sdev);
+	}
+	else{
+		term1 = gsl_cdf_gaussian_P(2 * flank_len + str_len - dist_mean, dist_sdev) - 
+					gsl_cdf_gaussian_P(str_len - dist_mean, dist_sdev);
+		term2 = gsl_ran_gaussian_pdf(2 * flank_len + str_len - dist_mean, dist_sdev) -
+					gsl_ran_gaussian_pdf(str_len - dist_mean, dist_sdev);
+	}
+
+	
+	*log_class_prob = coef0 * (coef1 * term1 + coef2 * term2);
+  	return false; // TODO
 }
 
 bool SpanningClass::GetLogReadProb(const int32_t& allele,
 			       const int32_t& data,
 			       double* log_allele_prob) {
-  return false; // TODO
+	int dist_mean = 500;
+	int dist_sdev = 50;
+	int motif_len = 3;
+	int ref_count = 10;
+
+	int mean_A = dist_mean - motif_len * (allele - ref_count);
+
+	*log_allele_prob = gsl_ran_gaussian_pdf(data - mean_A, dist_sdev);
+  	return false; // TODO
 }

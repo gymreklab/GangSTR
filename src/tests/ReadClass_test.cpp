@@ -66,7 +66,7 @@ void ReadClassTest::test_Reset() {
 
 void ReadClassTest::test_SpanClassProb() {
   // Example - TODO change
-  int32_t allele = 5;
+  int32_t allele = 14;
   double log_class_prob = 0.5;
   span_class_.GetLogClassProb(allele, &log_class_prob);
   CPPUNIT_ASSERT_EQUAL(log_class_prob, 0.5);
@@ -75,15 +75,20 @@ void ReadClassTest::test_SpanClassProb() {
 
 void ReadClassTest::test_SpanReadProb() {
   // Example - TODO change
-  int32_t allele = 5;
+  int32_t allele = 50;
   double log_allele_prob = 0.5;
-  int32_t data = 10;
+  int32_t data = 380;
   span_class_.GetLogReadProb(allele, data, &log_allele_prob);
   CPPUNIT_ASSERT_EQUAL(log_allele_prob, 0.5);
   CPPUNIT_FAIL("test_SpanClassProb not implemented");
 }
 
 void ReadClassTest::test_FRRClassProb() {
+  // Example - TODO change
+  int32_t allele = 44;
+  double log_class_prob = 0.5;
+  frr_class_.GetLogClassProb(allele, &log_class_prob);
+  CPPUNIT_ASSERT_EQUAL(log_class_prob, 0.5);
   CPPUNIT_FAIL("test_FRRClassProb not implemented");
 }
 
