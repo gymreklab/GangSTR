@@ -22,6 +22,7 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "src/read_extractor.h"
 #include "src/read_pair.h"
+#include "src/realignment.h"
 
 ReadExtractor::ReadExtractor() {}
 
@@ -96,14 +97,14 @@ bool ReadExtractor::ExtractReads(BamCramMultiReader* bamreader,
       read_pairs.insert(std::pair<std::string, ReadPair>(aln_key, read_pair));
     }
 
-    /* Check if read is enclosing */
+    /* Perform realignment to determine read type */    
     // TODO
-
-    /* Check if read is FRR */
-    // TODO
+    // This will decide if the read is enclosing, IRR, postflank, preflank, unknown
+    // Use results to determine which read class to add it as
+    // Maybe pull this out to another function
   }
   /*  Second pass through potential FRR reads */
-  // TODO
+  // TODO ? not sure we need this
 
   /* Load data into likelihood maximizer */
   for (std::map<std::string, ReadPair>::const_iterator iter = read_pairs.begin();
@@ -163,11 +164,6 @@ bool ReadExtractor::FindSpanningRead(BamAlignment alignment,
     *insert_size = abs(alignment.TemplateLength());
     return true;
   }
-
-  // Similar to 5.2_filter_spanning_only_core.py:69
-  // Allow flanking from both sides, but one side should be 
-  // mapped to the correct location for this to work
-  // TODO
   return false;
 }
 

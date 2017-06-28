@@ -43,7 +43,8 @@ libgangstr_a_SOURCES = \
 	read_extractor.h read_extractor.cpp \
 	bam_io.h bam_io.cpp \
 	stringops.h stringops.cpp \
-	read_pair.h read_pair.cpp
+	read_pair.h read_pair.cpp \
+	realignment.h realignment.cpp
 
 GangSTR_LDFLAGS = $(AM_LDFLAGS) $(HTS_LIBS)
 GangSTR_SOURCES = main_gangstr.cpp
@@ -66,5 +67,5 @@ GangSTRTests_SOURCES = \
 	tests/ReadClass_test.h tests/ReadClass_test.cpp \
 	tests/LiketestslihoodMaximizer_test.sh tests/LikelihoodMaximizer_test.cpp \
 	tests/main_test.cpp
-GangSTRTests_CXXFLAGS = $(CPPUNIT_CFLAGS)
-GangSTRTests_LDFLAGS = $(CPPUNIT_LIBS) -ldl
+GangSTRTests_CXXFLAGS = $(CPPUNIT_CFLAGS) $(GSL_CFLAGS)
+GangSTRTests_LDFLAGS = $(CPPUNIT_LIBS) -ldl $(GSL_LIBS)
