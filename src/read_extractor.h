@@ -27,6 +27,7 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 #include "src/read_pair.h"
 
 class ReadExtractor {
+  friend class ReadExtractorTest;
   const static int32_t REGIONSIZE = 5000; // TODO what should this be
  public:
   ReadExtractor();
@@ -36,7 +37,7 @@ class ReadExtractor {
   bool ExtractReads(BamCramMultiReader* bamreader,
 		    const Locus& locus,
 		    LikelihoodMaximizer* likelihood_maximizer);
- private:
+ protected:
   // Trim alignment read names
   std::string trim_alignment_name(const BamAlignment& aln) const;
   // Check if read should be discarded
@@ -50,8 +51,13 @@ class ReadExtractor {
 			int32_t* insert_size);
   // Check single read overlapping repeat area
   bool ProcessSingleRead(BamAlignment alignment,
+			 const int32_t& chrom_ref_id,
 			 const Locus& locus,
-			 int32_t* nCopy, int32_t* insert_size, ReadType* read_type);
+			 int32_t* data_value,
+			 ReadType* read_type);
+  // Rescue mate pairs aligned elsewhere
+  bool RescueMate(BamCramMultiReader* bamreader,
+		  BamAlignment alignment, BamAlignment* matepair);
 };
 
 #endif  // SRC_READ_EXTRACTOR_H__

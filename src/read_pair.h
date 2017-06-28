@@ -40,6 +40,7 @@ class ReadPair {
   BamAlignment read2;
   ReadType read_type;
   int32_t data_value;
+  bool found_pair;
 };
 
 #endif  // SRC_READ_PAIR_H__

@@ -32,7 +32,6 @@ bool expansion_aware_realign(const std::string& seq,
 			     int32_t* nCopy, int32_t* pos, double* score);
 			     
 
-// TODO add output field for read class (need new enum)
 enum SingleReadType {
   SR_PREFLANK = 0,
   SR_POSTFLANK = 1,

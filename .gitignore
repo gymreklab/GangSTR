@@ -1,3 +1,6 @@
+old/
+*_names.txt
+notes.txt
 *.log
 test-driver
 *.trs

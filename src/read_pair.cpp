@@ -24,6 +24,7 @@ using namespace std;
 
 ReadPair::ReadPair() {
   read_type = RC_UNKNOWN;
+  found_pair = false;
 }
 
 ReadPair::~ReadPair() {}
