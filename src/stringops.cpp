@@ -51,3 +51,33 @@ int length_suffix_match(std::string& s1, std::string& s2){
   }
   return num_matches;
 }
+
+std::string reverse_complement(std::string nucs) {
+  std::string rev;
+  size_t size = nucs.size();
+  rev.resize(size);
+  for (size_t i = 0; i < size; i++) {
+    rev.replace(size-i-1, 1, 1, complement(nucs[i]));
+  }
+  return rev;
+}
+
+char complement(const char nucleotide) {
+  switch (nucleotide) {
+  case 'A':
+  case 'a':
+    return 'T';
+  case 'T':
+  case 't':
+    return 'A';
+  case 'G':
+  case 'g':
+    return 'C';
+  case 'C':
+  case 'c':
+    return 'G';
+  default:
+    return 'N';
+  }
+  return 'N';
+}

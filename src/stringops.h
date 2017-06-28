@@ -18,4 +18,7 @@ bool orderByLengthAndSequence(const std::string& s1, const std::string s2);
 
 int length_suffix_match(std::string& s1, std::string& s2);
 
+std::string reverse_complement(std::string nucs);
+char complement(const char nucleotide);
+
 #endif
