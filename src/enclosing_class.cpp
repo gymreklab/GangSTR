@@ -27,12 +27,32 @@ using namespace std;
 
 bool EnclosingClass::GetLogClassProb(const int32_t& allele,
 				     double* log_class_prob) {
-  return false; // TODO
+	int flank_len = 2000;	// arg_dict['flank_len']			// (F)
+	int read_len =  100;		// arg_dict['read_len']				// (r)
+	int motif_len = 3;		// arg_dict['motif']
+	int str_len = allele * motif_len;					// (L)
+
+	if (read_len <= str_len)
+		*log_class_prob = 0;
+	else
+		*log_class_prob = 2.0 * double(read_len - str_len) / double(2 * flank_len + str_len - 2 * read_len);
+ 	return false; // TODO
 }
 
 bool EnclosingClass::GetLogReadProb(const int32_t& allele,
 				    const int32_t& data,
 				    double* log_allele_prob) {
-  return false; // TODO
+	// FILLLLLL INNNNN Stutter model
+	double u = 0.01;
+	double d = 0.02;
+	double p = 0.95;
+	double delta = data - allele;
+	if (delta == 0)
+		*log_allele_prob = 1 - u - d;
+	else if (delta > 0)
+		*log_allele_prob = pow(u * p * (1.0 - p), (delta - 1.0));
+	else
+		*log_allele_prob = pow(d * p * (1.0 - p), (-delta - 1.0));
+  	return false; // TODO
 }
 

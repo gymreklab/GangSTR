@@ -30,9 +30,9 @@ using namespace std;
 
 bool SpanningClass::GetLogClassProb(const int32_t& allele,
 				double* log_class_prob) {
-	int dist_mean = 500;		// arg_dict['read_ins_mean'] 		// (\mu)
+	int dist_mean = 400;		// arg_dict['read_ins_mean'] 		// (\mu)
 	int dist_sdev = 50;		// arg_dict['read_ins_stddev']		// (\sigma)
-	int flank_len = 3000;	// arg_dict['flank_len']			// (F)
+	int flank_len = 2000;	// arg_dict['flank_len']			// (F)
 	int read_len =  100;		// arg_dict['read_len']				// (r)
 	int motif_len = 3;		// arg_dict['motif']
 	int str_len = allele * motif_len;					// (L)
@@ -46,7 +46,7 @@ bool SpanningClass::GetLogClassProb(const int32_t& allele,
 	double coef0 = 1.0 / norm_const / double(2 * flank_len + str_len - 2 * read_len);
 
 	double coef1 = double(dist_mean - str_len);
-	double coef2 = - double(dist_sdev ^ 2);
+	double coef2 = - double(dist_sdev * dist_sdev);
 
 	double term1, term2;
 	if (2 * read_len >= str_len){
@@ -64,13 +64,14 @@ bool SpanningClass::GetLogClassProb(const int32_t& allele,
 
 	
 	*log_class_prob = coef0 * (coef1 * term1 + coef2 * term2);
+	// *log_class_prob = coef2;
   	return false; // TODO
 }
 
 bool SpanningClass::GetLogReadProb(const int32_t& allele,
 			       const int32_t& data,
 			       double* log_allele_prob) {
-	int dist_mean = 500;
+	int dist_mean = 400;
 	int dist_sdev = 50;
 	int motif_len = 3;
 	int ref_count = 10;

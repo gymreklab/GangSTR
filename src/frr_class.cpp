@@ -31,9 +31,9 @@ using namespace std;
 
 bool FRRClass::GetLogClassProb(const int32_t& allele,
 			       double* log_class_prob) {
-	int dist_mean = 500;
+	int dist_mean = 400;
 	int dist_sdev = 50;
-	int flank_len = 3000;
+	int flank_len = 2000;
 	int read_len = 100;
 	int motif_len = 3;
 	int str_len = allele * motif_len;
@@ -66,5 +66,27 @@ bool FRRClass::GetLogClassProb(const int32_t& allele,
 bool FRRClass::GetLogReadProb(const int32_t& allele,
 			      const int32_t& data,
 			      double* log_allele_prob) {
-  return false; // TODO
+	int dist_mean = 400;
+	int dist_sdev = 50;
+	int flank_len = 2000;
+	int read_len = 100;
+	int motif_len = 3;
+	int str_len = allele * motif_len;
+
+	// if (str_len < read_len){		// redundant -> remove
+	// 	*log_class_prob = 0;
+	// 	return false;
+	// }
+
+
+	// Compute normalization constant norm_const
+	double norm_const = gsl_cdf_gaussian_P(2 * flank_len + str_len - dist_mean, dist_sdev) -
+						gsl_cdf_gaussian_P(2 * read_len - dist_mean, dist_sdev); 
+
+	double term1 = gsl_cdf_gaussian_P(read_len + data + str_len - dist_mean, dist_sdev) - 
+			gsl_cdf_gaussian_P(2 * read_len + data - dist_mean, dist_sdev);
+
+	*log_allele_prob = 1 / norm_const * term1;
+
+  	return false; // TODO
 }
