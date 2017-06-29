@@ -21,6 +21,7 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 #include "src/realignment.h"
 
 #include <sstream>
+#include <iostream>
 
 bool expansion_aware_realign(const std::string& seq,
 			     const std::string& pre_flank,
@@ -111,7 +112,9 @@ bool create_score_matrix(const int32_t& rows, const int32_t& cols,
     }
   }
   if (max_pos_row == -1 || max_pos_col == -1) {
-    return false;
+    *current_score = 0;
+    *start_pos = -1;
+    return true;
   }
   *current_score = max_score;
   *start_pos = max_pos_row;
@@ -158,7 +161,8 @@ bool classify_realigned_read(const std::string& seq,
   int32_t end_str = prefix_length + nCopy*(int32_t)motif.size();
 
   // Check if read starts in the STR
-  bool start_in_str, end_in_str = false;
+  bool start_in_str = false;
+  bool end_in_str = false;
   if ((start_pos >= start_str-MARGIN) && (start_pos <= end_str+MARGIN)) {
     start_in_str = true;
   }
@@ -168,16 +172,22 @@ bool classify_realigned_read(const std::string& seq,
 
   // Set threshold for match
   int32_t score_threshold = (int32_t)(MATCH_PERC_THRESHOLD*seq.size()*MATCH_SCORE);
+
   if (score < score_threshold || nCopy == 0) {
-    return SR_UNKNOWN;
+    *single_read_class = SR_UNKNOWN;
+    return true;
   } else if (start_in_str && end_in_str) {
-    return SR_IRR;
+    *single_read_class = SR_IRR;
+    return true;
   } else if (start_in_str && !end_in_str) {
-    return SR_POSTFLANK;
+    *single_read_class = SR_POSTFLANK;
+    return true;
   } else if (!start_in_str && end_in_str) {
-    return SR_PREFLANK;
+    *single_read_class = SR_PREFLANK;
+    return true;
   } else if (start_pos < start_str && end_pos > end_str) {
-    return SR_ENCLOSING;
+    *single_read_class = SR_ENCLOSING;
+    return true;
   } else {
     return false;
   }

@@ -45,6 +45,10 @@ class RealignmentTest: public CppUnit::TestFixture {
   void test_CreateScoreMatrix();
   void test_CalcScore();
   void test_ClassifyRealignedRead();
+  std::string ConstructSeq(const std::string& prefix,
+			   const std::string& suffix,
+			   const std::string& motif,
+			   const int32_t& nCopy);
 };
 
 #endif //  SRC_TESTS_REALIGNMENT_H_

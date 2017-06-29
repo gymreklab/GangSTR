@@ -20,6 +20,8 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "src/tests/Realignment_test.h"
 
+#include <sstream>
+
 // Registers the fixture into the 'registry'
 CPPUNIT_TEST_SUITE_REGISTRATION(RealignmentTest);
 
@@ -27,8 +29,72 @@ void RealignmentTest::setUp() {}
 
 void RealignmentTest::tearDown() {}
 
+std::string RealignmentTest::ConstructSeq(const std::string& prefix,
+			 const std::string& suffix,
+			 const std::string& motif,
+			 const int32_t& nCopy) {
+  std::stringstream ss;
+  ss << prefix;
+  for (int i=0; i<nCopy; i++) {
+    ss << motif;
+  }
+  ss << suffix;
+  return ss.str();
+}
+
 void RealignmentTest::test_ExpansionAwareRealign() {
-  CPPUNIT_FAIL("test_ExpansionAwareRealign() not implemented");
+  std::string pre_flank = "ACTAGCTACTCATCCA";
+  std::string post_flank = "ATCATCGACTACGACT";
+  std::string motif = "CAG";
+  std::string seq;
+  int32_t nCopy, pos, score;
+  // Case 1 - enclosing
+  for (int32_t i=0; i<20; i++) {
+    seq = ConstructSeq(pre_flank, post_flank, motif, i);
+    if (!expansion_aware_realign(seq, pre_flank, post_flank, motif,
+				 &nCopy, &pos, &score)) {
+      CPPUNIT_FAIL("expansion_aware_realign returned false unexpectedly");
+    }
+    CPPUNIT_ASSERT_EQUAL(i, nCopy);
+    CPPUNIT_ASSERT_EQUAL(0, pos);
+    CPPUNIT_ASSERT_EQUAL((int32_t)seq.size()*MATCH_SCORE, score);
+  }
+  // Case 2 - preflank
+  for (int32_t i=0; i<50; i++) {
+    seq = ConstructSeq(pre_flank, "", motif, i);
+    if (!expansion_aware_realign(seq, pre_flank, post_flank, motif,
+				 &nCopy, &pos, &score)) {
+      CPPUNIT_FAIL("expansion_aware_realign returned false unexpectedly");
+    }
+    CPPUNIT_ASSERT_EQUAL(i, nCopy);
+    CPPUNIT_ASSERT_EQUAL(0, pos);
+    CPPUNIT_ASSERT_EQUAL((int32_t)seq.size()*MATCH_SCORE, score);
+  }
+  // Case 3 - postflank
+  for (int32_t i=0; i<50; i++) {
+    seq = ConstructSeq("", post_flank, motif, i);
+    if (!expansion_aware_realign(seq, pre_flank, post_flank, motif,
+				 &nCopy, &pos, &score)) {
+      CPPUNIT_FAIL("expansion_aware_realign returned false unexpectedly");
+    }
+    CPPUNIT_ASSERT_EQUAL(i, nCopy);
+  }
+  // Case 3 - IRR
+  for (int32_t i=0; i<50; i++) {
+    seq = ConstructSeq("", "", motif, i);
+    if (!expansion_aware_realign(seq, pre_flank, post_flank, motif,
+				 &nCopy, &pos, &score)) {
+      CPPUNIT_FAIL("expansion_aware_realign returned false unexpectedly");
+    }
+    CPPUNIT_ASSERT_EQUAL(i, nCopy);
+  }
+  // Case 4 - random sequence
+  seq ="NNNNNNNNNNN";
+  if (!expansion_aware_realign(seq, pre_flank, post_flank, motif,
+			       &nCopy, &pos, &score)) {
+    CPPUNIT_FAIL("expansion_aware_realign returned false unexpectedly");
+  }
+  CPPUNIT_ASSERT_EQUAL(0, score);
 }
 
 void RealignmentTest::test_SmithWaterman() {
@@ -153,7 +219,61 @@ void RealignmentTest::test_CalcScore() {
 }
 
 void RealignmentTest::test_ClassifyRealignedRead() {
-  CPPUNIT_FAIL("test_ClassifyRealignedRead() not implemented");
+  std::string pre_flank = "ACTAGCTACTCATCCA";
+  std::string post_flank = "ATCATCGACTACGACT";
+  std::string motif = "CAG";
+  std::string seq;
+  int32_t nCopy, pos, score;
+  SingleReadType src;
+  // Case 1 - enclosing
+  for (int32_t i=1; i<20; i++) {
+    seq = ConstructSeq(pre_flank, post_flank, motif, i);
+    expansion_aware_realign(seq, pre_flank, post_flank, motif,
+			    &nCopy, &pos, &score);
+    classify_realigned_read(seq, motif, pos, nCopy, score, (int32_t)pre_flank.size(),
+			    &src);
+    CPPUNIT_ASSERT_EQUAL(SR_ENCLOSING, src);
+  }
+  // Case 2 - preflank
+  for (int32_t i=1; i<20; i++) {
+    seq = ConstructSeq(pre_flank, "", motif, i);
+    expansion_aware_realign(seq, pre_flank, post_flank, motif,
+			    &nCopy, &pos, &score);
+    classify_realigned_read(seq, motif, pos, nCopy, score, (int32_t)pre_flank.size(),
+			    &src);
+    CPPUNIT_ASSERT_EQUAL(SR_PREFLANK, src);
+  }
+  // Case 3 - postflank
+  for (int32_t i=1; i<20; i++) {
+    seq = ConstructSeq("", post_flank, motif, i);
+    expansion_aware_realign(seq, pre_flank, post_flank, motif,
+			    &nCopy, &pos, &score);
+    classify_realigned_read(seq, motif, pos, nCopy, score, (int32_t)pre_flank.size(),
+			    &src);
+    CPPUNIT_ASSERT_EQUAL(SR_POSTFLANK, src);
+  }
+  // Case 4 - IRR
+  for (int32_t i=1; i<20; i++) {
+    seq = ConstructSeq("", "", motif, i);
+    expansion_aware_realign(seq, pre_flank, post_flank, motif,
+			    &nCopy, &pos, &score);
+    classify_realigned_read(seq, motif, pos, nCopy, score, (int32_t)pre_flank.size(),
+			    &src);
+    CPPUNIT_ASSERT_EQUAL(SR_IRR, src);
+  }
+  // Case 5 - unknown
+  seq = "NNNNNNNNNNN";
+  expansion_aware_realign(seq, pre_flank, post_flank, motif,
+			  &nCopy, &pos, &score);
+  classify_realigned_read(seq, motif, pos, nCopy, score, (int32_t)pre_flank.size(),
+			  &src);
+  CPPUNIT_ASSERT_EQUAL(SR_UNKNOWN, src);
+  seq = "ATACGTACGATCTACAG";
+  expansion_aware_realign(seq, pre_flank, post_flank, motif,
+			  &nCopy, &pos, &score);
+  classify_realigned_read(seq, motif, pos, nCopy, score, (int32_t)pre_flank.size(),
+			  &src);
+  CPPUNIT_ASSERT_EQUAL(SR_UNKNOWN, src);
 }
 
 
