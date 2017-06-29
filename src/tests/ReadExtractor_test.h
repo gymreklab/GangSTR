@@ -31,6 +31,7 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 class ReadExtractorTest: public CppUnit::TestFixture {
   CPPUNIT_TEST_SUITE(ReadExtractorTest);
   CPPUNIT_TEST(test_ExtractReads);
+  CPPUNIT_TEST(test_ProcessReadPairs);
   CPPUNIT_TEST(test_FindDiscardedRead);
   CPPUNIT_TEST(test_FindSpanningRead);
   CPPUNIT_TEST(test_ProcessSingleRead);
@@ -42,10 +43,14 @@ class ReadExtractorTest: public CppUnit::TestFixture {
   void tearDown();
  private:
   void test_ExtractReads();
+  void test_ProcessReadPairs();
   void test_FindDiscardedRead();
   void test_FindSpanningRead();
   void test_ProcessSingleRead();
   void test_RescueMate();
+  void LoadAnswers(const std::string& answers_file,
+		   std::map<std::string, ReadType>* read_type_answers,
+		   std::map<std::string, int32_t>* data_answers);
   std::string test_dir;
   ReadExtractor read_extractor;
   Locus locus;

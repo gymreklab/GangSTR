@@ -34,14 +34,57 @@ void ReadExtractorTest::setUp() {
   test_dir = getenv("GANGSTR_TEST_DIR");
   // Set up locus
   locus.chrom = "3";
-  locus.start = 63898361;
-  locus.end = 63898392;
+  locus.start = 63898362;
+  locus.end = 63898391;
+  locus.pre_flank = "TAGGAGCGGAAAGAATGTCGGAGCGGGCCGCGGATGACGTCAGGGGGGAGCCGCGCCGCGCGGCGGCGGCGGCGGGCGGAGCAGCGGCCGCGGCCGCCCGG";
+  locus.post_flank = "CCGCCGCCTCCGCAGCCCCAGCGGCAGCAGCACCCGCCACCGCCGCCACGGCGCACACGGCCGGAGGACGGCGGGCCCGGCGCCGCCTCCACCTCGGCCGC";
+  locus.motif = "CAG";
 }
 
 void ReadExtractorTest::tearDown() {}
 
 void ReadExtractorTest::test_ExtractReads() {
   CPPUNIT_FAIL("test_ExtractReads not implemented");
+}
+
+void ReadExtractorTest::LoadAnswers(const std::string& answers_file,
+				    std::map<std::string, ReadType>* read_type_answers,
+				    std::map<std::string, int32_t>* data_answers) {
+  std::ifstream* freader = new std::ifstream(answers_file.c_str());
+  std::string line;
+  std::vector<std::string> items;
+  while (std::getline(*freader, line)) {
+    split_by_delim(line, '\t', items);
+    std::string read_name = items[0];
+    ReadType rt = (ReadType)atoi(items[1].c_str());
+    int32_t data = (int32_t)atoi(items[2].c_str());
+    read_type_answers->insert(std::pair<std::string, ReadType>(read_name, rt));
+    data_answers->insert(std::pair<std::string, int32_t>(read_name, data));
+  }
+}
+
+void ReadExtractorTest::test_ProcessReadPairs() {
+  // Load answers
+  std::string answers_file = test_dir + "/test_pair_answers.tab";
+  std::map<std::string, ReadType> read_type_answers;
+  std::map<std::string, int32_t> data_answers;
+  LoadAnswers(answers_file, &read_type_answers, &data_answers);
+
+  // Load Bam file
+  std::string bam_file = test_dir + "/test.sorted.bam";
+  std::vector<std::string> files(0);
+  files.push_back(bam_file);
+  BamCramMultiReader bamreader(files);
+  std::map<std::string, ReadPair> read_pairs;
+  // Test each pair
+  if (!read_extractor.ProcessReadPairs(&bamreader, locus, &read_pairs)) {
+    CPPUNIT_FAIL("ProcessReadPairs returned false unexpectedly.");
+  }
+  for (std::map<std::string, ReadPair>::const_iterator iter = read_pairs.begin();
+       iter != read_pairs.end(); iter++) {
+    // TODO load test data
+  }
+  CPPUNIT_FAIL("test_ProcessReadPairs not implemented");
 }
 
 void ReadExtractorTest::test_FindDiscardedRead() {
@@ -53,6 +96,7 @@ void ReadExtractorTest::test_FindDiscardedRead() {
   files.push_back(spanning_file);
   files.push_back(enclosing_file);
   files.push_back(frr_file);
+  files.push_back(discarded_file);
   BamCramMultiReader bamreader(files);
   int32_t BUFFER = 50000; // want to capture all reads
   int32_t chrom_ref_id = bamreader.bam_header()->ref_id(locus.chrom);
@@ -99,7 +143,44 @@ void ReadExtractorTest::test_FindSpanningRead() {
 }
 
 void ReadExtractorTest::test_ProcessSingleRead() {
-  CPPUNIT_FAIL("test_ProcessSingleRead not implemented");
+  std::string spanning_file = test_dir + "/test.spanning.single.bam";
+  std::string enclosing_file = test_dir + "/test.enclosing.single.bam";
+  std::string frr_file = test_dir + "/test.frr.single.bam";
+  std::vector<std::string> files(0);
+  files.push_back(spanning_file);
+  files.push_back(enclosing_file);
+  files.push_back(frr_file);
+  BamCramMultiReader bamreader(files);
+  int32_t BUFFER = 50000; // want to capture all reads
+  int32_t chrom_ref_id = bamreader.bam_header()->ref_id(locus.chrom);
+  bamreader.SetRegion(locus.chrom, locus.start - BUFFER, locus.end + BUFFER);
+  BamAlignment aln;
+  int32_t data_value;
+  ReadType read_type;
+  bool truth_is_enclosing;
+  while (bamreader.GetNextAlignment(aln)) {
+    std::string fname = aln.Filename();
+    truth_is_enclosing = string_ends_with(fname, "test.enclosing.single.bam");
+    if (!read_extractor.ProcessSingleRead(aln, chrom_ref_id, locus, &data_value, &read_type)) {
+      CPPUNIT_FAIL("ProcessSingleRead returned false unexpectedly");
+    }
+    std::stringstream msg;
+    msg << "Misclassified discarded read " << aln.Name();
+    if (truth_is_enclosing) {
+      int64_t true_value;
+      std::string tag_id = "nc";
+      aln.GetIntTag(tag_id.c_str(), true_value);
+      CPPUNIT_ASSERT_EQUAL_MESSAGE(msg.str(), RC_ENCL, read_type);
+      CPPUNIT_ASSERT_EQUAL_MESSAGE(msg.str(), (int32_t)true_value, data_value);
+    } else if (aln.Name() == "ATXN7_52_cov60_dist500_DIP_const70_20_altAllele_2920_3331_0:0:0_0:0:0_219" ||
+	       aln.Name() == "ATXN7_52_cov60_dist500_DIP_const70_70_constAllele_2838_3270_0:0:0_0:0:0_3b") {
+      int64_t true_is;
+      std::string tag_is = "is";
+      aln.GetIntTag(tag_is.c_str(), true_is);
+      CPPUNIT_ASSERT_EQUAL_MESSAGE(msg.str(), RC_SPAN, read_type);
+      CPPUNIT_ASSERT_EQUAL_MESSAGE(msg.str(), (int32_t)true_is, data_value);
+    } 
+  }
 }
 
 // TODO add case where mate not actually in file, should return false

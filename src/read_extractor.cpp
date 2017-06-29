@@ -35,7 +35,32 @@ bool ReadExtractor::ExtractReads(BamCramMultiReader* bamreader,
 				 LikelihoodMaximizer* likelihood_maximizer) {
   // This will keep track of information for each read pair
   std::map<std::string, ReadPair> read_pairs;
+  if (!ProcessReadPairs(bamreader, locus, &read_pairs)) {
+    return false;
+  }
 
+  /* Load data into likelihood maximizer */
+  for (std::map<std::string, ReadPair>::const_iterator iter = read_pairs.begin();
+       iter != read_pairs.end(); iter++) {
+    if (iter->second.read_type == RC_SPAN) {
+      likelihood_maximizer->AddSpanningData(iter->second.data_value);
+    } else if (iter->second.read_type == RC_ENCL) {
+      likelihood_maximizer->AddEnclosingData(iter->second.data_value);
+    } else if (iter->second.read_type == RC_FRR) {
+      likelihood_maximizer->AddFRRData(iter->second.data_value);
+    } else {
+      continue;
+    }
+  }
+  return false;
+}
+
+/*
+  Main function to decide what to do with each read pair
+ */
+bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
+				     const Locus& locus, 
+				     std::map<std::string, ReadPair>* read_pairs) {
   // Get bam alignments from the relevant region
   bamreader->SetRegion(locus.chrom, locus.start-REGIONSIZE, locus.end+REGIONSIZE);
 
@@ -63,8 +88,8 @@ bool ReadExtractor::ExtractReads(BamCramMultiReader* bamreader,
     std::string aln_key = file_label + trim_alignment_name(alignment);
 
     /*  Check if read's mate already processed */
-    std::map<std::string, ReadPair>::iterator rp_iter = read_pairs.find(aln_key);
-    if (rp_iter != read_pairs.end()) {
+    std::map<std::string, ReadPair>::iterator rp_iter = read_pairs->find(aln_key);
+    if (rp_iter != read_pairs->end()) {
       rp_iter->second.found_pair = true;
       rp_iter->second.read2 = alignment;
       // Only need to do something if class is still unknown
@@ -84,7 +109,7 @@ bool ReadExtractor::ExtractReads(BamCramMultiReader* bamreader,
       ReadPair read_pair;
       read_pair.read_type = RC_DISCARD;
       read_pair.read1 = alignment;
-      read_pairs.insert(std::pair<std::string, ReadPair>(aln_key, read_pair));
+      read_pairs->insert(std::pair<std::string, ReadPair>(aln_key, read_pair));
       continue;
     }
 
@@ -95,7 +120,7 @@ bool ReadExtractor::ExtractReads(BamCramMultiReader* bamreader,
       read_pair.read_type = RC_SPAN;
       read_pair.read1 = alignment;
       read_pair.data_value = insert_size;
-      read_pairs.insert(std::pair<std::string, ReadPair>(aln_key, read_pair));
+      read_pairs->insert(std::pair<std::string, ReadPair>(aln_key, read_pair));
     }
 
     /* If read is at all close to the STR,
@@ -110,11 +135,11 @@ bool ReadExtractor::ExtractReads(BamCramMultiReader* bamreader,
     read_pair.read_type = read_type;
     read_pair.read1 = alignment;
     read_pair.data_value = data_value;
-    read_pairs.insert(std::pair<std::string, ReadPair>(aln_key, read_pair));
+    read_pairs->insert(std::pair<std::string, ReadPair>(aln_key, read_pair));
   }
   /*  Second pass through reads where only one end processed */
-  for (std::map<std::string, ReadPair>::iterator iter = read_pairs.begin();
-       iter != read_pairs.end(); iter++) {
+  for (std::map<std::string, ReadPair>::iterator iter = read_pairs->begin();
+       iter != read_pairs->end(); iter++) {
     if (iter->second.found_pair || iter->second.read_type != RC_UNKNOWN) {
       continue;
     }
@@ -130,21 +155,7 @@ bool ReadExtractor::ExtractReads(BamCramMultiReader* bamreader,
     iter->second.read_type = read_type;
     iter->second.data_value = data_value;
   }
-
-  /* Load data into likelihood maximizer */
-  for (std::map<std::string, ReadPair>::const_iterator iter = read_pairs.begin();
-       iter != read_pairs.end(); iter++) {
-    if (iter->second.read_type == RC_SPAN) {
-      likelihood_maximizer->AddSpanningData(iter->second.data_value);
-    } else if (iter->second.read_type == RC_ENCL) {
-      likelihood_maximizer->AddEnclosingData(iter->second.data_value);
-    } else if (iter->second.read_type == RC_FRR) {
-      likelihood_maximizer->AddFRRData(iter->second.data_value);
-    } else {
-      continue;
-    }
-  }
-  return false;
+  return true;
 }
 
 /*
@@ -202,6 +213,7 @@ bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
 				      const Locus& locus,
 				      int32_t* data_value,
 				      ReadType* read_type) {
+  std::cerr << "Checking STR vicinity" << std::endl; // TODO
   /* If read in vicinity but not close to STR, save for later */
   if (alignment.RefID() == chrom_ref_id &&
       (alignment.Position() > locus.end || alignment.GetEndPosition() < locus.start)) {
@@ -214,11 +226,14 @@ bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
   std::string seq = alignment.QueryBases();
   std::string seq_rev = reverse_complement(seq);
   int32_t read_length = (int32_t)seq.size();
+  std::cerr << "Realignment-forward" << std::endl; // TODO
   /* Perform realignment and classification */
+  std::cerr << seq << " " << locus.pre_flank << " " << locus.post_flank << " " << locus.motif << std::endl; // TODO
   if (!expansion_aware_realign(seq, locus.pre_flank, locus.post_flank, locus.motif,
 			       &nCopy, &pos, &score)) {
     return false;
   }
+  std::cerr << "Realignment-reverse" << std::endl; // TODO
   if (!expansion_aware_realign(seq_rev, locus.pre_flank, locus.post_flank, locus.motif,
 			       &nCopy_rev, &pos_rev, &score_rev)) {
     return false;
@@ -229,11 +244,14 @@ bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
     score = score_rev;
     seq = seq_rev;
   }
+  std::cerr << "classification" << std::endl; // TODO
   SingleReadType srt;
   if (!classify_realigned_read(seq, locus.motif, pos, nCopy, score,
 			       (int32_t)locus.pre_flank.size(), &srt)) {
     return false;
   }
+  std::cerr << "Process according to guessed read type" << std::endl; // TODO
+  std::cerr << nCopy << " " << pos << " " << score << " " << srt << std::endl;
   // Process according to guessed read type
   /* Spanning cases */
   // 5.2_filter_spanning_only_core.py#L86 - preflank case
@@ -269,6 +287,7 @@ bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
   if (srt == SR_ENCLOSING) {
     *read_type = RC_ENCL;
     *data_value = nCopy;
+    return true;
   }
   /* If we get here, we're not sure */
   *read_type = RC_UNKNOWN;

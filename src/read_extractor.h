@@ -40,6 +40,11 @@ class ReadExtractor {
  protected:
   // Trim alignment read names
   std::string trim_alignment_name(const BamAlignment& aln) const;
+  
+  // Process all read pairs
+  bool ProcessReadPairs(BamCramMultiReader* bamreader,
+			const Locus& locus, std::map<std::string, ReadPair>* read_pairs);
+
   // Check if read should be discarded
   bool FindDiscardedRead(BamAlignment alignment,
 			 const int32_t& chrom_ref_id,
