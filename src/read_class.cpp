@@ -32,9 +32,9 @@ void ReadClass::AddData(const int32_t& data) {
 }
 
 /*
-  Calculates log10 P(read_class_data_ | <allele1, allele2>) and sets class_ll
+  Calculates log P(read_class_data_ | <allele1, allele2>) and sets class_ll
 
-  log10 P(data|<allelele1, allele2>) = sum_i log10 P(data_i | <allele1, allele2>)
+  log P(data|<allelele1, allele2>) = sum_i log P(data_i | <allele1, allele2>)
   P(data_i | <allele1, allele2> = allele1_weight*P(data_i|allele1) + allele2_weight*P(data_i|allele2)
 
   Return false if something goes wrong.
@@ -53,13 +53,13 @@ bool ReadClass::GetClassLogLikelihood(const int32_t& allele1,
     if (!GetAlleleLogLikelihood(allele2, *data_it, &a2_ll)) {
       return false;
     }
-    *class_ll += fast_log_sum_exp(log10(allele1_weight_)+a1_ll, log10(allele2_weight_)+a2_ll);
+    *class_ll += fast_log_sum_exp(log(allele1_weight_)+a1_ll, log(allele2_weight_)+a2_ll);
   }
   return true;
 }
 
 /*
-  Calculates log10P(data_i|allele) and sets allele_ll
+  Calculates logP(data_i|allele) and sets allele_ll
 
   Return false if something goes wrong.
  */

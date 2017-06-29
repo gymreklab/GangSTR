@@ -47,7 +47,6 @@ std::size_t LikelihoodMaximizer::GetFRRDataSize() {
   return frr_class_.GetDataSize();
 }
 
-
 bool LikelihoodMaximizer::GetGenotypeNegLogLikelihood(const int32_t& allele1,
 						      const int32_t& allele2,
 						      double* gt_ll) {
