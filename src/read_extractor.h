@@ -33,6 +33,8 @@ class ReadExtractor {
   ReadExtractor();
   virtual ~ReadExtractor();
 
+  bool debug = false;
+
   // Main function to extract reads of each class
   bool ExtractReads(BamCramMultiReader* bamreader,
 		    const Locus& locus,
