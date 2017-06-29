@@ -22,17 +22,12 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <sstream>
 
-// Set NW params
-const static int32_t MATCH_SCORE = 3;
-const static int32_t MISMATCH_SCORE = -1;
-const static int32_t GAP_SCORE = -3;
-
 bool expansion_aware_realign(const std::string& seq,
 			     const std::string& pre_flank,
 			     const std::string& post_flank,
 			     const std::string& motif,
 			     int32_t* nCopy, int32_t* pos, int32_t* score) {
-  int32_t read_len = (int32_t)seq.size(); // TODO why not seq?
+  int32_t read_len = (int32_t)seq.size();
   int32_t period = (int32_t)motif.size();
   int32_t max_score = 0;
   int32_t max_nCopy = 0;
@@ -103,8 +98,8 @@ bool create_score_matrix(const int32_t& rows, const int32_t& cols,
   int32_t max_score = 0;
   int32_t max_pos_row = -1; // The row and column of highest score in the matrix
   int32_t max_pos_col = -1;
-  for (int32_t i=0; i<rows; i++) {
-    for (int32_t j=0; j<cols; j++) {
+  for (int32_t i=1; i<rows; i++) {
+    for (int32_t j=1; j<cols; j++) {
       if (!calc_score(i, j, seq1, seq2, score_matrix)) {
 	return false;
       }
@@ -128,10 +123,10 @@ bool create_score_matrix(const int32_t& rows, const int32_t& cols,
   The score is based on the up, left, and upper-left neighbors.
  */
 bool calc_score(const int32_t& i, const int32_t& j,
-	       const std::string& seq1, const std::string& seq2,
-	       std::vector<std::vector<int32_t> >* score_matrix) {
+		const std::string& seq1, const std::string& seq2,
+		std::vector<std::vector<int32_t> >* score_matrix) {
   int32_t max_score = 0;
-  int32_t similarity = (seq1.at(i-1)==seq1.at(j-1)) ? 
+  int32_t similarity = (seq1.at(i-1)==seq2.at(j-1)) ? 
     MATCH_SCORE : MISMATCH_SCORE;
   int32_t diag_score = score_matrix->at(i-1).at(j-1) + similarity;
   if (diag_score > max_score) {
@@ -151,9 +146,39 @@ bool calc_score(const int32_t& i, const int32_t& j,
 
 bool classify_realigned_read(const std::string& seq,
 			     const std::string& motif,
+			     const int32_t& start_pos,
 			     const int32_t& nCopy,
 			     const int32_t& score,
-			     const int32_t& read_length,
+			     const int32_t& prefix_length,
 			     SingleReadType* single_read_class) {
-  return false; // TODO
+  int32_t end_pos = start_pos + (int32_t)seq.size() - 1;
+
+  // Get coords of the STR
+  int32_t start_str = prefix_length;
+  int32_t end_str = prefix_length + nCopy*(int32_t)motif.size();
+
+  // Check if read starts in the STR
+  bool start_in_str, end_in_str = false;
+  if ((start_pos >= start_str-MARGIN) && (start_pos <= end_str+MARGIN)) {
+    start_in_str = true;
+  }
+  if ((end_pos >= start_str-MARGIN) && (end_pos <= end_str+MARGIN)) {
+    end_in_str = true;
+  }
+
+  // Set threshold for match
+  int32_t score_threshold = (int32_t)(MATCH_PERC_THRESHOLD*seq.size()*MATCH_SCORE);
+  if (score < score_threshold || nCopy == 0) {
+    return SR_UNKNOWN;
+  } else if (start_in_str && end_in_str) {
+    return SR_IRR;
+  } else if (start_in_str && !end_in_str) {
+    return SR_POSTFLANK;
+  } else if (!start_in_str && end_in_str) {
+    return SR_PREFLANK;
+  } else if (start_pos < start_str && end_pos > end_str) {
+    return SR_ENCLOSING;
+  } else {
+    return false;
+  }
 }

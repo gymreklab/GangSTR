@@ -42,6 +42,9 @@ class Genotyper {
 
   void Debug(BamCramMultiReader* bamreader); // For testing member classes. can remove later
  private:
+  // Set locus flanking regions
+  bool SetFlanks(Locus* locus);
+
   RefGenome* refgenome;
   const Options* options;
   LikelihoodMaximizer likelihood_maximizer;

@@ -26,6 +26,16 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <stdint.h>
 
+// Set NW params
+const static int32_t MATCH_SCORE = 3;
+const static int32_t MISMATCH_SCORE = -1;
+const static int32_t GAP_SCORE = -3;
+
+// amount of slip we allow between alignment position and STR start and end
+const static int32_t MARGIN = 2;
+// Threshold to discard alignment as non-overlapping
+const static double MATCH_PERC_THRESHOLD = 0.9;
+
 enum SingleReadType {
   SR_PREFLANK = 0,
   SR_POSTFLANK = 1,
@@ -51,14 +61,15 @@ bool create_score_matrix(const int32_t& rows, const int32_t& cols,
 			 int32_t* start_pos, int32_t* current_score);
 
 bool calc_score(const int32_t& i, const int32_t& j,
-		  const std::string& seq1, const std::string& seq2,
-		  std::vector<std::vector<int32_t> >* score_matrix);
+		const std::string& seq1, const std::string& seq2,
+		std::vector<std::vector<int32_t> >* score_matrix);
 
 bool classify_realigned_read(const std::string& seq,
 			     const std::string& motif,
+			     const int32_t& start_pos,
 			     const int32_t& nCopy,
 			     const int32_t& score,
-			     const int32_t& read_length,
+			     const int32_t& prefix_length,
 			     SingleReadType* single_read_class);
 
 #endif  // SRC_REALIGNMENT_H__

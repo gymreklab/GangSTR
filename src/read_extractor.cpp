@@ -230,8 +230,8 @@ bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
     seq = seq_rev;
   }
   SingleReadType srt;
-  if (!classify_realigned_read(seq, locus.motif, nCopy, score,
-			       read_length, &srt)) {
+  if (!classify_realigned_read(seq, locus.motif, pos, nCopy, score,
+			       (int32_t)locus.pre_flank.size(), &srt)) {
     return false;
   }
   // Process according to guessed read type

@@ -31,16 +31,27 @@ Genotyper::Genotyper(RefGenome _refgenome,
   options = &_options;
 }
 
+bool Genotyper::SetFlanks(Locus* locus) {
+  if (!refgenome->GetSequence(locus->chrom,
+			      locus->start-FLANKLEN,
+			      locus->start,
+			      &locus->pre_flank)) {
+    return false;
+  }
+  if (!refgenome->GetSequence(locus->chrom,
+			      locus->end,
+			      locus->end+FLANKLEN,
+			      &locus->post_flank)) {
+    return false;
+  }
+  return true;
+}
+
 bool Genotyper::ProcessLocus(BamCramMultiReader* bamreader, Locus* locus) {
   // Load preflank and postflank to locus
-  refgenome->GetSequence(locus->chrom,
-			 locus->start-FLANKLEN,
-			 locus->start,
-			 &locus->pre_flank);
-  refgenome->GetSequence(locus->chrom,
-			 locus->end,
-			 locus->end+FLANKLEN,
-			 &locus->post_flank);
+  if (!SetFlanks(locus)) {
+    return false;
+  }
 
   // Load all read data
   likelihood_maximizer.Reset();

@@ -85,6 +85,8 @@ GangSTRTests_SOURCES = \
 	tests/ReadClass_test.h tests/ReadClass_test.cpp \
 	tests/LiketestslihoodMaximizer_test.h tests/LikelihoodMaximizer_test.cpp \
 	tests/ReadExtractor_test.h tests/ReadExtractor_test.cpp \
+	tests/Genotyper_test.h tests/Genotyper_test.cpp \
+	tests/Realignment_test.h tests/Realignment_test.cpp \
 	tests/main_test.cpp
 GangSTRTests_CXXFLAGS = $(CPPUNIT_CFLAGS) $(GSL_CFLAGS)
 GangSTRTests_LDFLAGS = $(CPPUNIT_LIBS) -ldl $(GSL_LIBS) $(HTS_LIBS)
