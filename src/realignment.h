@@ -22,15 +22,9 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 #define SRC_REALIGNMENT_H__
 
 #include <string>
+#include <vector>
 
 #include <stdint.h>
-
-bool expansion_aware_realign(const std::string& seq,
-			     const std::string& pre_flank,
-			     const std::string& post_flank,
-			     const std::string& motif,
-			     int32_t* nCopy, int32_t* pos, double* score);
-			     
 
 enum SingleReadType {
   SR_PREFLANK = 0,
@@ -40,11 +34,31 @@ enum SingleReadType {
   SR_UNKNOWN = 4
 };
 
+bool expansion_aware_realign(const std::string& seq,
+			     const std::string& pre_flank,
+			     const std::string& post_flank,
+			     const std::string& motif,
+			     int32_t* nCopy, int32_t* pos, int32_t* score);		      
+
+bool smith_waterman(const std::string& seq1,
+		    const std::string& seq2,
+		    int32_t* pos, int32_t* score);
+
+bool create_score_matrix(const int32_t& rows, const int32_t& cols,
+			 const std::string& seq1,
+			 const std::string& seq2,
+			 std::vector<std::vector<int32_t> >* score_matrix,
+			 int32_t* start_pos, int32_t* current_score);
+
+bool calc_score(const int32_t& i, const int32_t& j,
+		  const std::string& seq1, const std::string& seq2,
+		  std::vector<std::vector<int32_t> >* score_matrix);
+
 bool classify_realigned_read(const std::string& seq,
 			     const std::string& motif,
 			     const int32_t& nCopy,
-			     const double& score,
-			     const int32_t read_length,
+			     const int32_t& score,
+			     const int32_t& read_length,
 			     SingleReadType* single_read_class);
 
 #endif  // SRC_REALIGNMENT_H__

@@ -209,7 +209,7 @@ bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
     return true;
   }
   int32_t pos, pos_rev;
-  double score, score_rev;
+  int32_t score, score_rev;
   int32_t nCopy, nCopy_rev;
   std::string seq = alignment.QueryBases();
   std::string seq_rev = reverse_complement(seq);

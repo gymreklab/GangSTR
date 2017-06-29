@@ -32,6 +32,7 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 #include "src/ref_genome.h"
 
 class Genotyper {
+  const static int32_t FLANKLEN = 3000; // TODO set somewhere
  public:
   Genotyper(RefGenome _refgenome,
 	    const Options& _options);
