@@ -19,7 +19,7 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include "src/tests/ReadClass_test.h"
-
+#include <math.h>
 // Registers the fixture into the 'registry'
 CPPUNIT_TEST_SUITE_REGISTRATION(ReadClassTest);
 
@@ -63,45 +63,63 @@ void ReadClassTest::test_Reset() {
   CPPUNIT_ASSERT_EQUAL((int)span_class_.GetDataSize(), 0);
   CPPUNIT_ASSERT_EQUAL((int)frr_class_.GetDataSize(), 0);
 }
-
+// NOTE:
+// exp: ATXN7_18_class2_cov50_dist400
 void ReadClassTest::test_SpanClassProb() {
   // Example - TODO change
-  int32_t allele = 14;
+  int32_t allele = 25;
   double log_class_prob = 0.5;
   span_class_.GetLogClassProb(allele, &log_class_prob);
-  CPPUNIT_ASSERT_EQUAL(log_class_prob, 0.5);
-  CPPUNIT_FAIL("test_SpanClassProb not implemented");
+  CPPUNIT_ASSERT_EQUAL(roundf(log_class_prob*pow(10,13))/pow(10,13), roundf(log(0.0838726946383)*pow(10,13))/pow(10,13));
+  // CPPUNIT_FAIL("test_SpanClassProb not implemented");
 }
 
 void ReadClassTest::test_SpanReadProb() {
   // Example - TODO change
-  int32_t allele = 50;
+  int32_t allele = 25;
   double log_allele_prob = 0.5;
-  int32_t data = 380;
+  int32_t data = 450;
   span_class_.GetLogReadProb(allele, data, &log_allele_prob);
-  CPPUNIT_ASSERT_EQUAL(log_allele_prob, 0.5);
-  CPPUNIT_FAIL("test_SpanClassProb not implemented");
+  CPPUNIT_ASSERT_EQUAL(roundf(log_allele_prob*pow(10,13))/pow(10,13), roundf(log(0.00131231629549)*pow(10,13))/pow(10,13));
+  // CPPUNIT_FAIL("test_SpanClassProb not implemented");
 }
 
 void ReadClassTest::test_FRRClassProb() {
   // Example - TODO change
-  int32_t allele = 44;
+  int32_t allele = 45;
   double log_class_prob = 0.5;
   frr_class_.GetLogClassProb(allele, &log_class_prob);
-  CPPUNIT_ASSERT_EQUAL(log_class_prob, 0.5);
-  CPPUNIT_FAIL("test_FRRClassProb not implemented");
+  CPPUNIT_ASSERT_EQUAL(roundf(log_class_prob*pow(10,13))/pow(10,13), roundf(log(0.0177896348168)*pow(10,13))/pow(10,13));
+  // CPPUNIT_FAIL("test_FRRClassProb not implemented");
 }
 
 void ReadClassTest::test_FRRReadProb() {
-  CPPUNIT_FAIL("test_FRRClassProb not implemented");
+  // Example - TODO change
+  int32_t allele = 45;
+  double log_allele_prob = 0.5;
+  int32_t data = 80;
+  frr_class_.GetLogReadProb(allele, data, &log_allele_prob);
+  CPPUNIT_ASSERT_EQUAL(roundf(log_allele_prob*pow(10,13))/pow(10,13), roundf(log(0.0363690786878)*pow(10,13))/pow(10,13));
+  // CPPUNIT_FAIL("test_FRRClassProb not implemented");
 }
 
 void ReadClassTest::test_EnclosingClassProb() {
-  CPPUNIT_FAIL("test_EnclosingClassProb not implemented");
+  // Example - TODO change
+  int32_t allele = 25;
+  double log_class_prob = 0.5;
+  encl_class_.GetLogClassProb(allele, &log_class_prob);
+  CPPUNIT_ASSERT_EQUAL(roundf(log_class_prob*pow(10,13))/pow(10,13), roundf(log(0.0129032258065)*pow(10,13))/pow(10,13));
+  // CPPUNIT_FAIL("test_EnclosingClassProb not implemented");
 }
 
 void ReadClassTest::test_EnclosingReadProb() {
-  CPPUNIT_FAIL("test_EnclosingClassProb not implemented");
+  // Example - TODO change
+  int32_t allele = 25;
+  double log_allele_prob = 0.5;
+  int32_t data = 25;
+  encl_class_.GetLogReadProb(allele, data, &log_allele_prob);
+  CPPUNIT_ASSERT_EQUAL(roundf(log_allele_prob*pow(10,13))/pow(10,13), roundf(log(0.97)*pow(10,13))/pow(10,13));
+  // CPPUNIT_FAIL("test_EnclosingClassProb not implemented");
 }
 
 void ReadClassTest::test_GetClassLogLikelihood() {
