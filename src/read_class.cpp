@@ -22,6 +22,8 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 #include "src/read_class.h"
 
 #include <math.h>
+#include <iostream>
+#include <iomanip>
 
 using namespace std;
 

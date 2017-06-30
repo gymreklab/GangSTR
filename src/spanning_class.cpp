@@ -20,7 +20,8 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "src/mathops.h"
 #include "src/spanning_class.h"
-
+#include <iostream>
+#include <iomanip>
 #include <math.h>
 #include <gsl/gsl_math.h>
 #include <gsl/gsl_rng.h>
@@ -37,7 +38,6 @@ bool SpanningClass::GetLogClassProb(const int32_t& allele,
 	int read_len =  100;		// arg_dict['read_len']				// (r)
 	int motif_len = 3;		// arg_dict['motif']
 	int str_len = allele * motif_len;					// (L)
-	
 	double norm_const = gsl_cdf_gaussian_P(2 * flank_len + str_len - dist_mean, dist_sdev) -
 						gsl_cdf_gaussian_P(2 * read_len - dist_mean, dist_sdev);  
 	//gsl_ran_gaussian_pdf
@@ -63,8 +63,11 @@ bool SpanningClass::GetLogClassProb(const int32_t& allele,
 					gsl_ran_gaussian_pdf(str_len - dist_mean, dist_sdev);
 	}
 
-	
 	double class_prob = coef0 * (coef1 * term1 + coef2 * term2);
+
+	// cout<<endl<<class_prob<<" "<<coef0<<" "<<coef1<<" "<<coef2;
+	// cout<<endl<<class_prob<<" "<<term1<<" "<<term2<<endl;
+
 	if (class_prob > 0){
 		*log_class_prob = log(class_prob);
 		return true;
@@ -73,8 +76,9 @@ bool SpanningClass::GetLogClassProb(const int32_t& allele,
 		*log_class_prob = neg_inf;
 		return true;
 	}
-	else
+	else{
 		return false;
+	}
 }
 
 bool SpanningClass::GetLogReadProb(const int32_t& allele,

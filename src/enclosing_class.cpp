@@ -22,7 +22,7 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 #include "src/enclosing_class.h"
 
 #include <math.h>
-
+#include <iostream>
 using namespace std;
 
 bool EnclosingClass::GetLogClassProb(const int32_t& allele,
@@ -63,10 +63,9 @@ bool EnclosingClass::GetLogReadProb(const int32_t& allele,
 	if (delta == 0)
 		allele_prob = 1 - u - d;
 	else if (delta > 0)
-		allele_prob = pow(u * p * (1.0 - p), (delta - 1.0));
+		allele_prob = u * p * pow(1.0 - p, delta - 1.0);
 	else
-		allele_prob = pow(d * p * (1.0 - p), (-delta - 1.0));
-
+		allele_prob = d * p * pow(1.0 - p, -delta - 1.0);
 	if (allele_prob > 0){
 		*log_allele_prob = log(allele_prob);
 		return true;
