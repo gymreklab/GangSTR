@@ -52,7 +52,7 @@ bool ReadExtractor::ExtractReads(BamCramMultiReader* bamreader,
       continue;
     }
   }
-  return false;
+  return true;
 }
 
 /*
@@ -79,6 +79,11 @@ bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
     if (debug) {
       std::cerr << "Processing " << alignment.Name() << std::endl;
     }
+    // Check if we should skip this read
+    if (alignment.IsSupplementary()) {
+      continue;
+    }
+    
     // Check if we've moved to a different file
     if (prev_file.compare(alignment.Filename()) != 0) {
       prev_file = alignment.Filename();
@@ -297,7 +302,7 @@ bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
   if (srt == SR_IRR) {
     *read_type = RC_FRR;
     if (alignment.MatePosition() < locus.start) {
-      *data_value = locus.start - alignment.MatePosition();
+      *data_value = locus.start - (alignment.MatePosition()+read_length);
     } else {
       *data_value = alignment.MatePosition() - locus.end;
     }
