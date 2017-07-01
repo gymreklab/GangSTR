@@ -32,7 +32,7 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 #include "src/ref_genome.h"
 
 class Genotyper {
-  const static int32_t FLANKLEN = 3000; // TODO set somewhere
+  friend class GenotyperTest;
  public:
   Genotyper(RefGenome _refgenome,
 	    const Options& _options);
@@ -41,7 +41,7 @@ class Genotyper {
   bool ProcessLocus(BamCramMultiReader* bamreader, Locus* locus);
 
   void Debug(BamCramMultiReader* bamreader); // For testing member classes. can remove later
- private:
+ protected:
   // Set locus flanking regions
   bool SetFlanks(Locus* locus);
 

@@ -33,14 +33,14 @@ Genotyper::Genotyper(RefGenome _refgenome,
 
 bool Genotyper::SetFlanks(Locus* locus) {
   if (!refgenome->GetSequence(locus->chrom,
-			      locus->start-FLANKLEN,
-			      locus->start,
+			      locus->start-options->flanklen-1,
+			      locus->start-2,
 			      &locus->pre_flank)) {
     return false;
   }
   if (!refgenome->GetSequence(locus->chrom,
 			      locus->end,
-			      locus->end+FLANKLEN,
+			      locus->end+options->flanklen-1,
 			      &locus->post_flank)) {
     return false;
   }

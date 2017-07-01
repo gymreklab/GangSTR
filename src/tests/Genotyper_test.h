@@ -39,6 +39,8 @@ class GenotyperTest: public CppUnit::TestFixture {
  private:
   void test_SetFlanks();
   void test_ProcessLocus();
+  Locus locus;
+  std::string test_dir;
 };
 
 #endif //  SRC_TESTS_GENOTYPER_H_

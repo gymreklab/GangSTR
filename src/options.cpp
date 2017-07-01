@@ -27,6 +27,7 @@ Options::Options() {
   reffa = "";
   regionsfile = "";
   outprefix = "";
+  flanklen = 100;
   verbose = false;
 }
 

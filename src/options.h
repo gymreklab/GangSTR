@@ -24,6 +24,8 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 #include <vector>
 #include <string>
 
+#include <stdint.h>
+
 class Options {
  public:
   Options();
@@ -34,6 +36,7 @@ class Options {
   std::string reffa;
   std::string regionsfile;
   std::string outprefix;
+  int32_t flanklen;
   bool verbose;
 };
 
