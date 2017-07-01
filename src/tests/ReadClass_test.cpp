@@ -20,6 +20,8 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "src/tests/ReadClass_test.h"
 #include <math.h>
+#include <iostream>
+using namespace std;
 // Registers the fixture into the 'registry'
 CPPUNIT_TEST_SUITE_REGISTRATION(ReadClassTest);
 
@@ -123,10 +125,59 @@ void ReadClassTest::test_EnclosingReadProb() {
 }
 
 void ReadClassTest::test_GetClassLogLikelihood() {
-  CPPUNIT_FAIL("test_GetClassLogLikelihood not implemented");
+  int32_t test_data1 = 10;
+  int32_t test_data2 = 20;
+  int32_t test_data3 = 30;
+  int32_t test_data4 = 40;
+  int32_t allele1 = 20;
+  int32_t allele2 = 50;
+  double class_ll;
+  encl_class_.Reset();
+  encl_class_.AddData(test_data1);
+  encl_class_.AddData(test_data2);
+  encl_class_.AddData(test_data3);
+  encl_class_.AddData(test_data4);
+  encl_class_.GetClassLogLikelihood(allele1, allele2, &class_ll);
+  CPPUNIT_ASSERT_EQUAL(roundf(class_ll*pow(10,11))/pow(10,11), roundf(-142.426968623*pow(10,11))/pow(10,11));
+
+  span_class_.Reset();
+  span_class_.AddData(test_data2);
+  span_class_.AddData(test_data3);
+  span_class_.AddData(test_data4);
+  // double allele_ll;
+  // cout<<frr_class_.GetLogReadProb(allele1, test_data1, &allele_ll);
+  // cout<<endl<<allele_ll<<endl;
+
+  span_class_.GetClassLogLikelihood(allele1, allele2, &class_ll);
+  CPPUNIT_ASSERT_EQUAL(roundf(class_ll*pow(10,4))/pow(10,4), roundf(-62.3921692604*pow(10,4))/pow(10,4));
+
+  frr_class_.Reset();
+  frr_class_.AddData(test_data1);
+  frr_class_.AddData(test_data2);
+  frr_class_.AddData(test_data3);
+  frr_class_.AddData(test_data4);
+  frr_class_.GetClassLogLikelihood(allele1, allele2, &class_ll);
+  CPPUNIT_ASSERT_EQUAL(roundf(class_ll*pow(10,11))/pow(10,11), roundf(-38.0513256637*pow(10,11))/pow(10,11));
+
+  // std::cout<<std::endl<<class_ll<<std::endl;
+  // CPPUNIT_FAIL("test_GetClassLogLikelihood not implemented");
 }
 
 void ReadClassTest::test_GetAlleleLogLikelihood() {
-  CPPUNIT_FAIL("test_GetAlleleLogLikelihood not implemented");
+  // Example - TODO change
+  int32_t allele = 25;
+  double allele_ll = 0.5;
+  int32_t data = 24;
+  encl_class_.GetAlleleLogLikelihood(allele, data, &allele_ll);
+  CPPUNIT_ASSERT_EQUAL(roundf(allele_ll*pow(10,11))/pow(10,11), roundf(-8.31359423617*pow(10,11))/pow(10,11));
+  allele = 55;
+  data = 430;
+  span_class_.GetAlleleLogLikelihood(allele, data, &allele_ll);
+  CPPUNIT_ASSERT_EQUAL(roundf(allele_ll*pow(10,11))/pow(10,11), roundf(-13.1016086835*pow(10,11))/pow(10,11));
+  allele = 55;
+  data = 80;
+  frr_class_.GetAlleleLogLikelihood(allele, data, &allele_ll);
+  CPPUNIT_ASSERT_EQUAL(roundf(allele_ll*pow(10,11))/pow(10,11), roundf(-5.47755044837*pow(10,11))/pow(10,11));
+  // CPPUNIT_FAIL("test_GetAlleleLogLikelihood not implemented");
 }
 

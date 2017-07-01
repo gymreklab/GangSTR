@@ -36,6 +36,7 @@ A read class consists of:
 - a method to calculate the class log likelihood for a diploid genotype
  */
 class ReadClass {
+  friend class ReadClassTest;
  public:
   ReadClass();
   virtual ~ReadClass();
@@ -49,13 +50,15 @@ class ReadClass {
   // Check how many data points
   std::size_t GetDataSize();
 
- private:
+ protected:
   // Calculate log probability P(datapoint | allele)
   bool GetAlleleLogLikelihood(const int32_t& allele, const int32_t& data, double* allele_ll);
+
+ private:
   // Calculate class probability for an allele - implemented in children classes
-  bool GetLogClassProb(const int32_t& allele, double* log_class_prob);
+  virtual bool GetLogClassProb(const int32_t& allele, double* log_class_prob);
   // Calculate read probability - implemented in children classes
-  bool GetLogReadProb(const int32_t& allele, const int32_t& data, double* log_allele_prob);
+  virtual bool GetLogReadProb(const int32_t& allele, const int32_t& data, double* log_allele_prob);
 
   // Store vector of data for this class
   std::vector<int32_t> read_class_data_;

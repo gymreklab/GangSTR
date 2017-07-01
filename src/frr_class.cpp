@@ -41,7 +41,7 @@ bool FRRClass::GetLogClassProb(const int32_t& allele,
 
 	if (str_len < read_len){		// condition: L > r for this read to be possible
 		*log_class_prob = neg_inf;
-		return false;
+		return true;
 	}
 	// Compute normalization constant norm_const
 	double norm_const = gsl_cdf_gaussian_P(2 * flank_len + str_len - dist_mean, dist_sdev) -
@@ -85,10 +85,10 @@ bool FRRClass::GetLogReadProb(const int32_t& allele,
 	int motif_len = 3;
 	int str_len = allele * motif_len;
 
-	// if (str_len < read_len){		// redundant -> remove
-	// 	*log_class_prob = 0;
-	// 	return false;
-	// }
+	if (str_len < read_len){		// redundant -> remove --> not really, because when class_prob=neg_inf this may lead to read_prob->false
+		*log_allele_prob = neg_inf;
+		return true;
+	}
 
 	// Compute normalization constant norm_const
 	double norm_const = gsl_cdf_gaussian_P(2 * flank_len + str_len - dist_mean, dist_sdev) -
