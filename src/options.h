@@ -36,7 +36,8 @@ class Options {
   std::string reffa;
   std::string regionsfile;
   std::string outprefix;
-  int32_t flanklen;
+  int32_t flanklen; // flank length to use for local realignment
+  int32_t regionsize; // region in bam file to search for reads around the STR
   bool verbose;
 };
 

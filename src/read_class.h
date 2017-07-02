@@ -38,6 +38,7 @@ A read class consists of:
 class ReadClass {
   friend class ReadClassTest;
  public:
+  const static double NEG_INF = -100; // TODO make smaller?
   ReadClass();
   virtual ~ReadClass();
 

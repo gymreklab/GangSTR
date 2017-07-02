@@ -55,7 +55,8 @@ bool Genotyper::ProcessLocus(BamCramMultiReader* bamreader, Locus* locus) {
   }
   // Load all read data
   likelihood_maximizer.Reset();
-  if (!read_extractor->ExtractReads(bamreader, *locus, &likelihood_maximizer)) {
+  if (!read_extractor->ExtractReads(bamreader, *locus, options->regionsize,
+				    &likelihood_maximizer)) {
     return false;
   }
   // Maximize the likelihood

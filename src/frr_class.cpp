@@ -31,7 +31,6 @@ using namespace std;
 
 bool FRRClass::GetLogClassProb(const int32_t& allele,
 			       double* log_class_prob) {
-	double neg_inf = -100; //TODO
 	int dist_mean = 400;
 	int dist_sdev = 50;
 	int flank_len = 2000;
@@ -40,7 +39,7 @@ bool FRRClass::GetLogClassProb(const int32_t& allele,
 	int str_len = allele * motif_len;
 
 	if (str_len < read_len){		// condition: L > r for this read to be possible
-		*log_class_prob = neg_inf;
+		*log_class_prob = NEG_INF;
 		return true;
 	}
 	// Compute normalization constant norm_const
@@ -67,7 +66,7 @@ bool FRRClass::GetLogClassProb(const int32_t& allele,
 		return true;
 	}
 	else if (class_prob == 0){
-		*log_class_prob = neg_inf;
+		*log_class_prob = NEG_INF;
 		return true;
 	}
 	else
@@ -77,7 +76,6 @@ bool FRRClass::GetLogClassProb(const int32_t& allele,
 bool FRRClass::GetLogReadProb(const int32_t& allele,
 			      const int32_t& data,
 			      double* log_allele_prob) {
-	double neg_inf = -100; //TODO
 	int dist_mean = 400;
 	int dist_sdev = 50;
 	int flank_len = 2000;
@@ -86,7 +84,7 @@ bool FRRClass::GetLogReadProb(const int32_t& allele,
 	int str_len = allele * motif_len;
 
 	if (str_len < read_len){		// redundant -> remove --> not really, because when class_prob=neg_inf this may lead to read_prob->false
-		*log_allele_prob = neg_inf;
+		*log_allele_prob = NEG_INF;
 		return true;
 	}
 
@@ -103,7 +101,7 @@ bool FRRClass::GetLogReadProb(const int32_t& allele,
 		return true;
 	}
 	else if (allele_prob == 0){
-		*log_allele_prob = neg_inf;
+		*log_allele_prob = NEG_INF;
 		return true;
 	}
 	else

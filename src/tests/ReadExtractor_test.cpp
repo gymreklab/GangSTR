@@ -42,6 +42,7 @@ void ReadExtractorTest::setUp() {
   locus.motif = "CAG";
   std::string answers_file = test_dir + "/test_pair_answers.tab";
   LoadAnswers(answers_file, &read_type_answers, &data_answers);
+  regionsize = 5000;
 }
 
 void ReadExtractorTest::tearDown() {}
@@ -52,7 +53,7 @@ void ReadExtractorTest::test_ExtractReads() {
   files.push_back(bam_file);
   BamCramMultiReader bamreader(files);
   LikelihoodMaximizer likmax;
-  if (!read_extractor.ExtractReads(&bamreader, locus, &likmax)) {
+  if (!read_extractor.ExtractReads(&bamreader, locus, regionsize, &likmax)) {
     CPPUNIT_FAIL("ExtractReads unexpectedly returned false");
   }
   // Check each class has at least as many as the python code found
@@ -88,7 +89,7 @@ void ReadExtractorTest::test_ProcessReadPairs() {
   BamCramMultiReader bamreader(files);
   std::map<std::string, ReadPair> read_pairs;
   // Test each pair
-  if (!read_extractor.ProcessReadPairs(&bamreader, locus, &read_pairs)) {
+  if (!read_extractor.ProcessReadPairs(&bamreader, locus, regionsize, &read_pairs)) {
     CPPUNIT_FAIL("ProcessReadPairs returned false unexpectedly.");
   }
   for (std::map<std::string, ReadPair>::const_iterator iter = read_pairs.begin();

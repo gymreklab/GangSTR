@@ -28,6 +28,7 @@ Options::Options() {
   regionsfile = "";
   outprefix = "";
   flanklen = 100;
+  regionsize = 5000;
   verbose = false;
 }
 

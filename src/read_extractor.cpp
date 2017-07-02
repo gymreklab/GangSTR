@@ -32,10 +32,11 @@ ReadExtractor::ReadExtractor() {}
  */
 bool ReadExtractor::ExtractReads(BamCramMultiReader* bamreader,
 				 const Locus& locus,
+				 const int32_t& regionsize,
 				 LikelihoodMaximizer* likelihood_maximizer) {
   // This will keep track of information for each read pair
   std::map<std::string, ReadPair> read_pairs;
-  if (!ProcessReadPairs(bamreader, locus, &read_pairs)) {
+  if (!ProcessReadPairs(bamreader, locus, regionsize, &read_pairs)) {
     return false;
   }
 
@@ -59,10 +60,10 @@ bool ReadExtractor::ExtractReads(BamCramMultiReader* bamreader,
   Main function to decide what to do with each read pair
  */
 bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
-				     const Locus& locus, 
+				     const Locus& locus, const int32_t& regionsize,
 				     std::map<std::string, ReadPair>* read_pairs) {
   // Get bam alignments from the relevant region
-  bamreader->SetRegion(locus.chrom, locus.start-REGIONSIZE, locus.end+REGIONSIZE);
+  bamreader->SetRegion(locus.chrom, locus.start-regionsize, locus.end+regionsize);
 
   // Keep track of which file we're processing
   int32_t file_index = 0;

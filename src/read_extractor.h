@@ -28,7 +28,6 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 
 class ReadExtractor {
   friend class ReadExtractorTest;
-  const static int32_t REGIONSIZE = 5000; // TODO what should this be
  public:
   ReadExtractor();
   virtual ~ReadExtractor();
@@ -38,6 +37,7 @@ class ReadExtractor {
   // Main function to extract reads of each class
   bool ExtractReads(BamCramMultiReader* bamreader,
 		    const Locus& locus,
+		    const int32_t& regionsize,
 		    LikelihoodMaximizer* likelihood_maximizer);
  protected:
   // Trim alignment read names
@@ -45,7 +45,8 @@ class ReadExtractor {
   
   // Process all read pairs
   bool ProcessReadPairs(BamCramMultiReader* bamreader,
-			const Locus& locus, std::map<std::string, ReadPair>* read_pairs);
+			const Locus& locus, const int32_t& regionsize,
+			std::map<std::string, ReadPair>* read_pairs);
 
   // Check if read should be discarded
   bool FindDiscardedRead(BamAlignment alignment,

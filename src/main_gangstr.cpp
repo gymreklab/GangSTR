@@ -140,7 +140,6 @@ int main(int argc, char* argv[]) {
   BamCramMultiReader bamreader(options.bamfiles, options.reffa, merge_type);
   RefGenome refgenome(options.reffa);
   Genotyper genotyper(refgenome, options);
-  //  genotyper.Debug(&bamreader); // TODO remove
   stringstream ss;
   while (region_reader.GetNextRegion(&locus)) {
     ss.clear();
