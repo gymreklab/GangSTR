@@ -30,7 +30,6 @@ Genotyper::Genotyper(RefGenome _refgenome,
   refgenome = &_refgenome;
   options = &_options;
   read_extractor = new ReadExtractor();
-  //  read_extractor->debug = true; // TODO remove
 }
 
 bool Genotyper::SetFlanks(Locus* locus) {
@@ -46,7 +45,6 @@ bool Genotyper::SetFlanks(Locus* locus) {
 			      &locus->post_flank)) {
     return false;
   }
-  std::cerr << locus->pre_flank << " " << locus->post_flank << std::endl;
   return true;
 }
 

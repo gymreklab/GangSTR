@@ -108,10 +108,18 @@ bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
       rp_iter->second.read2 = alignment;
       // Only need to do something if class is still unknown
       if (rp_iter->second.read_type == RC_UNKNOWN) {
+	if (debug) {
+	  std::cerr << "Checking mate " << alignment.Name() << " " << alignment.QueryBases() << std:: endl;
+	}
+
 	int32_t data_value;
 	ReadType read_type;
 	ProcessSingleRead(alignment, chrom_ref_id, locus,
 			  &data_value, &read_type);
+
+	if (debug) {
+	  std::cerr << "Mate found to be   " << read_type << std:: endl;
+	}
 	rp_iter->second.read_type = read_type;
 	rp_iter->second.data_value = data_value;
       }
@@ -277,6 +285,9 @@ bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
 			       (int32_t)locus.pre_flank.size(), &srt)) {
     return false;
   }
+  if (debug) {
+    std::cerr << "Processing single read found " << score << " " << pos << " " << srt << std::endl;
+  }
   // Process according to guessed read type
   /* Spanning cases */
   // 5.2_filter_spanning_only_core.py#L86 - preflank case
@@ -311,6 +322,12 @@ bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
   /* Enclosing cases */
   if (srt == SR_ENCLOSING) {
     *read_type = RC_ENCL;
+    *data_value = nCopy;
+    return true;
+  }
+  /* Partially spanning cases - get bound */
+  if (srt == SR_PREFLANK || srt == SR_POSTFLANK) {
+    *read_type = RC_BOUND;
     *data_value = nCopy;
     return true;
   }

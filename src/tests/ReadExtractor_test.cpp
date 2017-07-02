@@ -40,7 +40,6 @@ void ReadExtractorTest::setUp() {
   locus.pre_flank = "TAGGAGCGGAAAGAATGTCGGAGCGGGCCGCGGATGACGTCAGGGGGGAGCCGCGCCGCGCGGCGGCGGCGGCGGGCGGAGCAGCGGCCGCGGCCGCCCGG";
   locus.post_flank = "CCGCCGCCTCCGCAGCCCCAGCGGCAGCAGCACCCGCCACCGCCGCCACGGCGCACACGGCCGGAGGACGGCGGGCCCGGCGCCGCCTCCACCTCGGCCGC";
   locus.motif = "CAG";
-  //  read_extractor.debug = true;
   std::string answers_file = test_dir + "/test_pair_answers.tab";
   LoadAnswers(answers_file, &read_type_answers, &data_answers);
 }
@@ -112,11 +111,6 @@ void ReadExtractorTest::test_ProcessReadPairs() {
       } else {
 	CPPUNIT_FAIL("Shouldn't get here");
       }
-    } else {
-      bool discard = (iter->second.read_type == RC_DISCARD ||
-		      iter->second.read_type == RC_UNKNOWN);
-      //CPPUNIT_ASSERT_EQUAL_MESSAGE(msg.str(), true, discard); // TODO put back test
-      // TODO look at unknown vs. discard
     }
   }
 }

@@ -23,13 +23,13 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "src/bam_io.h"
 
-// TODO add partially spanning reads that give bounds
 enum ReadType {
   RC_SPAN = 0,
   RC_ENCL = 1,
   RC_FRR = 2,
   RC_UNKNOWN = 3,
   RC_DISCARD = 4,
+  RC_BOUND = 5
 };
 
 class ReadPair {
