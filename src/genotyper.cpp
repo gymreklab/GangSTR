@@ -29,6 +29,8 @@ Genotyper::Genotyper(RefGenome _refgenome,
 		     const Options& _options) {
   refgenome = &_refgenome;
   options = &_options;
+  read_extractor = new ReadExtractor();
+  //  read_extractor->debug = true; // TODO remove
 }
 
 bool Genotyper::SetFlanks(Locus* locus) {
@@ -44,6 +46,7 @@ bool Genotyper::SetFlanks(Locus* locus) {
 			      &locus->post_flank)) {
     return false;
   }
+  std::cerr << locus->pre_flank << " " << locus->post_flank << std::endl;
   return true;
 }
 
@@ -52,10 +55,9 @@ bool Genotyper::ProcessLocus(BamCramMultiReader* bamreader, Locus* locus) {
   if (!SetFlanks(locus)) {
     return false;
   }
-
   // Load all read data
   likelihood_maximizer.Reset();
-  if (!read_extractor.ExtractReads(bamreader, *locus, &likelihood_maximizer)) {
+  if (!read_extractor->ExtractReads(bamreader, *locus, &likelihood_maximizer)) {
     return false;
   }
   // Maximize the likelihood
@@ -70,7 +72,7 @@ bool Genotyper::ProcessLocus(BamCramMultiReader* bamreader, Locus* locus) {
 void Genotyper::Debug(BamCramMultiReader* bamreader) {
   cerr << "testing refgenome" << endl;
   std::string seq;
-  refgenome->GetSequence("3", 63898361, 63898392, &seq);
+  refgenome->GetSequence("3", 63898261, 63898360, &seq);
   cerr << seq << endl;
   cerr << "testing bam" << endl;
   bamreader->SetRegion("1", 0, 10000);

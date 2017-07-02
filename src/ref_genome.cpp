@@ -20,6 +20,7 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <stdlib.h>
 
+#include <iostream>
 #include <sstream>
 
 #include "src/common.h"

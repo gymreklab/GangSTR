@@ -140,9 +140,10 @@ int main(int argc, char* argv[]) {
   BamCramMultiReader bamreader(options.bamfiles, options.reffa, merge_type);
   RefGenome refgenome(options.reffa);
   Genotyper genotyper(refgenome, options);
-  genotyper.Debug(&bamreader); // TODO remove
+  //  genotyper.Debug(&bamreader); // TODO remove
+  stringstream ss;
   while (region_reader.GetNextRegion(&locus)) {
-    stringstream ss;
+    ss.clear();
     ss << "Processing " << locus.chrom << ":" << locus.start;
     PrintMessageDieOnError(ss.str(), M_PROGRESS);
     genotyper.ProcessLocus(&bamreader, &locus);

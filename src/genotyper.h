@@ -48,7 +48,7 @@ class Genotyper {
   RefGenome* refgenome;
   const Options* options;
   LikelihoodMaximizer likelihood_maximizer;
-  ReadExtractor read_extractor;
+  ReadExtractor* read_extractor;
 };
 
 #endif  // SRC_GENOTYPER_H__

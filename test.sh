@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ./src/GangSTR \
-    --bam test.bam \
-    --ref /storage/resources/dbase/human/hs37d5/hs37d5.fa \
+    --bam tests/test.sorted.bam \
+    --ref /storage/resources/dbase/human/hg19/Homo_sapiens_assembly19.fasta \
     --regions test.bed \
     --out test
