@@ -21,6 +21,8 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef SRC_READ_CLASS_H__
 #define SRC_READ_CLASS_H__
 
+#include "src/options.h"
+
 #include <stdint.h>
 
 #include <vector>
@@ -44,8 +46,13 @@ class ReadClass {
 
   // Add a data point to the class data vector
   void AddData(const int32_t& data);
+  // Set options (e.g. insert sizes, stutter params)
+  void SetOptions(const Options& options);
   // Calculate class log likelihood for diploid genotype P(data|<A,B>)
-  bool GetClassLogLikelihood(const int32_t& allele1, const int32_t& allele2, double* class_ll);
+  bool GetClassLogLikelihood(const int32_t& allele1, const int32_t& allele2,
+			     const int32_t& read_len, const int32_t& motif_len,
+			     const int32_t& ref_count,
+			     double* class_ll);
   // Clear all data from the class
   void Reset();
   // Check how many data points
@@ -53,13 +60,29 @@ class ReadClass {
 
  protected:
   // Calculate log probability P(datapoint | allele)
-  bool GetAlleleLogLikelihood(const int32_t& allele, const int32_t& data, double* allele_ll);
+  bool GetAlleleLogLikelihood(const int32_t& allele, const int32_t& data,
+			      const int32_t& read_len, const int32_t& motif_len,
+			      const int32_t& ref_count,
+			      double* allele_ll);
+
+  // Constants related to models
+  int32_t dist_mean;
+  int32_t dist_sdev;
+  int32_t flank_len;
+  double stutter_up;
+  double stutter_down;
+  double stutter_p;
 
  private:
   // Calculate class probability for an allele - implemented in children classes
-  virtual bool GetLogClassProb(const int32_t& allele, double* log_class_prob);
+  virtual bool GetLogClassProb(const int32_t& allele,
+			       const int32_t& read_len, const int32_t& motif_len,
+			       double* log_class_prob);
   // Calculate read probability - implemented in children classes
-  virtual bool GetLogReadProb(const int32_t& allele, const int32_t& data, double* log_allele_prob);
+  virtual bool GetLogReadProb(const int32_t& allele, const int32_t& data,
+			      const int32_t& read_len, const int32_t& motif_len,
+			      const int32_t& ref_count,
+			      double* log_allele_prob);
 
   // Store vector of data for this class
   std::vector<int32_t> read_class_data_;

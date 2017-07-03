@@ -52,14 +52,15 @@ void ReadExtractorTest::test_ExtractReads() {
   std::vector<std::string> files(0);
   files.push_back(bam_file);
   BamCramMultiReader bamreader(files);
-  LikelihoodMaximizer likmax;
-  if (!read_extractor.ExtractReads(&bamreader, locus, regionsize, &likmax)) {
+  Options options;
+  LikelihoodMaximizer* likmax = new LikelihoodMaximizer(options);
+  if (!read_extractor.ExtractReads(&bamreader, locus, regionsize, likmax)) {
     CPPUNIT_FAIL("ExtractReads unexpectedly returned false");
   }
   // Check each class has at least as many as the python code found
-  CPPUNIT_ASSERT(likmax.GetEnclosingDataSize()>=10);
-  CPPUNIT_ASSERT(likmax.GetSpanningDataSize()>=9);
-  CPPUNIT_ASSERT(likmax.GetFRRDataSize()>=10);
+  CPPUNIT_ASSERT(likmax->GetEnclosingDataSize()>=10);
+  CPPUNIT_ASSERT(likmax->GetSpanningDataSize()>=9);
+  CPPUNIT_ASSERT(likmax->GetFRRDataSize()>=10);
 }
 
 void ReadExtractorTest::LoadAnswers(const std::string& answers_file,

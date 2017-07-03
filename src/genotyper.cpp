@@ -30,18 +30,19 @@ Genotyper::Genotyper(RefGenome _refgenome,
   refgenome = &_refgenome;
   options = &_options;
   read_extractor = new ReadExtractor();
+  likelihood_maximizer = new LikelihoodMaximizer(_options);
 }
 
 bool Genotyper::SetFlanks(Locus* locus) {
   if (!refgenome->GetSequence(locus->chrom,
-			      locus->start-options->flanklen-1,
+			      locus->start-options->realignment_flanklen-1,
 			      locus->start-2,
 			      &locus->pre_flank)) {
     return false;
   }
   if (!refgenome->GetSequence(locus->chrom,
 			      locus->end,
-			      locus->end+options->flanklen-1,
+			      locus->end+options->realignment_flanklen-1,
 			      &locus->post_flank)) {
     return false;
   }
@@ -54,14 +55,14 @@ bool Genotyper::ProcessLocus(BamCramMultiReader* bamreader, Locus* locus) {
     return false;
   }
   // Load all read data
-  likelihood_maximizer.Reset();
+  likelihood_maximizer->Reset();
   if (!read_extractor->ExtractReads(bamreader, *locus, options->regionsize,
-				    &likelihood_maximizer)) {
+				    likelihood_maximizer)) {
     return false;
   }
   // Maximize the likelihood
   int32_t allele1, allele2;
-  if (!likelihood_maximizer.OptimizeLikelihood(&allele1, &allele2)) {
+  if (!likelihood_maximizer->OptimizeLikelihood(&allele1, &allele2)) {
     return false;
   }
   // Fill in locus with relevant information

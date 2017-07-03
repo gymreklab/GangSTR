@@ -58,6 +58,9 @@ class ReadClassTest: public CppUnit::TestFixture {
   EnclosingClass encl_class_;
   SpanningClass span_class_;
   FRRClass frr_class_;
+  int32_t read_len;
+  int32_t motif_len;
+  int32_t ref_count;
 };
 
 #endif //  SRC_TESTS_READCLASS_H_

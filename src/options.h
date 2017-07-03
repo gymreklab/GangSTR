@@ -31,12 +31,21 @@ class Options {
   Options();
   virtual ~Options();
 
-  // User defined options
+  // Input/output paths
   std::vector<std::string> bamfiles;
   std::string reffa;
   std::string regionsfile;
   std::string outprefix;
-  int32_t flanklen; // flank length to use for local realignment
+  // Insert sizes
+  int32_t dist_mean;
+  int32_t dist_sdev;
+  // Stutter model - TODO later make per locus model
+  double stutter_up;
+  double stutter_down;
+  double stutter_p;
+  // Additional constants
+  int32_t realignment_flanklen; // flank length to use for local realignment
+  int32_t flanklen; // used in models
   int32_t regionsize; // region in bam file to search for reads around the STR
   bool verbose;
 };

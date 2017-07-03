@@ -35,7 +35,7 @@ void GenotyperTest::tearDown() {}
 
 void GenotyperTest::test_SetFlanks() {
   Options options;
-  options.flanklen = 99;
+  options.realignment_flanklen = 99;
   std::string fastafile = test_dir + "/test.fa";
   RefGenome refgenome(fastafile);
   Genotyper genotyper(refgenome, options);

@@ -47,7 +47,7 @@ class Genotyper {
 
   RefGenome* refgenome;
   const Options* options;
-  LikelihoodMaximizer likelihood_maximizer;
+  LikelihoodMaximizer* likelihood_maximizer;
   ReadExtractor* read_extractor;
 };
 

@@ -26,10 +26,9 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 using namespace std;
 
 bool EnclosingClass::GetLogClassProb(const int32_t& allele,
+				     const int32_t& read_len, const int32_t& motif_len,
 				     double* log_class_prob) {
-	int flank_len = 2000;	// arg_dict['flank_len']			// (F)
-	int read_len =  100;		// arg_dict['read_len']				// (r)
-	int motif_len = 3;		// arg_dict['motif']
+  // TODO these shouldn't be set here
 	int str_len = allele * motif_len;					// (L)
 	double class_prob;
 	if (read_len <= str_len)
@@ -51,19 +50,18 @@ bool EnclosingClass::GetLogClassProb(const int32_t& allele,
 
 bool EnclosingClass::GetLogReadProb(const int32_t& allele,
 				    const int32_t& data,
+				    const int32_t& read_len,
+				    const int32_t& motif_len,
+				    const int32_t& ref_count,
 				    double* log_allele_prob) {
-	// FILLLLLL INNNNN Stutter model
-	double u = 0.01;
-	double d = 0.02;
-	double p = 0.95;
 	double delta = data - allele;
 	double allele_prob;
 	if (delta == 0)
-		allele_prob = 1 - u - d;
+		allele_prob = 1 - stutter_up - stutter_down;
 	else if (delta > 0)
-		allele_prob = u * p * pow(1.0 - p, delta - 1.0);
+		allele_prob = stutter_up * stutter_p * pow(1.0 - stutter_p, delta - 1.0);
 	else
-		allele_prob = d * p * pow(1.0 - p, -delta - 1.0);
+		allele_prob = stutter_down * stutter_p * pow(1.0 - stutter_p, -delta - 1.0);
 	if (allele_prob > 0){
 		*log_allele_prob = log(allele_prob);
 		return true;

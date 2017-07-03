@@ -20,7 +20,12 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "src/likelihood_maximizer.h"
 
-LikelihoodMaximizer::LikelihoodMaximizer() {}
+LikelihoodMaximizer::LikelihoodMaximizer(const Options& _options) {
+  options = &_options;
+  enclosing_class_.SetOptions(*options);
+  frr_class_.SetOptions(*options);
+  spanning_class_.SetOptions(*options);
+}
 
 void LikelihoodMaximizer::Reset() {
   enclosing_class_.Reset();
@@ -49,11 +54,14 @@ std::size_t LikelihoodMaximizer::GetFRRDataSize() {
 
 bool LikelihoodMaximizer::GetGenotypeNegLogLikelihood(const int32_t& allele1,
 						      const int32_t& allele2,
+						      const int32_t& read_len,
+						      const int32_t& motif_len,
+						      const int32_t& ref_count,
 						      double* gt_ll) {
   double frr_ll, span_ll, encl_ll = 0.0;
-  frr_class_.GetClassLogLikelihood(allele1, allele2, &frr_ll);
-  spanning_class_.GetClassLogLikelihood(allele1, allele2, &span_ll);
-  enclosing_class_.GetClassLogLikelihood(allele1, allele2, &encl_ll);
+  frr_class_.GetClassLogLikelihood(allele1, allele2, read_len, motif_len, ref_count, &frr_ll);
+  spanning_class_.GetClassLogLikelihood(allele1, allele2, read_len, motif_len, ref_count, &span_ll);
+  enclosing_class_.GetClassLogLikelihood(allele1, allele2, read_len, motif_len, ref_count, &encl_ll);
   *gt_ll = -1*(frr_weight_*frr_ll + spanning_weight_*span_ll + enclosing_weight_*encl_ll);
 }
 

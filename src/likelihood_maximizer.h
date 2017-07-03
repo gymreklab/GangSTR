@@ -23,12 +23,13 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "src/enclosing_class.h"
 #include "src/frr_class.h"
+#include "src/options.h"
 #include "src/read_class.h"
 #include "src/spanning_class.h"
 
 class LikelihoodMaximizer {
  public:
-  LikelihoodMaximizer();
+  LikelihoodMaximizer(const Options& _options);
   virtual ~LikelihoodMaximizer();
 
   // Clear data of all classes
@@ -42,7 +43,10 @@ class LikelihoodMaximizer {
   std::size_t GetSpanningDataSize();
   std::size_t GetFRRDataSize();
   // Main likelihood function
-  bool GetGenotypeNegLogLikelihood(const int32_t& allele1, const int32_t& allele2, double* gt_ll);
+  bool GetGenotypeNegLogLikelihood(const int32_t& allele1, const int32_t& allele2,
+				   const int32_t& read_len, const int32_t& motif_len,
+				   const int32_t& ref_count,
+				   double* gt_ll);
   // Main optimization function - TODO also return other data
   bool OptimizeLikelihood(int32_t* allele1, int32_t* allele2);
 
@@ -55,6 +59,9 @@ class LikelihoodMaximizer {
   const static double frr_weight_ = 0.8;
   const static double enclosing_weight_ = 1.0;
   const static double spanning_weight_ = 1.0;
+
+  // Other params
+  const Options* options;
 };
 
 #endif  // SRC_LIKELIHOOD_MAXIMIZER_H__

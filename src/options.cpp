@@ -27,8 +27,13 @@ Options::Options() {
   reffa = "";
   regionsfile = "";
   outprefix = "";
-  flanklen = 100;
-  regionsize = 5000;
+  dist_mean = 400;
+  dist_sdev = 50;
+  stutter_up = 0.01;
+  stutter_down = 0.02;
+  stutter_p = 0.95;
+  flanklen = 2000;
+  realignment_flanklen = 100;
   verbose = false;
 }
 

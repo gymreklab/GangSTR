@@ -44,7 +44,7 @@ class LikelihoodMaximizerTest: public CppUnit::TestFixture {
   void test_GetGenotypeNegLogLikelihood();
 
  private:
-  LikelihoodMaximizer likelihood_maximizer_;
+  LikelihoodMaximizer* likelihood_maximizer_;
 };
 
 #endif //  SRC_TESTS_LIKELIHOODMAXIMIZER_H_

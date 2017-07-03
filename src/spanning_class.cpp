@@ -30,12 +30,9 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 using namespace std;
 
 bool SpanningClass::GetLogClassProb(const int32_t& allele,
+				    const int32_t& read_len, const int32_t& motif_len,
 				double* log_class_prob) {
-	int dist_mean = 400;		// arg_dict['read_ins_mean'] 		// (\mu)
-	int dist_sdev = 50;		// arg_dict['read_ins_stddev']		// (\sigma)
-	int flank_len = 2000;	// arg_dict['flank_len']			// (F)
-	int read_len =  100;		// arg_dict['read_len']				// (r)
-	int motif_len = 3;		// arg_dict['motif']
+  // TODO these shouldn't be set here
 	int str_len = allele * motif_len;					// (L)
 	double norm_const = gsl_cdf_gaussian_P(2 * flank_len + str_len - dist_mean, dist_sdev) -
 						gsl_cdf_gaussian_P(2 * read_len - dist_mean, dist_sdev);  
@@ -81,13 +78,11 @@ bool SpanningClass::GetLogClassProb(const int32_t& allele,
 }
 
 bool SpanningClass::GetLogReadProb(const int32_t& allele,
-			       const int32_t& data,
-			       double* log_allele_prob) {
-	int dist_mean = 400;
-	int dist_sdev = 50;
-	int motif_len = 3;
-	int ref_count = 10;
-
+				   const int32_t& data,
+				   const int32_t& read_len,
+				   const int32_t& motif_len,
+				   const int32_t& ref_count,
+				   double* log_allele_prob) {
 	int mean_A = dist_mean - motif_len * (allele - ref_count);
 
 	double allele_prob = gsl_ran_gaussian_pdf(data - mean_A, dist_sdev);

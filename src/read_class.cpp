@@ -27,7 +27,20 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 
 using namespace std;
 
-ReadClass::ReadClass() {}
+ReadClass::ReadClass() {
+  // Set default options
+  Options default_options;
+  SetOptions(default_options);
+}
+
+void ReadClass::SetOptions(const Options& options) {
+  dist_mean = options.dist_mean;
+  dist_sdev = options.dist_sdev;
+  flank_len = options.flanklen;
+  stutter_up = options.stutter_up;
+  stutter_down = options.stutter_down;
+  stutter_p = options.stutter_p;
+}
 
 void ReadClass::AddData(const int32_t& data) {
   read_class_data_.push_back(data);
@@ -43,16 +56,18 @@ void ReadClass::AddData(const int32_t& data) {
  */
 bool ReadClass::GetClassLogLikelihood(const int32_t& allele1,
 				      const int32_t& allele2,
+				      const int32_t& read_len, const int32_t& motif_len,
+				      const int32_t& ref_count,
 				      double* class_ll) {
   *class_ll = 0;
   double samp_log_likelihood, a1_ll, a2_ll;
   for (std::vector<int32_t>::iterator data_it = read_class_data_.begin();
        data_it != read_class_data_.end();
        data_it++) {
-    if (!GetAlleleLogLikelihood(allele1, *data_it, &a1_ll)) {
+    if (!GetAlleleLogLikelihood(allele1, *data_it, read_len, motif_len, ref_count, &a1_ll)) {
       return false;
     }
-    if (!GetAlleleLogLikelihood(allele2, *data_it, &a2_ll)) {
+    if (!GetAlleleLogLikelihood(allele2, *data_it, read_len, motif_len, ref_count, &a2_ll)) {
       return false;
     }
     *class_ll += fast_log_sum_exp(log(allele1_weight_)+a1_ll, log(allele2_weight_)+a2_ll);
@@ -67,12 +82,14 @@ bool ReadClass::GetClassLogLikelihood(const int32_t& allele1,
  */
 bool ReadClass::GetAlleleLogLikelihood(const int32_t& allele,
 				       const int32_t& data,
+				       const int32_t& read_len, const int32_t&  motif_len,
+				       const int32_t& ref_count,
 				       double* allele_ll) {
   double log_class_prob, log_read_prob;
-  if (!GetLogClassProb(allele, &log_class_prob)) {
+  if (!GetLogClassProb(allele, read_len, motif_len, &log_class_prob)) {
     return false;
   }
-  if (!GetLogReadProb(allele, data, &log_read_prob)) {
+  if (!GetLogReadProb(allele, data, read_len, motif_len, ref_count, &log_read_prob)) {
     return false;
   }
   *allele_ll = log_class_prob + log_read_prob;
@@ -80,12 +97,15 @@ bool ReadClass::GetAlleleLogLikelihood(const int32_t& allele,
 }
 
 bool ReadClass::GetLogClassProb(const int32_t& allele,
+				const int32_t& read_len, const int32_t& motif_len,
 				double* log_class_prob) {
   return false; // Implement in child classes
 }
 
 bool ReadClass::GetLogReadProb(const int32_t& allele,
 			       const int32_t& data,
+			       const int32_t& read_len, const int32_t& motif_len,
+			       const int32_t& ref_count,
 			       double* log_allele_prob) {
   return false; // Implement in child classes
 }

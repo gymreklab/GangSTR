@@ -31,8 +31,13 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
  */
 class FRRClass: public ReadClass {
  public:
-  bool GetLogClassProb(const int32_t& allele, double* log_class_prob);
-  bool GetLogReadProb(const int32_t& allele, const int32_t& data, double* log_allele_prob);
+  bool GetLogClassProb(const int32_t& allele,
+		       const int32_t& read_len, const int32_t& motif_len,
+		       double* log_class_prob);
+  bool GetLogReadProb(const int32_t& allele, const int32_t& data,
+		      const int32_t& read_len, const int32_t& motif_len,
+		      const int32_t& ref_count,
+		      double* log_allele_prob);
 };
 
 #endif  // SRC_FRR_CLASS_H__

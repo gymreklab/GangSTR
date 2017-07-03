@@ -30,12 +30,8 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 using namespace std;
 
 bool FRRClass::GetLogClassProb(const int32_t& allele,
+			       const int32_t& read_len, const int32_t& motif_len,
 			       double* log_class_prob) {
-	int dist_mean = 400;
-	int dist_sdev = 50;
-	int flank_len = 2000;
-	int read_len = 100;
-	int motif_len = 3;
 	int str_len = allele * motif_len;
 
 	if (str_len < read_len){		// condition: L > r for this read to be possible
@@ -75,12 +71,10 @@ bool FRRClass::GetLogClassProb(const int32_t& allele,
 
 bool FRRClass::GetLogReadProb(const int32_t& allele,
 			      const int32_t& data,
+			      const int32_t& read_len,
+			      const int32_t& motif_len,
+			      const int32_t& ref_count,
 			      double* log_allele_prob) {
-	int dist_mean = 400;
-	int dist_sdev = 50;
-	int flank_len = 2000;
-	int read_len = 100;
-	int motif_len = 3;
 	int str_len = allele * motif_len;
 
 	if (str_len < read_len){		// redundant -> remove --> not really, because when class_prob=neg_inf this may lead to read_prob->false
