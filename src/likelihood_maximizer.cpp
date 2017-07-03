@@ -62,7 +62,9 @@ bool LikelihoodMaximizer::GetGenotypeNegLogLikelihood(const int32_t& allele1,
   frr_class_.GetClassLogLikelihood(allele1, allele2, read_len, motif_len, ref_count, &frr_ll);
   spanning_class_.GetClassLogLikelihood(allele1, allele2, read_len, motif_len, ref_count, &span_ll);
   enclosing_class_.GetClassLogLikelihood(allele1, allele2, read_len, motif_len, ref_count, &encl_ll);
-  *gt_ll = -1*(frr_weight_*frr_ll + spanning_weight_*span_ll + enclosing_weight_*encl_ll);
+  *gt_ll = -1*(options->frr_weight*frr_ll +
+	       options->spanning_weight*span_ll +
+	       options->enclosing_weight*encl_ll);
 }
 
 bool LikelihoodMaximizer::OptimizeLikelihood(const int32_t& read_len, const int32_t& motif_len,

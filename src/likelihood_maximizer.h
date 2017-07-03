@@ -57,11 +57,6 @@ class LikelihoodMaximizer {
   FRRClass frr_class_;
   SpanningClass spanning_class_;
 
-  // Class weights - TODO?
-  const static double frr_weight_ = 0.8;
-  const static double enclosing_weight_ = 1.0;
-  const static double spanning_weight_ = 1.0;
-
   // Other params
   const Options* options;
 };

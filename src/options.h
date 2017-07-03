@@ -47,6 +47,11 @@ class Options {
   int32_t realignment_flanklen; // flank length to use for local realignment
   int32_t flanklen; // used in models
   int32_t regionsize; // region in bam file to search for reads around the STR
+  // Likelihood weights
+  double frr_weight;
+  double enclosing_weight;
+  double spanning_weight;
+  // Helpers
   bool verbose;
 };
 
