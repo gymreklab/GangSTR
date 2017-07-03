@@ -32,7 +32,6 @@ using namespace std;
 bool SpanningClass::GetLogClassProb(const int32_t& allele,
 				    const int32_t& read_len, const int32_t& motif_len,
 				double* log_class_prob) {
-  // TODO these shouldn't be set here
 	int str_len = allele * motif_len;					// (L)
 	double norm_const = gsl_cdf_gaussian_P(2 * flank_len + str_len - dist_mean, dist_sdev) -
 						gsl_cdf_gaussian_P(2 * read_len - dist_mean, dist_sdev);  

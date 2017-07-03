@@ -77,6 +77,8 @@ bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
   // Go through each alignment in the region
   BamAlignment alignment;
   while (bamreader->GetNextAlignment(alignment)) {
+    // Set guessed read length
+    guessed_read_length = (int32_t)alignment.QueryBases().size();
     if (debug) {
       std::cerr << "Processing " << alignment.Name() << std::endl;
     }

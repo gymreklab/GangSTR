@@ -48,7 +48,9 @@ class LikelihoodMaximizer {
 				   const int32_t& ref_count,
 				   double* gt_ll);
   // Main optimization function - TODO also return other data
-  bool OptimizeLikelihood(int32_t* allele1, int32_t* allele2);
+  bool OptimizeLikelihood(const int32_t& read_len, const int32_t& motif_len,
+			  const int32_t& ref_count,
+			  int32_t* allele1, int32_t* allele2);
 
  private:
   EnclosingClass enclosing_class_;

@@ -39,6 +39,10 @@ class ReadExtractor {
 		    const Locus& locus,
 		    const int32_t& regionsize,
 		    LikelihoodMaximizer* likelihood_maximizer);
+
+  // Keep track of the guessed read length
+  int32_t guessed_read_length;
+
  protected:
   // Trim alignment read names
   std::string trim_alignment_name(const BamAlignment& aln) const;

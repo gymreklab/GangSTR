@@ -62,7 +62,11 @@ bool Genotyper::ProcessLocus(BamCramMultiReader* bamreader, Locus* locus) {
   }
   // Maximize the likelihood
   int32_t allele1, allele2;
-  if (!likelihood_maximizer->OptimizeLikelihood(&allele1, &allele2)) {
+  int32_t read_len = read_extractor->guessed_read_length;
+  int32_t ref_count = (int32_t)((locus->end-locus->start+1)/locus->motif.size());
+  if (!likelihood_maximizer->OptimizeLikelihood(read_len, (int32_t)(locus->motif.size()),
+						ref_count,
+						&allele1, &allele2)) {
     return false;
   }
   // Fill in locus with relevant information

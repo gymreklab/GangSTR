@@ -28,7 +28,6 @@ using namespace std;
 bool EnclosingClass::GetLogClassProb(const int32_t& allele,
 				     const int32_t& read_len, const int32_t& motif_len,
 				     double* log_class_prob) {
-  // TODO these shouldn't be set here
 	int str_len = allele * motif_len;					// (L)
 	double class_prob;
 	if (read_len <= str_len)
