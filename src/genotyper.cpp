@@ -92,4 +92,7 @@ void Genotyper::Debug(BamCramMultiReader* bamreader) {
   cerr << "gsl_ran_gaussian_pdf(0, 1) " << x << endl;
 }
 
-Genotyper::~Genotyper() {}
+Genotyper::~Genotyper() {
+  delete read_extractor;
+  delete likelihood_maximizer;
+}

@@ -57,4 +57,5 @@ bool RegionReader::GetNextRegion(Locus* locus) {
 
 RegionReader::~RegionReader() {
   freader->close();
+  delete freader;
 }
