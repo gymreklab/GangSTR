@@ -26,6 +26,7 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 #include "src/options.h"
 #include "src/read_class.h"
 #include "src/spanning_class.h"
+#include "gsl/gsl_vector.h"
 
 class LikelihoodMaximizer {
  public:
@@ -47,6 +48,8 @@ class LikelihoodMaximizer {
 				   const int32_t& read_len, const int32_t& motif_len,
 				   const int32_t& ref_count,
 				   double* gt_ll);
+  // Helper likelihood function for gsl optimizer
+  double gslNegLikelihood(const gsl_vector *v, void *params);
   // Main optimization function - TODO also return other data
   bool OptimizeLikelihood(const int32_t& read_len, const int32_t& motif_len,
 			  const int32_t& ref_count,

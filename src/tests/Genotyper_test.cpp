@@ -19,6 +19,7 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include "src/tests/Genotyper_test.h"
+#include "src/bam_io.h"
 
 // Registers the fixture into the 'registry'
 CPPUNIT_TEST_SUITE_REGISTRATION(GenotyperTest);
@@ -49,5 +50,16 @@ void GenotyperTest::test_SetFlanks() {
 }
 
 void GenotyperTest::test_ProcessLocus() {
+  Options options;
+  options.realignment_flanklen = 99;
+  std::string fastafile = test_dir + "/test.fa";
+  RefGenome refgenome(fastafile);
+  Genotyper genotyper(refgenome, options);
+
+  std::string bam_file = test_dir + "/test.sorted.bam";
+  std::vector<std::string> files(0);
+  files.push_back(bam_file);
+  BamCramMultiReader* bamreader = new BamCramMultiReader(files, fastafile);
+  genotyper.ProcessLocus(bamreader, &locus);
   CPPUNIT_FAIL("test_ProcessLocus() not implemented");
 }

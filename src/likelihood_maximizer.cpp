@@ -18,6 +18,7 @@ You should have received a copy of the GNU General Public License
 along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <gsl/gsl_multimin.h>
 #include "src/likelihood_maximizer.h"
 
 LikelihoodMaximizer::LikelihoodMaximizer(const Options& _options) {
@@ -67,9 +68,83 @@ bool LikelihoodMaximizer::GetGenotypeNegLogLikelihood(const int32_t& allele1,
 	       options->enclosing_weight*encl_ll);
 }
 
+double LikelihoodMaximizer::gslNegLikelihood(const gsl_vector *v, void *params)
+{
+  double A, B;
+  double *p = (double *)params;
+  double gt_ll;
+  A = gsl_vector_get(v, 0);
+  B = gsl_vector_get(v, 1);
+ 
+  if(!GetGenotypeNegLogLikelihood(A, B, p[0], p[1], p[2], &gt_ll))
+    return -1.0;
+  else
+    return gt_ll;
+}
+
 bool LikelihoodMaximizer::OptimizeLikelihood(const int32_t& read_len, const int32_t& motif_len,
 					     const int32_t& ref_count,
 					     int32_t* allele1, int32_t* allele2) {
+  size_t minim_dim = 2;
+  const gsl_multimin_fminimizer_type * minim_type = gsl_multimin_fminimizer_nmsimplex2;
+  gsl_multimin_fminimizer * minim_handle = gsl_multimin_fminimizer_alloc (minim_type, minim_dim);
+
+  gsl_vector *ss, *x;
+  gsl_multimin_function neg_log_like;
+
+  size_t iter = 0;
+  int status;
+  double size;
+  double par[3] = {100, 3, 10}; // Params = [read_len, motif_len, ref_count]
+  /* Starting point */
+  x = gsl_vector_alloc (2);
+  gsl_vector_set (x, 0, 10.0);
+  gsl_vector_set (x, 1, 30.0);
+
+  /* Set initial step sizes to 1 */
+  ss = gsl_vector_alloc (2);
+  gsl_vector_set_all (ss, 4.0);
+
+  /* Initialize method and iterate */
+  neg_log_like.n = 2;
+  neg_log_like.f = &(LikelihoodMaximizer::gslNegLikelihood);
+  neg_log_like.params = par;
+
+  minim_handle = gsl_multimin_fminimizer_alloc (minim_type, 2);
+  gsl_multimin_fminimizer_set (minim_handle, &neg_log_like, x, ss);
+
+  do
+    {
+      iter++;
+      status = gsl_multimin_fminimizer_iterate(minim_handle);
+      
+      if (status) 
+        break;
+
+      size = gsl_multimin_fminimizer_size (minim_handle);
+      status = gsl_multimin_test_size (size, 1e-2);
+
+      if (status == GSL_SUCCESS)
+        {
+          printf ("converged to minimum at\n");
+        }
+
+      printf ("%5d %10.3e %10.3e f() = %7.3f size = %.3f\n", 
+              iter,
+              gsl_vector_get (minim_handle->x, 0), 
+              gsl_vector_get (minim_handle->x, 1), 
+              minim_handle->fval, size);
+    }
+  while (status == GSL_CONTINUE && iter < 100);
+  
+  gsl_vector_free(x);
+  gsl_vector_free(ss);
+  gsl_multimin_fminimizer_free (minim_handle);
+
+  return status;
+
+
+  *allele1 = 2;
   // TODO
   return false;
 }
