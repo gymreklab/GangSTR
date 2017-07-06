@@ -4,6 +4,15 @@
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_randist.h>
 
+double dummy_func (const gsl_vector *v, void *params)
+{
+  double A;
+  double *p = (double *)params;
+
+  A = gsl_vector_get(v, 0);
+
+  return pow(A - p[0], p[1]);
+}
 double TestGSL() {
   return gsl_ran_gaussian_pdf(0, 1);
 }

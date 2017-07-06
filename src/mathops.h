@@ -3,9 +3,11 @@
 
 #include <math.h>
 #include "src/fastonebigheader.h"
-
+#include "gsl/gsl_vector.h"
 #include <vector>
 
+// dummy function to test gsl optimizer
+double dummy_func(const gsl_vector *v, void *params);
 // Testing gsl
 double TestGSL();
 

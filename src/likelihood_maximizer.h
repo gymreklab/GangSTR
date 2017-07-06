@@ -48,20 +48,22 @@ class LikelihoodMaximizer {
 				   const int32_t& read_len, const int32_t& motif_len,
 				   const int32_t& ref_count,
 				   double* gt_ll);
-  // Helper likelihood function for gsl optimizer
-  double gslNegLikelihood(const gsl_vector *v, void *params);
   // Main optimization function - TODO also return other data
   bool OptimizeLikelihood(const int32_t& read_len, const int32_t& motif_len,
 			  const int32_t& ref_count,
 			  int32_t* allele1, int32_t* allele2);
+
+  // Other params -> Made public for gslNegLikelihood to have access
+  const Options* options;
 
  private:
   EnclosingClass enclosing_class_;
   FRRClass frr_class_;
   SpanningClass spanning_class_;
 
-  // Other params
-  const Options* options;
 };
+
+// Helper likelihood function for gsl optimizer
+double gslNegLikelihood(const gsl_vector *v, void *params);
 
 #endif  // SRC_LIKELIHOOD_MAXIMIZER_H__

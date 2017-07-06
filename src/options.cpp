@@ -38,6 +38,10 @@ Options::Options() {
   enclosing_weight = 1.0;
   spanning_weight = 1.0;
   verbose = false;
+  // These shouldn't be here!
+  // read_len = 100;
+  // ref_count = 10;
+  // motif_len = 3;
 }
 
 Options::~Options() {}

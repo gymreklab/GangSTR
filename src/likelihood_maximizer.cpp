@@ -20,6 +20,10 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <gsl/gsl_multimin.h>
 #include "src/likelihood_maximizer.h"
+#include "src/mathops.h"
+#include <iostream>
+
+using namespace std;
 
 LikelihoodMaximizer::LikelihoodMaximizer(const Options& _options) {
   options = &_options;
@@ -68,19 +72,7 @@ bool LikelihoodMaximizer::GetGenotypeNegLogLikelihood(const int32_t& allele1,
 	       options->enclosing_weight*encl_ll);
 }
 
-double LikelihoodMaximizer::gslNegLikelihood(const gsl_vector *v, void *params)
-{
-  double A, B;
-  double *p = (double *)params;
-  double gt_ll;
-  A = gsl_vector_get(v, 0);
-  B = gsl_vector_get(v, 1);
- 
-  if(!GetGenotypeNegLogLikelihood(A, B, p[0], p[1], p[2], &gt_ll))
-    return -1.0;
-  else
-    return gt_ll;
-}
+
 
 bool LikelihoodMaximizer::OptimizeLikelihood(const int32_t& read_len, const int32_t& motif_len,
 					     const int32_t& ref_count,
@@ -95,7 +87,7 @@ bool LikelihoodMaximizer::OptimizeLikelihood(const int32_t& read_len, const int3
   size_t iter = 0;
   int status;
   double size;
-  double par[3] = {100, 3, 10}; // Params = [read_len, motif_len, ref_count]
+  //LikelihoodMaximizer* par = new LikelihoodMaximizer(options); // Params = [read_len, motif_len, ref_count]
   /* Starting point */
   x = gsl_vector_alloc (2);
   gsl_vector_set (x, 0, 10.0);
@@ -107,8 +99,8 @@ bool LikelihoodMaximizer::OptimizeLikelihood(const int32_t& read_len, const int3
 
   /* Initialize method and iterate */
   neg_log_like.n = 2;
-  neg_log_like.f = &(LikelihoodMaximizer::gslNegLikelihood);
-  neg_log_like.params = par;
+  neg_log_like.f = &(dummy_func);
+  neg_log_like.params = this;
 
   minim_handle = gsl_multimin_fminimizer_alloc (minim_type, 2);
   gsl_multimin_fminimizer_set (minim_handle, &neg_log_like, x, ss);
@@ -141,11 +133,24 @@ bool LikelihoodMaximizer::OptimizeLikelihood(const int32_t& read_len, const int3
   gsl_vector_free(ss);
   gsl_multimin_fminimizer_free (minim_handle);
 
-  return status;
-
-
+  cout<<gsl_vector_get (minim_handle->x, 0)<<"\t"<<gsl_vector_get (minim_handle->x, 1);
   *allele1 = 2;
   // TODO
   return false;
 }
 LikelihoodMaximizer::~LikelihoodMaximizer() {}
+
+
+double gslNegLikelihood(const gsl_vector *v, void *params)
+{
+  double A, B;
+  LikelihoodMaximizer *p = (LikelihoodMaximizer *)params;
+  double gt_ll;
+  A = gsl_vector_get(v, 0);
+  B = gsl_vector_get(v, 1);
+ 
+  if(!p[0].GetGenotypeNegLogLikelihood(A, B, p[0].options->read_len, p[0].options->motif_len, p[0].options->ref_count, &gt_ll))
+    return -1.0;
+  else
+    return gt_ll;
+}

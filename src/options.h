@@ -53,6 +53,10 @@ class Options {
   double spanning_weight;
   // Helpers
   bool verbose;
+  // Experiment parameters for likelihood maximizer
+  int32_t read_len;
+  int32_t motif_len;
+  int32_t ref_count;
 };
 
 #endif  // SRC_OPTIONS_H__
