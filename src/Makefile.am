@@ -89,5 +89,6 @@ GangSTRTests_SOURCES = \
 	tests/Genotyper_test.h tests/Genotyper_test.cpp \
 	tests/Realignment_test.h tests/Realignment_test.cpp \
 	tests/main_test.cpp
-GangSTRTests_CXXFLAGS = $(CPPUNIT_CFLAGS) $(GSL_CFLAGS)
-GangSTRTests_LDFLAGS = $(CPPUNIT_LIBS) -ldl $(GSL_LIBS) $(HTS_LIBS) $(NLOP_LIBS)
+GangSTRTests_CXXFLAGS = $(CPPUNIT_CFLAGS) $(GSL_CFLAGS) 
+GangSTRTests_LDFLAGS = -I/usr/local/lib $(CPPUNIT_LIBS) -ldl $(GSL_LIBS) $(HTS_LIBS) $(NLOP_LIBS) 
+GangSTRTests_LDADD = $(NLOP_LIBS)

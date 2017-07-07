@@ -35,7 +35,7 @@ double myfunc(unsigned n, const double *x, double *grad, void *my_func_data)
         grad[0] = 0.0;
         grad[1] = 0.5 / sqrt(x[1]);
     }
-    return sqrt(x[1]);
+    return 2 * sqrt(x[1]);
 }
 typedef struct {
     double a, b;
