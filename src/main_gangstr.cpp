@@ -146,5 +146,6 @@ int main(int argc, char* argv[]) {
     ss << "Processing " << locus.chrom << ":" << locus.start;
     PrintMessageDieOnError(ss.str(), M_PROGRESS);
     genotyper.ProcessLocus(&bamreader, &locus);
+    genotyper.Debug(&bamreader); // todo delete
   };
 }

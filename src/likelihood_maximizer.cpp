@@ -17,6 +17,8 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 */
+// #include <nlopt.hpp>
+#include <nlopt.h>
 
 #include <gsl/gsl_multimin.h>
 #include "src/likelihood_maximizer.h"
@@ -24,6 +26,31 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 #include <iostream>
 
 using namespace std;
+//////////
+int count = 0;
+double myfunc(unsigned n, const double *x, double *grad, void *my_func_data)
+{
+  ++count;
+    if (grad) {
+        grad[0] = 0.0;
+        grad[1] = 0.5 / sqrt(x[1]);
+    }
+    return sqrt(x[1]);
+}
+typedef struct {
+    double a, b;
+} my_constraint_data;
+double myconstraint(unsigned n, const double *x, double *grad, void *data)
+{
+    my_constraint_data *d = (my_constraint_data *) data;
+    double a = d->a, b = d->b;
+    if (grad) {
+        grad[0] = 3 * a * (a*x[0] + b) * (a*x[0] + b);
+        grad[1] = -1.0;
+    }
+    return ((a*x[0] + b) * (a*x[0] + b) * (a*x[0] + b) - x[1]);
+ }
+////////////
 
 LikelihoodMaximizer::LikelihoodMaximizer(const Options& _options) {
   options = &_options;
@@ -77,65 +104,120 @@ bool LikelihoodMaximizer::GetGenotypeNegLogLikelihood(const int32_t& allele1,
 bool LikelihoodMaximizer::OptimizeLikelihood(const int32_t& read_len, const int32_t& motif_len,
 					     const int32_t& ref_count,
 					     int32_t* allele1, int32_t* allele2) {
-  size_t minim_dim = 2;
-  const gsl_multimin_fminimizer_type * minim_type = gsl_multimin_fminimizer_nmsimplex2;
-  gsl_multimin_fminimizer * minim_handle = gsl_multimin_fminimizer_alloc (minim_type, minim_dim);
+  // //////////// NLOPT C
+  double lb[2] = { -HUGE_VAL, 0 }; /* lower bounds */
+  nlopt_opt opt;
+  opt = nlopt_create(NLOPT_LN_COBYLA, 2); /* algorithm and dimensionality */
+  nlopt_set_lower_bounds(opt, lb);
+  nlopt_set_min_objective(opt, myfunc, NULL);
 
-  gsl_vector *ss, *x;
-  gsl_multimin_function neg_log_like;
+  my_constraint_data data[2] = { {2,0}, {-1,1} };
+  nlopt_add_inequality_constraint(opt, myconstraint, &data[0], 1e-8);
+  nlopt_add_inequality_constraint(opt, myconstraint, &data[1], 1e-8);
 
-  size_t iter = 0;
-  int status;
-  double size;
-  //LikelihoodMaximizer* par = new LikelihoodMaximizer(options); // Params = [read_len, motif_len, ref_count]
-  /* Starting point */
-  x = gsl_vector_alloc (2);
-  gsl_vector_set (x, 0, 10.0);
-  gsl_vector_set (x, 1, 30.0);
+  nlopt_set_xtol_rel(opt, 1e-4);
 
-  /* Set initial step sizes to 1 */
-  ss = gsl_vector_alloc (2);
-  gsl_vector_set_all (ss, 4.0);
+  double x[2] = { 1.234, 5.678 };  /* some initial guess */
+  double minf; /* the minimum objective value, upon return */
 
-  /* Initialize method and iterate */
-  neg_log_like.n = 2;
-  neg_log_like.f = &(dummy_func);
-  neg_log_like.params = this;
+  if (nlopt_optimize(opt, x, &minf) < 0) {
+      printf("nlopt failed!\n");
+  }
+  else {
+   printf("found minimum after %d evaluations\n", count);
+      printf("found minimum at f(%g,%g) = %0.10g\n", x[0], x[1], minf);
+  }
 
-  minim_handle = gsl_multimin_fminimizer_alloc (minim_type, 2);
-  gsl_multimin_fminimizer_set (minim_handle, &neg_log_like, x, ss);
+  nlopt_destroy(opt);
 
-  do
-    {
-      iter++;
-      status = gsl_multimin_fminimizer_iterate(minim_handle);
+  // //////////// NLOPT C
+
+  // //////////// NLOPT C++
+
+
+  // nlopt::opt opt(nlopt::LD_MMA, 2);
+
+  // std::vector<double> lb(2);
+  // lb[0] = -HUGE_VAL; lb[1] = 0;
+  // opt.set_lower_bounds(lb);
+
+  // opt.set_min_objective(myfunc, NULL);
+
+  // my_constraint_data data[2] = { {2,0}, {-1,1} };
+  // opt.add_inequality_constraint(myconstraint, &data[0], 1e-8);
+  // opt.add_inequality_constraint(myconstraint, &data[1], 1e-8);
+
+  // opt.set_xtol_rel(1e-4);
+
+  // std::vector<double> xx(2);
+  // xx[0] = 1.234; xx[1] = 5.678;
+  // double minf;
+  // nlopt::result result = opt.optimize(xx, minf);
+
+  // cout<<result<<endl;
+  // cout<<"Hi\n";
+  // //////////// NLOPT C++
+
+  // //////////// GSL Optimizer
+  // size_t minim_dim = 2;
+  // const gsl_multimin_fminimizer_type * minim_type = gsl_multimin_fminimizer_nmsimplex2;
+  // gsl_multimin_fminimizer * minim_handle = gsl_multimin_fminimizer_alloc (minim_type, minim_dim);
+
+  // gsl_vector *ss, *x;
+  // gsl_multimin_function neg_log_like;
+
+  // size_t iter = 0;
+  // int status;
+  // double size;
+  // //LikelihoodMaximizer* par = new LikelihoodMaximizer(options); // Params = [read_len, motif_len, ref_count]
+  // /* Starting point */
+  // x = gsl_vector_alloc (2);
+  // gsl_vector_set (x, 0, 10.0);
+  // gsl_vector_set (x, 1, 30.0);
+
+  // /* Set initial step sizes to 1 */
+  // ss = gsl_vector_alloc (2);
+  // gsl_vector_set_all (ss, 4.0);
+
+  // /* Initialize method and iterate */
+  // neg_log_like.n = 2;
+  // neg_log_like.f = &(dummy_func);
+  // neg_log_like.params = this;
+
+  // minim_handle = gsl_multimin_fminimizer_alloc (minim_type, 2);
+  // gsl_multimin_fminimizer_set (minim_handle, &neg_log_like, x, ss);
+
+  // do
+  //   {
+  //     iter++;
+  //     status = gsl_multimin_fminimizer_iterate(minim_handle);
       
-      if (status) 
-        break;
+  //     if (status) 
+  //       break;
 
-      size = gsl_multimin_fminimizer_size (minim_handle);
-      status = gsl_multimin_test_size (size, 1e-2);
+  //     size = gsl_multimin_fminimizer_size (minim_handle);
+  //     status = gsl_multimin_test_size (size, 1e-2);
 
-      if (status == GSL_SUCCESS)
-        {
-          printf ("converged to minimum at\n");
-        }
+  //     if (status == GSL_SUCCESS)
+  //       {
+  //         printf ("converged to minimum at\n");
+  //       }
 
-      printf ("%5d %10.3e %10.3e f() = %7.3f size = %.3f\n", 
-              iter,
-              gsl_vector_get (minim_handle->x, 0), 
-              gsl_vector_get (minim_handle->x, 1), 
-              minim_handle->fval, size);
-    }
-  while (status == GSL_CONTINUE && iter < 100);
+  //     printf ("%5d %10.3e %10.3e f() = %7.3f size = %.3f\n", 
+  //             iter,
+  //             gsl_vector_get (minim_handle->x, 0), 
+  //             gsl_vector_get (minim_handle->x, 1), 
+  //             minim_handle->fval, size);
+  //   }
+  // while (status == GSL_CONTINUE && iter < 100);
   
-  gsl_vector_free(x);
-  gsl_vector_free(ss);
-  gsl_multimin_fminimizer_free (minim_handle);
+  // gsl_vector_free(x);
+  // gsl_vector_free(ss);
+  // gsl_multimin_fminimizer_free (minim_handle);
 
-  cout<<gsl_vector_get (minim_handle->x, 0)<<"\t"<<gsl_vector_get (minim_handle->x, 1);
-  *allele1 = 2;
-  // TODO
+  // cout<<gsl_vector_get (minim_handle->x, 0)<<"\t"<<gsl_vector_get (minim_handle->x, 1);
+  // *allele1 = 2;
+  // //////////// GSL Optimizer
   return false;
 }
 LikelihoodMaximizer::~LikelihoodMaximizer() {}

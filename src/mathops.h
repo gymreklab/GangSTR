@@ -10,6 +10,8 @@
 double dummy_func(const gsl_vector *v, void *params);
 // Testing gsl
 double TestGSL();
+//Testing nlopt
+double TestNLOPT();
 
 // To accelerate logsumexp, ignore values if they're 1/1000th or less than the maximum value
 const double LOG_THRESH = log(0.0000001);

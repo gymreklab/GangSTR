@@ -67,10 +67,10 @@ bool Genotyper::ProcessLocus(BamCramMultiReader* bamreader, Locus* locus) {
   if (!likelihood_maximizer->OptimizeLikelihood(read_len, (int32_t)(locus->motif.size()),
 						ref_count,
 						&allele1, &allele2)) {
-    cout<<allele1;
+    // cout<<allele1;
     return false;
   }
-  cout<<"BYYRYYRYRYRYR";
+  // cout<<"BYYRYYRYRYRYR";
   // Fill in locus with relevant information
   return true;
 }
@@ -92,6 +92,7 @@ void Genotyper::Debug(BamCramMultiReader* bamreader) {
   cerr << "testing GSL" << endl;
   double x = TestGSL();
   cerr << "gsl_ran_gaussian_pdf(0, 1) " << x << endl;
+  double y = TestNLOPT();
 }
 
 Genotyper::~Genotyper() {
