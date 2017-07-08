@@ -1,10 +1,11 @@
 # Urgent
 * require minimum matching at read ends, at least for enclosing reads
 * command line options for setting insert size, stutter, etc.
+* option to automatically detect insert size parameters
 * Remove outlier insert sizes
 * VCF output format
 
 # Less urgent
-* Automatically detect insert size parameters
 * Multi-sample calling
 * multithreading by locus
+* to save memory, don't need to store read1 and read2 in ReadPair
