@@ -1,0 +1,8 @@
+# Urgent
+* require minimum matching at read ends, at least for enclosing reads
+* VCF output format
+
+# Less urgent
+* Automatically detect insert size parameters
+* Multi-sample calling
+* multithreading by locus

@@ -44,10 +44,19 @@ bool ReadExtractor::ExtractReads(BamCramMultiReader* bamreader,
   for (std::map<std::string, ReadPair>::const_iterator iter = read_pairs.begin();
        iter != read_pairs.end(); iter++) {
     if (iter->second.read_type == RC_SPAN) {
+      if (print_read_data) {
+	std::cerr << iter->first << " " << "SPAN" << " " << iter->second.data_value << std::endl; // TODO remove
+      }
       likelihood_maximizer->AddSpanningData(iter->second.data_value);
     } else if (iter->second.read_type == RC_ENCL) {
+      if (print_read_data) {
+	std::cerr << iter->first << " " << "ENCLOSE" << " " << iter->second.data_value << std::endl; // TODO remove
+      }
       likelihood_maximizer->AddEnclosingData(iter->second.data_value);
     } else if (iter->second.read_type == RC_FRR) {
+      if (print_read_data) {
+	std::cerr << iter->first << " " << "FRR" << " " << iter->second.data_value << std::endl; // TODO remove
+      }
       likelihood_maximizer->AddFRRData(iter->second.data_value);
     } else {
       continue;

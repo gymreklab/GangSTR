@@ -34,6 +34,7 @@ Options::Options() {
   stutter_p = 0.95;
   flanklen = 2000;
   realignment_flanklen = 100;
+  regionsize = 2000;
   frr_weight = 0.8;
   enclosing_weight = 1.0;
   spanning_weight = 1.0;
