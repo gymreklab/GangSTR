@@ -23,25 +23,37 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 using namespace std;
 
 Options::Options() {
-  // initialize options
+  // // initialize options
+  // reffa = "";
+  // regionsfile = "";
+  // outprefix = "";
+  // dist_mean = 400;
+  // dist_sdev = 50;
+  // stutter_up = 0.01;
+  // stutter_down = 0.02;
+  // stutter_p = 0.95;
+  // flanklen = 2000;
+  // realignment_flanklen = 100;
+  // frr_weight = 0.8;
+  // enclosing_weight = 1.0;
+  // spanning_weight = 1.0;
+  // verbose = false;
+
+  // CACNA1A_47
   reffa = "";
   regionsfile = "";
   outprefix = "";
-  dist_mean = 400;
+  dist_mean = 500;
   dist_sdev = 50;
   stutter_up = 0.01;
   stutter_down = 0.02;
   stutter_p = 0.95;
-  flanklen = 2000;
+  flanklen = 3000;
   realignment_flanklen = 100;
   frr_weight = 0.8;
   enclosing_weight = 1.0;
   spanning_weight = 1.0;
   verbose = false;
-  // These shouldn't be here!
-  // read_len = 100;
-  // ref_count = 10;
-  // motif_len = 3;
 }
 
 Options::~Options() {}

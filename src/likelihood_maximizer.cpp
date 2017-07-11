@@ -17,8 +17,8 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 */
-// #include <nlopt.hpp>
-#include <nlopt.h>
+#include <nlopt.hpp>
+// #include <nlopt.h>
 
 #include <gsl/gsl_multimin.h>
 #include "src/likelihood_maximizer.h"
@@ -32,10 +32,11 @@ double myfunc(unsigned n, const double *x, double *grad, void *my_func_data)
 {
   ++count;
     if (grad) {
-        grad[0] = 0.0;
-        grad[1] = 0.5 / sqrt(x[1]);
+        cerr<< "No grad!"<<endl;
+        return 0.0;
     }
-    return 2 * sqrt(x[1]);
+    // return 2 * sqrt(x[1]);
+    return pow(x[0], 2) - 0.5 * pow(pow(x[0] - 1, 2) - 3, 2);
 }
 typedef struct {
     double a, b;
@@ -50,6 +51,57 @@ double myconstraint(unsigned n, const double *x, double *grad, void *data)
     }
     return ((a*x[0] + b) * (a*x[0] + b) * (a*x[0] + b) - x[1]);
  }
+////
+struct nlopt_data{
+  LikelihoodMaximizer* lm_ptr;
+  int read_len, motif_len, ref_count;
+  nlopt_data(int Read_Len, int Motif_Len, int Ref_Count, LikelihoodMaximizer* LM_OBJ) : 
+    read_len(Read_Len), motif_len(Motif_Len), ref_count(Ref_Count), lm_ptr(LM_OBJ) {
+      // cout<<endl<<"constr LM\t"<<LM_OBJ->GetEnclosingDataSize();
+      // cout<<endl<<"constr lm\t"<<lm_ptr->GetEnclosingDataSize();
+    }
+};
+
+void dummy_test(LikelihoodMaximizer* LM_OBJ){
+    cout<<endl<<"Dummyyy\t"<<LM_OBJ->GetEnclosingDataSize()<<endl;
+}
+
+double nloptNegLikelihood(unsigned n, const double *x, double *grad, void *data)
+{
+  ++count;
+  if (grad) {
+        cerr<< "No grad!"<<endl;
+        return 0.0;
+  }
+  nlopt_data *d = (nlopt_data *) data;
+  int read_len  = d -> read_len;
+  int motif_len = d -> motif_len;
+  int ref_count = d -> ref_count; 
+  LikelihoodMaximizer* lm_ptr = d -> lm_ptr;
+  // cout<<lm_ptr->GetSpanningDataSize();
+  double A = x[0], B = x[1];
+  double gt_ll;
+  if(!lm_ptr->GetGenotypeNegLogLikelihood(A, B, read_len, motif_len, ref_count, &gt_ll))
+    return -1.0;
+  else{
+    return gt_ll;
+  }
+}
+////
+
+double gslNegLikelihood(const gsl_vector *v, void *params)
+{
+  double A, B;
+  LikelihoodMaximizer *p = (LikelihoodMaximizer *)params;
+  double gt_ll;
+  A = gsl_vector_get(v, 0);
+  B = gsl_vector_get(v, 1);
+ 
+  if(!p[0].GetGenotypeNegLogLikelihood(A, B, p[0].options->read_len, p[0].options->motif_len, p[0].options->ref_count, &gt_ll))
+    return -1.0;
+  else
+    return gt_ll;
+}
 ////////////
 
 LikelihoodMaximizer::LikelihoodMaximizer(const Options& _options) {
@@ -58,6 +110,14 @@ LikelihoodMaximizer::LikelihoodMaximizer(const Options& _options) {
   frr_class_.SetOptions(*options);
   spanning_class_.SetOptions(*options);
 }
+
+// // Copy constructor:
+// LikelihoodMaximizer::LikelihoodMaximizer(const LikelihoodMaximizer& lm_obj){
+//   options = lm_obj.options;
+//   enclosing_class_.SetOptions(*options);
+//   frr_class_.SetOptions(*options);
+//   spanning_class_.SetOptions(*options);
+// }
 
 void LikelihoodMaximizer::Reset() {
   enclosing_class_.Reset();
@@ -94,6 +154,7 @@ bool LikelihoodMaximizer::GetGenotypeNegLogLikelihood(const int32_t& allele1,
   frr_class_.GetClassLogLikelihood(allele1, allele2, read_len, motif_len, ref_count, &frr_ll);
   spanning_class_.GetClassLogLikelihood(allele1, allele2, read_len, motif_len, ref_count, &span_ll);
   enclosing_class_.GetClassLogLikelihood(allele1, allele2, read_len, motif_len, ref_count, &encl_ll);
+  // cout<<endl<<frr_ll<<"\t"<<span_ll<<"\t"<<encl_ll;
   *gt_ll = -1*(options->frr_weight*frr_ll +
 	       options->spanning_weight*span_ll +
 	       options->enclosing_weight*encl_ll);
@@ -105,43 +166,80 @@ bool LikelihoodMaximizer::OptimizeLikelihood(const int32_t& read_len, const int3
 					     const int32_t& ref_count,
 					     int32_t* allele1, int32_t* allele2) {
   // //////////// NLOPT C
-  double lb[2] = { -HUGE_VAL, 0 }; /* lower bounds */
-  nlopt_opt opt;
-  opt = nlopt_create(NLOPT_LN_COBYLA, 2); /* algorithm and dimensionality */
-  nlopt_set_lower_bounds(opt, lb);
-  nlopt_set_min_objective(opt, myfunc, NULL);
+  // double lb[2] = { -HUGE_VAL, 0 }; /* lower bounds */
+  // nlopt_opt opt;
+  // opt = nlopt_create(NLOPT_LN_COBYLA, 2); /* algorithm and dimensionality */
+  // nlopt_set_lower_bounds(opt, lb);
+  // nlopt_set_min_objective(opt, myfunc, NULL);
 
-  my_constraint_data data[2] = { {2,0}, {-1,1} };
-  nlopt_add_inequality_constraint(opt, myconstraint, &data[0], 1e-8);
-  nlopt_add_inequality_constraint(opt, myconstraint, &data[1], 1e-8);
+  // my_constraint_data data[2] = { {2,0}, {-1,1} };
+  // nlopt_add_inequality_constraint(opt, myconstraint, &data[0], 1e-8);
+  // nlopt_add_inequality_constraint(opt, myconstraint, &data[1], 1e-8);
 
-  nlopt_set_xtol_rel(opt, 1e-4);
+  // nlopt_set_xtol_rel(opt, 1e-4);
 
-  double x[2] = { 1.234, 5.678 };  /* some initial guess */
-  double minf; /* the minimum objective value, upon return */
+  // double x[2] = { 1.234, 5.678 };  /* some initial guess */
+  // double minf; /* the minimum objective value, upon return */
 
-  if (nlopt_optimize(opt, x, &minf) < 0) {
-      printf("nlopt failed!\n");
-  }
-  else {
-   printf("found minimum after %d evaluations\n", count);
-      printf("found minimum at f(%g,%g) = %0.10g\n", x[0], x[1], minf);
-  }
+  // if (nlopt_optimize(opt, x, &minf) < 0) {
+  //     printf("nlopt failed!\n");
+  // }
+  // else {
+  //  printf("found minimum after %d evaluations\n", count);
+  //     printf("found minimum at f(%g,%g) = %0.10g\n", x[0], x[1], minf);
+  // }
 
-  nlopt_destroy(opt);
+  // nlopt_destroy(opt);
 
   // //////////// NLOPT C
 
+  // //////////// NLOPT C++ n = 1
+
+  nlopt::opt opt(nlopt::LN_COBYLA, 2);
+
+  std::vector<double> lb(2);
+  lb[0] = 33;
+  lb[1] = 33;
+  opt.set_lower_bounds(lb);
+
+  std::vector<double> ub(2);
+  ub[0] = 200;
+  ub[1] = 200;
+  opt.set_upper_bounds(ub);
+
+  nlopt_data data[1] = nlopt_data(read_len, motif_len, ref_count, this);
+  
+
+  opt.set_min_objective(nloptNegLikelihood, data);    // Change to max for maximization
+
+  opt.set_xtol_rel(1e-4);
+
+  std::vector<double> xx(2);
+  xx[0] = 40;
+  xx[1] = 50;
+  double minf;
+  nlopt::result result = opt.optimize(xx, minf);
+
+  cout<<result<<"\t"<<xx[0]<<","<<xx[1]<<"\t"<<minf<<endl;
+  const double yy[2] = {40, 50};
+  const double uu[2] = {50, 70};
+  // dummy_test(this);
+  // cout<<data[0].lm_ptr->GetSpanningDataSize()<<endl;
+  // cout<<data[0].read_len<<endl;
+  // cout<<endl<<"(40, 50): "<<nloptNegLikelihood(2, yy, NULL, data)<<endl;
+  // cout<<endl<<"(50, 70): "<<nloptNegLikelihood(2, uu, NULL, data)<<endl;
+  // //////////// NLOPT C++ n = 1
+
+
   // //////////// NLOPT C++
 
-
-  // nlopt::opt opt(nlopt::LD_MMA, 2);
+  // nlopt::opt opt(nlopt::LN_COBYLA, 2);
 
   // std::vector<double> lb(2);
   // lb[0] = -HUGE_VAL; lb[1] = 0;
   // opt.set_lower_bounds(lb);
 
-  // opt.set_min_objective(myfunc, NULL);
+  // opt.set_min_objective(myfunc, NULL);    // Change to max for maximization
 
   // my_constraint_data data[2] = { {2,0}, {-1,1} };
   // opt.add_inequality_constraint(myconstraint, &data[0], 1e-8);
@@ -154,7 +252,7 @@ bool LikelihoodMaximizer::OptimizeLikelihood(const int32_t& read_len, const int3
   // double minf;
   // nlopt::result result = opt.optimize(xx, minf);
 
-  // cout<<result<<endl;
+  // cout<<result<<"\t"<<minf<<endl;
   // cout<<"Hi\n";
   // //////////// NLOPT C++
 
@@ -221,18 +319,3 @@ bool LikelihoodMaximizer::OptimizeLikelihood(const int32_t& read_len, const int3
   return false;
 }
 LikelihoodMaximizer::~LikelihoodMaximizer() {}
-
-
-double gslNegLikelihood(const gsl_vector *v, void *params)
-{
-  double A, B;
-  LikelihoodMaximizer *p = (LikelihoodMaximizer *)params;
-  double gt_ll;
-  A = gsl_vector_get(v, 0);
-  B = gsl_vector_get(v, 1);
- 
-  if(!p[0].GetGenotypeNegLogLikelihood(A, B, p[0].options->read_len, p[0].options->motif_len, p[0].options->ref_count, &gt_ll))
-    return -1.0;
-  else
-    return gt_ll;
-}

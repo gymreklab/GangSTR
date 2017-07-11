@@ -31,6 +31,7 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 class LikelihoodMaximizer {
  public:
   LikelihoodMaximizer(const Options& _options);
+  // LikelihoodMaximizer(const LikelihoodMaximizer& lm_obj); // copy constructor
   virtual ~LikelihoodMaximizer();
 
   // Clear data of all classes
@@ -62,6 +63,7 @@ class LikelihoodMaximizer {
   SpanningClass spanning_class_;
 
 };
+
 
 // Helper likelihood function for gsl optimizer
 double gslNegLikelihood(const gsl_vector *v, void *params);

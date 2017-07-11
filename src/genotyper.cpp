@@ -60,6 +60,9 @@ bool Genotyper::ProcessLocus(BamCramMultiReader* bamreader, Locus* locus) {
 				    likelihood_maximizer)) {
     return false;
   }
+  // cout<<endl<<likelihood_maximizer->GetEnclosingDataSize()<<endl;
+  // cout<<endl<<likelihood_maximizer->GetSpanningDataSize()<<endl;
+  // cout<<endl<<likelihood_maximizer->GetFRRDataSize()<<endl;
   // Maximize the likelihood
   int32_t allele1, allele2;
   int32_t read_len = read_extractor->guessed_read_length;
