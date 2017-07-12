@@ -221,13 +221,22 @@ bool LikelihoodMaximizer::OptimizeLikelihood(const int32_t& read_len, const int3
   nlopt::result result = opt.optimize(xx, minf);
 
   cout<<result<<"\t"<<xx[0]<<","<<xx[1]<<"\t"<<minf<<endl;
-  const double yy[2] = {40, 50};
-  const double uu[2] = {50, 70};
+  
   // dummy_test(this);
   // cout<<data[0].lm_ptr->GetSpanningDataSize()<<endl;
   // cout<<data[0].read_len<<endl;
-  // cout<<endl<<"(40, 50): "<<nloptNegLikelihood(2, yy, NULL, data)<<endl;
-  // cout<<endl<<"(50, 70): "<<nloptNegLikelihood(2, uu, NULL, data)<<endl;
+  const double yy[2] = {50, 70};
+  cout<<endl<<"(50, 70): "<<nloptNegLikelihood(2, yy, NULL, data)<<endl;
+  double ans = 0.111;
+  this->frr_class_.GetClassLogLikelihood(50, 70, 100, 3, 13, &ans);
+  cout<<endl<<this->frr_class_.GetDataSize()<<endl;
+  cout<<endl<<"(50, 70) No wrapper: "<<ans<<endl;
+  // const double uu[2] = {52, 78};
+  // cout<<endl<<"(52, 78): "<<nloptNegLikelihood(2, uu, NULL, data)<<endl;
+  // const double ii[2] = {40, 80};
+  // cout<<endl<<"(40, 80): "<<nloptNegLikelihood(2, ii, NULL, data)<<endl;
+  // const double oo[2] = {50, 78};
+  // cout<<endl<<"(50, 78): "<<nloptNegLikelihood(2, oo, NULL, data)<<endl;
   // //////////// NLOPT C++ n = 1
 
 

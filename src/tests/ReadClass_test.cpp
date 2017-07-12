@@ -27,6 +27,19 @@ CPPUNIT_TEST_SUITE_REGISTRATION(ReadClassTest);
 
 void ReadClassTest::setUp() {
   Options options;
+
+  options.dist_mean = 400;
+  options.dist_sdev = 50;
+  options.stutter_up = 0.01;
+  options.stutter_down = 0.02;
+  options.stutter_p = 0.95;
+  options.flanklen = 2000;
+  options.realignment_flanklen = 100;
+  options.frr_weight = 0.8;
+  options.enclosing_weight = 1.0;
+  options.spanning_weight = 1.0;
+  options.verbose = false;
+
   encl_class_.SetOptions(options);
   span_class_.SetOptions(options);
   frr_class_.SetOptions(options);

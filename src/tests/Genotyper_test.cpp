@@ -41,8 +41,11 @@ void GenotyperTest::tearDown() {}
 void GenotyperTest::test_SetFlanks() {
   Options options;
   options.realignment_flanklen = 99;
-  // std::string fastafile = test_dir + "/test.fa";
-  std::string fastafile = "/storage/resources/dbase/human/hs37d5/hs37d5.fa";
+  locus.chrom = "3";
+  locus.start = 201;
+  locus.end = 230;
+  locus.motif = "CAG";
+  std::string fastafile = test_dir + "/test.fa";
   RefGenome refgenome(fastafile);
   Genotyper genotyper(refgenome, options);
   std::string pre_flank = "GGAGCGGAAAGAATGTCGGAGCGGGCCGCGGATGACGTCAGGGGGGAGCCGCGCCGCGCGGCGGCGGCGGCGGGCGGAGCAGCGGCCGCGGCCGCCCGG";
