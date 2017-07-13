@@ -31,7 +31,6 @@ Genotyper::Genotyper(RefGenome _refgenome,
   options = &_options;
   read_extractor = new ReadExtractor();
   likelihood_maximizer = new LikelihoodMaximizer(_options);
-  read_extractor->print_read_data = true; // TODO remove
 }
 
 bool Genotyper::SetFlanks(Locus* locus) {

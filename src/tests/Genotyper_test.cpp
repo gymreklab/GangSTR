@@ -34,6 +34,7 @@ void GenotyperTest::setUp() {
   locus.start = 13318672;
   locus.end = 13318710;
   locus.motif = "CTG";
+  locus.period = 3;
 }
 
 void GenotyperTest::tearDown() {}
@@ -45,6 +46,7 @@ void GenotyperTest::test_SetFlanks() {
   locus.start = 201;
   locus.end = 230;
   locus.motif = "CAG";
+  locus.period = 3;
   std::string fastafile = test_dir + "/test.fa";
   RefGenome refgenome(fastafile);
   Genotyper genotyper(refgenome, options);

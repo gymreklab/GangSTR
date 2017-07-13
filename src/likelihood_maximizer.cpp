@@ -193,7 +193,7 @@ bool LikelihoodMaximizer::OptimizeLikelihood(const int32_t& read_len, const int3
 
   // //////////// NLOPT C
 
-  // //////////// NLOPT C++ n = 1
+  // //////////// NLOPT C++ n = 2
 
   nlopt::opt opt(nlopt::LN_COBYLA, 2);
 
@@ -212,7 +212,7 @@ bool LikelihoodMaximizer::OptimizeLikelihood(const int32_t& read_len, const int3
 
   opt.set_min_objective(nloptNegLikelihood, data);    // Change to max for maximization
 
-  opt.set_xtol_rel(1e-4);
+  opt.set_xtol_rel(1e-5);
 
   std::vector<double> xx(2);
   xx[0] = 40;
@@ -227,10 +227,10 @@ bool LikelihoodMaximizer::OptimizeLikelihood(const int32_t& read_len, const int3
   // cout<<data[0].read_len<<endl;
   const double yy[2] = {50, 70};
   cout<<endl<<"(50, 70): "<<nloptNegLikelihood(2, yy, NULL, data)<<endl;
-  double ans = 0.111;
-  this->frr_class_.GetClassLogLikelihood(50, 70, 100, 3, 13, &ans);
-  cout<<endl<<this->frr_class_.GetDataSize()<<endl;
-  cout<<endl<<"(50, 70) No wrapper: "<<ans<<endl;
+  // double ans = 0.111;
+  // this->spanning_class_.GetClassLogLikelihood(50, 70, 100, 3, 13, &ans);
+  // cout<<endl<<endl<<this->spanning_class_.GetDataSize()<<endl;
+  // cout<<endl<<"(50, 70) Span likelihood: "<<ans<<endl;
   // const double uu[2] = {52, 78};
   // cout<<endl<<"(52, 78): "<<nloptNegLikelihood(2, uu, NULL, data)<<endl;
   // const double ii[2] = {40, 80};
@@ -239,31 +239,6 @@ bool LikelihoodMaximizer::OptimizeLikelihood(const int32_t& read_len, const int3
   // cout<<endl<<"(50, 78): "<<nloptNegLikelihood(2, oo, NULL, data)<<endl;
   // //////////// NLOPT C++ n = 1
 
-
-  // //////////// NLOPT C++
-
-  // nlopt::opt opt(nlopt::LN_COBYLA, 2);
-
-  // std::vector<double> lb(2);
-  // lb[0] = -HUGE_VAL; lb[1] = 0;
-  // opt.set_lower_bounds(lb);
-
-  // opt.set_min_objective(myfunc, NULL);    // Change to max for maximization
-
-  // my_constraint_data data[2] = { {2,0}, {-1,1} };
-  // opt.add_inequality_constraint(myconstraint, &data[0], 1e-8);
-  // opt.add_inequality_constraint(myconstraint, &data[1], 1e-8);
-
-  // opt.set_xtol_rel(1e-4);
-
-  // std::vector<double> xx(2);
-  // xx[0] = 1.234; xx[1] = 5.678;
-  // double minf;
-  // nlopt::result result = opt.optimize(xx, minf);
-
-  // cout<<result<<"\t"<<minf<<endl;
-  // cout<<"Hi\n";
-  // //////////// NLOPT C++
 
   // //////////// GSL Optimizer
   // size_t minim_dim = 2;

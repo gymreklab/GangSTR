@@ -245,9 +245,9 @@ bool ReadExtractor::FindSpanningRead(BamAlignment alignment,
   // Similar to 5.2_filter_spanning_only_core.py:57
   // Only includes obvious cases, pre/post flank taken care of elsewhere
   bool span1 = alignment.RefID() == chrom_ref_id && alignment.GetEndPosition() <= locus.start &&
-    alignment.MateRefID() == chrom_ref_id && alignment.MatePosition() >= locus.end;
+    alignment.MateRefID() == chrom_ref_id && alignment.MatePosition() >= locus.end - locus.period; // Margin of size period to find reads that are post flaknking by 1-2 base pairs (may not be found with realigner)
   bool span2 = alignment.RefID() == chrom_ref_id && alignment.Position() >= locus.end &&
-    alignment.MateRefID() == chrom_ref_id && alignment.MatePosition() <= locus.start-read_length;
+    alignment.MateRefID() == chrom_ref_id && alignment.MatePosition() <= locus.start-read_length + locus.period; // Margin of size period to find reads that are pre flaknking by 1-2 base pairs (may not be found with realigner)
   if (span1 || span2) {
     *insert_size = abs(alignment.TemplateLength());
     return true;
