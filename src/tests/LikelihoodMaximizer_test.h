@@ -43,6 +43,7 @@ class LikelihoodMaximizerTest: public CppUnit::TestFixture {
   void test_AddFRRData();
   void test_GetGenotypeNegLogLikelihood();
 
+  int read_len, motif_len, ref_count;
  private:
   LikelihoodMaximizer* likelihood_maximizer_;
 };

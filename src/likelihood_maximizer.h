@@ -53,6 +53,10 @@ class LikelihoodMaximizer {
   bool OptimizeLikelihood(const int32_t& read_len, const int32_t& motif_len,
 			  const int32_t& ref_count,
 			  int32_t* allele1, int32_t* allele2);
+  // Go over the list of the discovered alleles to find the best pair
+  bool findBestAlleleListTuple(std::vector<int32_t> allele_list,
+                          int32_t read_len, int32_t motif_len, int32_t ref_count,
+                          int32_t* allele1, int32_t* allele2);
 
   // Other params -> Made public for gslNegLikelihood to have access
   const Options* options;
@@ -61,11 +65,42 @@ class LikelihoodMaximizer {
   EnclosingClass enclosing_class_;
   FRRClass frr_class_;
   SpanningClass spanning_class_;
-
+  // Function to extract all enclosing alleles present
+  // bool ExtractEnclosingFreqs();
 };
+;
+
+// Helper struct for NLOPT gradient optimizer
+struct nlopt_data{
+  LikelihoodMaximizer* lm_ptr;
+  int read_len, motif_len, ref_count, n_dim, fix_allele;
+  nlopt_data(int Read_Len, int Motif_Len, int Ref_Count, LikelihoodMaximizer* LM_OBJ, int Fix_Allele) : 
+    read_len(Read_Len), motif_len(Motif_Len), ref_count(Ref_Count), lm_ptr(LM_OBJ), fix_allele(Fix_Allele) {
+    }
+};
+// 1D gradient optimizer using NLOPT
+bool nlopt_1D_optimize(const int32_t& read_len, const int32_t& motif_len,
+                const int32_t& ref_count, const int32_t& lower_bound,
+                const int32_t& upper_bound, LikelihoodMaximizer* lm_ptr,
+                const int32_t& fix_allele, int32_t* allele1,
+                int32_t* ret_result, double* minf_ret);
+// 2D gradient optimizer using NLOPT
+bool nlopt_2D_optimize(const int32_t& read_len, const int32_t& motif_len,
+               const int32_t& ref_count, const int32_t& lower_bound,
+               const int32_t& upper_bound, LikelihoodMaximizer* lm_ptr,
+               int32_t* allele1, int32_t* allele2, int32_t* ret_result, double* minf_ret);
+// Helper function for NLOPT gradient optimizer
+double nloptNegLikelihood(unsigned n, const double *x, double *grad, void *data);
 
 
-// Helper likelihood function for gsl optimizer
-double gslNegLikelihood(const gsl_vector *v, void *params);
 
+
+// // Helper struct for GSL simulated annealing
+// struct siman_data{
+//   LikelihoodMaximizer* lm_ptr;
+//   int read_len, motif_len, ref_count, n_dim, fix_allele, A, B;
+//   nlopt_data(int Read_Len, int Motif_Len, int Ref_Count, LikelihoodMaximizer* LM_OBJ, int Fix_Allele) : 
+//     read_len(Read_Len), motif_len(Motif_Len), ref_count(Ref_Count), lm_ptr(LM_OBJ), fix_allele(Fix_Allele) {
+//     }
+// }
 #endif  // SRC_LIKELIHOOD_MAXIMIZER_H__

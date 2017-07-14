@@ -41,7 +41,7 @@ bool FRRClass::GetLogClassProb(const int32_t& allele,
 	// Compute normalization constant norm_const
 	double norm_const = gsl_cdf_gaussian_P(2 * flank_len + str_len - dist_mean, dist_sdev) -
 						gsl_cdf_gaussian_P(2 * read_len - dist_mean, dist_sdev); 
-	double coef0 = 2.0 / norm_const / (2.0 * flank_len + str_len - 2.0 * read_len);
+	double coef0 = 1.0 / norm_const / (2.0 * flank_len + str_len - 2.0 * read_len);
 	double coef1 = - double(dist_sdev ^ 2);
 	double term1 = gsl_ran_gaussian_pdf(str_len - dist_mean, dist_sdev) -
 					gsl_ran_gaussian_pdf(2 * read_len - dist_mean, dist_sdev);

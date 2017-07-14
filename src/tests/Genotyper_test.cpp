@@ -67,10 +67,9 @@ void GenotyperTest::test_ProcessLocus() {
   RefGenome refgenome(fastafile);
   Genotyper genotyper(refgenome, options);
 
-  std::string bam_file = test_dir + "/47_nc_70.sorted.bam";
+  std::string bam_file = test_dir + "/53_nc_12.sorted.bam";
   std::vector<std::string> files(0);
   files.push_back(bam_file);
   BamCramMultiReader* bamreader = new BamCramMultiReader(files, fastafile);
-  genotyper.ProcessLocus(bamreader, &locus);
-  CPPUNIT_FAIL("test_ProcessLocus() not implemented");
+  CPPUNIT_ASSERT_EQUAL(genotyper.ProcessLocus(bamreader, &locus), true);
 }
