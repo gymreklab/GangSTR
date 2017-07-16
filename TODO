@@ -12,3 +12,4 @@
 * Multi-sample calling
 * multithreading by locus
 * to save memory, don't need to store read1 and read2 in ReadPair
+* Delete GSL stuff as long as we're not using it
