@@ -31,8 +31,10 @@ void GenotyperTest::setUp() {
   // locus.end = 230;
   // locus.motif = "CAG";
   locus.chrom = "19";
-  locus.start = 13318672;
-  locus.end = 13318710;
+  // locus.start = 13318672;
+  // locus.end = 13318710;
+  locus.start = 5000;
+  locus.end = 5039;
   locus.motif = "CTG";
   locus.period = 3;
 }
@@ -62,12 +64,12 @@ void GenotyperTest::test_SetFlanks() {
 void GenotyperTest::test_ProcessLocus() {
   Options options;
   options.realignment_flanklen = 99;
-  // std::string fastafile = test_dir + "/test.fa";
-  std::string fastafile = "/storage/resources/dbase/human/hs37d5/hs37d5.fa";
+  std::string fastafile = test_dir + "/CACNA1A_5k_region.fa";
+  // std::string fastafile = "/storage/reslsources/dbase/human/hs37d5/hs37d5.fa";
   RefGenome refgenome(fastafile);
   Genotyper genotyper(refgenome, options);
 
-  std::string bam_file = test_dir + "/53_nc_12.sorted.bam";
+  std::string bam_file = test_dir + "/54_nc_40.sorted.bam";
   std::vector<std::string> files(0);
   files.push_back(bam_file);
   BamCramMultiReader* bamreader = new BamCramMultiReader(files, fastafile);

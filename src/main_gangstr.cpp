@@ -132,13 +132,13 @@ int main(int argc, char* argv[]) {
   // Set up
   Options options;
   parse_commandline_options(argc, argv, &options);
-
   // Process each region
   RegionReader region_reader(options.regionsfile);
   Locus locus;
   int merge_type = BamCramMultiReader::ORDER_ALNS_BY_FILE;
   BamCramMultiReader bamreader(options.bamfiles, options.reffa, merge_type);
   RefGenome refgenome(options.reffa);
+  // cout<<endl<<options.reff<<endl;
   Genotyper genotyper(refgenome, options);
   stringstream ss;
   while (region_reader.GetNextRegion(&locus)) {
@@ -146,6 +146,6 @@ int main(int argc, char* argv[]) {
     ss << "Processing " << locus.chrom << ":" << locus.start;
     PrintMessageDieOnError(ss.str(), M_PROGRESS);
     genotyper.ProcessLocus(&bamreader, &locus);
-    genotyper.Debug(&bamreader); // todo delete
+    // genotyper.Debug(&bamreader); // todo delete
   };
 }

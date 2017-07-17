@@ -23,7 +23,12 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <cppunit/extensions/HelperMacros.h>
 
+#include "src/locus.h"
+#include "src/options.h"
 #include "src/likelihood_maximizer.h"
+#include "src/read_extractor.h"
+#include "src/ref_genome.h"
+#include "src/genotyper.h"
 
 class LikelihoodMaximizerTest: public CppUnit::TestFixture {
   CPPUNIT_TEST_SUITE(LikelihoodMaximizerTest);
@@ -32,6 +37,7 @@ class LikelihoodMaximizerTest: public CppUnit::TestFixture {
   CPPUNIT_TEST(test_AddSpanningData);
   CPPUNIT_TEST(test_AddFRRData);
   CPPUNIT_TEST(test_GetGenotypeNegLogLikelihood);
+  CPPUNIT_TEST(test_OptimizeLikelihood);
   CPPUNIT_TEST_SUITE_END();
 
  public:
@@ -42,10 +48,15 @@ class LikelihoodMaximizerTest: public CppUnit::TestFixture {
   void test_AddSpanningData();
   void test_AddFRRData();
   void test_GetGenotypeNegLogLikelihood();
+  void test_OptimizeLikelihood();
 
   int read_len, motif_len, ref_count;
  private:
   LikelihoodMaximizer* likelihood_maximizer_;
+  Locus locus;
+  std::string test_dir;
+  Options options;
+
 };
 
 #endif //  SRC_TESTS_LIKELIHOODMAXIMIZER_H_

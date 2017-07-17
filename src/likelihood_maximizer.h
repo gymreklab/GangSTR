@@ -27,6 +27,7 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 #include "src/read_class.h"
 #include "src/spanning_class.h"
 #include "gsl/gsl_vector.h"
+#include <string>
 
 class LikelihoodMaximizer {
  public:
@@ -52,11 +53,11 @@ class LikelihoodMaximizer {
   // Main optimization function - TODO also return other data
   bool OptimizeLikelihood(const int32_t& read_len, const int32_t& motif_len,
 			  const int32_t& ref_count,
-			  int32_t* allele1, int32_t* allele2);
+			  int32_t* allele1, int32_t* allele2, double* min_negLike);
   // Go over the list of the discovered alleles to find the best pair
   bool findBestAlleleListTuple(std::vector<int32_t> allele_list,
                           int32_t read_len, int32_t motif_len, int32_t ref_count,
-                          int32_t* allele1, int32_t* allele2);
+                          int32_t* allele1, int32_t* allele2, double* min_negLike);
 
   // Other params -> Made public for gslNegLikelihood to have access
   const Options* options;

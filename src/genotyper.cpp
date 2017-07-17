@@ -67,11 +67,14 @@ bool Genotyper::ProcessLocus(BamCramMultiReader* bamreader, Locus* locus) {
   int32_t allele1, allele2;
   int32_t read_len = read_extractor->guessed_read_length;
   int32_t ref_count = (int32_t)((locus->end-locus->start+1)/locus->motif.size());
+  double min_negLike;
   if (!likelihood_maximizer->OptimizeLikelihood(read_len, (int32_t)(locus->motif.size()),
 						ref_count,
-						&allele1, &allele2)) {
+						&allele1, &allele2, &min_negLike)) {
     return false;
   }
+  cout<<">>Genotyper Results:\t"<<allele1<<", "<<allele2<<"\tlikelihood = "<<min_negLike<<"\n";
+
   return true;
 }
 

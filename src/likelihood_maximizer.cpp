@@ -78,7 +78,7 @@ bool LikelihoodMaximizer::GetGenotypeNegLogLikelihood(const int32_t& allele1,
 
 bool LikelihoodMaximizer::OptimizeLikelihood(const int32_t& read_len, const int32_t& motif_len,
 					     const int32_t& ref_count,
-					     int32_t* allele1, int32_t* allele2) {
+					     int32_t* allele1, int32_t* allele2, double* min_negLike) {
 
   int32_t a1, a2, result;
   double minf;
@@ -111,16 +111,17 @@ bool LikelihoodMaximizer::OptimizeLikelihood(const int32_t& read_len, const int3
   }
 
   findBestAlleleListTuple(allele_list, read_len, motif_len, ref_count,
-                            allele1, allele2);
+                            allele1, allele2, min_negLike);
 
-  // cout<<endl<<*allele1<<"\t"<<*allele2<<endl;
+  // cout<<endl<<*allele1<<"\t"<<*allele2<<"\t"<<*min_negLike<<endl;
   return true;    // TODO add false
 }
 
 bool LikelihoodMaximizer::findBestAlleleListTuple(std::vector<int32_t> allele_list,
                           int32_t read_len, int32_t motif_len, int32_t ref_count,
-                          int32_t* allele1, int32_t* allele2){
-  double gt_ll, min_negLike = 1000000;
+                          int32_t* allele1, int32_t* allele2, double* min_negLike){
+  double gt_ll;
+  *min_negLike = 1000000;
   int32_t best_a1 = 0, best_a2 = 0;
   for (std::vector<int32_t>::iterator a1_it = allele_list.begin();
           a1_it != allele_list.end();
@@ -129,8 +130,8 @@ bool LikelihoodMaximizer::findBestAlleleListTuple(std::vector<int32_t> allele_li
           a2_it != allele_list.end();
           a2_it++){
       GetGenotypeNegLogLikelihood(*a1_it, *a2_it, read_len, motif_len, ref_count, &gt_ll);
-        if (gt_ll < min_negLike){
-          min_negLike = gt_ll;
+        if (gt_ll < *min_negLike){
+          *min_negLike = gt_ll;
           best_a1 = *a1_it;
           best_a2 = *a2_it;
         }
