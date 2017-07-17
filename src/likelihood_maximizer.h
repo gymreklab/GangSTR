@@ -65,10 +65,7 @@ class LikelihoodMaximizer {
   EnclosingClass enclosing_class_;
   FRRClass frr_class_;
   SpanningClass spanning_class_;
-  // Function to extract all enclosing alleles present
-  // bool ExtractEnclosingFreqs();
 };
-;
 
 // Helper struct for NLOPT gradient optimizer
 struct nlopt_data{
