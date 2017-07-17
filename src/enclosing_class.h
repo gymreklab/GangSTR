@@ -38,6 +38,8 @@ class EnclosingClass: public ReadClass {
 		      const int32_t& read_len, const int32_t& motif_len,
 		      const int32_t& ref_count,
 		      double* log_allele_prob);
+  // Function to extract all enclosing alleles present
+  bool ExtractEnclosingAlleles(std::vector<int> *alleles);
 };
 
 #endif  // SRC_ENCLOSING_CLASS_H__

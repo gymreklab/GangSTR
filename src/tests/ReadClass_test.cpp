@@ -27,6 +27,19 @@ CPPUNIT_TEST_SUITE_REGISTRATION(ReadClassTest);
 
 void ReadClassTest::setUp() {
   Options options;
+
+  options.dist_mean = 400;
+  options.dist_sdev = 50;
+  options.stutter_up = 0.01;
+  options.stutter_down = 0.02;
+  options.stutter_p = 0.95;
+  options.flanklen = 2000;
+  options.realignment_flanklen = 100;
+  options.frr_weight = 0.8;
+  options.enclosing_weight = 1.0;
+  options.spanning_weight = 1.0;
+  options.verbose = false;
+
   encl_class_.SetOptions(options);
   span_class_.SetOptions(options);
   frr_class_.SetOptions(options);
@@ -98,7 +111,7 @@ void ReadClassTest::test_FRRClassProb() {
   int32_t allele = 45;
   double log_class_prob = 0.5;
   frr_class_.GetLogClassProb(allele, read_len, motif_len, &log_class_prob);
-  CPPUNIT_ASSERT_EQUAL(roundf(log_class_prob*pow(10,13))/pow(10,13), roundf(log(0.0177896348168)*pow(10,13))/pow(10,13));
+  CPPUNIT_ASSERT_EQUAL(roundf(log_class_prob*pow(10,13))/pow(10,13), roundf(log(0.0177896348168/2)*pow(10,13))/pow(10,13));
   // CPPUNIT_FAIL("test_FRRClassProb not implemented");
 }
 
@@ -117,7 +130,7 @@ void ReadClassTest::test_EnclosingClassProb() {
   int32_t allele = 25;
   double log_class_prob = 0.5;
   encl_class_.GetLogClassProb(allele, read_len, motif_len, &log_class_prob);
-  CPPUNIT_ASSERT_EQUAL(roundf(log_class_prob*pow(10,13))/pow(10,13), roundf(log(0.0129032258065)*pow(10,13))/pow(10,13));
+  CPPUNIT_ASSERT_EQUAL(roundf(log_class_prob*pow(10,13))/pow(10,13), roundf(log(0.0129032258065/2)*pow(10,13))/pow(10,13));
   // CPPUNIT_FAIL("test_EnclosingClassProb not implemented");
 }
 
@@ -145,7 +158,7 @@ void ReadClassTest::test_GetClassLogLikelihood() {
   encl_class_.AddData(test_data3);
   encl_class_.AddData(test_data4);
   encl_class_.GetClassLogLikelihood(allele1, allele2, read_len, motif_len, ref_count, &class_ll);
-  CPPUNIT_ASSERT_EQUAL(roundf(class_ll*pow(10,11))/pow(10,11), roundf(-142.426968623*pow(10,11))/pow(10,11));
+  CPPUNIT_ASSERT_EQUAL(roundf(class_ll*pow(10,11))/pow(10,11), roundf(-145.199557345*pow(10,11))/pow(10,11));
 
   span_class_.Reset();
   span_class_.AddData(test_data2);
@@ -164,7 +177,7 @@ void ReadClassTest::test_GetClassLogLikelihood() {
   frr_class_.AddData(test_data3);
   frr_class_.AddData(test_data4);
   frr_class_.GetClassLogLikelihood(allele1, allele2, read_len, motif_len, ref_count, &class_ll);
-  CPPUNIT_ASSERT_EQUAL(roundf(class_ll*pow(10,11))/pow(10,11), roundf(-38.0513256637*pow(10,11))/pow(10,11));
+  CPPUNIT_ASSERT_EQUAL(roundf(class_ll*pow(10,11))/pow(10,11), roundf(-40.8239143859*pow(10,11))/pow(10,11));
 
   // std::cout<<std::endl<<class_ll<<std::endl;
   // CPPUNIT_FAIL("test_GetClassLogLikelihood not implemented");
@@ -176,7 +189,7 @@ void ReadClassTest::test_GetAlleleLogLikelihood() {
   double allele_ll = 0.5;
   int32_t data = 24;
   encl_class_.GetAlleleLogLikelihood(allele, data, read_len, motif_len, ref_count, &allele_ll);
-  CPPUNIT_ASSERT_EQUAL(roundf(allele_ll*pow(10,11))/pow(10,11), roundf(-8.31359423617*pow(10,11))/pow(10,11));
+  CPPUNIT_ASSERT_EQUAL(roundf(allele_ll*pow(10,11))/pow(10,11), roundf(-9.00674141673*pow(10,11))/pow(10,11));
   allele = 55;
   data = 430;
   span_class_.GetAlleleLogLikelihood(allele, data, read_len, motif_len, ref_count, &allele_ll);
@@ -184,7 +197,7 @@ void ReadClassTest::test_GetAlleleLogLikelihood() {
   allele = 55;
   data = 80;
   frr_class_.GetAlleleLogLikelihood(allele, data, read_len, motif_len, ref_count, &allele_ll);
-  CPPUNIT_ASSERT_EQUAL(roundf(allele_ll*pow(10,11))/pow(10,11), roundf(-5.47755044837*pow(10,11))/pow(10,11));
+  CPPUNIT_ASSERT_EQUAL(roundf(allele_ll*pow(10,11))/pow(10,11), roundf(-6.17069762893*pow(10,11))/pow(10,11));
   // CPPUNIT_FAIL("test_GetAlleleLogLikelihood not implemented");
 }
 

@@ -17,9 +17,10 @@
 # along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 
 HTS_LIBS = -Ilib/htslib -lhts
+NLOP_LIBS = -lnlopt -lm
 
 AM_CPPFLAGS = -I$(top_srcdir) $(GSL_CFLAGS)
-AM_LDFLAGS = $(GSL_LIBS)
+AM_LDFLAGS = $(GSL_LIBS) $(NLOP_LIBS)
 
 bin_PROGRAMS = GangSTR
 
@@ -51,7 +52,7 @@ GangSTR_SOURCES = main_gangstr.cpp
 GangSTR_CPPFLAGS = $(AM_CPPFLAGS)
 GangSTR_CFLAGS = $(AM_CFLAGS)
 GangSTR_CXXFLAGS = $(AM_CXXFLAGS)
-GangSTR_LDADD = libgangstr.a $(GSL_LIBS)
+GangSTR_LDADD = libgangstr.a $(GSL_LIBS) $(NLOP_LIBS)
 
 # (Copied from coreutils' tests/local.mk)
 # Use automake's TESTS_ENVIRONMENT to point to the "tests" directory
@@ -88,5 +89,6 @@ GangSTRTests_SOURCES = \
 	tests/Genotyper_test.h tests/Genotyper_test.cpp \
 	tests/Realignment_test.h tests/Realignment_test.cpp \
 	tests/main_test.cpp
-GangSTRTests_CXXFLAGS = $(CPPUNIT_CFLAGS) $(GSL_CFLAGS)
-GangSTRTests_LDFLAGS = $(CPPUNIT_LIBS) -ldl $(GSL_LIBS) $(HTS_LIBS)
+GangSTRTests_CXXFLAGS = $(CPPUNIT_CFLAGS) $(GSL_CFLAGS) 
+GangSTRTests_LDFLAGS = -I/usr/local/lib $(CPPUNIT_LIBS) -ldl $(GSL_LIBS) $(HTS_LIBS) $(NLOP_LIBS) 
+GangSTRTests_LDADD = $(NLOP_LIBS)

@@ -40,6 +40,7 @@ void ReadExtractorTest::setUp() {
   locus.pre_flank = "TAGGAGCGGAAAGAATGTCGGAGCGGGCCGCGGATGACGTCAGGGGGGAGCCGCGCCGCGCGGCGGCGGCGGCGGGCGGAGCAGCGGCCGCGGCCGCCCGG";
   locus.post_flank = "CCGCCGCCTCCGCAGCCCCAGCGGCAGCAGCACCCGCCACCGCCGCCACGGCGCACACGGCCGGAGGACGGCGGGCCCGGCGCCGCCTCCACCTCGGCCGC";
   locus.motif = "CAG";
+  locus.period = 3;
   std::string answers_file = test_dir + "/test_pair_answers.tab";
   LoadAnswers(answers_file, &read_type_answers, &data_answers);
   regionsize = 5000;

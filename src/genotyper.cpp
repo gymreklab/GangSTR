@@ -31,7 +31,6 @@ Genotyper::Genotyper(RefGenome _refgenome,
   options = &_options;
   read_extractor = new ReadExtractor();
   likelihood_maximizer = new LikelihoodMaximizer(_options);
-  read_extractor->print_read_data = true; // TODO remove
 }
 
 bool Genotyper::SetFlanks(Locus* locus) {
@@ -61,16 +60,21 @@ bool Genotyper::ProcessLocus(BamCramMultiReader* bamreader, Locus* locus) {
 				    likelihood_maximizer)) {
     return false;
   }
+  // cout<<endl<<likelihood_maximizer->GetEnclosingDataSize()<<endl;
+  // cout<<endl<<likelihood_maximizer->GetSpanningDataSize()<<endl;
+  // cout<<endl<<likelihood_maximizer->GetFRRDataSize()<<endl;
   // Maximize the likelihood
   int32_t allele1, allele2;
   int32_t read_len = read_extractor->guessed_read_length;
   int32_t ref_count = (int32_t)((locus->end-locus->start+1)/locus->motif.size());
+  double min_negLike;
   if (!likelihood_maximizer->OptimizeLikelihood(read_len, (int32_t)(locus->motif.size()),
 						ref_count,
-						&allele1, &allele2)) {
+						&allele1, &allele2, &min_negLike)) {
     return false;
   }
-  // Fill in locus with relevant information
+  cout<<">>Genotyper Results:\t"<<allele1<<", "<<allele2<<"\tlikelihood = "<<min_negLike<<"\n";
+
   return true;
 }
 
@@ -91,6 +95,7 @@ void Genotyper::Debug(BamCramMultiReader* bamreader) {
   cerr << "testing GSL" << endl;
   double x = TestGSL();
   cerr << "gsl_ran_gaussian_pdf(0, 1) " << x << endl;
+  double y = TestNLOPT();
 }
 
 Genotyper::~Genotyper() {

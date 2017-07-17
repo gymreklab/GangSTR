@@ -39,6 +39,7 @@ A read class consists of:
  */
 class ReadClass {
   friend class ReadClassTest;
+  friend class enclosing_class;
  public:
   const static double NEG_INF = -100; // TODO make smaller?
   ReadClass();
@@ -72,7 +73,9 @@ class ReadClass {
   double stutter_up;
   double stutter_down;
   double stutter_p;
-
+  // Store vector of data for this class
+  std::vector<int32_t> read_class_data_;
+  
  private:
   // Calculate class probability for an allele - implemented in children classes
   virtual bool GetLogClassProb(const int32_t& allele,
@@ -84,8 +87,7 @@ class ReadClass {
 			      const int32_t& ref_count,
 			      double* log_allele_prob);
 
-  // Store vector of data for this class
-  std::vector<int32_t> read_class_data_;
+  
   // Allele weights. TODO: change if phasing available, would need per-read weights
   const static double allele1_weight_ = 0.5;
   const static double allele2_weight_ = 0.5;
