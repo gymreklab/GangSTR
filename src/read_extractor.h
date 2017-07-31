@@ -26,8 +26,10 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 #include "src/likelihood_maximizer.h"
 #include "src/read_pair.h"
 
+#include <math.h>
 class ReadExtractor {
   friend class ReadExtractorTest;
+  friend class Genotyper;
  public:
   ReadExtractor();
   virtual ~ReadExtractor();
@@ -52,6 +54,11 @@ class ReadExtractor {
   bool ProcessReadPairs(BamCramMultiReader* bamreader,
 			const Locus& locus, const int32_t& regionsize,
 			std::map<std::string, ReadPair>* read_pairs);
+
+  // Find insert size distribution
+  bool ComputeInsertSizeDistribution(BamCramMultiReader* bamreader,
+       const Locus& locus,
+       double* mean, double* std_dev);
 
   // Check if read should be discarded
   bool FindDiscardedRead(BamAlignment alignment,

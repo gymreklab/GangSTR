@@ -19,11 +19,12 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include <map>
-
 #include "src/stringops.h"
 #include "src/read_extractor.h"
 #include "src/realignment.h"
-
+#include "gsl/gsl_statistics_int.h"
+#include <iostream>
+using namespace std;
 ReadExtractor::ReadExtractor() {}
 
 /*
@@ -45,17 +46,17 @@ bool ReadExtractor::ExtractReads(BamCramMultiReader* bamreader,
        iter != read_pairs.end(); iter++) {
     if (iter->second.read_type == RC_SPAN) {
       if (print_read_data) {
-	std::cerr << iter->first << " " << "SPAN" << " " << iter->second.data_value << std::endl; // TODO remove
+	std::cerr << iter->first << "\t" << "SPAN" << "\t" << iter->second.data_value << std::endl; // TODO remove
       }
       likelihood_maximizer->AddSpanningData(iter->second.data_value);
     } else if (iter->second.read_type == RC_ENCL) {
       if (print_read_data) {
-	std::cerr << iter->first << " " << "ENCLOSE" << " " << iter->second.data_value << std::endl; // TODO remove
+	std::cerr << iter->first << "\t" << "ENCLOSE" << "\t" << iter->second.data_value << std::endl; // TODO remove
       }
       likelihood_maximizer->AddEnclosingData(iter->second.data_value);
     } else if (iter->second.read_type == RC_FRR) {
       if (print_read_data) {
-	std::cerr << iter->first << " " << "FRR" << " " << iter->second.data_value << std::endl; // TODO remove
+	std::cerr << iter->first << "\t" << "FRR" << "\t" << iter->second.data_value << std::endl; // TODO remove
       }
       likelihood_maximizer->AddFRRData(iter->second.data_value);
     } else {
@@ -322,7 +323,12 @@ bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
   }
   /* FRR cases */
   // 5.2_filter_FRR_only_core.py:136
+  // Added this line to fix issues with mates being mapped to different chroms
   if (srt == SR_IRR) {
+    if (alignment.MateRefID() != '=' and alignment.MateRefID() != chrom_ref_id){
+      *read_type = RC_UNKNOWN;
+      return true;
+    }
     *read_type = RC_FRR;
     if (alignment.MatePosition() < locus.start) {
       *data_value = locus.start - (alignment.MatePosition()+read_length);
@@ -383,6 +389,50 @@ std::string ReadExtractor::trim_alignment_name(const BamAlignment& aln) const {
       aln_name.resize(aln_name.size()-2);
   }
   return aln_name;
+}
+
+
+/*
+  Computing the insert size distribution
+ */
+bool ReadExtractor::ComputeInsertSizeDistribution(BamCramMultiReader* bamreader,
+             const Locus& locus,
+             double* mean, double* std_dev) {
+  // TODO change 200000 flank size to something appropriate
+  int32_t flank_size = 200000;
+  // Get bam alignments from the relevant region
+  bamreader->SetRegion(locus.chrom, locus.start-flank_size>0?locus.start-flank_size:0, locus.end+flank_size);
+  // Header has info about chromosome names
+  const BamHeader* bam_header = bamreader->bam_header();
+  const int32_t chrom_ref_id = bam_header->ref_id(locus.chrom);
+
+  // Go through each alignment in the region
+  BamAlignment alignment;
+  int32_t median, size = 0, sum = 0, valid_size = 0, sum_std = 0;
+  std::vector<int32_t> temp_len_vec, valid_temp_len_vec;
+  while (bamreader->GetNextAlignment(alignment)) {
+    // Set template length
+    temp_len_vec.push_back(abs(alignment.TemplateLength()));
+    size++;
+  }
+
+  sort(temp_len_vec.begin(), temp_len_vec.end());
+  median = temp_len_vec.at(int32_t(size / 2));
+  
+  for (std::vector<int32_t>::iterator temp_it = temp_len_vec.begin();
+       temp_it != temp_len_vec.end();
+       ++temp_it) {
+    // Todo change 3
+    if(*temp_it < 3 * median){
+      valid_temp_len_vec.push_back(*temp_it);
+      valid_size++;  
+    }
+  }
+  int* valid_temp_len_arr = &valid_temp_len_vec[0];
+  *mean = gsl_stats_int_mean(valid_temp_len_arr, 1, valid_size - 1);
+  *std_dev = gsl_stats_int_sd_m (valid_temp_len_arr,  1, valid_size, *mean);
+
+  return true;  //TODO add false case
 }
 
 ReadExtractor::~ReadExtractor() {}

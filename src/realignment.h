@@ -32,7 +32,7 @@ const static int32_t MISMATCH_SCORE = -1;
 const static int32_t GAP_SCORE = -3;
 
 // amount of slip we allow between alignment position and STR start and end
-const static int32_t MARGIN = 2;
+static int32_t MARGIN = 5;		// This value is reset in expansion_aware_realign
 // Threshold to discard alignment as non-overlapping
 const static double MATCH_PERC_THRESHOLD = 0.9;
 

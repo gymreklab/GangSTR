@@ -35,6 +35,7 @@ class Locus {
   std::string motif;
   std::string pre_flank;
   std::string post_flank;
+  // std::string bed_file; TODO remove
 };
 
 #endif  // SRC_LOCUS_H__

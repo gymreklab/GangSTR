@@ -36,6 +36,7 @@ bool expansion_aware_realign(const std::string& seq,
   int32_t current_score = 0;
   int32_t current_pos = 0;
   int32_t current_nCopy;
+  MARGIN = 4 * period - 1;
   for (current_nCopy=0; current_nCopy<(int32_t)(read_len/period)+2; current_nCopy++) {
     std::stringstream var_realign_ss;
     var_realign_ss << pre_flank;
