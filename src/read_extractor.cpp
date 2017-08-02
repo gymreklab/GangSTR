@@ -276,14 +276,15 @@ bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
   int32_t score, score_rev;
   int32_t nCopy, nCopy_rev;
   std::string seq = alignment.QueryBases();
+  std::string qual = alignment.Qualities();
   std::string seq_rev = reverse_complement(seq);
   int32_t read_length = (int32_t)seq.size();
   /* Perform realignment and classification */
-  if (!expansion_aware_realign(seq, locus.pre_flank, locus.post_flank, locus.motif,
+  if (!expansion_aware_realign(seq, qual, locus.pre_flank, locus.post_flank, locus.motif,
 			       &nCopy, &pos, &score)) {
     return false;
   }
-  if (!expansion_aware_realign(seq_rev, locus.pre_flank, locus.post_flank, locus.motif,
+  if (!expansion_aware_realign(seq_rev, qual, locus.pre_flank, locus.post_flank, locus.motif,
 			       &nCopy_rev, &pos_rev, &score_rev)) {
     return false;
   }
