@@ -54,6 +54,7 @@ Options::Options() {
   frr_weight = 0.3;
   enclosing_weight = 0.3;
   spanning_weight = 1.0;
+  flanking_weight = 0.6;
   verbose = false;
 }
 

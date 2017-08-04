@@ -35,6 +35,7 @@ LikelihoodMaximizer::LikelihoodMaximizer(const Options& _options) {
   enclosing_class_.SetOptions(*options);
   frr_class_.SetOptions(*options);
   spanning_class_.SetOptions(*options);
+  flanking_class_.SetOptions(*options);
 }
 
 void LikelihoodMaximizer::Reset() {
@@ -52,6 +53,9 @@ void LikelihoodMaximizer::AddSpanningData(const int32_t& data) {
 void LikelihoodMaximizer::AddFRRData(const int32_t& data) {
   frr_class_.AddData(data);
 }
+void LikelihoodMaximizer::AddFlankingData(const int32_t& data) {
+  flanking_class_.AddData(data);
+}
 std::size_t LikelihoodMaximizer::GetEnclosingDataSize() {
   return enclosing_class_.GetDataSize();
 }
@@ -68,13 +72,17 @@ bool LikelihoodMaximizer::GetGenotypeNegLogLikelihood(const int32_t& allele1,
 						      const int32_t& motif_len,
 						      const int32_t& ref_count,
 						      double* gt_ll) {
-  double frr_ll, span_ll, encl_ll = 0.0;
+  double frr_ll, span_ll, encl_ll, flank_ll = 0.0;
   frr_class_.GetClassLogLikelihood(allele1, allele2, read_len, motif_len, ref_count, &frr_ll);
   spanning_class_.GetClassLogLikelihood(allele1, allele2, read_len, motif_len, ref_count, &span_ll);
   enclosing_class_.GetClassLogLikelihood(allele1, allele2, read_len, motif_len, ref_count, &encl_ll);
+  // flanking class overloads GetClassLogLikelihood function
+  flanking_class_.FlankingClass::GetClassLogLikelihood(allele1, allele2, read_len, motif_len, ref_count, &flank_ll);
+
   *gt_ll = -1*(options->frr_weight*frr_ll +
 	       options->spanning_weight*span_ll +
-	       options->enclosing_weight*encl_ll);
+	       options->enclosing_weight*encl_ll + 
+         options->flanking_weight*flank_ll);
 }
 
 bool LikelihoodMaximizer::OptimizeLikelihood(const int32_t& read_len, const int32_t& motif_len,

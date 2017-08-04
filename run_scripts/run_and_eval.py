@@ -30,9 +30,11 @@ with open (bam_file_list, 'r') as bam_list:
 			estm_genot = [float(x) for x in list(re.findall('(\d+)\, (\d+)',result))[0]]
 
 		print '>>  ', (min(real_genot), max(real_genot)), '->\t', (min(estm_genot), max(estm_genot))
-		samp_error_s = min(estm_genot) - min(real_genot)
+		# TODO remove 2 for non-HTT datasets
+		samp_error_s = min(estm_genot) - min(real_genot) - 2
 		samp_error_l = max(estm_genot) - max(real_genot)
 		samp_count = samp_count + 1.0
+
 
 		if error_mode == "rms":
 			sum_error_s = sum_error_s + samp_error_s * samp_error_s
@@ -41,8 +43,9 @@ with open (bam_file_list, 'r') as bam_list:
 			sum_error_s = sum_error_s + np.abs(samp_error_s)
 			sum_error_l = sum_error_l + np.abs(samp_error_l)
 
+		print samp_error_s, samp_error_l, samp_count
 
-		# if samp_count == 3:
+		# if samp_count == 10:
 		# 	break;
 
 if error_mode == "rms":

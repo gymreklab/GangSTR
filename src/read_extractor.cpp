@@ -59,6 +59,11 @@ bool ReadExtractor::ExtractReads(BamCramMultiReader* bamreader,
 	std::cerr << iter->first << "\t" << "FRR" << "\t" << iter->second.data_value << std::endl; // TODO remove
       }
       likelihood_maximizer->AddFRRData(iter->second.data_value);
+    } else if (iter->second.read_type == RC_BOUND) {
+      if (print_read_data) {
+  std::cerr << iter->first << "\t" << "BOUND" << "\t" << iter->second.data_value << std::endl; // TODO remove
+      }
+      likelihood_maximizer->AddFlankingData(iter->second.data_value);
     } else {
       continue;
     }
