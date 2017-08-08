@@ -1,4 +1,5 @@
 # More Urgent
+* Add unit test for new functions.
 * require minimum matching at read ends, at least for enclosing reads
 * command line options for setting insert size, stutter, etc.
 * option to automatically detect insert size parameters

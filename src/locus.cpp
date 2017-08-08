@@ -27,6 +27,7 @@ Locus::Locus() {
   start = -1;
   end = -1;
   period = -1;
+  // bed_file = ""; TODO remove
 }
 
 Locus::~Locus() {}

@@ -43,17 +43,18 @@ Options::Options() {
   reffa = "";
   regionsfile = "";
   outprefix = "";
-  dist_mean = 500;
-  dist_sdev = 50;
-  stutter_up = 0.01;
-  stutter_down = 0.02;
-  stutter_p = 0.95;
+  dist_mean = 200;
+  dist_sdev = 70;
+  stutter_up = 0.0364653;
+  stutter_down = 0.0428387;
+  stutter_p = 0.818913;
   flanklen = 3000;
   realignment_flanklen = 100;
   regionsize = 2000;
-  frr_weight = 0.3;
-  enclosing_weight = 1.0;
+  frr_weight = 0.4;
+  enclosing_weight = 0.3;
   spanning_weight = 1.0;
+  flanking_weight = 0.6;
   verbose = false;
 }
 

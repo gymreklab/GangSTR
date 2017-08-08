@@ -138,6 +138,7 @@ int main(int argc, char* argv[]) {
   int merge_type = BamCramMultiReader::ORDER_ALNS_BY_FILE;
   BamCramMultiReader bamreader(options.bamfiles, options.reffa, merge_type);
   RefGenome refgenome(options.reffa);
+  
   // cout<<endl<<options.reff<<endl;
   Genotyper genotyper(refgenome, options);
   stringstream ss;

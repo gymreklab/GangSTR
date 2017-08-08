@@ -35,7 +35,7 @@ class Genotyper {
   friend class GenotyperTest;
  public:
   Genotyper(RefGenome _refgenome,
-	    const Options& _options);
+	    Options& _options);
   virtual ~Genotyper();
 
   bool ProcessLocus(BamCramMultiReader* bamreader, Locus* locus);
@@ -46,7 +46,7 @@ class Genotyper {
   bool SetFlanks(Locus* locus);
 
   RefGenome* refgenome;
-  const Options* options;
+  Options* options;
   LikelihoodMaximizer* likelihood_maximizer;
   ReadExtractor* read_extractor;
 };

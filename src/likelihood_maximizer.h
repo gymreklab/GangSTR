@@ -23,6 +23,7 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "src/enclosing_class.h"
 #include "src/frr_class.h"
+#include "src/flanking_class.h"
 #include "src/options.h"
 #include "src/read_class.h"
 #include "src/spanning_class.h"
@@ -41,6 +42,7 @@ class LikelihoodMaximizer {
   void AddEnclosingData(const int32_t& data);
   void AddSpanningData(const int32_t& data);
   void AddFRRData(const int32_t& data);
+  void AddFlankingData(const int32_t& data);
   // Check data size
   std::size_t GetEnclosingDataSize();
   std::size_t GetSpanningDataSize();
@@ -66,6 +68,7 @@ class LikelihoodMaximizer {
   EnclosingClass enclosing_class_;
   FRRClass frr_class_;
   SpanningClass spanning_class_;
+  FlankingClass flanking_class_;
 };
 
 // Helper struct for NLOPT gradient optimizer

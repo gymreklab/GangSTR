@@ -36,6 +36,7 @@ libgangstr_a_SOURCES = \
 	genotyper.h genotyper.cpp \
 	read_class.h read_class.cpp \
 	frr_class.h frr_class.cpp \
+	flanking_class.h flanking_class.cpp \
 	enclosing_class.h enclosing_class.cpp \
 	spanning_class.h spanning_class.cpp \
 	likelihood_maximizer.h likelihood_maximizer.cpp \
@@ -73,6 +74,7 @@ GangSTRTests_SOURCES = \
 	genotyper.h genotyper.cpp \
 	read_class.h read_class.cpp \
 	frr_class.h frr_class.cpp \
+	flanking_class.h flanking_class.cpp \
 	enclosing_class.h enclosing_class.cpp \
 	spanning_class.h spanning_class.cpp \
 	likelihood_maximizer.h likelihood_maximizer.cpp \

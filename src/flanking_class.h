@@ -18,24 +18,30 @@ You should have received a copy of the GNU General Public License
 along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef SRC_LOCUS_H__
-#define SRC_LOCUS_H__
+#ifndef SRC_FLANKING_CLASS_H__
+#define SRC_FLANKING_CLASS_H__
 
-#include <string>
+#include "src/read_class.h"
 
-class Locus {
+/*
+  Type of ReadClass
+
+  Flanking read pair have at least one partially repetetive mate.
+
+ */
+class FlankingClass: public ReadClass {
  public:
-  Locus();
-  virtual ~Locus();
+	bool GetAlleleLogLikelihood(const int32_t& allele,
+				   const int32_t& data,
+				   const int32_t& read_len,
+				   const int32_t& motif_len,
+				   const int32_t& ref_count,
+				   double* allele_ll);
 
-  std::string chrom;
-  int start;
-  int end;
-  int period;
-  std::string motif;
-  std::string pre_flank;
-  std::string post_flank;
-  // std::string bed_file; TODO remove
+	bool GetClassLogLikelihood(const int32_t& allele1,
+				      const int32_t& allele2,
+				      const int32_t& read_len, const int32_t& motif_len,
+				      const int32_t& ref_count,
+				      double* class_ll);
 };
-
-#endif  // SRC_LOCUS_H__
+#endif  // SRC_FLANKING_CLASS_H__

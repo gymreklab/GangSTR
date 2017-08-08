@@ -23,7 +23,10 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 #include <sstream>
 #include <iostream>
 
+using namespace std;
+
 bool expansion_aware_realign(const std::string& seq,
+           const std::string& qual,
 			     const std::string& pre_flank,
 			     const std::string& post_flank,
 			     const std::string& motif,
@@ -31,11 +34,14 @@ bool expansion_aware_realign(const std::string& seq,
   int32_t read_len = (int32_t)seq.size();
   int32_t period = (int32_t)motif.size();
   int32_t max_score = 0;
+  int32_t second_best_score = 0;
   int32_t max_nCopy = 0;
+  int32_t second_best_nCopy = 0;
   int32_t max_pos = 0;
   int32_t current_score = 0;
   int32_t current_pos = 0;
   int32_t current_nCopy;
+  MARGIN = 2 * period - 1;
   for (current_nCopy=0; current_nCopy<(int32_t)(read_len/period)+2; current_nCopy++) {
     std::stringstream var_realign_ss;
     var_realign_ss << pre_flank;
@@ -44,10 +50,12 @@ bool expansion_aware_realign(const std::string& seq,
     }
     var_realign_ss << post_flank;
     std::string var_realign_string = var_realign_ss.str();
-    if (!smith_waterman(var_realign_string, seq, &current_pos, &current_score)) {
+    if (!smith_waterman(var_realign_string, seq, qual, &current_pos, &current_score)) {
       return false;
     }
     if (current_score > max_score) {
+      second_best_score = max_score;
+      second_best_nCopy = max_nCopy;
       max_score = current_score;
       max_nCopy = current_nCopy;
       max_pos = current_pos;
@@ -56,6 +64,8 @@ bool expansion_aware_realign(const std::string& seq,
       break;
     }
   }
+  // cout << max_score << "\t" << second_best_score<<endl;
+  // cout << max_nCopy << "\t" << second_best_nCopy<<endl<<endl;
   *nCopy = max_nCopy;
   *score = max_score;
   *pos = max_pos;
@@ -64,6 +74,7 @@ bool expansion_aware_realign(const std::string& seq,
 
 bool smith_waterman(const std::string& seq1,
 		    const std::string& seq2,
+        const std::string& qual,
 		    int32_t* pos, int32_t* score) {
   // The scoring matrix contains an extra row and column for the gap (-), hence
   // the +1 here
@@ -75,7 +86,7 @@ bool smith_waterman(const std::string& seq1,
   int32_t start_pos;
   std::vector<std::vector<int32_t> > score_matrix;
   score_matrix.resize(rows, std::vector<int32_t>(cols, 0));
-  if (!create_score_matrix(rows, cols, seq1, seq2,
+  if (!create_score_matrix(rows, cols, seq1, seq2, qual,
 			   &score_matrix, &start_pos, &current_score)) {
     return false;
   }
@@ -94,6 +105,7 @@ bool smith_waterman(const std::string& seq1,
 bool create_score_matrix(const int32_t& rows, const int32_t& cols,
 			 const std::string& seq1,
 			 const std::string& seq2,
+       const std::string& qual,
 			 std::vector<std::vector<int32_t> >* score_matrix,
 			 int32_t* start_pos, int32_t* current_score) {
   int32_t max_score = 0;
@@ -101,7 +113,7 @@ bool create_score_matrix(const int32_t& rows, const int32_t& cols,
   int32_t max_pos_col = -1;
   for (int32_t i=1; i<rows; i++) {
     for (int32_t j=1; j<cols; j++) {
-      if (!calc_score(i, j, seq1, seq2, score_matrix)) {
+      if (!calc_score(i, j, seq1, seq2, qual, score_matrix)) {
 	return false;
       }
       if (score_matrix->at(i).at(j) > max_score) {
@@ -127,10 +139,15 @@ bool create_score_matrix(const int32_t& rows, const int32_t& cols,
  */
 bool calc_score(const int32_t& i, const int32_t& j,
 		const std::string& seq1, const std::string& seq2,
+    const std::string& qual,
 		std::vector<std::vector<int32_t> >* score_matrix) {
   int32_t max_score = 0;
+  int32_t baseq = int32_t(qual.at(j-1));
   int32_t similarity = (seq1.at(i-1)==seq2.at(j-1)) ? 
     MATCH_SCORE : MISMATCH_SCORE;
+  // TODO pass threshold instead of hard code
+  // int32_t similarity = (seq1.at(i-1)==seq2.at(j-1)) ? 
+  //   MATCH_SCORE : (baseq>45 ? MISMATCH_SCORE : MISMATCH_SCORE / 4);
   int32_t diag_score = score_matrix->at(i-1).at(j-1) + similarity;
   if (diag_score > max_score) {
     max_score = diag_score;

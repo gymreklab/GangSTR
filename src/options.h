@@ -51,6 +51,7 @@ class Options {
   double frr_weight;
   double enclosing_weight;
   double spanning_weight;
+  double flanking_weight;
   // Helpers
   bool verbose;
   // Experiment parameters for likelihood maximizer

@@ -26,7 +26,7 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 using namespace std;
 
 Genotyper::Genotyper(RefGenome _refgenome,
-		     const Options& _options) {
+		    Options& _options) {
   refgenome = &_refgenome;
   options = &_options;
   read_extractor = new ReadExtractor();
@@ -54,12 +54,22 @@ bool Genotyper::ProcessLocus(BamCramMultiReader* bamreader, Locus* locus) {
   if (!SetFlanks(locus)) {
     return false;
   }
+
+  double mean, std_dev;
   // Load all read data
   likelihood_maximizer->Reset();
+  if (!read_extractor->ComputeInsertSizeDistribution(bamreader, *locus,
+            &mean, &std_dev)) {
+    return false;
+  }
+  options->dist_mean = mean;
+  options->dist_sdev = std_dev;
+  // cout<<endl<<mean<<"\t"<<std_dev<<endl;
   if (!read_extractor->ExtractReads(bamreader, *locus, options->regionsize,
 				    likelihood_maximizer)) {
     return false;
   }
+  
   // cout<<endl<<likelihood_maximizer->GetEnclosingDataSize()<<endl;
   // cout<<endl<<likelihood_maximizer->GetSpanningDataSize()<<endl;
   // cout<<endl<<likelihood_maximizer->GetFRRDataSize()<<endl;
