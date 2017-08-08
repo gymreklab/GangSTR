@@ -18,6 +18,7 @@ You should have received a copy of the GNU General Public License
 along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+
 #include <map>
 #include "src/stringops.h"
 #include "src/read_extractor.h"
@@ -331,7 +332,7 @@ bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
   // 5.2_filter_FRR_only_core.py:136
   // Added this line to fix issues with mates being mapped to different chroms
   if (srt == SR_IRR) {
-    if (alignment.MateRefID() != '=' and alignment.MateRefID() != chrom_ref_id){
+    if (alignment.MateRefID() != chrom_ref_id){
       *read_type = RC_UNKNOWN;
       return true;
     }
