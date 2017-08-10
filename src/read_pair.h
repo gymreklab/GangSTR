@@ -41,6 +41,7 @@ class ReadPair {
   BamAlignment read2;
   ReadType read_type;
   int32_t data_value;
+  int32_t max_nCopy;    // maximum nCopy among two reads (used for flanking heuristic)
   bool found_pair;
 };
 

@@ -18,7 +18,6 @@ You should have received a copy of the GNU General Public License
 along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-
 #include <map>
 #include "src/stringops.h"
 #include "src/read_extractor.h"
@@ -50,6 +49,18 @@ bool ReadExtractor::ExtractReads(BamCramMultiReader* bamreader,
 	std::cerr << iter->first << "\t" << "SPAN" << "\t" << iter->second.data_value << std::endl; // TODO remove
       }
       likelihood_maximizer->AddSpanningData(iter->second.data_value);
+      // In spanning case, we can also have flanking reads:
+      if (iter->second.max_nCopy > 0){
+        if (print_read_data) {
+          std::cerr << iter->first << "\t" << "SPFLNK" << "\t" << iter->second.max_nCopy << std::endl; // TODO remove
+        }
+        // if (iter->second.max_nCopy < 40){
+        //   cout<<((BamAlignment)iter->second.read1).QueryBases()<<endl;
+        //   cout<<((BamAlignment)iter->second.read2).QueryBases()<<endl;
+        // }
+        
+        // likelihood_maximizer->AddFlankingData(iter->second.max_nCopy);
+      }
     } else if (iter->second.read_type == RC_ENCL) {
       if (print_read_data) {
 	std::cerr << iter->first << "\t" << "ENCLOSE" << "\t" << iter->second.data_value << std::endl; // TODO remove
@@ -118,29 +129,38 @@ bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
     std::map<std::string, ReadPair>::iterator rp_iter = read_pairs->find(aln_key);
     if (rp_iter != read_pairs->end()) {
       if (debug) {
-	std::cerr << "Already found mate  " << alignment.Name()
-		  << " " << rp_iter->second.read_type
-		  << std::endl;
+      	std::cerr << "Already found mate  " << alignment.Name()
+      		  << " " << rp_iter->second.read_type
+      		  << std::endl;
       }
 
       rp_iter->second.found_pair = true;
       rp_iter->second.read2 = alignment;
-      // Only need to do something if class is still unknown
+      // We will check the mate in any case (not just UNKONWN) 
+      // (to find longer flanking reads or potential FRRs)
+      // if (1){ 
       if (rp_iter->second.read_type == RC_UNKNOWN) {
-	if (debug) {
-	  std::cerr << "Checking mate " << alignment.Name() << " " << alignment.QueryBases() << std:: endl;
-	}
+      	if (debug) {
+      	  std::cerr << "Checking mate " << alignment.Name() << " " << alignment.QueryBases() << std:: endl;
+      	}
 
-	int32_t data_value;
-	ReadType read_type;
-	ProcessSingleRead(alignment, chrom_ref_id, locus,
-			  &data_value, &read_type);
+      	int32_t data_value;
+        int32_t nCopy_value = 0;
+      	ReadType read_type;
+      	ProcessSingleRead(alignment, chrom_ref_id, locus,
+      			  &data_value, &nCopy_value, &read_type);
 
-	if (debug) {
-	  std::cerr << "Mate found to be   " << read_type << std:: endl;
-	}
-	rp_iter->second.read_type = read_type;
-	rp_iter->second.data_value = data_value;
+      	if (debug) {
+      	  std::cerr << "Mate found to be   " << read_type << std:: endl;
+      	}
+      	rp_iter->second.read_type = read_type;
+      	rp_iter->second.data_value = data_value;
+        if (rp_iter->second.max_nCopy < nCopy_value){
+          rp_iter->second.max_nCopy = nCopy_value;
+        }
+      }
+      else{
+
       }
       continue; // move on to next read
     }
@@ -178,13 +198,15 @@ bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
       std::cerr << "Processing single read" << std::endl;
     }
     int32_t data_value;
+    int32_t nCopy_value = 0;
     ReadType read_type;
     ReadPair read_pair;
     ProcessSingleRead(alignment, chrom_ref_id, locus,
-		      &data_value, &read_type);
+		      &data_value, &nCopy_value, &read_type);
     read_pair.read_type = read_type;
     read_pair.read1 = alignment;
     read_pair.data_value = data_value;
+    read_pair.max_nCopy = nCopy_value;
     read_pairs->insert(std::pair<std::string, ReadPair>(aln_key, read_pair));
   }
   /*  Second pass through reads where only one end processed */
@@ -205,14 +227,18 @@ bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
     }
     iter->second.read2 = matepair;
     int32_t data_value;
+    int32_t nCopy_value = 0;
     ReadType read_type;
-    ProcessSingleRead(matepair, chrom_ref_id, locus,
-		      &data_value, &read_type);
+    ProcessSingleRead(alignment, chrom_ref_id, locus,
+          &data_value, &nCopy_value, &read_type);
     if (debug) {
       std::cerr << "Processed mate, found " << read_type << " " << data_value << std::endl;
     }
     iter->second.read_type = read_type;
     iter->second.data_value = data_value;
+    if (iter->second.max_nCopy < nCopy_value){
+      iter->second.max_nCopy = nCopy_value;
+    }
   }
   return true;
 }
@@ -271,6 +297,7 @@ bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
 				      const int32_t& chrom_ref_id,
 				      const Locus& locus,
 				      int32_t* data_value,
+              int32_t* nCopy_value,
 				      ReadType* read_type) {
   /* If read in vicinity but not close to STR, save for later */
   if (alignment.RefID() == chrom_ref_id &&
@@ -300,6 +327,7 @@ bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
     score = score_rev;
     seq = seq_rev;
   }
+  *nCopy_value = nCopy;
   SingleReadType srt;
   if (!classify_realigned_read(seq, locus.motif, pos, nCopy, score,
 			       (int32_t)locus.pre_flank.size(), &srt)) {
@@ -314,9 +342,14 @@ bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
   if ((alignment.MateRefID() == chrom_ref_id) &&
       (alignment.MatePosition() >= locus.end - read_length) &&
       (srt == SR_PREFLANK)) {
+    
     *read_type = RC_SPAN;
     *data_value = abs(locus.start + nCopy*(int32_t)locus.motif.size() - read_length
 		      - (alignment.MatePosition() + read_length));
+    if (*data_value > 2000){    // TODO change 2000 to a value based on parameters
+      *data_value = 0;
+      *read_type = RC_UNKNOWN;
+    }
     return true;
   }
   // 5.2_filter_spanning_only_core.py#L92 - postflank case
@@ -326,6 +359,10 @@ bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
     *read_type = RC_SPAN;
     *data_value = abs(locus.end - nCopy*(int32_t)locus.motif.size()
 		      - alignment.MatePosition() + read_length);
+    if (*data_value > 2000){    // TODO change 2000 to a value based on parameters
+      *data_value = 0;
+      *read_type = RC_UNKNOWN;
+    }
     return true;
   }
   /* FRR cases */
@@ -348,6 +385,7 @@ bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
   if (srt == SR_ENCLOSING) {
     *read_type = RC_ENCL;
     *data_value = nCopy;
+    *nCopy_value = 0;     // nCopy_value is used for flanking heuristic, which is not relevant here
     return true;
   }
   /* Partially spanning cases - get bound */

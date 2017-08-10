@@ -58,7 +58,7 @@ with open (bam_file_list, 'r') as bam_list:
 			results.write(bam_file.split("/")[-1] + "\t" +\
 							str(int(min(estm_genot))) + "\t" +\
 							str(int(max(estm_genot))) + "\n")
-			# if samp_count == 10:
+			# if samp_count == 15:
 			# 	break;
 if true_available == True:
 	if error_mode == "rms":
@@ -82,7 +82,7 @@ if true_available == True:
 
 	fig2 = plt.figure()
 	ax2 = fig2.add_subplot(111)
-	ax2.hist(error_l_list, normed=False, bins=10)
+	ax2.hist(error_l_list, normed=False, bins=20)
 	ax2.set_ylabel('Absolute Genotyping Error')
 	ax2.set_title('Longer Allele')
 	fig2.savefig('genot_error_hist_l.pdf')

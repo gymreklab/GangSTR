@@ -74,6 +74,7 @@ class ReadExtractor {
 			 const int32_t& chrom_ref_id,
 			 const Locus& locus,
 			 int32_t* data_value,
+       int32_t* nCopy_value,
 			 ReadType* read_type);
   // Rescue mate pairs aligned elsewhere
   bool RescueMate(BamCramMultiReader* bamreader,
