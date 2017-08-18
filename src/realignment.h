@@ -41,7 +41,10 @@ enum SingleReadType {
   SR_POSTFLANK = 1,
   SR_ENCLOSING = 2,
   SR_IRR = 3,
-  SR_UNKNOWN = 4
+  SR_MAPPED_BEFORE = 4, // Not used TODO delete
+  SR_MAPPED_AFTER = 5,	// Not used TODO delete
+  SR_UNKNOWN = 6,
+  SR_NOT_FOUND = 7,		// Not used TODO delete
 };
 
 bool expansion_aware_realign(const std::string& seq,

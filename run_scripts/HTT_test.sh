@@ -1,20 +1,27 @@
 #!/bin/bash
-make -j -C ../
+repo_dir=/storage/nmmsv/GangSTR/
+make -j -C $repo_dir
 
 locus=HTT
 
 bam_dir=/storage/resources/datasets/repeat-expansions/bams
 
-bed_dir=../tests/$locus.bed
 
-for bam_file in $bam_dir/*.bam;
-# for bam_file in $bam_dir/SRR4243223_47_20.rmdup.bam;
+bed_dir=$repo_dir/tests/$locus.bed
+
+# for bam_file in $bam_dir/*.bam;
+for bam_file in $bam_dir/SRR4243174_43_22.rmdup.bam;
 do
 	echo '>>Running for: '$bam_file
-	../src/GangSTR \
+	$repo_dir/src/GangSTR \
 	    --bam $bam_file \
 	    --ref /storage/resources/dbase/human/hg19/Homo_sapiens_assembly19.fasta \
 	    --regions $bed_dir \
-	    --out test
+	    --out test \
+	    --frrweight 0.5 \
+	    --enclweight 0.3 \
+	    --spanweight 1.0 \
+	    --flankweight 0.5 \
+
 done
 

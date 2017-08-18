@@ -1,0 +1,3 @@
+SRR4243174_43_22.rmdup.bam	22	30
+SRR4243175_41_21.rmdup.bam	21	28
+SRR4243176_41_20.rmdup.bam	20	27

@@ -33,9 +33,9 @@ class ReadExtractor {
  public:
   ReadExtractor();
   virtual ~ReadExtractor();
-
+  
   bool debug = false;
-  bool print_read_data = false;
+  bool print_read_data = true;
 
   // Main function to extract reads of each class
   bool ExtractReads(BamCramMultiReader* bamreader,
@@ -75,7 +75,9 @@ class ReadExtractor {
 			 const Locus& locus,
 			 int32_t* data_value,
        int32_t* nCopy_value,
-			 ReadType* read_type);
+       int32_t* score_value,
+			 ReadType* read_type,
+       SingleReadType* srt);
   // Rescue mate pairs aligned elsewhere
   bool RescueMate(BamCramMultiReader* bamreader,
 		  BamAlignment alignment, BamAlignment* matepair);

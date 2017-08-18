@@ -22,6 +22,7 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 #define SRC_READ_PAIR_H__
 
 #include "src/bam_io.h"
+#include "src/realignment.h"
 
 enum ReadType {
   RC_SPAN = 0,

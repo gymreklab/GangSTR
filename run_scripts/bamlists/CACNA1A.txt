@@ -1,0 +1,1 @@
+/storage/nmmsv/expansion-experiments/bam_list_CACNA1A_1_cov80_dist500_DIP_readLen_100/aligned_read/nc_15_50.sorted.bam
