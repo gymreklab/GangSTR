@@ -64,7 +64,7 @@ bool Genotyper::ProcessLocus(BamCramMultiReader* bamreader, Locus* locus) {
   }
   options->dist_mean = mean;
   options->dist_sdev = std_dev;
-  // cout<<endl<<mean<<"\t"<<std_dev<<endl;
+  // cerr<<endl<<mean<<"\t"<<std_dev<<endl;
   if (!read_extractor->ExtractReads(bamreader, *locus, options->regionsize,
 				    likelihood_maximizer)) {
     return false;
@@ -78,6 +78,16 @@ bool Genotyper::ProcessLocus(BamCramMultiReader* bamreader, Locus* locus) {
   int32_t read_len = read_extractor->guessed_read_length;
   int32_t ref_count = (int32_t)((locus->end-locus->start+1)/locus->motif.size());
   double min_negLike;
+
+
+  // allele1 = 15;
+  // for (allele2 = 10; allele2 < 100; allele2 += 10){
+
+  //   likelihood_maximizer->GetGenotypeNegLogLikelihood(allele1, allele2, read_len, (int32_t)(locus->motif.size()),
+  //           ref_count, &min_negLike);
+  //   cerr<<allele1<<","<<allele2<<"\t"<<min_negLike<<endl;
+  // }
+
   if (!likelihood_maximizer->OptimizeLikelihood(read_len, (int32_t)(locus->motif.size()),
 						ref_count,
 						&allele1, &allele2, &min_negLike)) {

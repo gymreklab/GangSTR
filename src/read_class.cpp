@@ -24,7 +24,7 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 #include <math.h>
 #include <iostream>
 #include <iomanip>
-
+#include <typeinfo>
 using namespace std;
 
 ReadClass::ReadClass() {
@@ -70,6 +70,8 @@ bool ReadClass::GetClassLogLikelihood(const int32_t& allele1,
     if (!GetAlleleLogLikelihood(allele2, *data_it, read_len, motif_len, ref_count, &a2_ll)) {
       return false;
     }
+    // cerr<<typeid(*this).name()<<"\t";
+    // cerr<<*data_it<<"\t"<<fast_log_sum_exp(log(allele1_weight_)+a1_ll, log(allele2_weight_)+a2_ll)<<endl;
     *class_ll += fast_log_sum_exp(log(allele1_weight_)+a1_ll, log(allele2_weight_)+a2_ll);
   }
   return true;

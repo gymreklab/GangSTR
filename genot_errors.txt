@@ -1,0 +1,2 @@
+nc_3_3.sorted.bam	3	3
+nc_3_7.sorted.bam	3	7

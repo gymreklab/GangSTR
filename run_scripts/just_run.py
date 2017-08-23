@@ -12,7 +12,8 @@ run_dir = repo_dir + "/run_scripts/"
 # dataset_dir = "/storage/resources/datasets/repeat-expansions/bams/"
 bed_dir = repo_dir + "/tests/" + locus + ".bed"
 ref_genome = "/storage/resources/dbase/human/hg19/Homo_sapiens_assembly19.fasta"
-bam_file_list = run_dir + "bamlists/CACNA1A.txt"
+# bam_file_list = run_dir + "bamlists/HTT_full.txt"
+bam_file_list = run_dir + "bamlists/CACNA1A_grid.txt"
 true_available = True
 
 error_mode  = "rms"					# rms, mae: mean absolute error
@@ -40,10 +41,10 @@ with open (bam_file_list, 'r') as bam_list:
 									"--ref", ref_genome, \
 									"--regions", bed_dir, \
 									"--out", "test", \
-									"--frrweight", str(0.045), \
+									"--frrweight", str(0.3), \
 									"--enclweight", "0.3", \
 									"--spanweight", "1.0", \
-									"--flankweight", str(0.25)], stdout=subprocess.PIPE)
+									"--flankweight", str(.45)], stdout=subprocess.PIPE)
 			cmd.wait()
 			for line in cmd.stdout:
 				result = line.rstrip()

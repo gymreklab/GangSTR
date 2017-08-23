@@ -35,7 +35,7 @@ class ReadExtractor {
   virtual ~ReadExtractor();
   
   bool debug = false;
-  bool print_read_data = true;
+  bool print_read_data = false;
 
   // Main function to extract reads of each class
   bool ExtractReads(BamCramMultiReader* bamreader,

@@ -26,6 +26,7 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_randist.h>
 #include <gsl/gsl_cdf.h>
+#include <iostream>
 
 using namespace std;
 
