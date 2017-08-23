@@ -66,7 +66,7 @@ bool ReadExtractor::ExtractReads(BamCramMultiReader* bamreader,
         //   cout<<((BamAlignment)iter->second.read1).QueryBases()<<endl;
         //   cout<<((BamAlignment)iter->second.read2).QueryBases()<<endl;
         // }
-        // likelihood_maximizer->AddFlankingData(iter->second.max_nCopy);
+        likelihood_maximizer->AddFlankingData(iter->second.max_nCopy);
       }
     } else if (iter->second.read_type == RC_ENCL) {
       if (print_read_data) {
@@ -84,7 +84,7 @@ bool ReadExtractor::ExtractReads(BamCramMultiReader* bamreader,
       if (print_read_data) {
   std::cerr << iter->first << "\t" << "BOUND" << "\t" << iter->second.data_value << "\t" << iter->second.found_pair << std::endl; // TODO remove
       }
-      // likelihood_maximizer->AddFlankingData(iter->second.data_value);
+      likelihood_maximizer->AddFlankingData(iter->second.data_value);
     } else {
       continue;
     }

@@ -44,7 +44,8 @@ with open (bam_file_list, 'r') as bam_list:
 									"--frrweight", str(0.3), \
 									"--enclweight", "0.3", \
 									"--spanweight", "1.0", \
-									"--flankweight", str(.45)], stdout=subprocess.PIPE)
+									"--flankweight", str(.45),\
+									"--ploidy", str(2)], stdout=subprocess.PIPE)
 			cmd.wait()
 			for line in cmd.stdout:
 				result = line.rstrip()

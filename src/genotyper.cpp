@@ -70,6 +70,7 @@ bool Genotyper::ProcessLocus(BamCramMultiReader* bamreader, Locus* locus) {
     return false;
   }
   
+
   // cout<<endl<<likelihood_maximizer->GetEnclosingDataSize()<<endl;
   // cout<<endl<<likelihood_maximizer->GetSpanningDataSize()<<endl;
   // cout<<endl<<likelihood_maximizer->GetFRRDataSize()<<endl;

@@ -57,7 +57,7 @@ void ReadClass::AddData(const int32_t& data) {
 bool ReadClass::GetClassLogLikelihood(const int32_t& allele1,
 				      const int32_t& allele2,
 				      const int32_t& read_len, const int32_t& motif_len,
-				      const int32_t& ref_count,
+				      const int32_t& ref_count, const int32_t& ploidy,
 				      double* class_ll) {
   *class_ll = 0;
   double samp_log_likelihood, a1_ll, a2_ll;
@@ -72,7 +72,12 @@ bool ReadClass::GetClassLogLikelihood(const int32_t& allele1,
     }
     // cerr<<typeid(*this).name()<<"\t";
     // cerr<<*data_it<<"\t"<<fast_log_sum_exp(log(allele1_weight_)+a1_ll, log(allele2_weight_)+a2_ll)<<endl;
-    *class_ll += fast_log_sum_exp(log(allele1_weight_)+a1_ll, log(allele2_weight_)+a2_ll);
+    if (ploidy == 2){
+      *class_ll += fast_log_sum_exp(log(allele1_weight_)+a1_ll, log(allele2_weight_)+a2_ll);
+    }
+    else if (ploidy == 1){
+      *class_ll += log(allele1_weight_) + a1_ll;
+    }
   }
   return true;
 }

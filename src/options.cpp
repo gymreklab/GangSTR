@@ -56,6 +56,7 @@ Options::Options() {
   spanning_weight = 1.0;
   flanking_weight = 0.5;
   verbose = false;
+  ploidy = 2;
 }
 
 Options::~Options() {}

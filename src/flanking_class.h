@@ -41,7 +41,7 @@ class FlankingClass: public ReadClass {
 	bool GetClassLogLikelihood(const int32_t& allele1,
 				      const int32_t& allele2,
 				      const int32_t& read_len, const int32_t& motif_len,
-				      const int32_t& ref_count,
+				      const int32_t& ref_count, const int32_t& ploidy,
 				      double* class_ll);
 };
 #endif  // SRC_FLANKING_CLASS_H__
