@@ -59,7 +59,7 @@ bool FlankingClass::GetAlleleLogLikelihood(const int32_t& allele,
 bool FlankingClass::GetClassLogLikelihood(const int32_t& allele1,
 				      const int32_t& allele2,
 				      const int32_t& read_len, const int32_t& motif_len,
-				      const int32_t& ref_count,
+				      const int32_t& ref_count, const int32_t& ploidy,
 				      double* class_ll) {
   *class_ll = 0;
   double samp_log_likelihood, a1_ll, a2_ll;
@@ -72,7 +72,12 @@ bool FlankingClass::GetClassLogLikelihood(const int32_t& allele1,
     if (!FlankingClass::GetAlleleLogLikelihood(allele2, *data_it, read_len, motif_len, ref_count, &a2_ll)) {
       return false;
     }
-    *class_ll += fast_log_sum_exp(log(allele1_weight_)+a1_ll, log(allele2_weight_)+a2_ll);
+    if (ploidy == 2){
+      *class_ll += fast_log_sum_exp(log(allele1_weight_)+a1_ll, log(allele2_weight_)+a2_ll);
+  	}
+    else if (ploidy == 1){
+      *class_ll += log(allele1_weight_) + a1_ll;
+    }
   }
   return true;
 }

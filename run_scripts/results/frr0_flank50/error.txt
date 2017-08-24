@@ -1,0 +1,3 @@
+Short	rms	0.0
+Long	rms	13.3416640641
+Both	rms	9.43398113206

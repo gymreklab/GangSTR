@@ -22,6 +22,7 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 #define SRC_READ_PAIR_H__
 
 #include "src/bam_io.h"
+#include "src/realignment.h"
 
 enum ReadType {
   RC_SPAN = 0,
@@ -41,6 +42,7 @@ class ReadPair {
   BamAlignment read2;
   ReadType read_type;
   int32_t data_value;
+  int32_t max_nCopy;    // maximum nCopy among two reads (used for flanking heuristic)
   bool found_pair;
 };
 

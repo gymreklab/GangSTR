@@ -44,6 +44,11 @@ void show_help() {
 	   << "--out <outprefix> "
 	   << "\n\nOptions:\n"
 	   << "-h,--help      display this help screen\n"
+     << "--frr-weight   weight of FRR reads in the likelihood model\n"
+     << "--encl-weight  weight of enclosing reads in the likelihood model\n"
+     << "--span-weight  weight of spanning reads in the likelihood model\n"
+     << "--flank-weight weight of flanking reads in the likelihood model\n"
+     << "--haploid      Indicate whether data is haploid (1) or diploid (2)\n"
 	   << "-v,--verbose   print out useful progress messages\n"
 	   << "--version      print out the version of this software\n"
 	   << "This program takes in aligned reads in BAM format\n"
@@ -59,6 +64,11 @@ void parse_commandline_options(int argc, char* argv[], Options* options) {
     OPT_REGIONS,
     OPT_OUT,
     OPT_HELP,
+    OPT_WFRR,
+    OPT_WENCLOSE,
+    OPT_WSPAN,
+    OPT_WFLANK,
+    OPT_PLOIDY,
     OPT_VERBOSE,
     OPT_VERSION,
   };
@@ -68,6 +78,11 @@ void parse_commandline_options(int argc, char* argv[], Options* options) {
     {"regions", 1, 0, OPT_REGIONS},
     {"out", 1, 0, OPT_OUT},
     {"help", 0, 0, OPT_HELP},
+    {"frrweight", 1, 0, OPT_WFRR},
+    {"enclweight", 1, 0, OPT_WENCLOSE},
+    {"spanweight", 1, 0, OPT_WSPAN},
+    {"flankweight", 1, 0, OPT_WFLANK},
+    {"ploidy", 1, 0, OPT_PLOIDY},
     {"verbose", 0, 0, OPT_VERBOSE},
     {"version", 0, 0, OPT_VERSION},
     {NULL, no_argument, NULL, 0},
@@ -94,6 +109,16 @@ void parse_commandline_options(int argc, char* argv[], Options* options) {
     case OPT_HELP:
     case 'h':
       show_help();
+    case OPT_WFRR:
+      options->frr_weight = atof(optarg);
+    case OPT_WENCLOSE:
+      options->enclosing_weight = atof(optarg);
+    case OPT_WSPAN:
+      options->spanning_weight = atof(optarg);
+    case OPT_WFLANK:
+      options->flanking_weight = atof(optarg);
+    case OPT_PLOIDY:
+      options->ploidy = atoi(optarg);
     case OPT_VERBOSE:
     case 'v':
       options->verbose++;

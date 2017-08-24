@@ -6,7 +6,9 @@
 * Remove outlier insert sizes
 * Make read length a global param rather than per-locus. Allow user to set or infer from first couple reads of BAM
 * VCF output format
+* Add minimum alignment score and discard if it's not met
 * Confidence intervals and/or quality scores
+
 
 # Less urgent
 * Ability to read from S3 files

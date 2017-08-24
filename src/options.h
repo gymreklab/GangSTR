@@ -58,6 +58,8 @@ class Options {
   int32_t read_len;
   int32_t motif_len;
   int32_t ref_count;
+  // Haploid/Diploid
+  int32_t ploidy;
 };
 
 #endif  // SRC_OPTIONS_H__

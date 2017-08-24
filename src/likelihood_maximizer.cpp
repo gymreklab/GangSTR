@@ -73,12 +73,11 @@ bool LikelihoodMaximizer::GetGenotypeNegLogLikelihood(const int32_t& allele1,
 						      const int32_t& ref_count,
 						      double* gt_ll) {
   double frr_ll, span_ll, encl_ll, flank_ll = 0.0;
-  frr_class_.GetClassLogLikelihood(allele1, allele2, read_len, motif_len, ref_count, &frr_ll);
-  spanning_class_.GetClassLogLikelihood(allele1, allele2, read_len, motif_len, ref_count, &span_ll);
-  enclosing_class_.GetClassLogLikelihood(allele1, allele2, read_len, motif_len, ref_count, &encl_ll);
+  frr_class_.GetClassLogLikelihood(allele1, allele2, read_len, motif_len, ref_count, options->ploidy, &frr_ll);
+  spanning_class_.GetClassLogLikelihood(allele1, allele2, read_len, motif_len, ref_count, options->ploidy, &span_ll);
+  enclosing_class_.GetClassLogLikelihood(allele1, allele2, read_len, motif_len, ref_count, options->ploidy, &encl_ll);
   // flanking class overloads GetClassLogLikelihood function
-  flanking_class_.FlankingClass::GetClassLogLikelihood(allele1, allele2, read_len, motif_len, ref_count, &flank_ll);
-
+  flanking_class_.FlankingClass::GetClassLogLikelihood(allele1, allele2, read_len, motif_len, ref_count, options->ploidy, &flank_ll);
   *gt_ll = -1*(options->frr_weight*frr_ll +
 	       options->spanning_weight*span_ll +
 	       options->enclosing_weight*encl_ll + 
@@ -95,36 +94,43 @@ bool LikelihoodMaximizer::OptimizeLikelihood(const int32_t& read_len, const int3
 
   std::vector<int32_t> sublist;
   this->enclosing_class_.ExtractEnclosingAlleles(&allele_list);
-  for (std::vector<int32_t>::iterator allele_it = allele_list.begin();
-       allele_it != allele_list.end();
-       allele_it++) {
+
+  if (options->ploidy == 2){
+    for (std::vector<int32_t>::iterator allele_it = allele_list.begin();
+         allele_it != allele_list.end();
+         allele_it++) {
+      // TODO Change 200 for number depending the parameters
+      nlopt_1D_optimize(read_len, motif_len, ref_count, int32_t((read_len) / 3), 200, this, *allele_it, &a1, &result, &minf);
+      // cout<<endl<<result<<"\t"<<a1<<","<<*allele_it<<"\t"<<minf<<endl; // TODO remove
+      sublist.push_back(a1);
+    }
+
     // TODO Change 200 for number depending the parameters
-    nlopt_1D_optimize(read_len, motif_len, ref_count, int32_t((read_len) / 3), 200, this, *allele_it, &a1, &result, &minf);
-    // cout<<endl<<result<<"\t"<<a1<<","<<*allele_it<<"\t"<<minf<<endl; // TODO remove
+    nlopt_2D_optimize(read_len, motif_len, ref_count, int32_t((read_len - 2 * MARGIN) / 3 - 1), 200, this, &a1, &a2, &result, &minf);
+    // cout<<endl<<result<<"\t"<<a1<<","<<a2<<"\t"<<minf<<endl; // TODO remove
     sublist.push_back(a1);
-  }
+    sublist.push_back(a2);
 
-  // TODO Change 200 for number depending the parameters
-  nlopt_2D_optimize(read_len, motif_len, ref_count, int32_t((read_len - 2 * MARGIN) / 3 - 1), 200, this, &a1, &a2, &result, &minf);
-  // cout<<endl<<result<<"\t"<<a1<<","<<a2<<"\t"<<minf<<endl; // TODO remove
-  sublist.push_back(a1);
-  sublist.push_back(a2);
-
-  for (std::vector<int32_t>::iterator subl_it = sublist.begin();
-       subl_it != sublist.end();
-       subl_it++) {
-    if(std::find(allele_list.begin(), allele_list.end(), *subl_it) == allele_list.end()) {
-        /* allele_list does not contain this sublist item */
-        allele_list.push_back(*subl_it);
+    for (std::vector<int32_t>::iterator subl_it = sublist.begin();
+         subl_it != sublist.end();
+         subl_it++) {
+      if(std::find(allele_list.begin(), allele_list.end(), *subl_it) == allele_list.end()) {
+          /* allele_list does not contain this sublist item */
+          allele_list.push_back(*subl_it);
+      }
     }
   }
-
+  else if (options->ploidy == 1){
+    nlopt_1D_optimize(read_len, motif_len, ref_count, int32_t((read_len) / 3), 200, this, 0, &a1, &result, &minf);
+    allele_list.push_back(a1);
+  }
   findBestAlleleListTuple(allele_list, read_len, motif_len, ref_count,
                             allele1, allele2, min_negLike);
 
-  // cout<<endl<<*allele1<<"\t"<<*allele2<<"\t"<<*min_negLike<<endl;
+  // cerr<<endl<<*allele1<<"\t"<<*allele2<<"\t"<<*min_negLike<<endl;
   return true;    // TODO add false
 }
+
 
 bool LikelihoodMaximizer::findBestAlleleListTuple(std::vector<int32_t> allele_list,
                           int32_t read_len, int32_t motif_len, int32_t ref_count,
@@ -132,20 +138,37 @@ bool LikelihoodMaximizer::findBestAlleleListTuple(std::vector<int32_t> allele_li
   double gt_ll;
   *min_negLike = 1000000;
   int32_t best_a1 = 0, best_a2 = 0;
-  for (std::vector<int32_t>::iterator a1_it = allele_list.begin();
-          a1_it != allele_list.end();
-          a1_it++){
-    for (std::vector<int32_t>::iterator a2_it = allele_list.begin();
-          a2_it != allele_list.end();
-          a2_it++){
-      GetGenotypeNegLogLikelihood(*a1_it, *a2_it, read_len, motif_len, ref_count, &gt_ll);
-        if (gt_ll < *min_negLike){
-          *min_negLike = gt_ll;
-          best_a1 = *a1_it;
-          best_a2 = *a2_it;
-        }
+  if (options->ploidy == 2){
+    for (std::vector<int32_t>::iterator a1_it = allele_list.begin();
+            a1_it != allele_list.end();
+            a1_it++){
+      for (std::vector<int32_t>::iterator a2_it = allele_list.begin();
+            a2_it != allele_list.end();
+            a2_it++){
+        GetGenotypeNegLogLikelihood(*a1_it, *a2_it, read_len, motif_len, ref_count, &gt_ll);
+        // cerr<<endl<<*a1_it<<"\t"<<*a2_it<<"\t"<<gt_ll<<endl;
+          if (gt_ll < *min_negLike){
+            *min_negLike = gt_ll;
+            best_a1 = *a1_it;
+            best_a2 = *a2_it;
+          }
+      }
     }
   }
+  else if (options->ploidy == 1){
+    best_a2 = 0;
+    for (std::vector<int32_t>::iterator a1_it = allele_list.begin();
+            a1_it != allele_list.end();
+            a1_it++){
+      GetGenotypeNegLogLikelihood(*a1_it, 0, read_len, motif_len, ref_count, &gt_ll);
+      // cerr<<endl<<*a1_it<<"\t"<<*a2_it<<"\t"<<gt_ll<<endl;
+      if (gt_ll < *min_negLike){
+        *min_negLike = gt_ll;
+        best_a1 = *a1_it;
+      }
+    }
+  }
+  
   *allele1 = best_a1;
   *allele2 = best_a2;
   return true;    // TODO add false
@@ -212,8 +235,8 @@ bool nlopt_2D_optimize(const int32_t& read_len, const int32_t& motif_len,
   opt.set_xtol_rel(1e-5);   // TODO set something appropriate
 
   std::vector<double> xx(2);
-  xx[0] = 40;               // TODO set something appropriate
-  xx[1] = 50;               // TODO set something appropriate
+  xx[0] = 35;               // TODO set something appropriate
+  xx[1] = 40;               // TODO set something appropriate
   double minf;
   nlopt::result result = opt.optimize(xx, minf);
   *allele1 = int32_t(xx[0]);
@@ -246,7 +269,7 @@ bool nlopt_1D_optimize(const int32_t& read_len, const int32_t& motif_len,
   opt.set_xtol_rel(1e-5);   // TODO set something appropriate
 
   std::vector<double> xx(1);
-  xx[0] = 40;               // TODO set something appropriate
+  xx[0] = 45;               // TODO set something appropriate
   double minf;
   nlopt::result result = opt.optimize(xx, minf);
   *allele1 = int32_t(xx[0]);
