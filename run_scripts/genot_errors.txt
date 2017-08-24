@@ -1,0 +1,13 @@
+nc_3_3.sorted.bam	3	3
+nc_3_7.sorted.bam	3	7
+nc_3_10.sorted.bam	3	10
+nc_3_15.sorted.bam	3	15
+nc_3_25.sorted.bam	3	25
+nc_3_30.sorted.bam	3	30
+nc_3_35.sorted.bam	3	39
+nc_3_40.sorted.bam	3	39
+nc_3_45.sorted.bam	3	47
+nc_3_50.sorted.bam	3	52
+nc_3_60.sorted.bam	3	56
+nc_3_80.sorted.bam	3	81
+nc_3_100.sorted.bam	3	103

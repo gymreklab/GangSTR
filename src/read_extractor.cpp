@@ -44,28 +44,17 @@ bool ReadExtractor::ExtractReads(BamCramMultiReader* bamreader,
   /* Load data into likelihood maximizer */
   for (std::map<std::string, ReadPair>::const_iterator iter = read_pairs.begin();
        iter != read_pairs.end(); iter++) {
-    if (iter->second.read_type == RC_UNKNOWN){
-      // std::cerr << iter->first << "\t" << "UNK" << endl;
-      // std::cerr << ((BamAlignment)iter->second.read1).QueryBases() << endl;
-      // std::cerr << ((BamAlignment)iter->second.read2).QueryBases() << endl;
-    }
     if (iter->second.read_type == RC_SPAN) {
       if (print_read_data) {
   std::cerr << iter->first << "\t" << "SPAN" << "\t" << iter->second.data_value << "\t" << iter->second.found_pair << std::endl; // TODO remove
       }
       likelihood_maximizer->AddSpanningData(iter->second.data_value);
       span++;
-      // std::cerr << iter->first << "\t";
-      // std::cerr << iter->second.data_value << endl;
       // In spanning case, we can also have flanking reads:
       if (iter->second.max_nCopy > 0){
         if (print_read_data) {
           std::cerr << iter->first << "\t" << "SPFLNK" << "\t" << iter->second.max_nCopy << "\t" << iter->second.found_pair << std::endl; // TODO remove
         }
-        // if (iter->second.max_nCopy < 40){
-        //   cout<<((BamAlignment)iter->second.read1).QueryBases()<<endl;
-        //   cout<<((BamAlignment)iter->second.read2).QueryBases()<<endl;
-        // }
         likelihood_maximizer->AddFlankingData(iter->second.max_nCopy);
       }
     } else if (iter->second.read_type == RC_ENCL) {
@@ -94,6 +83,7 @@ bool ReadExtractor::ExtractReads(BamCramMultiReader* bamreader,
       std::cerr<<"\t\t"<<((BamAlignment)iter->second.read2).QueryBases()<<endl;
     }
   }
+  // TODO Delete
   // std::cerr << "~~Enclose:\t" << encl << endl;
   // std::cerr << "~~Span:\t\t" << span << endl;
   // std::cerr << "~~FRR:\t\t" << frr << endl;
@@ -163,16 +153,8 @@ bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
 
         int32_t insert_size;
         if (FindSpanningRead(alignment, chrom_ref_id, locus, &insert_size)) {
-          // ReadPair read_pair;
-          // read_pair.read_type = RC_SPAN;
-          // read_pair.read1 = alignment;
-          // read_pair.data_value = insert_size;
-          // read_pairs->insert(std::pair<std::string, ReadPair>(aln_key, read_pair));
           rp_iter->second.read_type = RC_SPAN;
           rp_iter->second.data_value = insert_size;
-
-          // std::cerr << "YES" << endl;
-          // std::cerr << rp_iter->second.read_type << endl << endl;
           continue;
         }
         
@@ -282,7 +264,6 @@ bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
   /*  Second pass through reads where only one end processed */
   for (std::map<std::string, ReadPair>::iterator iter = read_pairs->begin();
        iter != read_pairs->end(); iter++) {
-    // if (iter->second.found_pair || iter->second.read_type != RC_UNKNOWN) {
 
     if (iter->second.found_pair || iter->second.read_type == RC_FRR || 
                   iter->second.read_type == RC_ENCL) {  // Changed similar to first pass
@@ -460,13 +441,7 @@ bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
   }
   *nCopy_value = nCopy;
   *score_value = score;
-  // cout<<score<<endl;
-  // if (score < 0.8 * MATCH_SCORE * read_length){   // TODO set 0.8 to appropriate threshold
-  //   *read_type = RC_UNKNOWN;
-  //   *data_value = 0;
-  //   return true;
-  // }
-  // SingleReadType srt;  // Added to function parameters to be returned
+  
   if (!classify_realigned_read(seq, locus.motif, pos, nCopy, score,
              (int32_t)locus.pre_flank.size(), srt)) {
     return false;

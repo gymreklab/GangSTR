@@ -41,10 +41,10 @@ with open (bam_file_list, 'r') as bam_list:
 									"--ref", ref_genome, \
 									"--regions", bed_dir, \
 									"--out", "test", \
-									"--frrweight", str(0.3), \
-									"--enclweight", "0.3", \
+									"--frrweight", str(0.35), \
+									"--enclweight", "1.0", \
 									"--spanweight", "1.0", \
-									"--flankweight", str(.45),\
+									"--flankweight", str(1),\
 									"--ploidy", str(2)], stdout=subprocess.PIPE)
 			cmd.wait()
 			for line in cmd.stdout:
