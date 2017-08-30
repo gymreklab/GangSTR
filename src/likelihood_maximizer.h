@@ -31,8 +31,9 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 #include <string>
 
 class LikelihoodMaximizer {
+ friend class Genotyper;
  public:
-  LikelihoodMaximizer(const Options& _options);
+  LikelihoodMaximizer(Options& _options);
   // LikelihoodMaximizer(const LikelihoodMaximizer& lm_obj); // copy constructor
   virtual ~LikelihoodMaximizer();
 
@@ -61,8 +62,11 @@ class LikelihoodMaximizer {
                           int32_t read_len, int32_t motif_len, int32_t ref_count,
                           int32_t* allele1, int32_t* allele2, double* min_negLike);
 
+  // Update read class options
+  void UpdateOptions();
+ protected:
   // Other params -> Made public for gslNegLikelihood to have access
-  const Options* options;
+  Options* options;
 
  private:
   EnclosingClass enclosing_class_;

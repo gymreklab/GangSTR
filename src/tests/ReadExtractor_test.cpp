@@ -186,13 +186,15 @@ void ReadExtractorTest::test_ProcessSingleRead() {
   int32_t chrom_ref_id = bamreader.bam_header()->ref_id(locus.chrom);
   bamreader.SetRegion(locus.chrom, locus.start - BUFFER, locus.end + BUFFER);
   BamAlignment aln;
-  int32_t data_value;
   ReadType read_type;
+  SingleReadType srt;
+  int32_t score_value, data_value, nCopy_value;
   bool truth_is_enclosing;
   while (bamreader.GetNextAlignment(aln)) {
     std::string fname = aln.Filename();
     truth_is_enclosing = string_ends_with(fname, "test.enclosing.single.bam");
-    if (!read_extractor.ProcessSingleRead(aln, chrom_ref_id, locus, &data_value, &read_type)) {
+    if (!read_extractor.ProcessSingleRead(aln, chrom_ref_id, locus, 
+      &data_value, &nCopy_value, &score_value, &read_type, &srt)) {
       CPPUNIT_FAIL("ProcessSingleRead returned false unexpectedly");
     }
     std::stringstream msg;

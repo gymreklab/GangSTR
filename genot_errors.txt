@@ -1,2 +1,1 @@
-nc_3_3.sorted.bam	3	3
-nc_3_7.sorted.bam	3	7
+SRR4243174_43_22.rmdup.bam	21	39
