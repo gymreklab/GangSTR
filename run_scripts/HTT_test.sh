@@ -18,10 +18,11 @@ do
 	    --ref /storage/resources/dbase/human/hg19/Homo_sapiens_assembly19.fasta \
 	    --regions $bed_dir \
 	    --out test \
-	    --frrweight 0.5 \
+	    --frrweight 0.12 \
 	    --enclweight 0.3 \
 	    --spanweight 1.0 \
 	    --flankweight 0.5 \
+	    --ploidy 2 \
 
 done
 

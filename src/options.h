@@ -39,6 +39,7 @@ class Options {
   // Insert sizes
   double dist_mean;
   double dist_sdev;
+  bool dist_man_set;   // whether insert size dist parameters manually set in command line
   // Stutter model - TODO later make per locus model
   double stutter_up;
   double stutter_down;
