@@ -560,16 +560,38 @@ bool ReadExtractor::ComputeInsertSizeDistribution(BamCramMultiReader* bamreader,
              double* mean, double* std_dev) {
   // TODO change 200000 flank size to something appropriate
   int32_t flank_size = 200000;
+  int32_t exclusion_margin = 1000;
+
+  double mean_b, mean_a, std_b, std_a; // mean and std dev, before and after locus
+  
   // Get bam alignments from the relevant region
-  bamreader->SetRegion(locus.chrom, locus.start-flank_size>0?locus.start-flank_size:0, locus.end+flank_size);
+  // bamreader->SetRegion(locus.chrom, locus.start-flank_size>0?locus.start-flank_size:0, locus.end+flank_size);
+
+
   // Header has info about chromosome names
   const BamHeader* bam_header = bamreader->bam_header();
   const int32_t chrom_ref_id = bam_header->ref_id(locus.chrom);
 
-  // Go through each alignment in the region
-  BamAlignment alignment;
   int32_t median, size = 0, sum = 0, valid_size = 0, sum_std = 0;
   std::vector<int32_t> temp_len_vec, valid_temp_len_vec;
+  BamAlignment alignment;
+
+  // collecting reads mapped before locus
+  bamreader->SetRegion(locus.chrom, 
+      locus.start - flank_size > 0 ? locus.start - flank_size : 0, 
+      locus.start - exclusion_margin > 0 ? locus.start - exclusion_margin : 0);
+  // Go through each alignment in the region
+  while (bamreader->GetNextAlignment(alignment)) {
+    // Set template length
+    temp_len_vec.push_back(abs(alignment.TemplateLength()));
+    size++;
+  }
+
+  // collecting reads mapped after locus
+  bamreader->SetRegion(locus.chrom, 
+      locus.start + exclusion_margin, 
+      locus.start + flank_size);
+  // Go through each alignment in the region
   while (bamreader->GetNextAlignment(alignment)) {
     // Set template length
     temp_len_vec.push_back(abs(alignment.TemplateLength()));

@@ -44,11 +44,16 @@ void show_help() {
 	   << "--out <outprefix> "
 	   << "\n\nOptions:\n"
 	   << "-h,--help      display this help screen\n"
-     << "--frr-weight   weight of FRR reads in the likelihood model\n"
-     << "--encl-weight  weight of enclosing reads in the likelihood model\n"
-     << "--span-weight  weight of spanning reads in the likelihood model\n"
-     << "--flank-weight weight of flanking reads in the likelihood model\n"
-     << "--haploid      Indicate whether data is haploid (1) or diploid (2)\n"
+     << "--frrweight   weight of FRR reads in the likelihood model\n"
+     << "--enclweight  weight of enclosing reads in the likelihood model\n"
+     << "--spanweight  weight of spanning reads in the likelihood model\n"
+     << "--flankweight weight of flanking reads in the likelihood model\n"
+     << "--ploidy       Indicate whether data is haploid (1) or diploid (2)\n"
+     << "--insertmean   Insert size mean\n"
+     << "--insertsdev   Insert size standard deviation\n"
+     << "--stutterup    Stutter up parameter (refer to the stutter model)\n"
+     << "--stutterdown  Stutter down parameter (refer to the stutter model)\n"
+     << "--stutterprob  Stutter probability (refer to the stutter model)\n"
 	   << "-v,--verbose   print out useful progress messages\n"
 	   << "--version      print out the version of this software\n"
 	   << "This program takes in aligned reads in BAM format\n"
@@ -69,23 +74,33 @@ void parse_commandline_options(int argc, char* argv[], Options* options) {
     OPT_WSPAN,
     OPT_WFLANK,
     OPT_PLOIDY,
+    OPT_INSMEAN,
+    OPT_INSSDEV,
+    OPT_STUTUP,
+    OPT_STUTDW,
+    OPT_STUTPR,
     OPT_VERBOSE,
     OPT_VERSION,
   };
   static struct option long_options[] = {
-    {"bam", 1, 0, OPT_BAMFILES},
-    {"ref", 1, 0, OPT_REFFA},
-    {"regions", 1, 0, OPT_REGIONS},
-    {"out", 1, 0, OPT_OUT},
-    {"help", 0, 0, OPT_HELP},
-    {"frrweight", 1, 0, OPT_WFRR},
-    {"enclweight", 1, 0, OPT_WENCLOSE},
-    {"spanweight", 1, 0, OPT_WSPAN},
-    {"flankweight", 1, 0, OPT_WFLANK},
-    {"ploidy", 1, 0, OPT_PLOIDY},
-    {"verbose", 0, 0, OPT_VERBOSE},
-    {"version", 0, 0, OPT_VERSION},
-    {NULL, no_argument, NULL, 0},
+    {"bam",         required_argument,  NULL, OPT_BAMFILES},
+    {"ref",         required_argument,  NULL, OPT_REFFA},
+    {"regions",     required_argument,  NULL, OPT_REGIONS},
+    {"out",         required_argument,  NULL, OPT_OUT},
+    {"help",        no_argument,        NULL, OPT_HELP},
+    {"frrweight",   required_argument,  NULL, OPT_WFRR},      // TODO tried using optional_argument, but it causes segmentation faults
+    {"enclweight",  required_argument,  NULL, OPT_WENCLOSE},
+    {"spanweight",  required_argument,  NULL, OPT_WSPAN},
+    {"flankweight", required_argument,  NULL, OPT_WFLANK},
+    {"ploidy",      required_argument,  NULL, OPT_PLOIDY},
+    {"insertmean",  required_argument,  NULL, OPT_INSMEAN},
+    {"insertsdev",  required_argument,  NULL, OPT_INSSDEV},
+    {"stutterup",   required_argument,  NULL, OPT_STUTUP},
+    {"stutterdown", required_argument,  NULL, OPT_STUTDW},
+    {"stutterprob", required_argument,  NULL, OPT_STUTPR},
+    {"verbose",     no_argument,        NULL, OPT_VERBOSE},
+    {"version",     no_argument,        NULL, OPT_VERSION},
+    {NULL,          no_argument,        NULL, 0},
   };
   int ch;
   int option_index = 0;
@@ -111,14 +126,36 @@ void parse_commandline_options(int argc, char* argv[], Options* options) {
       show_help();
     case OPT_WFRR:
       options->frr_weight = atof(optarg);
+      break;
     case OPT_WENCLOSE:
       options->enclosing_weight = atof(optarg);
+      break;
     case OPT_WSPAN:
       options->spanning_weight = atof(optarg);
+      break;
     case OPT_WFLANK:
       options->flanking_weight = atof(optarg);
+      break;
     case OPT_PLOIDY:
       options->ploidy = atoi(optarg);
+      break;
+    case OPT_INSMEAN:
+      options->dist_mean = atoi(optarg);
+      options->dist_man_set = true;
+      break;
+    case OPT_INSSDEV:
+      options->dist_sdev = atoi(optarg);
+      options->dist_man_set = true;
+      break;
+    case OPT_STUTUP:
+      options->stutter_up = atof(optarg);
+      break;
+    case OPT_STUTDW:
+      options->stutter_down = atof(optarg);
+      break;
+    case OPT_STUTPR:
+      options->stutter_p = atof(optarg);
+      break;
     case OPT_VERBOSE:
     case 'v':
       options->verbose++;

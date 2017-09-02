@@ -30,8 +30,18 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 using namespace std;
 
 
-LikelihoodMaximizer::LikelihoodMaximizer(const Options& _options) {
+LikelihoodMaximizer::LikelihoodMaximizer(Options& _options) {
   options = &_options;
+
+  enclosing_class_.SetOptions(*options);
+  frr_class_.SetOptions(*options);
+  spanning_class_.SetOptions(*options);
+  flanking_class_.SetOptions(*options);
+}
+
+void LikelihoodMaximizer::UpdateOptions(){
+  
+  // std::cerr << options->dist_mean << ", " << options->dist_sdev << endl;
   enclosing_class_.SetOptions(*options);
   frr_class_.SetOptions(*options);
   spanning_class_.SetOptions(*options);

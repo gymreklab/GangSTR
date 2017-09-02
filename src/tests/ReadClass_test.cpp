@@ -49,6 +49,7 @@ void ReadClassTest::setUp() {
   read_len = 100;
   motif_len = 3;
   ref_count = 10;
+  ploidy = 2;
 }
 
 void ReadClassTest::tearDown() {}
@@ -157,7 +158,7 @@ void ReadClassTest::test_GetClassLogLikelihood() {
   encl_class_.AddData(test_data2);
   encl_class_.AddData(test_data3);
   encl_class_.AddData(test_data4);
-  encl_class_.GetClassLogLikelihood(allele1, allele2, read_len, motif_len, ref_count, &class_ll);
+  encl_class_.GetClassLogLikelihood(allele1, allele2, read_len, motif_len, ref_count, ploidy, &class_ll);
   CPPUNIT_ASSERT_EQUAL(roundf(class_ll*pow(10,11))/pow(10,11), roundf(-145.199557345*pow(10,11))/pow(10,11));
 
   span_class_.Reset();
@@ -168,7 +169,7 @@ void ReadClassTest::test_GetClassLogLikelihood() {
   // cout<<frr_class_.GetLogReadProb(allele1, test_data1, &allele_ll);
   // cout<<endl<<allele_ll<<endl;
 
-  span_class_.GetClassLogLikelihood(allele1, allele2, read_len, motif_len, ref_count, &class_ll);
+  span_class_.GetClassLogLikelihood(allele1, allele2, read_len, motif_len, ref_count, ploidy, &class_ll);
   CPPUNIT_ASSERT_EQUAL(roundf(class_ll*pow(10,4))/pow(10,4), roundf(-62.3921692604*pow(10,4))/pow(10,4));
 
   frr_class_.Reset();
@@ -176,7 +177,7 @@ void ReadClassTest::test_GetClassLogLikelihood() {
   frr_class_.AddData(test_data2);
   frr_class_.AddData(test_data3);
   frr_class_.AddData(test_data4);
-  frr_class_.GetClassLogLikelihood(allele1, allele2, read_len, motif_len, ref_count, &class_ll);
+  frr_class_.GetClassLogLikelihood(allele1, allele2, read_len, motif_len, ref_count, ploidy, &class_ll);
   CPPUNIT_ASSERT_EQUAL(roundf(class_ll*pow(10,11))/pow(10,11), roundf(-40.8239143859*pow(10,11))/pow(10,11));
 
   // std::cout<<std::endl<<class_ll<<std::endl;

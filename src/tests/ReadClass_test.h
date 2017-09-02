@@ -61,6 +61,7 @@ class ReadClassTest: public CppUnit::TestFixture {
   int32_t read_len;
   int32_t motif_len;
   int32_t ref_count;
+  int32_t ploidy;
 };
 
 #endif //  SRC_TESTS_READCLASS_H_

@@ -46,12 +46,14 @@ void RealignmentTest::test_ExpansionAwareRealign() {
   std::string pre_flank = "ACTAGCTACTCATCCA";
   std::string post_flank = "ATCATCGACTACGACT";
   std::string motif = "CAG";
+  std::string qual = "ATCATCGACTACGACT"; // TODO fix -> qual
+
   std::string seq;
   int32_t nCopy, pos, score;
   // Case 1 - enclosing
   for (int32_t i=0; i<20; i++) {
     seq = ConstructSeq(pre_flank, post_flank, motif, i);
-    if (!expansion_aware_realign(seq, pre_flank, post_flank, motif,
+    if (!expansion_aware_realign(seq, qual, pre_flank, post_flank, motif,
 				 &nCopy, &pos, &score)) {
       CPPUNIT_FAIL("expansion_aware_realign returned false unexpectedly");
     }
@@ -62,7 +64,7 @@ void RealignmentTest::test_ExpansionAwareRealign() {
   // Case 2 - preflank
   for (int32_t i=0; i<50; i++) {
     seq = ConstructSeq(pre_flank, "", motif, i);
-    if (!expansion_aware_realign(seq, pre_flank, post_flank, motif,
+    if (!expansion_aware_realign(seq, qual, pre_flank, post_flank, motif,
 				 &nCopy, &pos, &score)) {
       CPPUNIT_FAIL("expansion_aware_realign returned false unexpectedly");
     }
@@ -73,7 +75,7 @@ void RealignmentTest::test_ExpansionAwareRealign() {
   // Case 3 - postflank
   for (int32_t i=0; i<50; i++) {
     seq = ConstructSeq("", post_flank, motif, i);
-    if (!expansion_aware_realign(seq, pre_flank, post_flank, motif,
+    if (!expansion_aware_realign(seq, qual, pre_flank, post_flank, motif,
 				 &nCopy, &pos, &score)) {
       CPPUNIT_FAIL("expansion_aware_realign returned false unexpectedly");
     }
@@ -82,7 +84,7 @@ void RealignmentTest::test_ExpansionAwareRealign() {
   // Case 3 - IRR
   for (int32_t i=0; i<50; i++) {
     seq = ConstructSeq("", "", motif, i);
-    if (!expansion_aware_realign(seq, pre_flank, post_flank, motif,
+    if (!expansion_aware_realign(seq, qual, pre_flank, post_flank, motif,
 				 &nCopy, &pos, &score)) {
       CPPUNIT_FAIL("expansion_aware_realign returned false unexpectedly");
     }
@@ -90,7 +92,7 @@ void RealignmentTest::test_ExpansionAwareRealign() {
   }
   // Case 4 - random sequence
   seq ="NNNNNNNNNNN";
-  if (!expansion_aware_realign(seq, pre_flank, post_flank, motif,
+  if (!expansion_aware_realign(seq, qual, pre_flank, post_flank, motif,
 			       &nCopy, &pos, &score)) {
     CPPUNIT_FAIL("expansion_aware_realign returned false unexpectedly");
   }
@@ -102,8 +104,9 @@ void RealignmentTest::test_SmithWaterman() {
   // Case 1
   seq1 = "ACGT";
   seq2 = "ACGT";
+  std::string qual = "ATCA"; // TODO fix -> qual
   int32_t pos, score;
-  if (!smith_waterman(seq1, seq2, &pos, &score)) {
+  if (!smith_waterman(seq1, seq2, qual, &pos, &score)) {
     CPPUNIT_FAIL("smith_waterman returned false unexpectedly");
   }
   CPPUNIT_ASSERT_EQUAL(MATCH_SCORE*4, score);
@@ -111,7 +114,8 @@ void RealignmentTest::test_SmithWaterman() {
   // Case 2
   seq1 = "ATCACGT";
   seq2 = "ATCGCGT";
-  if (!smith_waterman(seq1, seq2, &pos, &score)) {
+  qual = "ATCACTA";   // TODO fix -> qual
+  if (!smith_waterman(seq1, seq2, qual, &pos, &score)) {
     CPPUNIT_FAIL("smith_waterman returned false unexpectedly");
   }
   CPPUNIT_ASSERT_EQUAL(MATCH_SCORE*6+MISMATCH_SCORE, score);
@@ -119,7 +123,7 @@ void RealignmentTest::test_SmithWaterman() {
   // Case 3
   seq1 = "ATCACGT";
   seq2 = "CACGT";
-  if (!smith_waterman(seq1, seq2, &pos, &score)) {
+  if (!smith_waterman(seq1, seq2, qual, &pos, &score)) {
     CPPUNIT_FAIL("smith_waterman returned false unexpectedly");
   }
   CPPUNIT_ASSERT_EQUAL(MATCH_SCORE*5, score);
@@ -132,11 +136,12 @@ void RealignmentTest::test_CreateScoreMatrix() {
   // Case 1 - trivial matching
   std::string seq1 = "ACT";
   std::string seq2 = "ACT";
+  std::string qual = "AAA";   // TODO set appropriate qual
   int32_t rows = (int32_t)seq1.size() + 1;
   int32_t cols = (int32_t)seq2.size() + 1;
   std::vector<std::vector<int32_t> > score_matrix;
   score_matrix.resize(rows, std::vector<int32_t>(cols, 0));
-  if (!create_score_matrix(rows, cols, seq1, seq2,
+  if (!create_score_matrix(rows, cols, seq1, seq2, qual,
 			   &score_matrix, &start_pos, &current_score)) {
     CPPUNIT_FAIL("create_score_matrix failed unexpectedly");
   }
@@ -146,11 +151,12 @@ void RealignmentTest::test_CreateScoreMatrix() {
   // Case 2 - almost trivial matching
   seq1 = "ACTG";
   seq2 = "ACT";
+  qual = "AAAA";    // TODO set appropriate qual
   rows = (int32_t)seq1.size() + 1;
   cols = (int32_t)seq2.size() + 1;
   std::vector<std::vector<int32_t> > score_matrix2;
   score_matrix2.resize(rows, std::vector<int32_t>(cols, 0));
-  if (!create_score_matrix(rows, cols, seq1, seq2,
+  if (!create_score_matrix(rows, cols, seq1, seq2, qual,
 			   &score_matrix2, &start_pos, &current_score)) {
     CPPUNIT_FAIL("create_score_matrix failed unexpectedly");
   }
@@ -159,11 +165,12 @@ void RealignmentTest::test_CreateScoreMatrix() {
   // Case 3
   seq1 = "ACCTGA";
   seq2 = "CCTG";
+  qual = "AAAAAA";    // TODO set appropriate qual
   rows = (int32_t)seq1.size() + 1;
   cols = (int32_t)seq2.size() + 1;
   std::vector<std::vector<int32_t> > score_matrix3;
   score_matrix3.resize(rows, std::vector<int32_t>(cols, 0));
-  if (!create_score_matrix(rows, cols, seq1, seq2,
+  if (!create_score_matrix(rows, cols, seq1, seq2, qual,
 			   &score_matrix3, &start_pos, &current_score)) {
     CPPUNIT_FAIL("create_score_matrix failed unexpectedly");
   }
@@ -172,11 +179,12 @@ void RealignmentTest::test_CreateScoreMatrix() {
   // Case 4
   seq1 = "ACCTGAT";
   seq2 = "ACTGAT";
+  qual = "AAAAAAA";   // TODO set appropriate qual
   rows = (int32_t)seq1.size() + 1;
   cols = (int32_t)seq2.size() + 1;
   std::vector<std::vector<int32_t> > score_matrix4;
   score_matrix4.resize(rows, std::vector<int32_t>(cols, 0));
-  if (!create_score_matrix(rows, cols, seq1, seq2,
+  if (!create_score_matrix(rows, cols, seq1, seq2, qual,
 			   &score_matrix4, &start_pos, &current_score)) {
     CPPUNIT_FAIL("create_score_matrix failed unexpectedly");
   }
@@ -187,6 +195,7 @@ void RealignmentTest::test_CreateScoreMatrix() {
 void RealignmentTest::test_CalcScore() {
   std::string seq1 = "ATCT";
   std::string seq2 = "ACT";
+  std::string qual = "AAAA";  // TODO set appropriate qual
   int32_t rows = (int32_t)seq1.size() + 1;
   int32_t cols = (int32_t)seq2.size() + 1;
   std::vector<std::vector<int32_t> > score_matrix;
@@ -194,25 +203,25 @@ void RealignmentTest::test_CalcScore() {
   // Walk through a couple steps of filling in the matrix
   int32_t i=1;
   int32_t j=1;
-  if (!calc_score(i, j, seq1, seq2, &score_matrix)) {
+  if (!calc_score(i, j, seq1, seq2, qual, &score_matrix)) {
     CPPUNIT_FAIL("calc_score returned false unexpectedly");
   }
   CPPUNIT_ASSERT_EQUAL(MATCH_SCORE, score_matrix.at(i).at(j));
   i=2;
   j=1;
-  if (!calc_score(i, j, seq1, seq2, &score_matrix)) {
+  if (!calc_score(i, j, seq1, seq2, qual, &score_matrix)) {
     CPPUNIT_FAIL("calc_score returned false unexpectedly");
   }
   CPPUNIT_ASSERT_EQUAL(0, score_matrix.at(i).at(j));
   i=2;
   j=2;
-  if (!calc_score(i, j, seq1, seq2, &score_matrix)) {
+  if (!calc_score(i, j, seq1, seq2, qual, &score_matrix)) {
     CPPUNIT_FAIL("calc_score returned false unexpectedly");
   }
   CPPUNIT_ASSERT_EQUAL(2, score_matrix.at(i).at(j));
   i=3;
   j=2;
-  if (!calc_score(i, j, seq1, seq2, &score_matrix)) {
+  if (!calc_score(i, j, seq1, seq2, qual, &score_matrix)) {
     CPPUNIT_FAIL("calc_score returned false unexpectedly");
   }
   CPPUNIT_ASSERT_EQUAL(3, score_matrix.at(i).at(j));
@@ -222,13 +231,14 @@ void RealignmentTest::test_ClassifyRealignedRead() {
   std::string pre_flank = "ACTAGCTACTCATCCA";
   std::string post_flank = "ATCATCGACTACGACT";
   std::string motif = "CAG";
-  std::string seq;
+  std::string seq, qual;
   int32_t nCopy, pos, score;
   SingleReadType src;
   // Case 1 - enclosing
   for (int32_t i=1; i<20; i++) {
     seq = ConstructSeq(pre_flank, post_flank, motif, i);
-    expansion_aware_realign(seq, pre_flank, post_flank, motif,
+    qual = seq;   // TODO set appropriate qual
+    expansion_aware_realign(seq, qual, pre_flank, post_flank, motif,
 			    &nCopy, &pos, &score);
     classify_realigned_read(seq, motif, pos, nCopy, score, (int32_t)pre_flank.size(),
 			    &src);
@@ -237,7 +247,8 @@ void RealignmentTest::test_ClassifyRealignedRead() {
   // Case 2 - preflank
   for (int32_t i=1; i<20; i++) {
     seq = ConstructSeq(pre_flank, "", motif, i);
-    expansion_aware_realign(seq, pre_flank, post_flank, motif,
+    qual = seq;   // TODO set appropriate qual
+    expansion_aware_realign(seq, qual, pre_flank, post_flank, motif,
 			    &nCopy, &pos, &score);
     classify_realigned_read(seq, motif, pos, nCopy, score, (int32_t)pre_flank.size(),
 			    &src);
@@ -246,7 +257,8 @@ void RealignmentTest::test_ClassifyRealignedRead() {
   // Case 3 - postflank
   for (int32_t i=1; i<20; i++) {
     seq = ConstructSeq("", post_flank, motif, i);
-    expansion_aware_realign(seq, pre_flank, post_flank, motif,
+    qual = seq;   // TODO set appropriate qual
+    expansion_aware_realign(seq, qual, pre_flank, post_flank, motif,
 			    &nCopy, &pos, &score);
     classify_realigned_read(seq, motif, pos, nCopy, score, (int32_t)pre_flank.size(),
 			    &src);
@@ -255,7 +267,8 @@ void RealignmentTest::test_ClassifyRealignedRead() {
   // Case 4 - IRR
   for (int32_t i=1; i<20; i++) {
     seq = ConstructSeq("", "", motif, i);
-    expansion_aware_realign(seq, pre_flank, post_flank, motif,
+    qual = seq;   // TODO set appropriate qual
+    expansion_aware_realign(seq, qual, pre_flank, post_flank, motif,
 			    &nCopy, &pos, &score);
     classify_realigned_read(seq, motif, pos, nCopy, score, (int32_t)pre_flank.size(),
 			    &src);
@@ -263,13 +276,15 @@ void RealignmentTest::test_ClassifyRealignedRead() {
   }
   // Case 5 - unknown
   seq = "NNNNNNNNNNN";
-  expansion_aware_realign(seq, pre_flank, post_flank, motif,
+  qual = seq;   // TODO set appropriate qual
+  expansion_aware_realign(seq, qual, pre_flank, post_flank, motif,
 			  &nCopy, &pos, &score);
   classify_realigned_read(seq, motif, pos, nCopy, score, (int32_t)pre_flank.size(),
 			  &src);
   CPPUNIT_ASSERT_EQUAL(SR_UNKNOWN, src);
   seq = "ATACGTACGATCTACAG";
-  expansion_aware_realign(seq, pre_flank, post_flank, motif,
+  qual = seq;   // TODO set appropriate qual
+  expansion_aware_realign(seq, qual, pre_flank, post_flank, motif,
 			  &nCopy, &pos, &score);
   classify_realigned_read(seq, motif, pos, nCopy, score, (int32_t)pre_flank.size(),
 			  &src);

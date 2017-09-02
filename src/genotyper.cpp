@@ -62,11 +62,13 @@ bool Genotyper::ProcessLocus(BamCramMultiReader* bamreader, Locus* locus) {
             &mean, &std_dev)) {
     return false;
   }
-  // TODO either remove or update ComputeInsertSizeDistribution
-  // options->dist_mean = mean;
-  // options->dist_sdev = std_dev;
+  // TODO upgrade ComputeInsertSizeDistribution to bwa mem edition
+  options->dist_mean = mean;
+  options->dist_sdev = std_dev;
+  // std::cerr <<">> " << mean << ", " << likelihood_maximizer->options->dist_sdev << endl;
+  likelihood_maximizer->UpdateOptions();
 
-  if (!read_extractor->ExtractReads(bamreader, *locus, options->regionsize,
+  if (!read_extractor->ExtractReads(bamreader, *locus, likelihood_maximizer->options->regionsize,
 				    likelihood_maximizer)) {
     return false;
   }
