@@ -111,6 +111,7 @@ bool create_score_matrix(const int32_t& rows, const int32_t& cols,
   int32_t max_score = 0;
   int32_t max_pos_row = -1; // The row and column of highest score in the matrix
   int32_t max_pos_col = -1;
+
   for (int32_t i=1; i<rows; i++) {
     for (int32_t j=1; j<cols; j++) {
       if (!calc_score(i, j, seq1, seq2, qual, score_matrix)) {

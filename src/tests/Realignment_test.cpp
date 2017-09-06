@@ -19,7 +19,7 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include "src/tests/Realignment_test.h"
-
+#include <math.h>
 #include <sstream>
 
 // Registers the fixture into the 'registry'
@@ -46,13 +46,14 @@ void RealignmentTest::test_ExpansionAwareRealign() {
   std::string pre_flank = "ACTAGCTACTCATCCA";
   std::string post_flank = "ATCATCGACTACGACT";
   std::string motif = "CAG";
-  std::string qual = "ATCATCGACTACGACT"; // TODO fix -> qual
+  std::string qual;
 
   std::string seq;
   int32_t nCopy, pos, score;
   // Case 1 - enclosing
   for (int32_t i=0; i<20; i++) {
     seq = ConstructSeq(pre_flank, post_flank, motif, i);
+    qual = seq;   // TODO set appropriate qual
     if (!expansion_aware_realign(seq, qual, pre_flank, post_flank, motif,
 				 &nCopy, &pos, &score)) {
       CPPUNIT_FAIL("expansion_aware_realign returned false unexpectedly");
@@ -64,6 +65,7 @@ void RealignmentTest::test_ExpansionAwareRealign() {
   // Case 2 - preflank
   for (int32_t i=0; i<50; i++) {
     seq = ConstructSeq(pre_flank, "", motif, i);
+    qual = seq;   // TODO set appropriate qual
     if (!expansion_aware_realign(seq, qual, pre_flank, post_flank, motif,
 				 &nCopy, &pos, &score)) {
       CPPUNIT_FAIL("expansion_aware_realign returned false unexpectedly");
@@ -75,6 +77,7 @@ void RealignmentTest::test_ExpansionAwareRealign() {
   // Case 3 - postflank
   for (int32_t i=0; i<50; i++) {
     seq = ConstructSeq("", post_flank, motif, i);
+    qual = seq;   // TODO set appropriate qual
     if (!expansion_aware_realign(seq, qual, pre_flank, post_flank, motif,
 				 &nCopy, &pos, &score)) {
       CPPUNIT_FAIL("expansion_aware_realign returned false unexpectedly");
@@ -84,6 +87,7 @@ void RealignmentTest::test_ExpansionAwareRealign() {
   // Case 3 - IRR
   for (int32_t i=0; i<50; i++) {
     seq = ConstructSeq("", "", motif, i);
+    qual = seq;   // TODO set appropriate qual
     if (!expansion_aware_realign(seq, qual, pre_flank, post_flank, motif,
 				 &nCopy, &pos, &score)) {
       CPPUNIT_FAIL("expansion_aware_realign returned false unexpectedly");
@@ -92,6 +96,7 @@ void RealignmentTest::test_ExpansionAwareRealign() {
   }
   // Case 4 - random sequence
   seq ="NNNNNNNNNNN";
+  qual = seq;   // TODO set appropriate qual
   if (!expansion_aware_realign(seq, qual, pre_flank, post_flank, motif,
 			       &nCopy, &pos, &score)) {
     CPPUNIT_FAIL("expansion_aware_realign returned false unexpectedly");
@@ -207,24 +212,43 @@ void RealignmentTest::test_CalcScore() {
     CPPUNIT_FAIL("calc_score returned false unexpectedly");
   }
   CPPUNIT_ASSERT_EQUAL(MATCH_SCORE, score_matrix.at(i).at(j));
+
   i=2;
   j=1;
   if (!calc_score(i, j, seq1, seq2, qual, &score_matrix)) {
     CPPUNIT_FAIL("calc_score returned false unexpectedly");
   }
-  CPPUNIT_ASSERT_EQUAL(0, score_matrix.at(i).at(j));
+  CPPUNIT_ASSERT_EQUAL(std::max(0, MATCH_SCORE + GAP_SCORE), score_matrix.at(i).at(j));
+
+  i=1;
+  j=2;
+  if (!calc_score(i, j, seq1, seq2, qual, &score_matrix)) {
+    CPPUNIT_FAIL("calc_score returned false unexpectedly");
+  }
+  CPPUNIT_ASSERT_EQUAL(std::max(0, MATCH_SCORE + GAP_SCORE), score_matrix.at(i).at(j));
+
   i=2;
   j=2;
   if (!calc_score(i, j, seq1, seq2, qual, &score_matrix)) {
     CPPUNIT_FAIL("calc_score returned false unexpectedly");
   }
-  CPPUNIT_ASSERT_EQUAL(2, score_matrix.at(i).at(j));
+  CPPUNIT_ASSERT_EQUAL(std::max(std::max(0,MATCH_SCORE+MISMATCH_SCORE), MATCH_SCORE + 2 * GAP_SCORE)
+        , score_matrix.at(i).at(j));
+
+  i=3;
+  j=1;
+  if (!calc_score(i, j, seq1, seq2, qual, &score_matrix)) {
+    CPPUNIT_FAIL("calc_score returned false unexpectedly");
+  }
+  CPPUNIT_ASSERT_EQUAL(std::max(0, MATCH_SCORE+2*GAP_SCORE), score_matrix.at(i).at(j));
+
   i=3;
   j=2;
   if (!calc_score(i, j, seq1, seq2, qual, &score_matrix)) {
     CPPUNIT_FAIL("calc_score returned false unexpectedly");
   }
-  CPPUNIT_ASSERT_EQUAL(3, score_matrix.at(i).at(j));
+  CPPUNIT_ASSERT_EQUAL(std::max(std::max(0, 2*MATCH_SCORE+GAP_SCORE), MATCH_SCORE + MISMATCH_SCORE + GAP_SCORE)
+    , score_matrix.at(i).at(j));
 }
 
 void RealignmentTest::test_ClassifyRealignedRead() {

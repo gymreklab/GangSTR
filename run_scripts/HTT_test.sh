@@ -9,8 +9,8 @@ bam_dir=/storage/resources/datasets/repeat-expansions/bams
 
 bed_dir=$repo_dir/tests/$locus.bed
 
-# for bam_file in $bam_dir/*.bam;
-for bam_file in $bam_dir/SRR4243174_43_22.rmdup.bam;
+for bam_file in $bam_dir/*.bam;
+# for bam_file in $bam_dir/SRR4243174_43_22.rmdup.bam;
 do
 	echo '>>Running for: '$bam_file
 	$repo_dir/src/GangSTR \

@@ -4,16 +4,18 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
-locus = "HTT"
-# locus = "CACNA1A"
+# locus = "HTT"
+locus = "CACNA1A"
+# locus = "ATXN7"
 repo_dir = "/storage/nmmsv/GangSTR"
 run_dir = repo_dir + "/run_scripts/"
 # result_dir = run_dir + "/results2/"
 # dataset_dir = "/storage/resources/datasets/repeat-expansions/bams/"
 bed_dir = repo_dir + "/tests/" + locus + ".bed"
 ref_genome = "/storage/resources/dbase/human/hg19/Homo_sapiens_assembly19.fasta"
-bam_file_list = run_dir + "bamlists/HTT_full.txt"
-# bam_file_list = run_dir + "bamlists/CACNA1A.txt"
+# bam_file_list = run_dir + "bamlists/HTT_full.txt"
+bam_file_list = run_dir + "bamlists/CACNA1A_grid.txt"
+# bam_file_list = run_dir + "bamlists/ATXN7_grid.txt"
 true_available = True
 
 error_mode  = "rms"					# rms, mae: mean absolute error
@@ -41,10 +43,10 @@ with open (bam_file_list, 'r') as bam_list:
 									"--ref", ref_genome, \
 									"--regions", bed_dir, \
 									"--out", "test", \
-									"--frrweight", str(0.12), \
+									"--frrweight", str(0.35), \
 									"--enclweight", "1.0", \
 									"--spanweight", "1.0", \
-									"--flankweight", str(0.5),\
+									"--flankweight", str(1.0),\
 									"--ploidy", str(2)], stdout=subprocess.PIPE)
 			cmd.wait()
 			for line in cmd.stdout:
@@ -74,6 +76,9 @@ with open (bam_file_list, 'r') as bam_list:
 							str(int(max(estm_genot))) + "\n")
 			# if samp_count == 15:
 			# 	break;
+print
+print ">> Result for", locus
+
 if true_available == True:
 	if error_mode == "rms":
 		error_s = np.sqrt(sum_error_s / samp_count)
