@@ -51,12 +51,19 @@ bool Genotyper::SetFlanks(Locus* locus) {
 
 bool Genotyper::ProcessLocus(BamCramMultiReader* bamreader, Locus* locus) {
   // Load preflank and postflank to locus
+  if (options->verbose) {
+    PrintMessageDieOnError("\tSetting flanking regions", M_PROGRESS);
+  }
   if (!SetFlanks(locus)) {
     return false;
   }
+  std::cerr << locus->pre_flank << " " << locus->motif << " " << locus->post_flank << std::endl; // TODO remove
 
+  // Compute insert size distribution
+  if (options->verbose) {
+    PrintMessageDieOnError("\tComputing insert size distribution", M_PROGRESS);
+  }
   double mean, std_dev;
-  // Load all read data
   likelihood_maximizer->Reset();
   if (!read_extractor->ComputeInsertSizeDistribution(bamreader, *locus,
             &mean, &std_dev)) {
@@ -65,15 +72,26 @@ bool Genotyper::ProcessLocus(BamCramMultiReader* bamreader, Locus* locus) {
   // TODO upgrade ComputeInsertSizeDistribution to bwa mem edition
   options->dist_mean = mean;
   options->dist_sdev = std_dev;
-  // std::cerr <<">> " << mean << ", " << likelihood_maximizer->options->dist_sdev << endl;
   likelihood_maximizer->UpdateOptions();
+  if (options->verbose) {
+    stringstream ss;
+    ss << "\t\tMean=" << mean << " SD=" << std_dev;
+    PrintMessageDieOnError(ss.str(), M_PROGRESS);
+  }
 
+  // Load all read data
+  if (options->verbose) {
+    PrintMessageDieOnError("\tLoading read data", M_PROGRESS);
+  }
   if (!read_extractor->ExtractReads(bamreader, *locus, likelihood_maximizer->options->regionsize,
 				    likelihood_maximizer)) {
     return false;
   }
   
   // Maximize the likelihood
+  if (options->verbose) {
+    PrintMessageDieOnError("\tMaximizing likelihood", M_PROGRESS);
+  }
   int32_t allele1, allele2;
   int32_t read_len = read_extractor->guessed_read_length;
   int32_t ref_count = (int32_t)((locus->end-locus->start+1)/locus->motif.size());
