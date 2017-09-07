@@ -205,6 +205,7 @@ int main(int argc, char* argv[]) {
   Genotyper genotyper(refgenome, options);
   stringstream ss;
   while (region_reader.GetNextRegion(&locus)) {
+    ss.str("");
     ss.clear();
     ss << "Processing " << locus.chrom << ":" << locus.start;
     PrintMessageDieOnError(ss.str(), M_PROGRESS);
