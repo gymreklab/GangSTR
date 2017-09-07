@@ -57,7 +57,6 @@ bool Genotyper::ProcessLocus(BamCramMultiReader* bamreader, Locus* locus) {
   if (!SetFlanks(locus)) {
     return false;
   }
-  std::cerr << locus->pre_flank << " " << locus->motif << " " << locus->post_flank << std::endl; // TODO remove
 
   // Compute insert size distribution
   if (options->verbose) {
