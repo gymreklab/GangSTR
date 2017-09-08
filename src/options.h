@@ -61,6 +61,10 @@ class Options {
   int32_t ref_count;
   // Haploid/Diploid
   int32_t ploidy;
+  // Number of bootsrap resamples
+  int32_t num_boot_samp;
+  // Random number generator seed
+  int32_t seed;
 };
 
 #endif  // SRC_OPTIONS_H__

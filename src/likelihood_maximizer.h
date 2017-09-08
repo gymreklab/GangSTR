@@ -71,6 +71,13 @@ class LikelihoodMaximizer {
                           int32_t read_len, int32_t motif_len, int32_t ref_count, bool resampled,
                           int32_t* allele1, int32_t* allele2, double* min_negLike);
 
+  // Compute and return confidence interval with bootstrapping
+  bool GetConfidenceInterval(const int32_t& read_len, 
+                const int32_t& motif_len,
+                const int32_t& ref_count,
+                const int32_t& allele1,
+                const int32_t& allele2,
+                double* lob1, double* hib1, double* lob2, double* hib2);
   // Update read class options
   void UpdateOptions();
 

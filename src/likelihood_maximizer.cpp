@@ -48,7 +48,7 @@ LikelihoodMaximizer::LikelihoodMaximizer(Options& _options) {
   T = gsl_rng_default;
   r = gsl_rng_alloc (T);
 
-  gsl_rng_set(r, time(NULL));
+  gsl_rng_set(r, options->seed);
 }
 
 void LikelihoodMaximizer::UpdateOptions(){
@@ -119,8 +119,6 @@ void LikelihoodMaximizer::PrintReadPool(){
 }
 
 void LikelihoodMaximizer::ResampleReadPool(){
-  
-
   int32_t pool_size = read_pool.size();
   if (!resampled_pool.empty()){
     resampled_pool.clear();
@@ -150,6 +148,42 @@ void LikelihoodMaximizer::ResampleReadPool(){
   }
 
   // PrintReadPool();
+}
+
+bool LikelihoodMaximizer::GetConfidenceInterval(const int32_t& read_len, 
+                const int32_t& motif_len,
+                const int32_t& ref_count,
+                const int32_t& all1,
+                const int32_t& all2,
+                double* lob1, double* hib1, double* lob2, double* hib2){
+  int32_t allele1, allele2;
+  if (allele1 > allele2){
+    allele2 = all1;
+    allele1 = all2;
+  }
+  else{
+    allele1 = all1;
+    allele2 = all2;
+  }
+  int32_t num_boot_samp = options->num_boot_samp;
+  int32_t boot_al1, boot_al2;
+  double min_negLike;
+  std::vector<int32_t> small_alleles, large_alleles;
+  for (int i = 0; i < num_boot_samp; i++){
+    ResampleReadPool();
+    OptimizeLikelihood(read_len, motif_len, ref_count, true, &boot_al1, &boot_al2, &min_negLike);
+    small_alleles.push_back(min(boot_al1, boot_al2) - allele1);
+    large_alleles.push_back(max(boot_al1, boot_al2) - allele2);
+  }
+  std::sort(small_alleles.begin(), small_alleles.end());
+  std::sort(large_alleles.begin(), large_alleles.end());
+  // TODO 0.9 or 0.1? allele1 -/+ lob1?
+  // TODO allow change of 0.9 and 0.1
+  *lob1 = small_alleles.at(int(0.9 * num_boot_samp));
+  *hib1 = small_alleles.at(int(0.1 * num_boot_samp));
+  *lob2 = large_alleles.at(int(0.9 * num_boot_samp));
+  *hib2 = large_alleles.at(int(0.1 * num_boot_samp));
+  return true;  // TODO add return false cases
 }
 
 std::size_t LikelihoodMaximizer::GetEnclosingDataSize() {

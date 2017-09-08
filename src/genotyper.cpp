@@ -77,7 +77,7 @@ bool Genotyper::ProcessLocus(BamCramMultiReader* bamreader, Locus* locus) {
   int32_t allele1, allele2;
   int32_t read_len = read_extractor->guessed_read_length;
   int32_t ref_count = (int32_t)((locus->end-locus->start+1)/locus->motif.size());
-  double min_negLike;
+  double min_negLike, lob1, lob2, hib1, hib2;
   bool resampled = false;
 
   if (!likelihood_maximizer->OptimizeLikelihood(read_len, (int32_t)(locus->motif.size()),
@@ -87,17 +87,23 @@ bool Genotyper::ProcessLocus(BamCramMultiReader* bamreader, Locus* locus) {
   }
   cout<<">>Genotyper Results:\t"<<allele1<<", "<<allele2<<"\tlikelihood = "<<min_negLike<<"\n";
 
-  for (int jj = 0; jj < 10; jj++){
-    likelihood_maximizer->ResampleReadPool();
-    resampled = true;
-    if (!likelihood_maximizer->OptimizeLikelihood(read_len, (int32_t)(locus->motif.size()),
-              ref_count, resampled,
-              &allele1, &allele2, &min_negLike)) {
-      return false;
-    }
-    cout<<">>Resampled Results:\t"<<allele1<<", "<<allele2<<"\tlikelihood = "<<min_negLike<<"\n";
+  // for (int jj = 0; jj < 10; jj++){
+  //   likelihood_maximizer->ResampleReadPool();
+  //   resampled = true;
+  //   if (!likelihood_maximizer->OptimizeLikelihood(read_len, (int32_t)(locus->motif.size()),
+  //             ref_count, resampled,
+  //             &allele1, &allele2, &min_negLike)) {
+  //     return false;
+  //   }
+  //   cout<<">>Resampled Results:\t"<<allele1<<", "<<allele2<<"\tlikelihood = "<<min_negLike<<"\n";
+  // }
+  if (!likelihood_maximizer->GetConfidenceInterval(read_len, (int32_t)(locus->motif.size()),
+            ref_count, allele1, allele2,
+            &lob1, &hib1, &lob2, &hib2)) {
+    return false;
   }
-
+  cout<<"@@Small Allele Bound:\t["<<allele1 - lob1<<", "<<allele1 - hib1<<"]\n";
+  cout<<"@@Large Allele Bound:\t["<<allele2 - lob2<<", "<<allele2 - hib2<<"]\n";
 
   return true;
 }
