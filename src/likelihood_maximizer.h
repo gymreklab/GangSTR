@@ -27,8 +27,17 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 #include "src/options.h"
 #include "src/read_class.h"
 #include "src/spanning_class.h"
+#include "src/read_pair.h"
 #include "gsl/gsl_vector.h"
+#include "gsl/gsl_rng.h"
+#include "gsl/gsl_randist.h"
 #include <string>
+
+// Struct for storing reads from all classes in a unified vector
+struct ReadRecord{
+  int32_t data;
+  ReadType read_type;
+};
 
 class LikelihoodMaximizer {
  friend class Genotyper;
@@ -51,19 +60,33 @@ class LikelihoodMaximizer {
   // Main likelihood function
   bool GetGenotypeNegLogLikelihood(const int32_t& allele1, const int32_t& allele2,
 				   const int32_t& read_len, const int32_t& motif_len,
-				   const int32_t& ref_count,
+				   const int32_t& ref_count, const bool& resampled,
 				   double* gt_ll);
   // Main optimization function - TODO also return other data
   bool OptimizeLikelihood(const int32_t& read_len, const int32_t& motif_len,
-			  const int32_t& ref_count,
+			  const int32_t& ref_count, const bool& resampled,
 			  int32_t* allele1, int32_t* allele2, double* min_negLike);
   // Go over the list of the discovered alleles to find the best pair
   bool findBestAlleleListTuple(std::vector<int32_t> allele_list,
-                          int32_t read_len, int32_t motif_len, int32_t ref_count,
+                          int32_t read_len, int32_t motif_len, int32_t ref_count, bool resampled,
                           int32_t* allele1, int32_t* allele2, double* min_negLike);
 
+  // Compute and return confidence interval with bootstrapping
+  bool GetConfidenceInterval(const int32_t& read_len, 
+                const int32_t& motif_len,
+                const int32_t& ref_count,
+                const int32_t& allele1,
+                const int32_t& allele2,
+                double* lob1, double* hib1, double* lob2, double* hib2);
   // Update read class options
   void UpdateOptions();
+
+  // Print read pool
+  void PrintReadPool();
+
+  // Resample read pool with replacement
+  void ResampleReadPool();
+
  protected:
   // Other params -> Made public for gslNegLikelihood to have access
   Options* options;
@@ -73,26 +96,38 @@ class LikelihoodMaximizer {
   FRRClass frr_class_;
   SpanningClass spanning_class_;
   FlankingClass flanking_class_;
+  std::vector<ReadRecord> read_pool;
+  std::vector<ReadRecord> resampled_pool;
+  EnclosingClass resampled_enclosing_class_;
+  FRRClass resampled_frr_class_;
+  SpanningClass resampled_spanning_class_;
+  FlankingClass resampled_flanking_class_;
+
+  // Random number generator
+  gsl_rng * r;
 };
 
 // Helper struct for NLOPT gradient optimizer
 struct nlopt_data{
   LikelihoodMaximizer* lm_ptr;
-  int read_len, motif_len, ref_count, n_dim, fix_allele;
-  nlopt_data(int Read_Len, int Motif_Len, int Ref_Count, LikelihoodMaximizer* LM_OBJ, int Fix_Allele) : 
-    read_len(Read_Len), motif_len(Motif_Len), ref_count(Ref_Count), lm_ptr(LM_OBJ), fix_allele(Fix_Allele) {
+  int32_t read_len, motif_len, ref_count, n_dim, fix_allele;
+  bool resampled;
+  nlopt_data(int32_t Read_Len, int32_t Motif_Len, int32_t Ref_Count, 
+    LikelihoodMaximizer* LM_OBJ, int32_t Fix_Allele, bool Resampled) : 
+    read_len(Read_Len), motif_len(Motif_Len), ref_count(Ref_Count), 
+    lm_ptr(LM_OBJ), fix_allele(Fix_Allele), resampled(Resampled) {
     }
 };
 // 1D gradient optimizer using NLOPT
 bool nlopt_1D_optimize(const int32_t& read_len, const int32_t& motif_len,
                 const int32_t& ref_count, const int32_t& lower_bound,
-                const int32_t& upper_bound, LikelihoodMaximizer* lm_ptr,
+                const int32_t& upper_bound, const bool& resampled, LikelihoodMaximizer* lm_ptr,
                 const int32_t& fix_allele, int32_t* allele1,
                 int32_t* ret_result, double* minf_ret);
 // 2D gradient optimizer using NLOPT
 bool nlopt_2D_optimize(const int32_t& read_len, const int32_t& motif_len,
                const int32_t& ref_count, const int32_t& lower_bound,
-               const int32_t& upper_bound, LikelihoodMaximizer* lm_ptr,
+               const int32_t& upper_bound, const bool& resampled, LikelihoodMaximizer* lm_ptr,
                int32_t* allele1, int32_t* allele2, int32_t* ret_result, double* minf_ret);
 // Helper function for NLOPT gradient optimizer
 double nloptNegLikelihood(unsigned n, const double *x, double *grad, void *data);

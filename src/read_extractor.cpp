@@ -41,6 +41,11 @@ bool ReadExtractor::ExtractReads(BamCramMultiReader* bamreader,
     return false;
   }
   int32_t frr = 0, span = 0, encl = 0;
+  if (read_pairs.size() == 0){
+    // TODO print error "Not enough extracted reads"
+    PrintMessageDieOnError("\tNot enough reads extracted. Aborting..", M_PROGRESS);
+    return false;
+  }
   /* Load data into likelihood maximizer */
   for (std::map<std::string, ReadPair>::const_iterator iter = read_pairs.begin();
        iter != read_pairs.end(); iter++) {
@@ -96,6 +101,11 @@ bool ReadExtractor::ExtractReads(BamCramMultiReader* bamreader,
 bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
              const Locus& locus, const int32_t& regionsize,
              std::map<std::string, ReadPair>* read_pairs) {
+  if (locus.end < locus.start){
+    // TODO print error "Not enough extracted reads"
+    PrintMessageDieOnError("\tLocus end preceeds locus start. Aborting..", M_PROGRESS);
+    return false;
+  }
   // Get bam alignments from the relevant region
   bamreader->SetRegion(locus.chrom, locus.start-regionsize, locus.end+regionsize);
 

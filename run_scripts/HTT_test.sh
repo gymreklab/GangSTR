@@ -6,11 +6,11 @@ locus=HTT
 
 bam_dir=/storage/resources/datasets/repeat-expansions/bams
 
-
+ll
 bed_dir=$repo_dir/tests/$locus.bed
 
-# for bam_file in $bam_dir/*.bam;
-for bam_file in $bam_dir/SRR4243174_43_22.rmdup.bam;
+for bam_file in $bam_dir/*.bam;
+# for bam_file in $bam_dir/SRR4243174_43_22.rmdup.bam;
 do
 	echo '>>Running for: '$bam_file
 	$repo_dir/src/GangSTR \
@@ -23,6 +23,7 @@ do
 	    --spanweight 1.0 \
 	    --flankweight 0.5 \
 	    --ploidy 2 \
+	    --numbstrap 100
 
 done
 

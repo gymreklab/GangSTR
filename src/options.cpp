@@ -58,6 +58,8 @@ Options::Options() {
   flanking_weight = 0.5;
   verbose = false;
   ploidy = 2;
+  num_boot_samp = 100;
+  seed = time(NULL);
 }
 
 Options::~Options() {}

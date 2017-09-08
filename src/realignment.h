@@ -27,9 +27,11 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 #include <stdint.h>
 
 // Set NW params
-const static int32_t MATCH_SCORE = 12;
-const static int32_t MISMATCH_SCORE = -12;
-const static int32_t GAP_SCORE = -16;
+// NOTE: the other score triple (12,-12,-16) causes issues in realignment test (ambigous cases)
+// Diag score too big ^^
+const static int32_t MATCH_SCORE = 4;
+const static int32_t MISMATCH_SCORE = -4;
+const static int32_t GAP_SCORE = -6;
 
 // amount of slip we allow between alignment position and STR start and end
 static int32_t MARGIN = 5;		// This value is reset in expansion_aware_realign

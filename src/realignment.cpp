@@ -25,6 +25,41 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 
 using namespace std;
 
+bool find_longest_stretch(const std::string& seq,
+            const std::string& motif,
+            int32_t* nCopy){
+  int32_t read_len = (int32_t)seq.size();
+  int32_t period = (int32_t)motif.size();
+  bool motif_found;
+  bool on_stretch = false;
+  int32_t longest_stretch = 0, current_stretch = 0;
+  for (int i = 0; i < read_len - period; i++){
+    motif_found = true;
+    for (int j = 0; j < period; j++){
+      if (motif.at(j) != seq.at(i + j)){
+        on_stretch = false;
+        motif_found = false;
+        break;
+      }
+    }
+    if (motif_found){
+      i+=period-1;
+      if (on_stretch){
+        current_stretch++;
+      }
+      else{
+        on_stretch = true;
+        current_stretch = 1;
+      }
+    }
+    if (current_stretch > longest_stretch){
+      longest_stretch = current_stretch;
+    }
+  }
+  *nCopy = longest_stretch;
+}
+
+
 bool expansion_aware_realign(const std::string& seq,
            const std::string& qual,
 			     const std::string& pre_flank,
@@ -33,6 +68,10 @@ bool expansion_aware_realign(const std::string& seq,
 			     int32_t* nCopy, int32_t* pos, int32_t* score) {
   int32_t read_len = (int32_t)seq.size();
   int32_t period = (int32_t)motif.size();
+  int32_t min_nCopy = 0;
+  // Find longest stretch of motif as starting point of our search.
+  find_longest_stretch(seq, motif, &min_nCopy);
+  
   int32_t max_score = 0;
   int32_t second_best_score = 0;
   int32_t max_nCopy = 0;
@@ -41,11 +80,18 @@ bool expansion_aware_realign(const std::string& seq,
   int32_t current_score = 0;
   int32_t current_pos = 0;
   int32_t current_nCopy;
+  int32_t prev_score = 0;
   MARGIN = 1 * period - 1;
-  for (current_nCopy=0; current_nCopy<(int32_t)(read_len/period)+2; current_nCopy++) {
+
+  // if (min_nCopy > 15){
+  //   cerr<<min_nCopy<<motif<<"\t"<<seq<<endl;
+  //   cerr<<pre_flank<<endl;
+  //   cerr<<post_flank<<endl;
+  // }
+  for (current_nCopy=min_nCopy; current_nCopy<(int32_t)(read_len/period)+2; current_nCopy++) {
     std::stringstream var_realign_ss;
     var_realign_ss << pre_flank;
-    for (int i=0; i<current_nCopy; i++) {
+    for (int i = 0; i<current_nCopy; i++) {
       var_realign_ss << motif;
     }
     var_realign_ss << post_flank;
@@ -53,6 +99,9 @@ bool expansion_aware_realign(const std::string& seq,
     if (!smith_waterman(var_realign_string, seq, qual, &current_pos, &current_score)) {
       return false;
     }
+    // if (min_nCopy > 15){
+    //   cerr<<">>"<<current_nCopy<<"\t"<<current_pos<<"\t"<<current_score<<endl;
+    // }
     if (current_score > max_score) {
       second_best_score = max_score;
       second_best_nCopy = max_nCopy;
@@ -60,12 +109,22 @@ bool expansion_aware_realign(const std::string& seq,
       max_nCopy = current_nCopy;
       max_pos = current_pos;
     }
+    // Stop if score is relatively high, but lower than max
+    if (current_score > 0.7 * MATCH_SCORE * read_len and 
+          current_score == prev_score and
+          prev_score == max_score){
+      break;
+    }
     if (current_score == read_len*MATCH_SCORE) {
       break;
     }
   }
   // cout << max_score << "\t" << second_best_score<<endl;
   // cout << max_nCopy << "\t" << second_best_nCopy<<endl<<endl;
+
+  // if (min_nCopy > 15){
+  //   cerr<<">>>>Max nCopy:\t"<<max_nCopy<<endl;
+  // }
   *nCopy = max_nCopy;
   *score = max_score;
   *pos = max_pos;
@@ -111,6 +170,7 @@ bool create_score_matrix(const int32_t& rows, const int32_t& cols,
   int32_t max_score = 0;
   int32_t max_pos_row = -1; // The row and column of highest score in the matrix
   int32_t max_pos_col = -1;
+
   for (int32_t i=1; i<rows; i++) {
     for (int32_t j=1; j<cols; j++) {
       if (!calc_score(i, j, seq1, seq2, qual, score_matrix)) {
