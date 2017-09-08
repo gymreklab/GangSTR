@@ -598,6 +598,11 @@ bool ReadExtractor::ComputeInsertSizeDistribution(BamCramMultiReader* bamreader,
     size++;
   }
 
+  // Give up if we don't have enough reads TODO probably need more than 0...
+  if (temp_len_vec.size() == 0) {
+    return false;
+  }
+
   sort(temp_len_vec.begin(), temp_len_vec.end());
   median = temp_len_vec.at(int32_t(size / 2));
   
