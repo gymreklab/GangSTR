@@ -71,6 +71,7 @@ bool Genotyper::ProcessLocus(BamCramMultiReader* bamreader, Locus* locus) {
   // TODO upgrade ComputeInsertSizeDistribution to bwa mem edition
   options->dist_mean = mean;
   options->dist_sdev = std_dev;
+
   likelihood_maximizer->UpdateOptions();
   if (options->verbose) {
     stringstream ss;
@@ -86,7 +87,6 @@ bool Genotyper::ProcessLocus(BamCramMultiReader* bamreader, Locus* locus) {
 				    likelihood_maximizer)) {
     return false;
   }
-  
   // Maximize the likelihood
   if (options->verbose) {
     PrintMessageDieOnError("\tMaximizing likelihood", M_PROGRESS);
