@@ -119,9 +119,13 @@ bool Genotyper::ProcessLocus(BamCramMultiReader* bamreader, Locus* locus) {
             &lob1, &hib1, &lob2, &hib2)) {
     return false;
   }
-  cout<<"@@Small Allele Bound:\t["<<allele1 - lob1<<", "<<allele1 - hib1<<"]\n";
-  cout<<"@@Large Allele Bound:\t["<<allele2 - lob2<<", "<<allele2 - hib2<<"]\n";
+  // Bootstrapping method from Davison and Hinkley 1997
+  // cout<<"@@Small Allele Bound:\t["<<2 * allele1 - hib1<<", "<<2 * allele1 - lob1<<"]\n";
+  // cout<<"@@Large Allele Bound:\t["<<2 * allele2 - hib2<<", "<<2 * allele2 - lob2<<"]\n";
 
+  // 
+  cout<<"@@Small Allele Bound:\t["<<lob1<<", "<<hib1<<"]\n";
+  cout<<"@@Large Allele Bound:\t["<<lob2<<", "<<hib2<<"]\n";
   return true;
 }
 

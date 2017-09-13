@@ -29,9 +29,9 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 // Set NW params
 // NOTE: the other score triple (12,-12,-16) causes issues in realignment test (ambigous cases)
 // Diag score too big ^^
-const static int32_t MATCH_SCORE = 4;
-const static int32_t MISMATCH_SCORE = -4;
-const static int32_t GAP_SCORE = -6;
+const static int32_t MATCH_SCORE = 3;
+const static int32_t MISMATCH_SCORE = -1;
+const static int32_t GAP_SCORE = -1;
 
 // amount of slip we allow between alignment position and STR start and end
 static int32_t MARGIN = 5;		// This value is reset in expansion_aware_realign
@@ -49,6 +49,25 @@ enum SingleReadType {
   SR_NOT_FOUND = 7,		// Not used TODO delete
 };
 
+enum sw_move{
+	SW_END = 0,
+	SW_DIAG = 1,
+	SW_UP = 2,
+	SW_LEFT = 3
+};
+
+
+bool trace_back(const std::vector<std::vector<int32_t> > score_matrix, 
+            const int32_t& start_pos, 
+            const int32_t& start_pos_temp,
+            const std::string& seq1, 
+            const std::string& seq2);
+
+bool next_move(std::vector<std::vector<int32_t> > score_matrix, 
+            const int32_t& x, 
+            const int32_t& y, 
+            sw_move* move);
+
 bool expansion_aware_realign(const std::string& seq,
 				 const std::string& qual,
 			     const std::string& pre_flank,
@@ -59,14 +78,14 @@ bool expansion_aware_realign(const std::string& seq,
 bool smith_waterman(const std::string& seq1,
 		    const std::string& seq2,
 		    const std::string& qual,
-		    int32_t* pos, int32_t* score);
+		    int32_t* pos, int32_t* pos_temp, int32_t* score);
 
 bool create_score_matrix(const int32_t& rows, const int32_t& cols,
 			 const std::string& seq1,
 			 const std::string& seq2,
 			 const std::string& qual,
 			 std::vector<std::vector<int32_t> >* score_matrix,
-			 int32_t* start_pos, int32_t* current_score);
+			 int32_t* start_pos, int32_t* start_pos_temp, int32_t* current_score);
 
 bool calc_score(const int32_t& i, const int32_t& j,
 		const std::string& seq1, const std::string& seq2,
@@ -79,6 +98,8 @@ bool classify_realigned_read(const std::string& seq,
 			     const int32_t& nCopy,
 			     const int32_t& score,
 			     const int32_t& prefix_length,
+			     const std::string& pre_flank,
+			     const std::string& post_flank,
 			     SingleReadType* single_read_class);
 
 #endif  // SRC_REALIGNMENT_H__
