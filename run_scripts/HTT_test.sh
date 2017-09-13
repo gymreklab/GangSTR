@@ -6,7 +6,6 @@ locus=HTT
 
 bam_dir=/storage/resources/datasets/repeat-expansions/bams
 
-ll
 bed_dir=$repo_dir/tests/$locus.bed
 
 for bam_file in $bam_dir/*.bam;

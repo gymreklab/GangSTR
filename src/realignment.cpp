@@ -78,7 +78,7 @@ bool expansion_aware_realign(const std::string& seq,
   int32_t second_best_nCopy = 0;
   int32_t max_pos = 0;
   int32_t current_score = 0;
-  int32_t current_pos = 0;
+  int32_t current_pos = 0, current_pos_temp = 0;
   int32_t current_nCopy;
   int32_t prev_score = 0;
   MARGIN = 1 * period - 1;
@@ -96,7 +96,7 @@ bool expansion_aware_realign(const std::string& seq,
     }
     var_realign_ss << post_flank;
     std::string var_realign_string = var_realign_ss.str();
-    if (!smith_waterman(var_realign_string, seq, qual, &current_pos, &current_score)) {
+    if (!smith_waterman(var_realign_string, seq, qual, &current_pos, &current_pos_temp, &current_score)) {
       return false;
     }
     // if (min_nCopy > 15){
@@ -131,10 +131,62 @@ bool expansion_aware_realign(const std::string& seq,
   return true;
 }
 
+bool trace_back(const std::vector<std::vector<int32_t> > score_matrix, 
+            const int32_t& start_pos, 
+            const int32_t& start_pos_temp,
+            const std::string& seq1, 
+            const std::string& seq2,
+            std::string* seq1_rea){
+  sw_move best_move;
+  int32_t x = start_pos;
+  int32_t y = start_pos_temp;
+  if(!next_move(score_matrix, x, y, &best_move)){
+    return false;
+  }
+  while (best_move != SW_END){
+    if (best_move == SW_DIAG){
+
+    }
+    else if (best_move == SW_UP){
+
+    }
+    else{
+
+    }
+    if(!next_move(score_matrix, x, y, &best_move)){
+      return false;
+    }
+  }
+}
+
+bool next_move(std::vector<std::vector<int32_t> > score_matrix, 
+            const int32_t& x, 
+            const int32_t& y, 
+            sw_move* move){
+  int32_t diag = score_matrix.at(x - 1).at(y - 1);
+  int32_t up = score_matrix.at(x - 1).at(y);
+  int32_t left = score_matrix.at(x).at(y - 1);
+  if (diag >= up and diag >= left){
+    *move = (diag != 0 ? SW_DIAG : SW_END);
+    return true;
+  }
+  else if (up > diag and up >= left){
+    *move = (up != 0 ? SW_UP : SW_END);
+    return true;
+  }
+  else if (left > diag and left > up){
+    *move = (left != 0 ? SW_LEFT : SW_END);
+    return true;
+  }
+  else{
+    return false;
+  }
+}
+
 bool smith_waterman(const std::string& seq1,
 		    const std::string& seq2,
         const std::string& qual,
-		    int32_t* pos, int32_t* score) {
+		    int32_t* pos, int32_t* pos_temp, int32_t* score) {
   // The scoring matrix contains an extra row and column for the gap (-), hence
   // the +1 here
   int32_t rows = (int32_t)seq1.size() + 1;
@@ -142,14 +194,15 @@ bool smith_waterman(const std::string& seq1,
 
   // Initialize the scoring matrix
   int32_t current_score;
-  int32_t start_pos;
+  int32_t start_pos, start_pos_temp;
   std::vector<std::vector<int32_t> > score_matrix;
   score_matrix.resize(rows, std::vector<int32_t>(cols, 0));
   if (!create_score_matrix(rows, cols, seq1, seq2, qual,
-			   &score_matrix, &start_pos, &current_score)) {
+			   &score_matrix, &start_pos, &start_pos_temp, &current_score)) {
     return false;
   }
   *pos = start_pos-(int32_t)seq2.size();
+  *pos_temp = start_pos_temp - (int32_t)seq1.size();
   *score = current_score;
   return true;
 }
@@ -166,7 +219,7 @@ bool create_score_matrix(const int32_t& rows, const int32_t& cols,
 			 const std::string& seq2,
        const std::string& qual,
 			 std::vector<std::vector<int32_t> >* score_matrix,
-			 int32_t* start_pos, int32_t* current_score) {
+			 int32_t* start_pos, int32_t* start_pos_temp, int32_t* current_score) {
   int32_t max_score = 0;
   int32_t max_pos_row = -1; // The row and column of highest score in the matrix
   int32_t max_pos_col = -1;
@@ -190,6 +243,7 @@ bool create_score_matrix(const int32_t& rows, const int32_t& cols,
   }
   *current_score = max_score;
   *start_pos = max_pos_row;
+  // *start_pos_temp = max_pos_col;
   return true;
 }
 
@@ -230,7 +284,13 @@ bool classify_realigned_read(const std::string& seq,
 			     const int32_t& nCopy,
 			     const int32_t& score,
 			     const int32_t& prefix_length,
+           const std::string& pre_flank,
+           const std::string& post_flank,
 			     SingleReadType* single_read_class) {
+  
+  int32_t min_match = 6;
+  int32_t i,j;
+  bool flank_match;
   int32_t end_pos = start_pos + (int32_t)seq.size() - 1;
 
   // Get coords of the STR
@@ -264,6 +324,32 @@ bool classify_realigned_read(const std::string& seq,
     return true;
   } else if (start_pos < start_str && end_pos > end_str) {
     *single_read_class = SR_ENCLOSING;
+    // cerr<<"start_str:\t"<<start_str<<endl;
+    // cerr<<"start_pos:\t"<<start_pos<<endl;
+    // cerr<<seq<<"\t"<<nCopy<<"\t"<<max(start_str - start_pos - min_match, 0)<<endl;
+
+    // flank_match = true;
+    // j = prefix_length -(start_str - start_pos - max(start_str - start_pos - min_match, 0));
+    // for (i = max(start_str - start_pos - min_match, 0)
+    //         ; i <start_str - start_pos ; i++){
+    //   cerr<<seq.at(i);
+    //   if (seq.at(i)!=pre_flank.at(j)){
+    //     flank_match = false;
+    //     break;
+    //   }
+    //   j++;
+    // }
+    // if (flank_match){
+    //   cerr<<" -> PASS!!";
+    // }
+    // cerr<<endl;
+    // j = prefix_length -(start_str - start_pos - max(start_str - start_pos - min_match, 0));
+    // for (i = max(start_str - start_pos - min_match, 0)
+    //         ; i <start_str - start_pos ; i++){
+    //   cerr<<pre_flank.at(j);
+    //   j++;
+    // }
+    // cerr<<endl<<endl;
     return true;
   } else {
     return false;

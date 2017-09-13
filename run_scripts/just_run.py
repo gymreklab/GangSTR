@@ -43,15 +43,19 @@ with open (bam_file_list, 'r') as bam_list:
 									"--ref", ref_genome, \
 									"--regions", bed_dir, \
 									"--out", "test", \
-									"--frrweight", str(0.35), \
+									"--frrweight", str(0.5), \
 									"--enclweight", "1.0", \
 									"--spanweight", "1.0", \
 									"--flankweight", str(1.0),\
-									"--ploidy", str(2)], stdout=subprocess.PIPE)
+									"--ploidy", str(2),\
+									"--numbstrap", str(100)], stdout=subprocess.PIPE)
 			cmd.wait()
 			for line in cmd.stdout:
 				result = line.rstrip()
-				estm_genot = [float(x) for x in list(re.findall('(\d+)\, (\d+)',result))[0]]
+				if line[0] == ">":
+					estm_genot = [float(x) for x in list(re.findall('(\d+)\, (\d+)',result))[0]]
+				else:
+					print result
 			if true_available == False:				
 				print '>>  ', (min(estm_genot), max(estm_genot))
 			else:

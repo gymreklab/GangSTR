@@ -157,6 +157,8 @@ bool LikelihoodMaximizer::GetConfidenceInterval(const int32_t& read_len,
                 const int32_t& all2,
                 double* lob1, double* hib1, double* lob2, double* hib2){
   int32_t allele1, allele2;
+  // TODO allow change of alpha
+  double alpha = 0.5;   // Tail error on each end
   if (allele1 > allele2){
     allele2 = all1;
     allele1 = all2;
@@ -172,17 +174,30 @@ bool LikelihoodMaximizer::GetConfidenceInterval(const int32_t& read_len,
   for (int i = 0; i < num_boot_samp; i++){
     ResampleReadPool();
     OptimizeLikelihood(read_len, motif_len, ref_count, true, &boot_al1, &boot_al2, &min_negLike);
-    small_alleles.push_back(min(boot_al1, boot_al2) - allele1);
-    large_alleles.push_back(max(boot_al1, boot_al2) - allele2);
+    
+    // cerr<<min(boot_al1, boot_al2)<<"\t"<<max(boot_al1, boot_al2)<<endl;
+    // small_alleles.push_back(min(boot_al1, boot_al2) - allele1);
+    // large_alleles.push_back(max(boot_al1, boot_al2) - allele2);
+    small_alleles.push_back(min(boot_al1, boot_al2));
+    large_alleles.push_back(max(boot_al1, boot_al2));
   }
   std::sort(small_alleles.begin(), small_alleles.end());
   std::sort(large_alleles.begin(), large_alleles.end());
+
+  // Bootstrapping method from Davison and Hinkley 1997
+  *lob1 = small_alleles.at(int((alpha / 2.0)  * (num_boot_samp + 1)));
+  *hib1 = small_alleles.at(int((1.0 - alpha / 2.0) * (num_boot_samp + 1)));
+  *lob2 = large_alleles.at(int((alpha / 2.0) * (num_boot_samp + 1)));
+  *hib2 = large_alleles.at(int((1.0 - alpha / 2.0) * (num_boot_samp + 1)));
+
   // TODO 0.9 or 0.1? allele1 -/+ lob1?
   // TODO allow change of 0.9 and 0.1
-  *lob1 = small_alleles.at(int(0.9 * num_boot_samp));
-  *hib1 = small_alleles.at(int(0.1 * num_boot_samp));
-  *lob2 = large_alleles.at(int(0.9 * num_boot_samp));
-  *hib2 = large_alleles.at(int(0.1 * num_boot_samp));
+
+  // *lob1 = small_alleles.at(int(0.9 * (num_boot_samp + 1)));
+  // *hib1 = small_alleles.at(int(0.1 * (num_boot_samp + 1)));
+  // *lob2 = large_alleles.at(int(0.9 * (num_boot_samp + 1)));
+  // *hib2 = large_alleles.at(int(0.1 * (num_boot_samp + 1)));
+
   return true;  // TODO add return false cases
 }
 
@@ -228,7 +243,7 @@ bool LikelihoodMaximizer::OptimizeLikelihood(const int32_t& read_len, const int3
 					     const int32_t& ref_count, const bool& resampled,
 					     int32_t* allele1, int32_t* allele2, double* min_negLike) {
 
-  int32_t a1, a2, result;
+  int32_t a1, a2, result, temp;
   double minf;
   std::vector<int32_t> allele_list;
   std::vector<int32_t> sublist;
@@ -265,7 +280,11 @@ bool LikelihoodMaximizer::OptimizeLikelihood(const int32_t& read_len, const int3
   }
   findBestAlleleListTuple(allele_list, read_len, motif_len, ref_count, resampled,
                             allele1, allele2, min_negLike);
-
+  if (*allele1 > *allele2){
+    temp = *allele1;
+    *allele1 = *allele2;
+    *allele2 = temp;
+  }
   // cerr<<endl<<*allele1<<"\t"<<*allele2<<"\t"<<*min_negLike<<endl;
   return true;    // TODO add false
 }

@@ -452,8 +452,8 @@ bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
   *nCopy_value = nCopy;
   *score_value = score;
   
-  if (!classify_realigned_read(seq, locus.motif, pos, nCopy, score,
-             (int32_t)locus.pre_flank.size(), srt)) {
+  if (!classify_realigned_read(seq, locus.motif, pos, nCopy, score, 
+             (int32_t)locus.pre_flank.size(), locus.pre_flank, locus.post_flank, srt)) {
     return false;
   }
   if (debug) {
