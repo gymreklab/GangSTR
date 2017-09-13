@@ -229,8 +229,8 @@ bool create_score_matrix(const int32_t& rows, const int32_t& cols,
       if (!calc_score(i, j, seq1, seq2, qual, score_matrix)) {
 	return false;
       }
-      if (score_matrix->at(i).at(j) > max_score) {
-	max_score = score_matrix->at(i).at(j);
+      if ((*score_matrix)[i][j] > max_score) { // ->at(i).at(j)
+	max_score = (*score_matrix)[i][j]; //->at(i).at(j);
 	max_pos_row = i;
 	max_pos_col = j;
       }
@@ -256,25 +256,25 @@ bool calc_score(const int32_t& i, const int32_t& j,
     const std::string& qual,
 		std::vector<std::vector<int32_t> >* score_matrix) {
   int32_t max_score = 0;
-  int32_t baseq = int32_t(qual.at(j-1));
-  int32_t similarity = (seq1.at(i-1)==seq2.at(j-1)) ? 
+  int32_t baseq = int32_t(qual[j-1]);
+  int32_t similarity = (seq1[i-1]==seq2[j-1]) ? 
     MATCH_SCORE : MISMATCH_SCORE;
   // TODO pass threshold instead of hard code
   // int32_t similarity = (seq1.at(i-1)==seq2.at(j-1)) ? 
   //   MATCH_SCORE : (baseq>45 ? MISMATCH_SCORE : MISMATCH_SCORE / 4);
-  int32_t diag_score = score_matrix->at(i-1).at(j-1) + similarity;
+  int32_t diag_score = (*score_matrix)[i-1][j-1] + similarity;
   if (diag_score > max_score) {
     max_score = diag_score;
   }
-  int32_t up_score = score_matrix->at(i-1).at(j) + GAP_SCORE;
+  int32_t up_score = (*score_matrix)[i-1][j] + GAP_SCORE;
   if (up_score > max_score) {
     max_score = up_score;
   }
-  int32_t left_score = score_matrix->at(i).at(j-1) + GAP_SCORE;
+  int32_t left_score = (*score_matrix)[i][j-1] + GAP_SCORE;
   if (left_score > max_score) {
     max_score = left_score;
   }
-  score_matrix->at(i).at(j) = max_score;
+  (*score_matrix)[i][j] = max_score;
   return true;
 }
 
