@@ -27,7 +27,16 @@ Locus::Locus() {
   start = -1;
   end = -1;
   period = -1;
-  // bed_file = ""; TODO remove
+
+  insert_size_mean = -1.0;
+  insert_size_stddev = -1.0;
+  allele1 = -1;
+  allele2 = -1;
+  lob1 = -1;
+  hib1 = -1;
+  lob2 = -1;
+  hib2 = -1;
+  min_neg_lik = 0;
 }
 
 Locus::~Locus() {}

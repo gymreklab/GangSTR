@@ -32,6 +32,7 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 #include "src/ref_genome.h"
 #include "src/region_reader.h"
 #include "src/stringops.h"
+#include "src/vcf_writer.h"
 
 using namespace std;
 
@@ -206,14 +207,19 @@ int main(int argc, char* argv[]) {
   // Set up
   Options options;
   parse_commandline_options(argc, argv, &options);
+  stringstream full_command_ss;
+  full_command_ss << "GangSTR-" << _GIT_VERSION;
+  for (int i = 1; i < argc; i++) {
+    full_command_ss << " " << argv[i];
+  }
+  std::string full_command = full_command_ss.str();
   // Process each region
   RegionReader region_reader(options.regionsfile);
   Locus locus;
   int merge_type = BamCramMultiReader::ORDER_ALNS_BY_FILE;
   BamCramMultiReader bamreader(options.bamfiles, options.reffa, merge_type);
   RefGenome refgenome(options.reffa);
-  
-  // cout<<endl<<options.reff<<endl;
+  VCFWriter vcfwriter(options.outprefix + ".vcf", full_command);
   Genotyper genotyper(refgenome, options);
   stringstream ss;
   while (region_reader.GetNextRegion(&locus)) {
@@ -221,7 +227,8 @@ int main(int argc, char* argv[]) {
     ss.clear();
     ss << "Processing " << locus.chrom << ":" << locus.start;
     PrintMessageDieOnError(ss.str(), M_PROGRESS);
-    genotyper.ProcessLocus(&bamreader, &locus);
-    // genotyper.Debug(&bamreader); // todo delete
+    if (genotyper.ProcessLocus(&bamreader, &locus)) {
+      vcfwriter.WriteRecord(locus);
+    }
   };
 }

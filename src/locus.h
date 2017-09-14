@@ -35,7 +35,17 @@ class Locus {
   std::string motif;
   std::string pre_flank;
   std::string post_flank;
-  // std::string bed_file; TODO remove
+
+  // Fill in these fields
+  double insert_size_mean;
+  double insert_size_stddev;
+  int allele1;
+  int allele2;
+  int lob1;
+  int hib1;
+  int lob2;
+  int hib2;
+  double min_neg_lik;
 };
 
 #endif  // SRC_LOCUS_H__
