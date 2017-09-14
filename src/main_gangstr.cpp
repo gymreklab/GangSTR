@@ -32,6 +32,7 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 #include "src/ref_genome.h"
 #include "src/region_reader.h"
 #include "src/stringops.h"
+#include "src/vcf_writer.h"
 
 using namespace std;
 
@@ -56,6 +57,8 @@ void show_help() {
      << "--stutterprob  Stutter probability (refer to the stutter model)\n"
      << "--numbstrap    Number of bootsrap resamples\n"
      << "--seed         Random number generator initial seed\n"
+	   << "--output-bootstraps  Output file with bootstrap samples\n"
+	   << "--output-readinfo    Output read class info (for debugging)\n"
 	   << "-v,--verbose   print out useful progress messages\n"
 	   << "--version      print out the version of this software\n"
 	   << "This program takes in aligned reads in BAM format\n"
@@ -82,6 +85,8 @@ void parse_commandline_options(int argc, char* argv[], Options* options) {
     OPT_STUTDW,
     OPT_STUTPR,
     OPT_NBSTRAP,
+    OPT_OUTBS,
+    OPT_OUTREADINFO,
     OPT_SEED,
     OPT_VERBOSE,
     OPT_VERSION,
@@ -103,6 +108,8 @@ void parse_commandline_options(int argc, char* argv[], Options* options) {
     {"stutterdown", required_argument,  NULL, OPT_STUTDW},
     {"stutterprob", required_argument,  NULL, OPT_STUTPR},
     {"numbstrap",   required_argument,  NULL, OPT_NBSTRAP},
+    {"output-bootstraps", no_argument,      NULL, OPT_OUTBS},
+    {"output-readinfo", no_argument,        NULL, OPT_OUTREADINFO},
     {"seed",        required_argument,  NULL, OPT_SEED},
     {"verbose",     no_argument,        NULL, OPT_VERBOSE},
     {"version",     no_argument,        NULL, OPT_VERSION},
@@ -165,6 +172,12 @@ void parse_commandline_options(int argc, char* argv[], Options* options) {
     case OPT_NBSTRAP:
       options->num_boot_samp = atoi(optarg);
       break;
+    case OPT_OUTBS:
+      options->output_bootstrap++;
+      break;
+    case OPT_OUTREADINFO:
+      options->output_readinfo++;
+      break;
     case OPT_SEED:
       options->seed = atoi(optarg);
       break;
@@ -206,14 +219,19 @@ int main(int argc, char* argv[]) {
   // Set up
   Options options;
   parse_commandline_options(argc, argv, &options);
+  stringstream full_command_ss;
+  full_command_ss << "GangSTR-" << _GIT_VERSION;
+  for (int i = 1; i < argc; i++) {
+    full_command_ss << " " << argv[i];
+  }
+  std::string full_command = full_command_ss.str();
   // Process each region
   RegionReader region_reader(options.regionsfile);
   Locus locus;
   int merge_type = BamCramMultiReader::ORDER_ALNS_BY_FILE;
   BamCramMultiReader bamreader(options.bamfiles, options.reffa, merge_type);
   RefGenome refgenome(options.reffa);
-  
-  // cout<<endl<<options.reff<<endl;
+  VCFWriter vcfwriter(options.outprefix + ".vcf", full_command);
   Genotyper genotyper(refgenome, options);
   stringstream ss;
   while (region_reader.GetNextRegion(&locus)) {
@@ -221,7 +239,8 @@ int main(int argc, char* argv[]) {
     ss.clear();
     ss << "Processing " << locus.chrom << ":" << locus.start;
     PrintMessageDieOnError(ss.str(), M_PROGRESS);
-    genotyper.ProcessLocus(&bamreader, &locus);
-    // genotyper.Debug(&bamreader); // todo delete
+    if (genotyper.ProcessLocus(&bamreader, &locus)) {
+      vcfwriter.WriteRecord(locus);
+    }
   };
 }

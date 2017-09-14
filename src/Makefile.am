@@ -46,7 +46,8 @@ libgangstr_a_SOURCES = \
 	bam_io.h bam_io.cpp \
 	stringops.h stringops.cpp \
 	read_pair.h read_pair.cpp \
-	realignment.h realignment.cpp
+	realignment.h realignment.cpp \
+	vcf_writer.h vcf_writer.cpp
 
 GangSTR_LDFLAGS = $(AM_LDFLAGS) $(HTS_LIBS)
 GangSTR_SOURCES = main_gangstr.cpp
