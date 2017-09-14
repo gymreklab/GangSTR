@@ -59,6 +59,8 @@ Options::Options() {
   verbose = false;
   ploidy = 2;
   num_boot_samp = 100;
+  output_bootstrap = false;
+  output_readinfo = false;
   seed = time(NULL);
 }
 

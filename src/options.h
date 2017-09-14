@@ -63,6 +63,10 @@ class Options {
   int32_t ploidy;
   // Number of bootsrap resamples
   int32_t num_boot_samp;
+  // Output bootstrap samples to file
+  bool output_bootstrap;
+  // Output debug info for reads
+  bool output_readinfo;
   // Random number generator seed
   int32_t seed;
 };
