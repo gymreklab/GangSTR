@@ -64,7 +64,7 @@ bool ReadExtractor::ExtractReads(BamCramMultiReader* bamreader,
       if (iter->second.max_nCopy > 0){
 	if (options.output_readinfo) {
 	  readfile_ << locus.chrom << "\t" << locus.start << "\t" << locus.end << "\t"
-		    << iter->first << "\t" << "SPFLNK" << "\t" << iter->second.max_nCopy << "|t" << iter->second.found_pair << std::endl;
+		    << iter->first << "\t" << "SPFLNK" << "\t" << iter->second.max_nCopy << "\t" << iter->second.found_pair << std::endl;
 	}
         likelihood_maximizer->AddFlankingData(iter->second.max_nCopy);
       }
