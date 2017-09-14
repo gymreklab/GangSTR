@@ -46,11 +46,13 @@ libgangstr_a_SOURCES = \
 	bam_io.h bam_io.cpp \
 	stringops.h stringops.cpp \
 	read_pair.h read_pair.cpp \
-	realignment.h realignment.cpp
+	realignment.h realignment.cpp \
+	ssw.h ssw.c \
+	ssw_cpp.h ssw_cpp.cpp
 
 GangSTR_LDFLAGS = $(AM_LDFLAGS) $(HTS_LIBS)
 GangSTR_SOURCES = main_gangstr.cpp
-GangSTR_CPPFLAGS = $(AM_CPPFLAGS)
+GangSTR_CPPFLAGS = $(AM_CPPFLAGS) $(AM_PROG_CC_C_O)
 GangSTR_CFLAGS = $(AM_CFLAGS)
 GangSTR_CXXFLAGS = $(AM_CXXFLAGS)
 GangSTR_LDADD = libgangstr.a $(GSL_LIBS) $(NLOP_LIBS)

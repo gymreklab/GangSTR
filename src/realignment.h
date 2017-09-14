@@ -25,6 +25,7 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 #include <vector>
 
 #include <stdint.h>
+#include "src/ssw_cpp.h"
 
 // Set NW params
 // NOTE: the other score triple (12,-12,-16) causes issues in realignment test (ambigous cases)
@@ -80,6 +81,11 @@ bool smith_waterman(const std::string& seq1,
 		    const std::string& qual,
 		    int32_t* pos, int32_t* pos_temp, int32_t* score);
 
+bool striped_smith_waterman(const std::string& ref,
+        const std::string& seq,
+        const std::string& qual,
+        int32_t* pos, int32_t* pos_temp, int32_t* score);
+static void ssw_PrintAlignment(const StripedSmithWaterman::Alignment& alignment);
 bool create_score_matrix(const int32_t& rows, const int32_t& cols,
 			 const std::string& seq1,
 			 const std::string& seq2,

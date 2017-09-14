@@ -22,6 +22,7 @@ AC_PROG_CC
 AC_PROG_CXX
 AC_PROG_RANLIB
 AM_PROG_AR
+AM_PROG_CC_C_O 
 
 # Set variables using shell commands
 GIT_VERSION=${PACKAGE_VERSION}

@@ -99,6 +99,16 @@ bool expansion_aware_realign(const std::string& seq,
     if (!smith_waterman(var_realign_string, seq, qual, &current_pos, &current_pos_temp, &current_score)) {
       return false;
     }
+    // if (current_score > 200){
+    //   cout<<var_realign_string<<endl;
+    //   cout<<seq<<endl;
+    //   cout<<current_pos<<endl;
+    //   cout<<current_pos_temp<<endl;
+    //   cout<<current_score<<endl;
+    //   striped_smith_waterman(var_realign_string, seq, qual, &current_pos, &current_pos_temp, &current_score);
+    // }
+
+
     // if (min_nCopy > 15){
     //   cerr<<">>"<<current_nCopy<<"\t"<<current_pos<<"\t"<<current_score<<endl;
     // }
@@ -183,6 +193,42 @@ bool next_move(std::vector<std::vector<int32_t> > score_matrix,
   }
 }
 
+bool striped_smith_waterman(const std::string& ref,
+        const std::string& seq,
+        const std::string& qual,
+        int32_t* pos, int32_t* pos_temp, int32_t* score) {
+  StripedSmithWaterman::Aligner* aligner;
+  StripedSmithWaterman::Filter* filter;
+  StripedSmithWaterman::Alignment* alignment;
+  aligner = new StripedSmithWaterman::Aligner(MATCH_SCORE, MISMATCH_SCORE, -3, -1);
+  filter = new StripedSmithWaterman::Filter;
+  alignment = new StripedSmithWaterman::Alignment;
+
+  int32_t maskLen = seq.size() / 2;
+  maskLen = maskLen < 15 ? 15 : maskLen;
+  aligner->Align(seq.c_str(), ref.c_str(), (int32_t)ref.size(), *filter, alignment, maskLen);
+
+  ssw_PrintAlignment(*alignment);
+  *pos = alignment->ref_begin;
+  // *pos_temp = start_pos_temp - (int32_t)seq1.size();
+  *score = alignment->sw_score;
+
+}
+
+static void ssw_PrintAlignment(const StripedSmithWaterman::Alignment& alignment){
+  cout << "===== SSW result =====" << endl;
+  cout << "Best Smith-Waterman score:\t" << alignment.sw_score << endl
+       << "Next-best Smith-Waterman score:\t" << alignment.sw_score_next_best << endl
+       << "Reference start:\t" << alignment.ref_begin << endl
+       << "Reference end:\t" << alignment.ref_end << endl
+       << "Query start:\t" << alignment.query_begin << endl
+       << "Query end:\t" << alignment.query_end << endl
+       << "Next-best reference end:\t" << alignment.ref_end_next_best << endl
+       << "Number of mismatches:\t" << alignment.mismatches << endl
+       << "Cigar: " << alignment.cigar_string << endl;
+  cout << "======================" << endl;
+}
+
 bool smith_waterman(const std::string& seq1,
 		    const std::string& seq2,
         const std::string& qual,
@@ -229,8 +275,8 @@ bool create_score_matrix(const int32_t& rows, const int32_t& cols,
       if (!calc_score(i, j, seq1, seq2, qual, score_matrix)) {
 	return false;
       }
-      if ((*score_matrix)[i][j] > max_score) { // ->at(i).at(j)
-	max_score = (*score_matrix)[i][j]; //->at(i).at(j);
+      if (score_matrix->at(i).at(j) > max_score) {
+	max_score = score_matrix->at(i).at(j);
 	max_pos_row = i;
 	max_pos_col = j;
       }
@@ -256,25 +302,25 @@ bool calc_score(const int32_t& i, const int32_t& j,
     const std::string& qual,
 		std::vector<std::vector<int32_t> >* score_matrix) {
   int32_t max_score = 0;
-  int32_t baseq = int32_t(qual[j-1]);
-  int32_t similarity = (seq1[i-1]==seq2[j-1]) ? 
+  int32_t baseq = int32_t(qual.at(j-1));
+  int32_t similarity = (seq1.at(i-1)==seq2.at(j-1)) ? 
     MATCH_SCORE : MISMATCH_SCORE;
   // TODO pass threshold instead of hard code
   // int32_t similarity = (seq1.at(i-1)==seq2.at(j-1)) ? 
   //   MATCH_SCORE : (baseq>45 ? MISMATCH_SCORE : MISMATCH_SCORE / 4);
-  int32_t diag_score = (*score_matrix)[i-1][j-1] + similarity;
+  int32_t diag_score = score_matrix->at(i-1).at(j-1) + similarity;
   if (diag_score > max_score) {
     max_score = diag_score;
   }
-  int32_t up_score = (*score_matrix)[i-1][j] + GAP_SCORE;
+  int32_t up_score = score_matrix->at(i-1).at(j) + GAP_SCORE;
   if (up_score > max_score) {
     max_score = up_score;
   }
-  int32_t left_score = (*score_matrix)[i][j-1] + GAP_SCORE;
+  int32_t left_score = score_matrix->at(i).at(j-1) + GAP_SCORE;
   if (left_score > max_score) {
     max_score = left_score;
   }
-  (*score_matrix)[i][j] = max_score;
+  score_matrix->at(i).at(j) = max_score;
   return true;
 }
 
