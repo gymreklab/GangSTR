@@ -28,10 +28,16 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 #include "src/read_class.h"
 #include "src/spanning_class.h"
 #include "src/read_pair.h"
+#include "src/locus.h"
 #include "gsl/gsl_vector.h"
 #include "gsl/gsl_rng.h"
 #include "gsl/gsl_randist.h"
+
+#include <iostream>
+#include <fstream>
 #include <string>
+
+using namespace std;
 
 // Struct for storing reads from all classes in a unified vector
 struct ReadRecord{
@@ -57,6 +63,9 @@ class LikelihoodMaximizer {
   std::size_t GetEnclosingDataSize();
   std::size_t GetSpanningDataSize();
   std::size_t GetFRRDataSize();
+  std::size_t GetFlankingDataSize();
+  std::size_t GetReadPoolSize();
+
   // Main likelihood function
   bool GetGenotypeNegLogLikelihood(const int32_t& allele1, const int32_t& allele2,
 				   const int32_t& read_len, const int32_t& motif_len,
@@ -73,10 +82,11 @@ class LikelihoodMaximizer {
 
   // Compute and return confidence interval with bootstrapping
   bool GetConfidenceInterval(const int32_t& read_len, 
-                const int32_t& motif_len,
-                const int32_t& ref_count,
-                const int32_t& allele1,
-                const int32_t& allele2,
+			     const int32_t& motif_len,
+			     const int32_t& ref_count,
+			     const int32_t& allele1,
+			     const int32_t& allele2,
+			     const Locus& locus,
                 double* lob1, double* hib1, double* lob2, double* hib2);
   // Update read class options
   void UpdateOptions();
@@ -103,6 +113,8 @@ class LikelihoodMaximizer {
   SpanningClass resampled_spanning_class_;
   FlankingClass resampled_flanking_class_;
 
+  // Write bootstrap samples to file
+  ofstream bsfile_;
   // Random number generator
   gsl_rng * r;
 };

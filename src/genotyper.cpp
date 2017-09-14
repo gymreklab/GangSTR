@@ -29,7 +29,7 @@ Genotyper::Genotyper(RefGenome _refgenome,
 		    Options& _options) {
   refgenome = &_refgenome;
   options = &_options;
-  read_extractor = new ReadExtractor();
+  read_extractor = new ReadExtractor(_options);
   likelihood_maximizer = new LikelihoodMaximizer(_options);
 }
 
@@ -108,6 +108,11 @@ bool Genotyper::ProcessLocus(BamCramMultiReader* bamreader, Locus* locus) {
   locus->allele1 = allele1;
   locus->allele2 = allele2;
   locus->min_neg_lik = min_negLike;
+  locus->enclosing_reads = likelihood_maximizer->GetEnclosingDataSize();
+  locus->spanning_reads = likelihood_maximizer->GetSpanningDataSize();
+  locus->frr_reads = likelihood_maximizer->GetFRRDataSize();
+  locus->flanking_reads = likelihood_maximizer->GetFlankingDataSize();
+  locus->depth = likelihood_maximizer->GetReadPoolSize();
   cout<<">>Genotyper Results:\t"<<allele1<<", "<<allele2<<"\tlikelihood = "<<min_negLike<<"\n";
 
   // for (int jj = 0; jj < 10; jj++){
@@ -121,8 +126,8 @@ bool Genotyper::ProcessLocus(BamCramMultiReader* bamreader, Locus* locus) {
   //   cout<<">>Resampled Results:\t"<<allele1<<", "<<allele2<<"\tlikelihood = "<<min_negLike<<"\n";
   // }
   if (!likelihood_maximizer->GetConfidenceInterval(read_len, (int32_t)(locus->motif.size()),
-            ref_count, allele1, allele2,
-            &lob1, &hib1, &lob2, &hib2)) {
+						   ref_count, allele1, allele2, *locus,
+						   &lob1, &hib1, &lob2, &hib2)) {
     return false;
   }
   // Bootstrapping method from Davison and Hinkley 1997

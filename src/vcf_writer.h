@@ -18,30 +18,23 @@ You should have received a copy of the GNU General Public License
 along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#ifndef SRC_VCF_WRITER_H
+#define SRC_VCF_WRITER_H__
+
+#include <iostream>
+#include <fstream>
+
 #include "src/locus.h"
 
 using namespace std;
 
-Locus::Locus() {
-  chrom = "";
-  start = -1;
-  end = -1;
-  period = -1;
+class VCFWriter {
+ public:
+  VCFWriter(const std::string& _vcffile, const std::string& full_command);
+  void WriteRecord(const Locus& locus);
+  virtual ~VCFWriter();
+ private:
+  ofstream writer_;
+};
 
-  insert_size_mean = -1.0;
-  insert_size_stddev = -1.0;
-  allele1 = -1;
-  allele2 = -1;
-  lob1 = -1;
-  hib1 = -1;
-  lob2 = -1;
-  hib2 = -1;
-  min_neg_lik = 0;
-  enclosing_reads = 0;
-  spanning_reads = 0;
-  frr_reads = 0;
-  flanking_reads = 0;
-  depth = 0;
-}
-
-Locus::~Locus() {}
+#endif  // SRC_VCF_WRITER_H__

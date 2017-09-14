@@ -46,6 +46,11 @@ class Locus {
   int lob2;
   int hib2;
   double min_neg_lik;
+  size_t enclosing_reads;
+  size_t spanning_reads;
+  size_t frr_reads;
+  size_t flanking_reads;
+  size_t depth;
 };
 
 #endif  // SRC_LOCUS_H__

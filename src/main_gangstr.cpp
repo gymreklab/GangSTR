@@ -57,6 +57,8 @@ void show_help() {
      << "--stutterprob  Stutter probability (refer to the stutter model)\n"
      << "--numbstrap    Number of bootsrap resamples\n"
      << "--seed         Random number generator initial seed\n"
+	   << "--output-bootstraps  Output file with bootstrap samples\n"
+	   << "--output-readinfo    Output read class info (for debugging)\n"
 	   << "-v,--verbose   print out useful progress messages\n"
 	   << "--version      print out the version of this software\n"
 	   << "This program takes in aligned reads in BAM format\n"
@@ -83,6 +85,8 @@ void parse_commandline_options(int argc, char* argv[], Options* options) {
     OPT_STUTDW,
     OPT_STUTPR,
     OPT_NBSTRAP,
+    OPT_OUTBS,
+    OPT_OUTREADINFO,
     OPT_SEED,
     OPT_VERBOSE,
     OPT_VERSION,
@@ -104,6 +108,8 @@ void parse_commandline_options(int argc, char* argv[], Options* options) {
     {"stutterdown", required_argument,  NULL, OPT_STUTDW},
     {"stutterprob", required_argument,  NULL, OPT_STUTPR},
     {"numbstrap",   required_argument,  NULL, OPT_NBSTRAP},
+    {"output-bootstraps", no_argument,      NULL, OPT_OUTBS},
+    {"output-readinfo", no_argument,        NULL, OPT_OUTREADINFO},
     {"seed",        required_argument,  NULL, OPT_SEED},
     {"verbose",     no_argument,        NULL, OPT_VERBOSE},
     {"version",     no_argument,        NULL, OPT_VERSION},
@@ -165,6 +171,12 @@ void parse_commandline_options(int argc, char* argv[], Options* options) {
       break;
     case OPT_NBSTRAP:
       options->num_boot_samp = atoi(optarg);
+      break;
+    case OPT_OUTBS:
+      options->output_bootstrap++;
+      break;
+    case OPT_OUTREADINFO:
+      options->output_readinfo++;
       break;
     case OPT_SEED:
       options->seed = atoi(optarg);
