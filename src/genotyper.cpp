@@ -29,7 +29,7 @@ Genotyper::Genotyper(RefGenome _refgenome,
 		    Options& _options) {
   refgenome = &_refgenome;
   options = &_options;
-  read_extractor = new ReadExtractor(_options);
+  read_extractor = new ReadExtractor();
   likelihood_maximizer = new LikelihoodMaximizer(_options);
 }
 
@@ -68,10 +68,7 @@ bool Genotyper::ProcessLocus(BamCramMultiReader* bamreader, Locus* locus) {
             &mean, &std_dev)) {
     return false;
   }
-  locus->insert_size_mean = mean;
-  locus->insert_size_stddev = std_dev;
   // TODO upgrade ComputeInsertSizeDistribution to bwa mem edition
-  // TODO ideally we don't modify options, should be const
   options->dist_mean = mean;
   options->dist_sdev = std_dev;
 
@@ -105,14 +102,6 @@ bool Genotyper::ProcessLocus(BamCramMultiReader* bamreader, Locus* locus) {
 						&allele1, &allele2, &min_negLike)) {
     return false;
   }
-  locus->allele1 = allele1;
-  locus->allele2 = allele2;
-  locus->min_neg_lik = min_negLike;
-  locus->enclosing_reads = likelihood_maximizer->GetEnclosingDataSize();
-  locus->spanning_reads = likelihood_maximizer->GetSpanningDataSize();
-  locus->frr_reads = likelihood_maximizer->GetFRRDataSize();
-  locus->flanking_reads = likelihood_maximizer->GetFlankingDataSize();
-  locus->depth = likelihood_maximizer->GetReadPoolSize();
   cout<<">>Genotyper Results:\t"<<allele1<<", "<<allele2<<"\tlikelihood = "<<min_negLike<<"\n";
 
   // for (int jj = 0; jj < 10; jj++){
@@ -125,9 +114,12 @@ bool Genotyper::ProcessLocus(BamCramMultiReader* bamreader, Locus* locus) {
   //   }
   //   cout<<">>Resampled Results:\t"<<allele1<<", "<<allele2<<"\tlikelihood = "<<min_negLike<<"\n";
   // }
-  if (!likelihood_maximizer->GetConfidenceInterval(read_len, (int32_t)(locus->motif.size()),
-						   ref_count, allele1, allele2, *locus,
-						   &lob1, &hib1, &lob2, &hib2)) {
+  if (!likelihood_maximizer->GetConfidenceInterval(read_len, 
+            (int32_t)(locus->motif.size()),
+            ref_count, 
+            allele1, 
+            allele2,
+            &lob1, &hib1, &lob2, &hib2)) {
     return false;
   }
   // Bootstrapping method from Davison and Hinkley 1997
@@ -135,10 +127,6 @@ bool Genotyper::ProcessLocus(BamCramMultiReader* bamreader, Locus* locus) {
   // cout<<"@@Large Allele Bound:\t["<<2 * allele2 - hib2<<", "<<2 * allele2 - lob2<<"]\n";
 
   // 
-  locus->lob1 = lob1;
-  locus->hib1 = hib1;
-  locus->lob2 = lob2;
-  locus->hib2 = hib2;
   cout<<"@@Small Allele Bound:\t["<<lob1<<", "<<hib1<<"]\n";
   cout<<"@@Large Allele Bound:\t["<<lob2<<", "<<hib2<<"]\n";
   return true;

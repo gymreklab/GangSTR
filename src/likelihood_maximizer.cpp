@@ -42,11 +42,6 @@ LikelihoodMaximizer::LikelihoodMaximizer(Options& _options) {
   resampled_spanning_class_.SetOptions(*options);
   resampled_flanking_class_.SetOptions(*options);
 
-  // Set up output file
-  if (options->output_bootstrap) {
-    bsfile_.open((options->outprefix + ".bootstrap.tab").c_str());
-  }
-
   // Setup random number generator
   const gsl_rng_type * T;
   gsl_rng_env_setup();
@@ -156,11 +151,10 @@ void LikelihoodMaximizer::ResampleReadPool(){
 }
 
 bool LikelihoodMaximizer::GetConfidenceInterval(const int32_t& read_len, 
-						const int32_t& motif_len,
-						const int32_t& ref_count,
-						const int32_t& all1,
-						const int32_t& all2,
-						const Locus& locus,
+                const int32_t& motif_len,
+                const int32_t& ref_count,
+                const int32_t& all1,
+                const int32_t& all2,
                 double* lob1, double* hib1, double* lob2, double* hib2){
   int32_t allele1, allele2;
   // TODO allow change of alpha
@@ -186,10 +180,6 @@ bool LikelihoodMaximizer::GetConfidenceInterval(const int32_t& read_len,
     // large_alleles.push_back(max(boot_al1, boot_al2) - allele2);
     small_alleles.push_back(min(boot_al1, boot_al2));
     large_alleles.push_back(max(boot_al1, boot_al2));
-    if (options->output_bootstrap) {
-      bsfile_ << locus.chrom << "\t" << locus.start << "\t" << locus.end << "\t"
-	      << min(boot_al1, boot_al2) << "\t" << max(boot_al1, boot_al2) << endl;
-    }
   }
   std::sort(small_alleles.begin(), small_alleles.end());
   std::sort(large_alleles.begin(), large_alleles.end());
@@ -219,12 +209,6 @@ std::size_t LikelihoodMaximizer::GetSpanningDataSize() {
 }
 std::size_t LikelihoodMaximizer::GetFRRDataSize() {
   return frr_class_.GetDataSize();
-}
-std::size_t LikelihoodMaximizer::GetFlankingDataSize() {
-  return flanking_class_.GetDataSize();
-}
-std::size_t LikelihoodMaximizer::GetReadPoolSize() {
-  return read_pool.size();
 }
 
 bool LikelihoodMaximizer::GetGenotypeNegLogLikelihood(const int32_t& allele1,
@@ -348,11 +332,7 @@ bool LikelihoodMaximizer::findBestAlleleListTuple(std::vector<int32_t> allele_li
   return true;    // TODO add false
 }
 
-LikelihoodMaximizer::~LikelihoodMaximizer() {
-  if (options->output_bootstrap) {
-    bsfile_.close();
-  }
-}
+LikelihoodMaximizer::~LikelihoodMaximizer() {}
 
 
 

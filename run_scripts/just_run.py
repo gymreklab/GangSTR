@@ -14,7 +14,7 @@ run_dir = repo_dir + "/run_scripts/"
 bed_dir = repo_dir + "/tests/" + locus + ".bed"
 ref_genome = "/storage/resources/dbase/human/hg19/Homo_sapiens_assembly19.fasta"
 # bam_file_list = run_dir + "bamlists/HTT_full.txt"
-bam_file_list = run_dir + "bamlists/CACNA1A_grid.txt"
+bam_file_list = run_dir + "bamlists/CACNA1A.txt"
 # bam_file_list = run_dir + "bamlists/ATXN7_grid.txt"
 true_available = True
 
