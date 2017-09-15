@@ -71,7 +71,6 @@ bool expansion_aware_realign(const std::string& seq,
   int32_t min_nCopy = 0;
   // Find longest stretch of motif as starting point of our search.
   find_longest_stretch(seq, motif, &min_nCopy);
-  
   int32_t max_score = 0;
   int32_t second_best_score = 0;
   int32_t max_nCopy = 0;
@@ -129,7 +128,7 @@ bool expansion_aware_realign(const std::string& seq,
     if (current_score > 0.7 * MATCH_SCORE * read_len and 
           current_score <= max_score and
           prev_score == current_score){
-      max_nCopy--;
+      // max_nCopy--;
       break;
     }
     if (current_score == read_len*MATCH_SCORE) {
@@ -355,8 +354,8 @@ bool classify_realigned_read(const std::string& seq,
            const std::string& post_flank,
            SingleReadType* single_read_class) {
   
-  int32_t min_match = 6;
-  int32_t i,j;
+  int32_t min_match = 10;
+  int32_t i,j, limit;
   bool flank_match;
 
   // Get coords of the STR
@@ -390,40 +389,88 @@ bool classify_realigned_read(const std::string& seq,
     return true;
   } else if (start_pos < start_str && end_pos > end_str) {
     *single_read_class = SR_ENCLOSING;
+    // cerr<<endl;
     // cerr<<"start_str:\t"<<start_str<<endl;
     // cerr<<"end_str:\t"<<end_str<<endl;
     // cerr<<"start_pos:\t"<<start_pos<<endl;
     // cerr<<"end_pos:\t"<<end_pos<<endl;
     // cerr<<seq<<"\t"<<nCopy<<"\t"<<max(start_str - start_pos - min_match, 0)<<endl;
-
-    // // Pre flank check
-    // flank_match = true;
-    // // j = prefix_length -(start_str - start_pos - max(start_str - start_pos - min_match, 0));
-    // j = start_str - start_pos >= min_match ? start_str - min_match : start_pos;
-    // for (i = max(start_str - start_pos - min_match, 0)
-    //         ; i <start_str - start_pos ; i++){
-    //   cerr<<seq.at(i);
-    //   if (seq.at(i)!=pre_flank.at(j)){
-    //     flank_match = false;
-    //     break;
-    //   }
-    //   j++;
-    // }
+    if (start_str - start_pos <= seq.size() - (end_str - start_str)){
+      // cerr<<std::string(start_str - start_pos, ' ')<<seq.substr(start_str - start_pos, end_str - start_str)<<endl;
+    }
+    else{
+      // cerr<<"REPEAT OUT OF RANGE"<<endl;
+      *single_read_class = SR_UNKNOWN;
+      return true;
+    }
+    // Pre flank check
+    flank_match = true;
+    // j = prefix_length -(start_str - start_pos - max(start_str - start_pos - min_match, 0));
+    j = start_str - start_pos >= min_match ? start_str - min_match : start_pos;
+    for (i = min(max(start_str - start_pos - min_match, 0), (int32_t)seq.size())
+            ; i <min(start_str - start_pos, (int32_t)seq.size()) ; i++){
+      // cerr<<seq.at(i);
+      if (seq.at(i)!=pre_flank.at(j)){
+        flank_match = false;
+        // break;
+      }
+      j++;
+    }
     // if (flank_match){
     //   cerr<<" -> PASS!!";
     // }
     // cerr<<endl;
     // j = prefix_length -(start_str - start_pos - max(start_str - start_pos - min_match, 0));
-    // for (i = max(start_str - start_pos - min_match, 0)
-    //         ; i <start_str - start_pos ; i++){
+    // for (i = min(max(start_str - start_pos - min_match, 0), (int32_t)seq.size())
+    //         ; i <min(start_str - start_pos, (int32_t)seq.size()) ; i++){
     //   cerr<<pre_flank.at(j);
     //   j++;
     // }
     // cerr<<endl;
-    // // Post flank check
-    // if (flank_match){
-       
-    // }
+
+
+    // Post flank check
+
+    // flank_match = true;
+    if (flank_match){
+       j = 0;
+       limit = (end_pos - end_str >= min_match ? end_str - start_pos + min_match - 1 : end_pos - start_pos - 1);
+
+       // cerr << (end_pos - end_str >= min_match) << endl;
+       // cerr << end_str - start_pos + min_match - 1 << endl;
+       // cerr << "Size: "<< seq.size() - 1 << endl;
+       for (i = min(end_str - start_pos, (int32_t)seq.size() - 1) ; 
+          i <= min(limit, (int32_t)seq.size() - 1);
+          i++){
+        // cerr<<seq.at(i);
+        if (seq.at(i)!=post_flank.at(j)){
+          flank_match = false;
+          // break;
+        }
+        j++;   
+       }
+       // if (flank_match){
+       //  cerr << " -> PASS!!";
+       // }
+       // cerr<<endl;
+       // j = 0;
+       // for (i = min(end_str - start_pos, (int32_t)seq.size() - 1) ; 
+       //    i <= min(limit, (int32_t)seq.size() - 1);
+       //    i++){
+       //  cerr<<post_flank.at(j);
+       //  j++;
+       // }
+    }
+
+    // If either flanks didn't match reference
+    if (!flank_match){
+      *single_read_class = SR_UNKNOWN;
+      return true;
+    }
+    else{
+      // cerr<<seq<<"\t"<<nCopy<<"\t"<<max(start_str - start_pos - min_match, 0)<<endl;
+      // cerr<<std::string(start_str - start_pos, ' ')<<seq.substr(start_str - start_pos, end_str - start_str)<<endl;
+    }
     return true;
   } else {
     return false;

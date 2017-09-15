@@ -254,13 +254,15 @@ bool LikelihoodMaximizer::OptimizeLikelihood(const int32_t& read_len, const int3
          allele_it != allele_list.end();
          allele_it++) {
       // TODO Change 200 for number depending the parameters
-      nlopt_1D_optimize(read_len, motif_len, ref_count, int32_t((read_len) / motif_len), 200, resampled, this, *allele_it, &a1, &result, &minf);
+      //nlopt_1D_optimize(read_len, motif_len, ref_count, int32_t((read_len) / motif_len), 200, resampled, this, *allele_it, &a1, &result, &minf);
+    nlopt_1D_optimize(read_len, motif_len, ref_count, 1, 200, resampled, this, *allele_it, &a1, &result, &minf);
       // cout<<endl<<result<<"\t"<<a1<<","<<*allele_it<<"\t"<<minf<<endl; // TODO remove
       sublist.push_back(a1);
     }
 
     // TODO Change 200 for number depending the parameters
-    nlopt_2D_optimize(read_len, motif_len, ref_count, int32_t((read_len - 2 * MARGIN) / motif_len - 1), 200, resampled, this, &a1, &a2, &result, &minf);
+    // nlopt_2D_optimize(read_len, motif_len, ref_count, int32_t((read_len - 2 * MARGIN) / motif_len - 1), 200, resampled, this, &a1, &a2, &result, &minf);
+    nlopt_2D_optimize(read_len, motif_len, ref_count, 1, 200, resampled, this, &a1, &a2, &result, &minf);
     // cout<<endl<<result<<"\t"<<a1<<","<<a2<<"\t"<<minf<<endl; // TODO remove
     sublist.push_back(a1);
     sublist.push_back(a2);
@@ -300,6 +302,7 @@ bool LikelihoodMaximizer::findBestAlleleListTuple(std::vector<int32_t> allele_li
     for (std::vector<int32_t>::iterator a1_it = allele_list.begin();
             a1_it != allele_list.end();
             a1_it++){
+      // cerr<<*a1_it<<endl;
       for (std::vector<int32_t>::iterator a2_it = allele_list.begin();
             a2_it != allele_list.end();
             a2_it++){
