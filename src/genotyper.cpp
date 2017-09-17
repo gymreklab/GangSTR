@@ -125,6 +125,9 @@ bool Genotyper::ProcessLocus(BamCramMultiReader* bamreader, Locus* locus) {
   //   }
   //   cout<<">>Resampled Results:\t"<<allele1<<", "<<allele2<<"\tlikelihood = "<<min_negLike<<"\n";
   // }
+  if (options->verbose) {
+    PrintMessageDieOnError("\tGetting confidence intervals", M_PROGRESS);
+  }
   if (!likelihood_maximizer->GetConfidenceInterval(read_len, (int32_t)(locus->motif.size()),
 						   ref_count, allele1, allele2, *locus,
 						   &lob1, &hib1, &lob2, &hib2)) {
