@@ -250,23 +250,21 @@ bool LikelihoodMaximizer::OptimizeLikelihood(const int32_t& read_len, const int3
   this->enclosing_class_.ExtractEnclosingAlleles(&allele_list);
   ResampleReadPool();
   if (options->ploidy == 2){
+    int32_t upper_bound = 500; // TODO Change 200 for number depending the parameters
+    int32_t lower_bound_1d = int32_t((read_len) / motif_len);
+    int32_t lower_bound_2d = int32_t((read_len - 2 * MARGIN) / motif_len - 1);
+
     for (std::vector<int32_t>::iterator allele_it = allele_list.begin();
          allele_it != allele_list.end();
          allele_it++) {
-      // TODO Change 200 for number depending the parameters
-      //nlopt_1D_optimize(read_len, motif_len, ref_count, int32_t((read_len) / motif_len), 200, resampled, this, *allele_it, &a1, &result, &minf);
-    nlopt_1D_optimize(read_len, motif_len, ref_count, 1, 200, resampled, this, *allele_it, &a1, &result, &minf);
+      nlopt_1D_optimize(read_len, motif_len, ref_count, lower_bound_1d, upper_bound, resampled, this, *allele_it, &a1, &result, &minf);
       // cout<<endl<<result<<"\t"<<a1<<","<<*allele_it<<"\t"<<minf<<endl; // TODO remove
       sublist.push_back(a1);
     }
-
-    // TODO Change 200 for number depending the parameters
-    // nlopt_2D_optimize(read_len, motif_len, ref_count, int32_t((read_len - 2 * MARGIN) / motif_len - 1), 200, resampled, this, &a1, &a2, &result, &minf);
-    nlopt_2D_optimize(read_len, motif_len, ref_count, 1, 200, resampled, this, &a1, &a2, &result, &minf);
+    nlopt_2D_optimize(read_len, motif_len, ref_count, lower_bound_2d, upper_bound, resampled, this, &a1, &a2, &result, &minf);
     // cout<<endl<<result<<"\t"<<a1<<","<<a2<<"\t"<<minf<<endl; // TODO remove
     sublist.push_back(a1);
     sublist.push_back(a2);
-
     for (std::vector<int32_t>::iterator subl_it = sublist.begin();
          subl_it != sublist.end();
          subl_it++) {
@@ -377,7 +375,6 @@ bool nlopt_2D_optimize(const int32_t& read_len, const int32_t& motif_len,
                const int32_t& ref_count, const int32_t& lower_bound,
                const int32_t& upper_bound, const bool& resampled, LikelihoodMaximizer* lm_ptr,
                int32_t* allele1, int32_t* allele2, int32_t* ret_result, double* minf_ret) {
-
   nlopt::opt opt(nlopt::LN_COBYLA, 2);
 
   std::vector<double> lb(2);
@@ -390,8 +387,9 @@ bool nlopt_2D_optimize(const int32_t& read_len, const int32_t& motif_len,
   ub[1] = upper_bound;
   opt.set_upper_bounds(ub);
 
+
   nlopt_data data[1] = nlopt_data(read_len, motif_len, ref_count, lm_ptr, 0, resampled);
-  
+
   opt.set_min_objective(nloptNegLikelihood, data);    // Change to max for maximization
 
   opt.set_xtol_rel(1e-5);   // TODO set something appropriate
@@ -405,7 +403,7 @@ bool nlopt_2D_optimize(const int32_t& read_len, const int32_t& motif_len,
   *allele2 = int32_t(xx[1]);
   *ret_result = result;
   *minf_ret = minf;
-return true;  // TODO add false
+  return true;  // TODO add false
 }
 
 bool nlopt_1D_optimize(const int32_t& read_len, const int32_t& motif_len,
