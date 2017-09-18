@@ -25,6 +25,7 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 #include <vector>
 
 #include <stdint.h>
+#include "src/ssw_cpp.h"
 
 // Set NW params
 // NOTE: the other score triple (12,-12,-16) causes issues in realignment test (ambigous cases)
@@ -32,6 +33,13 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 const static int32_t MATCH_SCORE = 3;
 const static int32_t MISMATCH_SCORE = -1;
 const static int32_t GAP_SCORE = -1;
+
+
+// SSW Parameters
+const static int32_t SSW_MATCH_SCORE = 4;
+const static int32_t SSW_MISMATCH_SCORE = 2;
+const static int32_t SSW_GAP_OPEN = 3;
+const static int32_t SSW_GAP_EXTEND = 1;
 
 // amount of slip we allow between alignment position and STR start and end
 static int32_t MARGIN = 5;		// This value is reset in expansion_aware_realign
@@ -73,13 +81,18 @@ bool expansion_aware_realign(const std::string& seq,
 			     const std::string& pre_flank,
 			     const std::string& post_flank,
 			     const std::string& motif,
-			     int32_t* nCopy, int32_t* pos, int32_t* score);		      
+			     int32_t* nCopy, int32_t* start_pos, int32_t* end_pos, int32_t* score);		      
 
 bool smith_waterman(const std::string& seq1,
 		    const std::string& seq2,
 		    const std::string& qual,
-		    int32_t* pos, int32_t* pos_temp, int32_t* score);
+		    int32_t* pos, int32_t* end, int32_t* score);
 
+bool striped_smith_waterman(const std::string& ref,
+        const std::string& seq,
+        const std::string& qual,
+        int32_t* pos, int32_t* pos_temp, int32_t* score);
+static void ssw_PrintAlignment(const StripedSmithWaterman::Alignment& alignment);
 bool create_score_matrix(const int32_t& rows, const int32_t& cols,
 			 const std::string& seq1,
 			 const std::string& seq2,
@@ -95,6 +108,7 @@ bool calc_score(const int32_t& i, const int32_t& j,
 bool classify_realigned_read(const std::string& seq,
 			     const std::string& motif,
 			     const int32_t& start_pos,
+			     const int32_t& end_pos,
 			     const int32_t& nCopy,
 			     const int32_t& score,
 			     const int32_t& prefix_length,
