@@ -151,11 +151,12 @@ void LikelihoodMaximizer::ResampleReadPool(){
 }
 
 bool LikelihoodMaximizer::GetConfidenceInterval(const int32_t& read_len, 
-                const int32_t& motif_len,
-                const int32_t& ref_count,
-                const int32_t& all1,
-                const int32_t& all2,
-                double* lob1, double* hib1, double* lob2, double* hib2){
+						const int32_t& motif_len,
+						const int32_t& ref_count,
+						const int32_t& all1,
+						const int32_t& all2,
+						const Locus& locus,
+						double* lob1, double* hib1, double* lob2, double* hib2){
   int32_t allele1, allele2;
   // TODO allow change of alpha
   double alpha = 0.05;   // Tail error on each end
