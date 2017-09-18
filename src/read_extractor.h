@@ -41,6 +41,7 @@ class ReadExtractor {
   bool ExtractReads(BamCramMultiReader* bamreader,
 		    const Locus& locus,
 		    const int32_t& regionsize,
+        const int32_t& min_match, 
 		    LikelihoodMaximizer* likelihood_maximizer);
 
   // Keep track of the guessed read length
@@ -52,7 +53,9 @@ class ReadExtractor {
   
   // Process all read pairs
   bool ProcessReadPairs(BamCramMultiReader* bamreader,
-			const Locus& locus, const int32_t& regionsize,
+			const Locus& locus, 
+      const int32_t& regionsize,
+      const int32_t& min_match, 
 			std::map<std::string, ReadPair>* read_pairs);
 
   // Find insert size distribution
@@ -73,6 +76,7 @@ class ReadExtractor {
   bool ProcessSingleRead(BamAlignment alignment,
 			 const int32_t& chrom_ref_id,
 			 const Locus& locus,
+       const int32_t &min_match,
 			 int32_t* data_value,
        int32_t* nCopy_value,
        int32_t* score_value,

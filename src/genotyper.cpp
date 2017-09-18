@@ -84,7 +84,7 @@ bool Genotyper::ProcessLocus(BamCramMultiReader* bamreader, Locus* locus) {
     PrintMessageDieOnError("\tLoading read data", M_PROGRESS);
   }
   if (!read_extractor->ExtractReads(bamreader, *locus, likelihood_maximizer->options->regionsize,
-				    likelihood_maximizer)) {
+				    likelihood_maximizer->options->min_match, likelihood_maximizer)) {
     return false;
   }
   // Maximize the likelihood

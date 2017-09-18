@@ -252,8 +252,10 @@ bool LikelihoodMaximizer::OptimizeLikelihood(const int32_t& read_len, const int3
   ResampleReadPool();
   if (options->ploidy == 2){
     int32_t upper_bound = 500; // TODO Change 200 for number depending the parameters
-    int32_t lower_bound_1d = int32_t((read_len) / motif_len);
-    int32_t lower_bound_2d = int32_t((read_len - 2 * MARGIN) / motif_len - 1);
+    // int32_t lower_bound_1d = int32_t((read_len) / motif_len);
+    // int32_t lower_bound_2d = int32_t((read_len - 2 * MARGIN) / motif_len - 1);
+    int32_t lower_bound_1d = 1;
+    int32_t lower_bound_2d = 1;
 
     for (std::vector<int32_t>::iterator allele_it = allele_list.begin();
          allele_it != allele_list.end();
@@ -377,7 +379,7 @@ bool nlopt_2D_optimize(const int32_t& read_len, const int32_t& motif_len,
                const int32_t& upper_bound, const bool& resampled, LikelihoodMaximizer* lm_ptr,
                int32_t* allele1, int32_t* allele2, int32_t* ret_result, double* minf_ret) {
   nlopt::opt opt(nlopt::LN_COBYLA, 2);
-
+  // opt.set_local_optimizer(nlopt::LN_COBYLA)   // TODO check nlopt::G_MLSL_LDS->multiple local
   std::vector<double> lb(2);
   lb[0] = lower_bound;
   lb[1] = lower_bound;
@@ -396,8 +398,8 @@ bool nlopt_2D_optimize(const int32_t& read_len, const int32_t& motif_len,
   opt.set_xtol_rel(1e-5);   // TODO set something appropriate
 
   std::vector<double> xx(2);
-  xx[0] = 35;               // TODO set something appropriate
-  xx[1] = 40;               // TODO set something appropriate
+  xx[0] = int32_t(1.1 * (read_len / motif_len));
+  xx[1] = int32_t(1.2 * (read_len / motif_len));
   double minf;
   nlopt::result result = opt.optimize(xx, minf);
   *allele1 = int32_t(xx[0]);
@@ -430,7 +432,7 @@ bool nlopt_1D_optimize(const int32_t& read_len, const int32_t& motif_len,
   opt.set_xtol_rel(1e-5);   // TODO set something appropriate
 
   std::vector<double> xx(1);
-  xx[0] = 45;               // TODO set something appropriate
+  xx[0] = int32_t(1.1 * (read_len / motif_len));
   double minf;
   nlopt::result result = opt.optimize(xx, minf);
   *allele1 = int32_t(xx[0]);

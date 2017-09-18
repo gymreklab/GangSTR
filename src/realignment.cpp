@@ -19,7 +19,7 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include "src/realignment.h"
-
+#include <algorithm>
 #include <sstream>
 #include <iostream>
 
@@ -66,6 +66,7 @@ bool expansion_aware_realign(const std::string& seq,
            const std::string& post_flank,
            const std::string& motif,
            int32_t* nCopy, int32_t* start_pos, int32_t* end_pos, int32_t* score) {
+
   int32_t read_len = (int32_t)seq.size();
   int32_t period = (int32_t)motif.size();
   int32_t min_nCopy = 0;
@@ -210,6 +211,7 @@ bool striped_smith_waterman(const std::string& ref,
         const std::string& seq,
         const std::string& qual,
         int32_t* pos, int32_t* end, int32_t* score) {
+
   // SSW Objects
   StripedSmithWaterman::Aligner* aligner;
   StripedSmithWaterman::Filter* filter;
@@ -350,11 +352,11 @@ bool classify_realigned_read(const std::string& seq,
            const int32_t& nCopy,
            const int32_t& score,
            const int32_t& prefix_length,
+           const int32_t& min_match,
            const std::string& pre_flank,
            const std::string& post_flank,
            SingleReadType* single_read_class) {
-  
-  int32_t min_match = 10;
+
   int32_t i,j, limit;
   bool flank_match;
 
@@ -389,6 +391,7 @@ bool classify_realigned_read(const std::string& seq,
     return true;
   } else if (start_pos < start_str && end_pos > end_str) {
     *single_read_class = SR_ENCLOSING;
+
     // cerr<<endl;
     // cerr<<"start_str:\t"<<start_str<<endl;
     // cerr<<"end_str:\t"<<end_str<<endl;
@@ -420,7 +423,8 @@ bool classify_realigned_read(const std::string& seq,
     //   cerr<<" -> PASS!!";
     // }
     // cerr<<endl;
-    // j = prefix_length -(start_str - start_pos - max(start_str - start_pos - min_match, 0));
+    // // j = prefix_length -(start_str - start_pos - max(start_str - start_pos - min_match, 0));
+    // j = start_str - start_pos >= min_match ? start_str - min_match : start_pos;
     // for (i = min(max(start_str - start_pos - min_match, 0), (int32_t)seq.size())
     //         ; i <min(start_str - start_pos, (int32_t)seq.size()) ; i++){
     //   cerr<<pre_flank.at(j);

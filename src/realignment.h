@@ -112,6 +112,7 @@ bool classify_realigned_read(const std::string& seq,
 			     const int32_t& nCopy,
 			     const int32_t& score,
 			     const int32_t& prefix_length,
+           		 const int32_t& min_match,
 			     const std::string& pre_flank,
 			     const std::string& post_flank,
 			     SingleReadType* single_read_class);

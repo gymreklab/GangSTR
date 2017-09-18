@@ -62,6 +62,7 @@ Options::Options() {
   output_bootstrap = false;
   output_readinfo = false;
   seed = time(NULL);
+  min_match = 5;
 }
 
 Options::~Options() {}
