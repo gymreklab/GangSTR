@@ -34,10 +34,11 @@ ReadExtractor::ReadExtractor() {}
 bool ReadExtractor::ExtractReads(BamCramMultiReader* bamreader,
          const Locus& locus,
          const int32_t& regionsize,
+         const int32_t& min_match, 
          LikelihoodMaximizer* likelihood_maximizer) {
   // This will keep track of information for each read pair
   std::map<std::string, ReadPair> read_pairs;
-  if (!ProcessReadPairs(bamreader, locus, regionsize, &read_pairs)) {
+  if (!ProcessReadPairs(bamreader, locus, regionsize, min_match, &read_pairs)) {
     return false;
   }
   int32_t frr = 0, span = 0, encl = 0;
@@ -83,10 +84,10 @@ bool ReadExtractor::ExtractReads(BamCramMultiReader* bamreader,
       continue;
     }
     
-    if(print_read_data) {
-      std::cerr<<"\t\t"<<((BamAlignment)iter->second.read1).QueryBases()<<endl;
-      std::cerr<<"\t\t"<<((BamAlignment)iter->second.read2).QueryBases()<<endl;
-    }
+    // if(print_read_data) {
+    //   std::cerr<<"\t\t"<<((BamAlignment)iter->second.read1).QueryBases()<<endl;
+    //   std::cerr<<"\t\t"<<((BamAlignment)iter->second.read2).QueryBases()<<endl;
+    // }
   }
   // TODO Delete
   // std::cerr << "~~Enclose:\t" << encl << endl;
@@ -99,7 +100,7 @@ bool ReadExtractor::ExtractReads(BamCramMultiReader* bamreader,
   Main function to decide what to do with each read pair
  */
 bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
-             const Locus& locus, const int32_t& regionsize,
+             const Locus& locus, const int32_t& regionsize, const int32_t& min_match,
              std::map<std::string, ReadPair>* read_pairs) {
   if (locus.end < locus.start){
     // TODO print error "Not enough extracted reads"
@@ -175,7 +176,7 @@ bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
         ReadType read_type;
         SingleReadType srt;
 
-        ProcessSingleRead(alignment, chrom_ref_id, locus,
+        ProcessSingleRead(alignment, chrom_ref_id, locus, min_match,
               &data_value, &nCopy_value, &score_value, &read_type, &srt);
 
         if (debug) {
@@ -261,7 +262,7 @@ bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
     ReadType read_type;
     ReadPair read_pair;
     SingleReadType srt;
-    ProcessSingleRead(alignment, chrom_ref_id, locus,
+    ProcessSingleRead(alignment, chrom_ref_id, locus, min_match,
           &data_value, &nCopy_value, &score_value, &read_type, &srt);
 
 
@@ -297,7 +298,7 @@ bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
     int32_t nCopy_value = 0;
     ReadType read_type;
     SingleReadType srt;
-    ProcessSingleRead(matepair, chrom_ref_id, locus,
+    ProcessSingleRead(matepair, chrom_ref_id, locus, min_match,
           &data_value, &nCopy_value, &score_value, &read_type, &srt);
     int32_t read_length = (int32_t)matepair.QueryBases().size();
 
@@ -415,6 +416,7 @@ bool ReadExtractor::FindSpanningRead(BamAlignment alignment,
 bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
               const int32_t& chrom_ref_id,
               const Locus& locus,
+              const int32_t &min_match,
               int32_t* data_value,
               int32_t* nCopy_value,
               int32_t* score_value,
@@ -432,6 +434,7 @@ bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
   int32_t score, score_rev;
   int32_t nCopy, nCopy_rev;
   std::string seq = alignment.QueryBases();
+  std::transform(seq.begin(), seq.end(), seq.begin(), ::tolower);
   std::string qual = alignment.Qualities();
   std::string seq_rev = reverse_complement(seq);
   int32_t read_length = (int32_t)seq.size();
@@ -455,7 +458,7 @@ bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
   *score_value = score;
   
   if (!classify_realigned_read(seq, locus.motif, start_pos, end_pos, nCopy, score, 
-             (int32_t)locus.pre_flank.size(), locus.pre_flank, locus.post_flank, srt)) {
+             (int32_t)locus.pre_flank.size(), min_match, locus.pre_flank, locus.post_flank, srt)) {
     return false;
   }
   if (debug) {
@@ -569,7 +572,7 @@ std::string ReadExtractor::trim_alignment_name(const BamAlignment& aln) const {
  */
 bool ReadExtractor::ComputeInsertSizeDistribution(BamCramMultiReader* bamreader,
              const Locus& locus,
-             double* mean, double* std_dev) {
+             double* mean, double* std_dev, int32_t* read_len) {
   // TODO change 200000 flank size to something appropriate
   int32_t flank_size = 200000;
   int32_t exclusion_margin = 1000;
@@ -592,13 +595,14 @@ bool ReadExtractor::ComputeInsertSizeDistribution(BamCramMultiReader* bamreader,
   bamreader->SetRegion(locus.chrom, 
       locus.start - flank_size > 0 ? locus.start - flank_size : 0, 
       locus.start - exclusion_margin > 0 ? locus.start - exclusion_margin : 0);
+
   // Go through each alignment in the region
   while (bamreader->GetNextAlignment(alignment)) {
     // Set template length
     temp_len_vec.push_back(abs(alignment.TemplateLength()));
     size++;
   }
-
+  *read_len = (int32_t)(alignment.QueryBases().size());
   // collecting reads mapped after locus
   bamreader->SetRegion(locus.chrom, 
       locus.start + exclusion_margin, 
@@ -630,7 +634,7 @@ bool ReadExtractor::ComputeInsertSizeDistribution(BamCramMultiReader* bamreader,
   int* valid_temp_len_arr = &valid_temp_len_vec[0];
   *mean = gsl_stats_int_mean(valid_temp_len_arr, 1, valid_size - 1);
   *std_dev = gsl_stats_int_sd_m (valid_temp_len_arr,  1, valid_size, *mean);
-
+  
   return true;  //TODO add false case
 }
 

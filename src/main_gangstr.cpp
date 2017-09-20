@@ -52,6 +52,7 @@ void show_help() {
      << "--ploidy       Indicate whether data is haploid (1) or diploid (2)\n"
      << "--insertmean   Insert size mean\n"
      << "--insertsdev   Insert size standard deviation\n"
+     << "--minmatch     Minimum number of matching basepairs on each end of enclosing reads\n"
      << "--stutterup    Stutter up parameter (refer to the stutter model)\n"
      << "--stutterdown  Stutter down parameter (refer to the stutter model)\n"
      << "--stutterprob  Stutter probability (refer to the stutter model)\n"
@@ -81,6 +82,7 @@ void parse_commandline_options(int argc, char* argv[], Options* options) {
     OPT_PLOIDY,
     OPT_INSMEAN,
     OPT_INSSDEV,
+    OPT_MINMATCH,
     OPT_STUTUP,
     OPT_STUTDW,
     OPT_STUTPR,
@@ -104,6 +106,7 @@ void parse_commandline_options(int argc, char* argv[], Options* options) {
     {"ploidy",      required_argument,  NULL, OPT_PLOIDY},
     {"insertmean",  required_argument,  NULL, OPT_INSMEAN},
     {"insertsdev",  required_argument,  NULL, OPT_INSSDEV},
+    {"minmatch",    required_argument,  NULL, OPT_MINMATCH},
     {"stutterup",   required_argument,  NULL, OPT_STUTUP},
     {"stutterdown", required_argument,  NULL, OPT_STUTDW},
     {"stutterprob", required_argument,  NULL, OPT_STUTPR},
@@ -159,6 +162,9 @@ void parse_commandline_options(int argc, char* argv[], Options* options) {
     case OPT_INSSDEV:
       options->dist_sdev = atoi(optarg);
       options->dist_man_set = true;
+      break;
+    case OPT_MINMATCH:
+      options->min_match = atoi(optarg);
       break;
     case OPT_STUTUP:
       options->stutter_up = atof(optarg);
