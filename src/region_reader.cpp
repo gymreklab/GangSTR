@@ -19,6 +19,8 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include <stdlib.h>
+#include <algorithm>
+#include <string>
 
 #include "src/common.h"
 #include "src/region_reader.h"
@@ -52,6 +54,7 @@ bool RegionReader::GetNextRegion(Locus* locus) {
   locus->end = atoi(items[2].c_str());
   locus->period = atoi(items[3].c_str());
   locus->motif = items[4];
+  std::transform(locus->motif.begin(), locus->motif.end(), locus->motif.begin(), ::tolower);
   return true;
 }
 

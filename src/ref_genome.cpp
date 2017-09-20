@@ -22,6 +22,7 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <iostream>
 #include <sstream>
+#include <algorithm>
 
 #include "src/common.h"
 #include "src/ref_genome.h"
@@ -58,6 +59,7 @@ bool RefGenome::GetSequence(const std::string& _chrom,
     PrintMessageDieOnError(ss.str(), M_ERROR);
   }
   seq->assign(result, length);
+  std::transform(seq->begin(), seq->end(), seq->begin(), ::tolower);
   free((void *)result);
   return true;
 }
