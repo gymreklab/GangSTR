@@ -355,9 +355,6 @@ LikelihoodMaximizer::~LikelihoodMaximizer() {
   }
 }
 
-
-
-
 double nloptNegLikelihood(unsigned n, const double *x, double *grad, void *data)
 {
   if (grad) {
