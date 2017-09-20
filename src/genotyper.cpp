@@ -50,13 +50,13 @@ bool Genotyper::SetFlanks(Locus* locus) {
 }
 
 bool Genotyper::ProcessLocus(BamCramMultiReader* bamreader, Locus* locus) {
+  int32_t read_len;
+
   // Load preflank and postflank to locus
   if (options->verbose) {
     PrintMessageDieOnError("\tSetting flanking regions", M_PROGRESS);
   }
-  if (!SetFlanks(locus)) {
-    return false;
-  }
+
 
   // Compute insert size distribution
   if (options->verbose) {
@@ -65,7 +65,12 @@ bool Genotyper::ProcessLocus(BamCramMultiReader* bamreader, Locus* locus) {
   double mean, std_dev;
   likelihood_maximizer->Reset();
   if (!read_extractor->ComputeInsertSizeDistribution(bamreader, *locus,
-            &mean, &std_dev)) {
+            &mean, &std_dev, &read_len)) {
+    return false;
+  }
+  options->realignment_flanklen = read_len;
+
+  if (!SetFlanks(locus)) {
     return false;
   }
   // TODO upgrade ComputeInsertSizeDistribution to bwa mem edition
@@ -75,7 +80,7 @@ bool Genotyper::ProcessLocus(BamCramMultiReader* bamreader, Locus* locus) {
   likelihood_maximizer->UpdateOptions();
   if (options->verbose) {
     stringstream ss;
-    ss << "\t\tMean=" << mean << " SD=" << std_dev;
+    ss << "\tMean=" << mean << " SD=" << std_dev;
     PrintMessageDieOnError(ss.str(), M_PROGRESS);
   }
 
@@ -87,12 +92,18 @@ bool Genotyper::ProcessLocus(BamCramMultiReader* bamreader, Locus* locus) {
 				    likelihood_maximizer->options->min_match, likelihood_maximizer)) {
     return false;
   }
+
+  locus->enclosing_reads = likelihood_maximizer->GetEnclosingDataSize();
+  locus->spanning_reads = likelihood_maximizer->GetSpanningDataSize();
+  locus->frr_reads = likelihood_maximizer->GetFRRDataSize();
+  locus->flanking_reads = likelihood_maximizer->GetFlankingDataSize();
+
   // Maximize the likelihood
   if (options->verbose) {
     PrintMessageDieOnError("\tMaximizing likelihood", M_PROGRESS);
   }
   int32_t allele1, allele2;
-  int32_t read_len = read_extractor->guessed_read_length;
+  read_len = read_extractor->guessed_read_length;
   int32_t ref_count = (int32_t)((locus->end-locus->start+1)/locus->motif.size());
   double min_negLike, lob1, lob2, hib1, hib2;
   bool resampled = false;
@@ -103,7 +114,8 @@ bool Genotyper::ProcessLocus(BamCramMultiReader* bamreader, Locus* locus) {
     return false;
   }
   cout<<">>Genotyper Results:\t"<<allele1<<", "<<allele2<<"\tlikelihood = "<<min_negLike<<"\n";
-
+  locus->allele1 = allele1;
+  locus->allele2 = allele2;
   // for (int jj = 0; jj < 10; jj++){
   //   likelihood_maximizer->ResampleReadPool();
   //   resampled = true;
@@ -123,6 +135,10 @@ bool Genotyper::ProcessLocus(BamCramMultiReader* bamreader, Locus* locus) {
 						   &lob1, &hib1, &lob2, &hib2)) {
     return false;
   }
+  locus->lob1 = lob1;
+  locus->lob2 = lob2;
+  locus->hib1 = hib1;
+  locus->hib2 = hib2;
   // Bootstrapping method from Davison and Hinkley 1997
   // cout<<"@@Small Allele Bound:\t["<<2 * allele1 - hib1<<", "<<2 * allele1 - lob1<<"]\n";
   // cout<<"@@Large Allele Bound:\t["<<2 * allele2 - hib2<<", "<<2 * allele2 - lob2<<"]\n";

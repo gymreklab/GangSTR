@@ -408,7 +408,6 @@ bool classify_realigned_read(const std::string& seq,
     }
     // Pre flank check
     flank_match = true;
-    // j = prefix_length -(start_str - start_pos - max(start_str - start_pos - min_match, 0));
     j = start_str - start_pos >= min_match ? start_str - min_match : start_pos;
     for (i = min(max(start_str - start_pos - min_match, 0), (int32_t)seq.size())
             ; i <min(start_str - start_pos, (int32_t)seq.size()) ; i++){
@@ -423,7 +422,6 @@ bool classify_realigned_read(const std::string& seq,
     //   cerr<<" -> PASS!!";
     // }
     // cerr<<endl;
-    // // j = prefix_length -(start_str - start_pos - max(start_str - start_pos - min_match, 0));
     // j = start_str - start_pos >= min_match ? start_str - min_match : start_pos;
     // for (i = min(max(start_str - start_pos - min_match, 0), (int32_t)seq.size())
     //         ; i <min(start_str - start_pos, (int32_t)seq.size()) ; i++){
@@ -434,7 +432,6 @@ bool classify_realigned_read(const std::string& seq,
 
 
     // Post flank check
-
     // flank_match = true;
     if (flank_match){
        j = 0;
@@ -465,6 +462,7 @@ bool classify_realigned_read(const std::string& seq,
        //  j++;
        // }
     }
+    // cerr<<endl<<endl;
 
     // If either flanks didn't match reference
     if (!flank_match){

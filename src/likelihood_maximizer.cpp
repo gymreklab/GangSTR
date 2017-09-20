@@ -211,6 +211,9 @@ std::size_t LikelihoodMaximizer::GetSpanningDataSize() {
 std::size_t LikelihoodMaximizer::GetFRRDataSize() {
   return frr_class_.GetDataSize();
 }
+std::size_t LikelihoodMaximizer::GetFlankingDataSize() {
+  return flanking_class_.GetDataSize();
+}
 
 bool LikelihoodMaximizer::GetGenotypeNegLogLikelihood(const int32_t& allele1,
 						      const int32_t& allele2,
@@ -288,6 +291,17 @@ bool LikelihoodMaximizer::OptimizeLikelihood(const int32_t& read_len, const int3
     *allele1 = *allele2;
     *allele2 = temp;
   }
+
+  // double ret_val;
+  // GetGenotypeNegLogLikelihood(10, 11, read_len, motif_len, ref_count, resampled, &ret_val);
+  // cerr<<"10, 11: "<<ret_val<<endl;
+  // GetGenotypeNegLogLikelihood(10, 12, read_len, motif_len, ref_count, resampled, &ret_val);
+  // cerr<<"10, 12: "<<ret_val<<endl;
+  // GetGenotypeNegLogLikelihood(10, 13, read_len, motif_len, ref_count, resampled, &ret_val);
+  // cerr<<"10, 13: "<<ret_val<<endl;
+  // GetGenotypeNegLogLikelihood(10, 14, read_len, motif_len, ref_count, resampled, &ret_val);
+  // cerr<<"10, 14: "<<ret_val<<endl;
+
   // cerr<<endl<<*allele1<<"\t"<<*allele2<<"\t"<<*min_negLike<<endl;
   return true;    // TODO add false
 }

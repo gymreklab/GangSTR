@@ -572,7 +572,7 @@ std::string ReadExtractor::trim_alignment_name(const BamAlignment& aln) const {
  */
 bool ReadExtractor::ComputeInsertSizeDistribution(BamCramMultiReader* bamreader,
              const Locus& locus,
-             double* mean, double* std_dev) {
+             double* mean, double* std_dev, int32_t* read_len) {
   // TODO change 200000 flank size to something appropriate
   int32_t flank_size = 200000;
   int32_t exclusion_margin = 1000;
@@ -595,13 +595,14 @@ bool ReadExtractor::ComputeInsertSizeDistribution(BamCramMultiReader* bamreader,
   bamreader->SetRegion(locus.chrom, 
       locus.start - flank_size > 0 ? locus.start - flank_size : 0, 
       locus.start - exclusion_margin > 0 ? locus.start - exclusion_margin : 0);
+
   // Go through each alignment in the region
   while (bamreader->GetNextAlignment(alignment)) {
     // Set template length
     temp_len_vec.push_back(abs(alignment.TemplateLength()));
     size++;
   }
-
+  *read_len = (int32_t)(alignment.QueryBases().size());
   // collecting reads mapped after locus
   bamreader->SetRegion(locus.chrom, 
       locus.start + exclusion_margin, 
@@ -633,7 +634,7 @@ bool ReadExtractor::ComputeInsertSizeDistribution(BamCramMultiReader* bamreader,
   int* valid_temp_len_arr = &valid_temp_len_vec[0];
   *mean = gsl_stats_int_mean(valid_temp_len_arr, 1, valid_size - 1);
   *std_dev = gsl_stats_int_sd_m (valid_temp_len_arr,  1, valid_size, *mean);
-
+  
   return true;  //TODO add false case
 }
 

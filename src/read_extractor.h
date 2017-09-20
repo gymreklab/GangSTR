@@ -61,7 +61,7 @@ class ReadExtractor {
   // Find insert size distribution
   bool ComputeInsertSizeDistribution(BamCramMultiReader* bamreader,
        const Locus& locus,
-       double* mean, double* std_dev);
+       double* mean, double* std_dev, int32_t* read_len);
 
   // Check if read should be discarded
   bool FindDiscardedRead(BamAlignment alignment,
