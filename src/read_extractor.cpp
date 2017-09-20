@@ -24,8 +24,14 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 #include "src/realignment.h"
 #include "gsl/gsl_statistics_int.h"
 #include <iostream>
+
 using namespace std;
-ReadExtractor::ReadExtractor() {}
+
+ReadExtractor::ReadExtractor(const Options& options_) : options(options_) {
+  if (options.output_readinfo) {
+    readfile_.open((options.outprefix + ".readinfo.tab").c_str());
+  }
+}
 
 /*
   Extracts relevant reads from bamfile and 
@@ -50,43 +56,48 @@ bool ReadExtractor::ExtractReads(BamCramMultiReader* bamreader,
   for (std::map<std::string, ReadPair>::const_iterator iter = read_pairs.begin();
        iter != read_pairs.end(); iter++) {
     if (iter->second.read_type == RC_SPAN) {
-      if (print_read_data) {
-  std::cerr << iter->first << "\t" << "SPAN" << "\t" << iter->second.data_value << "\t" << iter->second.found_pair << std::endl; // TODO remove
+      if (options.output_readinfo) {
+	readfile_ << locus.chrom << "\t" << locus.start << "\t" << locus.end << "\t"
+		  << iter->first << "\t" << "SPAN" << "\t" << iter->second.data_value << "\t" << iter->second.found_pair << std::endl;
       }
       likelihood_maximizer->AddSpanningData(iter->second.data_value);
       span++;
       // In spanning case, we can also have flanking reads:
-      if (iter->second.max_nCopy > 0){
-        if (print_read_data) {
-          std::cerr << iter->first << "\t" << "SPFLNK" << "\t" << iter->second.max_nCopy << "\t" << iter->second.found_pair << std::endl; // TODO remove
-        }
+      if (iter->second.max_nCopy > 0) {
+	if (options.output_readinfo) {
+	  readfile_ << locus.chrom << "\t" << locus.start << "\t" << locus.end << "\t"
+		    << iter->first << "\t" << "SPFLNK" << "\t" << iter->second.max_nCopy << "\t" << iter->second.found_pair << std::endl;
+	}
         likelihood_maximizer->AddFlankingData(iter->second.max_nCopy);
       }
     } else if (iter->second.read_type == RC_ENCL) {
-      if (print_read_data) {
-  std::cerr << iter->first << "\t" << "ENCLOSE" << "\t" << iter->second.data_value << "\t" << iter->second.found_pair << std::endl; // TODO remove
+      if (options.output_readinfo) {
+	readfile_ << locus.chrom << "\t" << locus.start << "\t" << locus.end << "\t"
+		  << iter->first << "\t" << "ENCLOSE" << "\t" << iter->second.data_value << "\t" << iter->second.found_pair << std::endl;
       }
       likelihood_maximizer->AddEnclosingData(iter->second.data_value);
       encl++;
     } else if (iter->second.read_type == RC_FRR) {
-      if (print_read_data) {
-  std::cerr << iter->first << "\t" << "FRR" << "\t" << iter->second.data_value << "\t" << iter->second.found_pair << std::endl; // TODO remove
+      if (options.output_readinfo) {
+	readfile_ << locus.chrom << "\t" << locus.start << "\t" << locus.end << "\t"
+		  << iter->first << "\t" << "FRR" << "\t" << iter->second.data_value << "\t" << iter->second.found_pair << std::endl;
       }
       likelihood_maximizer->AddFRRData(iter->second.data_value);
       frr++;
     } else if (iter->second.read_type == RC_BOUND) {
-      if (print_read_data) {
-  std::cerr << iter->first << "\t" << "BOUND" << "\t" << iter->second.data_value << "\t" << iter->second.found_pair << std::endl; // TODO remove
+      if (options.output_readinfo) {
+	readfile_ << locus.chrom << "\t" << locus.start << "\t" << locus.end << "\t"
+		  << iter->first << "\t" << "BOUND" << "\t" << iter->second.data_value << "\t" << iter->second.found_pair << std::endl;
       }
       likelihood_maximizer->AddFlankingData(iter->second.data_value);
     } else {
       continue;
     }
     
-    if(print_read_data) {
-      std::cerr<<"\t\t"<<((BamAlignment)iter->second.read1).QueryBases()<<endl;
-      std::cerr<<"\t\t"<<((BamAlignment)iter->second.read2).QueryBases()<<endl;
-    }
+    //    if(print_read_data) {
+    //  std::cerr<<"\t\t"<<((BamAlignment)iter->second.read1).QueryBases()<<endl;
+    //  std::cerr<<"\t\t"<<((BamAlignment)iter->second.read2).QueryBases()<<endl;
+    //}
   }
   // TODO Delete
   // std::cerr << "~~Enclose:\t" << encl << endl;
@@ -634,4 +645,9 @@ bool ReadExtractor::ComputeInsertSizeDistribution(BamCramMultiReader* bamreader,
   return true;  //TODO add false case
 }
 
-ReadExtractor::~ReadExtractor() {}
+ReadExtractor::~ReadExtractor() {
+  if (options.output_readinfo) {
+    readfile_.close();
+  }
+}
+

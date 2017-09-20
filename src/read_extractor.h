@@ -24,18 +24,23 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 #include "src/bam_io.h"
 #include "src/locus.h"
 #include "src/likelihood_maximizer.h"
+#include "src/options.h"
 #include "src/read_pair.h"
 
+#include <iostream>
+#include <fstream>
+
 #include <math.h>
+
 class ReadExtractor {
   friend class ReadExtractorTest;
   friend class Genotyper;
  public:
-  ReadExtractor();
+  ReadExtractor(const Options& options_);
   virtual ~ReadExtractor();
     
   bool debug = false;
-  bool print_read_data = false;
+//bool print_read_data = false;
 
   // Main function to extract reads of each class
   bool ExtractReads(BamCramMultiReader* bamreader,
@@ -81,6 +86,10 @@ class ReadExtractor {
   // Rescue mate pairs aligned elsewhere
   bool RescueMate(BamCramMultiReader* bamreader,
 		  BamAlignment alignment, BamAlignment* matepair);
+
+private:
+Options options;
+ofstream readfile_;
 };
 
 #endif  // SRC_READ_EXTRACTOR_H__
