@@ -52,8 +52,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "string_alloc.h"
 #include "pooled_alloc.h"
 
-#include "htslib/khash.h"
-#include "htslib/kstring.h"
+#include "../htslib/khash.h"
+#include "../htslib/kstring.h"
 
 #ifdef __cplusplus
 extern "C" {

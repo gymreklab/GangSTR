@@ -16,11 +16,11 @@
 # You should have received a copy of the GNU General Public License
 # along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 
-HTS_LIBS = -Ilib/htslib -lhts
+HTS_LIBS = -lhts
 NLOP_LIBS = -lnlopt -lm
 
 AM_CPPFLAGS = -I$(top_srcdir) $(GSL_CFLAGS)
-AM_LDFLAGS = $(GSL_LIBS) $(NLOP_LIBS)
+AM_LDFLAGS = $(GSL_LIBS) $(NLOP_LIBS) -L../lib/htslib -Ilib/htslib
 
 bin_PROGRAMS = GangSTR
 
@@ -51,12 +51,12 @@ libgangstr_a_SOURCES = \
 	ssw_cpp.h ssw_cpp.cpp \
 	vcf_writer.h vcf_writer.cpp
 
-GangSTR_LDFLAGS = $(AM_LDFLAGS) $(HTS_LIBS)
+GangSTR_LDFLAGS = $(AM_LDFLAGS)
 GangSTR_SOURCES = main_gangstr.cpp
 GangSTR_CPPFLAGS = $(AM_CPPFLAGS) $(AM_PROG_CC_C_O)
 GangSTR_CFLAGS = $(AM_CFLAGS)
 GangSTR_CXXFLAGS = $(AM_CXXFLAGS)
-GangSTR_LDADD = libgangstr.a $(GSL_LIBS) $(NLOP_LIBS)
+GangSTR_LDADD = libgangstr.a $(GSL_LIBS) $(NLOP_LIBS) $(HTS_LIBS)
 
 # (Copied from coreutils' tests/local.mk)
 # Use automake's TESTS_ENVIRONMENT to point to the "tests" directory
