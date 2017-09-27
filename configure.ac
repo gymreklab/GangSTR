@@ -17,7 +17,7 @@
 # along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 
 AC_INIT([GangSTR], [1.0], [mgymrek@ucsd.edu])
-AM_INIT_AUTOMAKE([foreign -Wall -Werror])
+AM_INIT_AUTOMAKE([foreign -Wall -Werror subdir-objects])
 AC_PROG_CC
 AC_PROG_CXX
 AC_PROG_RANLIB
