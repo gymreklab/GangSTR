@@ -11,6 +11,7 @@
 
 # Make compiling easy
 * Automatically check for necessary libraries (cppunit, gsl, nlopt)
+* Make sure lib/htslib gets added to LD_LIBRARY_PATH somehow
 
 
 # Done
