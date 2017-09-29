@@ -257,28 +257,53 @@ int main(int argc, char* argv[]) {
     full_command_ss << " " << argv[i];
   }
   std::string full_command = full_command_ss.str();
+  RegionReader region_reader(options.regionsfile);
+  Locus locus;
+  int merge_type = BamCramMultiReader::ORDER_ALNS_BY_FILE;
+  BamCramMultiReader bamreader(options.bamfiles, options.reffa, merge_type);
+
 
   // Extract information from bam file (read length, insert size distribution, ..)
-  int merge_type = BamCramMultiReader::ORDER_ALNS_BY_FILE;
-  BamCramMultiReader info_bamreader(options.bamfiles, options.reffa, merge_type);
-  RegionReader info_region_reader(options.regionsfile);
-  BamInfoExtract bam_info(&options, &info_bamreader, &info_region_reader);
   int32_t read_len;
+  double mean, std_dev;
+  BamInfoExtract bam_info(&options, &bamreader, &region_reader);
+
   if(options.read_len == -1){  // if read_len wasn't set, we need to extract from bam.
+    if (options.verbose) {
+      PrintMessageDieOnError("\tExtracting read length", M_PROGRESS);
+    }
     if(!bam_info.GetReadLen(&read_len)){
       PrintMessageDieOnError("No Locus contains enough reads to extract read length.", M_ERROR);
     }
     options.read_len = read_len;
     options.realignment_flanklen = read_len;
+    if (options.verbose) {
+      stringstream ss;
+      ss << "\tRead_Length=" << read_len;
+      PrintMessageDieOnError(ss.str(), M_PROGRESS);
+    }
   }
-  if(options.)
-  cerr<<options.read_len<<endl;
+
+  region_reader.Reset();
+  if(options.dist_mean == -1 or options.dist_sdev == -1){
+    if (options.verbose) {
+      PrintMessageDieOnError("\tComputing insert size distribution", M_PROGRESS);
+    }
+    if(!bam_info.GetInsertSizeDistribution(&mean, &std_dev)){
+      PrintMessageDieOnError("No Locus contains enough reads to extract insert size mean and standard deviation.", M_ERROR);
+    }
+    options.dist_mean = mean;
+    options.dist_sdev = std_dev;
+    if (options.verbose) {
+      stringstream ss;
+      ss << "\tMean=" << mean << " SD=" << std_dev;
+      PrintMessageDieOnError(ss.str(), M_PROGRESS);
+    }
+  }
 
 
   // Process each region
-  RegionReader region_reader(options.regionsfile);
-  Locus locus;
-  BamCramMultiReader bamreader(options.bamfiles, options.reffa, merge_type);
+  region_reader.Reset();
   RefGenome refgenome(options.reffa);
   VCFWriter vcfwriter(options.outprefix + ".vcf", full_command);
   Genotyper genotyper(refgenome, options);
@@ -288,6 +313,8 @@ int main(int argc, char* argv[]) {
     ss.clear();
     ss << "Processing " << locus.chrom << ":" << locus.start;
     PrintMessageDieOnError(ss.str(), M_PROGRESS);
+    locus.insert_size_mean = options.dist_mean;
+    locus.insert_size_stddev = options.dist_sdev = std_dev;
     if (genotyper.ProcessLocus(&bamreader, &locus)) {
       vcfwriter.WriteRecord(locus);
     }

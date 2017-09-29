@@ -30,6 +30,7 @@ BamInfoExtract::BamInfoExtract(Options* options_,
 }
 
 bool BamInfoExtract::GetReadLen(int32_t* read_len){
+	*read_len = -1;
 	int32_t flank_size = 2000;
 	int32_t req_streak = 10;
 	bool found_read_len = false;
@@ -63,13 +64,68 @@ bool BamInfoExtract::GetReadLen(int32_t* read_len){
 			found_read_len = true;
 		}
 	}
-	if (found_read_len){
-		return true;
+	return found_read_len;
+}
+
+bool BamInfoExtract::GetInsertSizeDistribution(double* mean, double* std_dev){
+	// TODO change 200000 flank size to something appropriate
+	int32_t flank_size = 200000;
+	int32_t exclusion_margin = 1000;
+	bool found_ins_distribution = false;
+	double mean_b, mean_a, std_b, std_a; // mean and std dev, before and after locus
+	int* valid_temp_len_arr;
+	std::vector<int32_t> temp_len_vec, valid_temp_len_vec;
+
+	// Header has info about chromosome names
+	const BamHeader* bam_header = bamreader->bam_header();
+	while(region_reader->GetNextRegion(&locus) and !found_ins_distribution){
+		const int32_t chrom_ref_id = bam_header->ref_id(locus.chrom);
+
+		int32_t median, size = 0, sum = 0, valid_size = 0, sum_std = 0;
+		BamAlignment alignment;
+
+		// collecting reads mapped before locus
+		bamreader->SetRegion(locus.chrom, 
+			locus.start - flank_size > 0 ? locus.start - flank_size : 0, 
+			locus.start - exclusion_margin > 0 ? locus.start - exclusion_margin : 0);
+
+		// Go through each alignment in the region
+		while (bamreader->GetNextAlignment(alignment)) {
+			// Set template length
+			temp_len_vec.push_back(abs(alignment.TemplateLength()));
+			size++;
+		}
+		// collecting reads mapped after locus
+		bamreader->SetRegion(locus.chrom, 
+			locus.start + exclusion_margin, 
+			locus.start + flank_size);
+		// Go through each alignment in the region
+		while (bamreader->GetNextAlignment(alignment)) {
+			// Set template length
+			temp_len_vec.push_back(abs(alignment.TemplateLength()));
+			size++;
+		}
+		// if there's enough reads, compute and return TODO set 1000 to a different number...
+		if (temp_len_vec.size() > 1000) {
+			sort(temp_len_vec.begin(), temp_len_vec.end());
+			median = temp_len_vec.at(int32_t(size / 2));
+
+			for (std::vector<int32_t>::iterator temp_it = temp_len_vec.begin();
+					temp_it != temp_len_vec.end();
+					++temp_it) {
+				// Todo change 3
+				if(*temp_it < 3 * median){
+					valid_temp_len_vec.push_back(*temp_it);
+					valid_size++;  
+				}
+			}
+			valid_temp_len_arr = &valid_temp_len_vec[0];
+			*mean = gsl_stats_int_mean(valid_temp_len_arr, 1, valid_size - 1);
+			*std_dev = gsl_stats_int_sd_m (valid_temp_len_arr,  1, valid_size, *mean);			
+			found_ins_distribution = true;
+		}
 	}
-	else{
-		*read_len = -1;
-		return false;
-	}
+	return found_ins_distribution;
 }
 
 BamInfoExtract::~BamInfoExtract(){

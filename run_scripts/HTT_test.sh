@@ -18,11 +18,12 @@ do
 	    --regions $bed_dir \
 	    --out test \
 	    --frrweight 0.12 \
-	    --enclweight 0.3 \
+	    --enclweight 1.0 \
 	    --spanweight 1.0 \
 	    --flankweight 0.5 \
 	    --ploidy 2 \
-	    --numbstrap 100
+	    --numbstrap 100 \
+	    --verbose
 
 done
 

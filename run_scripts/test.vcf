@@ -1,5 +1,5 @@
 ##fileformat=VCFv4.1
-##command=GangSTR-1.0 --bam /storage/resources/datasets/repeat-expansions/bams/SRR4243178_52_23.rmdup.bam --ref /storage/resources/dbase/human/hg19/Homo_sapiens_assembly19.fasta --regions /storage/nmmsv/GangSTR//tests/HTT.bed --out test --frrweight 0.12 --enclweight 0.3 --spanweight 1.0 --flankweight 0.5 --ploidy 2 --numbstrap 100
+##command=GangSTR-1.0 --bam /storage/resources/datasets/repeat-expansions/bams/SRR4243195_45_17.rmdup.bam --ref /storage/resources/dbase/human/hg19/Homo_sapiens_assembly19.fasta --regions /storage/nmmsv/GangSTR//tests/HTT.bed --out test --frrweight 0.12 --enclweight 1.0 --spanweight 1.0 --flankweight 0.5 --ploidy 2 --numbstrap 100 --verbose
 ##INFO=<ID=END,Number=1,Type=Integer,Description="End position of variant">
 ##INFO=<ID=RU,Number=1,Type=String,Description="Repeat motif">
 ##INFO=<ID=REF,Number=1,Type=Float,Description="Reference copy number">

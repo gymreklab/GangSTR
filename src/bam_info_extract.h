@@ -22,6 +22,7 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 #include "src/region_reader.h"
 #include "src/locus.h"
 #include "src/bam_io.h"
+#include "gsl/gsl_statistics_int.h"
 
 #ifndef BAM_INFO_H_
 #define BAM_INFO_H_
@@ -33,6 +34,7 @@ public:
 						RegionReader* region_reader_);
 	~BamInfoExtract();
 	bool GetReadLen(int32_t* read_len);
+	bool GetInsertSizeDistribution(double* mean, double* std_dev);
 private:
 	Options* options;
 	RegionReader* region_reader;

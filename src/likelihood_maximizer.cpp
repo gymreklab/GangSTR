@@ -56,18 +56,20 @@ LikelihoodMaximizer::LikelihoodMaximizer(Options& _options) {
   gsl_rng_set(r, options->seed);
 }
 
-void LikelihoodMaximizer::UpdateOptions(){
+// // Not needed. since options are updated before creating likelihood maximizer object
+// TODO delete
+// void LikelihoodMaximizer::UpdateOptions(){
   
-  // std::cerr << options->dist_mean << ", " << options->dist_sdev << endl;
-  enclosing_class_.SetOptions(*options);
-  frr_class_.SetOptions(*options);
-  spanning_class_.SetOptions(*options);
-  flanking_class_.SetOptions(*options);
-  resampled_enclosing_class_.SetOptions(*options);
-  resampled_frr_class_.SetOptions(*options);
-  resampled_spanning_class_.SetOptions(*options);
-  resampled_flanking_class_.SetOptions(*options);
-}
+//   // std::cerr << options->dist_mean << ", " << options->dist_sdev << endl;
+//   enclosing_class_.SetOptions(*options);
+//   frr_class_.SetOptions(*options);
+//   spanning_class_.SetOptions(*options);
+//   flanking_class_.SetOptions(*options);
+//   resampled_enclosing_class_.SetOptions(*options);
+//   resampled_frr_class_.SetOptions(*options);
+//   resampled_spanning_class_.SetOptions(*options);
+//   resampled_flanking_class_.SetOptions(*options);
+// }
 
 void LikelihoodMaximizer::Reset() {
   enclosing_class_.Reset();

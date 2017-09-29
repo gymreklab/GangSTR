@@ -32,6 +32,7 @@ class RegionReader {
   virtual ~RegionReader();
 
   bool GetNextRegion(Locus* locus);
+  void Reset();
 
  private:
   std::ifstream* freader;

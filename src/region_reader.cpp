@@ -58,6 +58,13 @@ bool RegionReader::GetNextRegion(Locus* locus) {
   return true;
 }
 
+/*
+  Reset region reader to the top of the regions file
+*/
+void RegionReader::Reset(){
+  freader->clear();
+  freader->seekg(0, ios::beg);
+}
 RegionReader::~RegionReader() {
   freader->close();
   delete freader;
