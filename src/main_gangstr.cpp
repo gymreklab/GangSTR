@@ -283,7 +283,6 @@ int main(int argc, char* argv[]) {
       PrintMessageDieOnError(ss.str(), M_PROGRESS);
     }
   }
-
   region_reader.Reset();
   if(options.dist_mean == -1 or options.dist_sdev == -1){
     if (options.verbose) {
@@ -299,6 +298,9 @@ int main(int argc, char* argv[]) {
       ss << "\tMean=" << mean << " SD=" << std_dev;
       PrintMessageDieOnError(ss.str(), M_PROGRESS);
     }
+  }
+  if (options.dist_max == -1){
+    options.dist_max = options.dist_mean + 2 * options.dist_sdev;
   }
 
 

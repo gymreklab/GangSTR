@@ -58,7 +58,7 @@ bool ReadExtractor::ExtractReads(BamCramMultiReader* bamreader,
        iter != read_pairs.end(); iter++) {
     if (iter->second.read_type == RC_SPAN) {
       if (iter->second.data_value > options.dist_mean - 2 * options.dist_sdev and
-            iter->second.data_value < options.dist_mean + 2 * options.dist_sdev){
+            iter->second.data_value < options.dist_max){
         if (options.output_readinfo) {
   	readfile_ << locus.chrom << "\t" << locus.start << "\t" << locus.end << "\t"
   		  << iter->first << "\t" << "SPAN" << "\t" << iter->second.data_value << "\t" << iter->second.found_pair << std::endl;
@@ -468,10 +468,15 @@ bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
   }
   *nCopy_value = nCopy;
   *score_value = score;
-
   if (!classify_realigned_read(seq, locus.motif, start_pos, end_pos, nCopy, score, 
              (int32_t)locus.pre_flank.size(), min_match, locus.pre_flank, locus.post_flank, srt)) {
     return false;
+  }
+  // Set as UNKNOWN if doesn't pass the score threshold.
+  if (score < options.min_score / 100.0 * double(SSW_MATCH_SCORE * options.read_len)){
+    *data_value = 0;
+    *read_type = RC_UNKNOWN;
+    return true;
   }
   if (debug) {
     std::cerr << "Processing single read found " << score << " " << start_pos << " " << srt << std::endl;
@@ -486,10 +491,10 @@ bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
     *read_type = RC_SPAN;
     *data_value = abs(locus.start + nCopy*(int32_t)locus.motif.size() - read_length
           - (alignment.MatePosition() + read_length));
-    if (*data_value > 2000){    // TODO change 2000 to a value based on parameters
-      *data_value = 0;
-      *read_type = RC_UNKNOWN;
-    }
+    // if (*data_value > 2000){    // TODO change 2000 to a value based on parameters
+    //   *data_value = 0;
+    //   *read_type = RC_UNKNOWN;
+    // }
     return true;
   }
   // 5.2_filter_spanning_only_core.py#L92 - postflank case
@@ -500,10 +505,10 @@ bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
     *read_type = RC_SPAN;
     *data_value = abs(locus.end - nCopy*(int32_t)locus.motif.size()
           - alignment.MatePosition() + read_length);
-    if (*data_value > 2000){    // TODO change 2000 to a value based on parameters
-      *data_value = 0;
-      *read_type = RC_UNKNOWN;
-    }
+    // if (*data_value > 2000){    // TODO change 2000 to a value based on parameters
+    //   *data_value = 0;
+    //   *read_type = RC_UNKNOWN;
+    // }
     return true;
   }
   /* FRR cases */
