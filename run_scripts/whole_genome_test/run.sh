@@ -22,8 +22,8 @@ NA13509=/storage/resources/datasets/IlluminaRepeatExpansions/forExpValidation/_E
 /storage/nmmsv/GangSTR/src/GangSTR \
     --stutterup 0.001 --stutterdown 0.001 --stutterprob 0.99 \
     --frrweight 0.5 --enclweight 1.0 --spanweight 1.0 --flankweight 1.0 \
-    --bam $NA12878 \
-    --ref $ref \
+    --bam $NA06151 \
+    --ref $ref_chr \
     --regions /storage/nmmsv/GangSTR/reference/test_locus.bed \
     --ploidy 2 \
     --minmatch 5\

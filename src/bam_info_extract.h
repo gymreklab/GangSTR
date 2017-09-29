@@ -28,9 +28,11 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 
 class BamInfoExtract{
 public:
-	BamInfoExtract(Options* options_);
+	BamInfoExtract(Options* options_,
+						BamCramMultiReader* bamreader_, 
+						RegionReader* region_reader_);
 	~BamInfoExtract();
-	int32_t GetReadLen();
+	bool GetReadLen(int32_t* read_len);
 private:
 	Options* options;
 	RegionReader* region_reader;

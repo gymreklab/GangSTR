@@ -257,13 +257,27 @@ int main(int argc, char* argv[]) {
     full_command_ss << " " << argv[i];
   }
   std::string full_command = full_command_ss.str();
+
   // Extract information from bam file (read length, insert size distribution, ..)
-  BamInfoExtract bam_info(&options);
-  cerr<<options.read_len;
+  int merge_type = BamCramMultiReader::ORDER_ALNS_BY_FILE;
+  BamCramMultiReader info_bamreader(options.bamfiles, options.reffa, merge_type);
+  RegionReader info_region_reader(options.regionsfile);
+  BamInfoExtract bam_info(&options, &info_bamreader, &info_region_reader);
+  int32_t read_len;
+  if(options.read_len == -1){  // if read_len wasn't set, we need to extract from bam.
+    if(!bam_info.GetReadLen(&read_len)){
+      PrintMessageDieOnError("No Locus contains enough reads to extract read length.", M_ERROR);
+    }
+    options.read_len = read_len;
+    options.realignment_flanklen = read_len;
+  }
+  if(options.)
+  cerr<<options.read_len<<endl;
+
+
   // Process each region
   RegionReader region_reader(options.regionsfile);
   Locus locus;
-  int merge_type = BamCramMultiReader::ORDER_ALNS_BY_FILE;
   BamCramMultiReader bamreader(options.bamfiles, options.reffa, merge_type);
   RefGenome refgenome(options.reffa);
   VCFWriter vcfwriter(options.outprefix + ".vcf", full_command);
