@@ -49,10 +49,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <pthread.h>
 #include <stdint.h>
 
-#include "htslib/thread_pool.h"
+#include "../htslib/thread_pool.h"
 #include "string_alloc.h"
 #include "mFILE.h"
-#include "htslib/khash.h"
+#include "../htslib/khash.h"
 
 #ifdef __cplusplus
 extern "C" {
