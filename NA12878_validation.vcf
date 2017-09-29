@@ -1,0 +1,13 @@
+##fileformat=VCFv4.1
+##command=GangSTR-1.0 --stutterup 0.001 --stutterdown 0.001 --stutterprob 0.99 --frrweight 0.5 --enclweight 1.0 --spanweight 1.0 --flankweight 1.0 --bam /storage/resources/datasets/GM12878/platinum_genomes_200x/bam/NA12878_platinum_genomes.bam --ref /storage/resources/dbase/human/hg19/Homo_sapiens_assembly19.fasta --regions /storage/nmmsv/GangSTR/reference/test_locus.bed --ploidy 2 --minmatch 5 --output-bootstraps --output-readinfo --out NA12878_validation --verbose
+##INFO=<ID=END,Number=1,Type=Integer,Description="End position of variant">
+##INFO=<ID=RU,Number=1,Type=String,Description="Repeat motif">
+##INFO=<ID=REF,Number=1,Type=Float,Description="Reference copy number">
+##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
+##FORMAT=<ID=DP,Number=1,Type=Integer,Description="Read Depth">
+##FORMAT=<ID=GB,Number=1,Type=String,Description="Genotype given in bp difference from reference">
+##FORMAT=<ID=CI,Number=1,Type=String,Description="Confidence intervals">
+##FORMAT=<ID=RC,Number=1,Type=String,Description="Number of reads in each class (enclosing, spanning, FRR, bounding">
+##FORMAT=<ID=Q,Number=1,Type=Float,Description="Min. negative likelihood">
+##FORMAT=<ID=INS,Number=1,Type=String,Description="Insert size mean and stddev">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	sample

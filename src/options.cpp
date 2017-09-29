@@ -45,6 +45,7 @@ Options::Options() {
   outprefix = "";
   dist_mean = 200;
   dist_sdev = 200;
+  read_len = -1;
   dist_man_set = false;
   stutter_up = 0.0364653;
   stutter_down = 0.0428387;

@@ -267,22 +267,36 @@ bool LikelihoodMaximizer::OptimizeLikelihood(const int32_t& read_len, const int3
   ResampleReadPool();
   if (options->ploidy == 2){
     int32_t upper_bound = 500; // TODO Change 200 for number depending the parameters
-    // int32_t lower_bound_1d = int32_t((read_len) / motif_len);
-    // int32_t lower_bound_2d = int32_t((read_len - 2 * MARGIN) / motif_len - 1);
-    int32_t lower_bound_1d = 1;
-    int32_t lower_bound_2d = 1;
+    int32_t lower_bound_1d, lower_bound_2d;
+    // if (allele_list.size() == 0){
+    //   lower_bound_1d = 1;
+    //   lower_bound_2d = 1;
+    // } else if (allele_list.size() == 1){
+    //   lower_bound_1d = int32_t((read_len) / motif_len);
+    //   lower_bound_2d = 1;
+    // }
+    // else if (allele_list.size() >= 2) {
+    //   lower_bound_1d = int32_t((read_len) / motif_len);
+    //   lower_bound_2d = int32_t((read_len - 2 * MARGIN) / motif_len - 1);
+    // }
+
+    lower_bound_1d = 1;
+    lower_bound_2d = 1;
 
     for (std::vector<int32_t>::iterator allele_it = allele_list.begin();
          allele_it != allele_list.end();
          allele_it++) {
       nlopt_1D_optimize(read_len, motif_len, ref_count, lower_bound_1d, upper_bound, resampled, this, *allele_it, &a1, &result, &minf);
-      // cout<<endl<<result<<"\t"<<a1<<","<<*allele_it<<"\t"<<minf<<endl; // TODO remove
       sublist.push_back(a1);
+      // cerr<<"ER:\t"<<*allele_it<<endl;
+      // cerr<<"1D:\t"<<a1<<endl;
     }
     nlopt_2D_optimize(read_len, motif_len, ref_count, lower_bound_2d, upper_bound, resampled, this, &a1, &a2, &result, &minf);
-    // cout<<endl<<result<<"\t"<<a1<<","<<a2<<"\t"<<minf<<endl; // TODO remove
     sublist.push_back(a1);
     sublist.push_back(a2);
+
+    // cerr<<"2D:\t"<<a1<<endl;
+    // cerr<<"2D:\t"<<a2<<endl;
     for (std::vector<int32_t>::iterator subl_it = sublist.begin();
          subl_it != sublist.end();
          subl_it++) {
@@ -303,16 +317,6 @@ bool LikelihoodMaximizer::OptimizeLikelihood(const int32_t& read_len, const int3
     *allele1 = *allele2;
     *allele2 = temp;
   }
-
-  // double ret_val;
-  // GetGenotypeNegLogLikelihood(10, 11, read_len, motif_len, ref_count, resampled, &ret_val);
-  // cerr<<"10, 11: "<<ret_val<<endl;
-  // GetGenotypeNegLogLikelihood(10, 12, read_len, motif_len, ref_count, resampled, &ret_val);
-  // cerr<<"10, 12: "<<ret_val<<endl;
-  // GetGenotypeNegLogLikelihood(10, 13, read_len, motif_len, ref_count, resampled, &ret_val);
-  // cerr<<"10, 13: "<<ret_val<<endl;
-  // GetGenotypeNegLogLikelihood(10, 14, read_len, motif_len, ref_count, resampled, &ret_val);
-  // cerr<<"10, 14: "<<ret_val<<endl;
 
   // cerr<<endl<<*allele1<<"\t"<<*allele2<<"\t"<<*min_negLike<<endl;
   return true;    // TODO add false

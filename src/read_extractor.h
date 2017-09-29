@@ -94,6 +94,8 @@ class ReadExtractor {
 private:
 Options options;
 ofstream readfile_;
+double dist_mean;
+double dist_sdev;
 };
 
 #endif  // SRC_READ_EXTRACTOR_H__

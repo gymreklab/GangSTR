@@ -39,6 +39,7 @@ class Options {
   // Insert sizes
   double dist_mean;
   double dist_sdev;
+  int32_t dist_max;     // Maximum insert size for spanning reads to be considered.
   bool dist_man_set;   // whether insert size dist parameters manually set in command line
   // Stutter model - TODO later make per locus model
   double stutter_up;
@@ -49,6 +50,7 @@ class Options {
   int32_t flanklen; // used in models
   int32_t regionsize; // region in bam file to search for reads around the STR
   int32_t min_match;  // minimum matching basepairs on each end of enclosing read
+  int32_t min_score;  // minimum alignment score (out of 100)
   // Likelihood weights
   double frr_weight;
   double enclosing_weight;

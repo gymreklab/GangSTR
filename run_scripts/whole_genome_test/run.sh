@@ -12,10 +12,10 @@ NA23709=/storage/resources/datasets/IlluminaRepeatExpansions/forExpValidation/_E
 # ATXN3 SCA3 (Chr14) Expanded:
 NA06151=/storage/resources/datasets/IlluminaRepeatExpansions/forExpValidation/_EGAR00001587277_repeat_expansions_NA06151.bam
 
-#
+# ATXN1 SCA1 (Chr6)
 NA06926=/storage/resources/datasets/IlluminaRepeatExpansions/forExpValidation/_EGAR00001587302_repeat_expansions_NA06926.bam
 
-#
+# HTT (Chr4) Expanded
 NA13509=/storage/resources/datasets/IlluminaRepeatExpansions/forExpValidation/_EGAR00001587344_repeat_expansions_NA13509.bam
 
 
