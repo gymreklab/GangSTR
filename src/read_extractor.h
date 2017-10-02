@@ -49,9 +49,6 @@ class ReadExtractor {
         const int32_t& min_match, 
 		    LikelihoodMaximizer* likelihood_maximizer);
 
-  // Keep track of the guessed read length
-  int32_t guessed_read_length;
-
  protected:
   // Trim alignment read names
   std::string trim_alignment_name(const BamAlignment& aln) const;
@@ -63,10 +60,11 @@ class ReadExtractor {
       const int32_t& min_match, 
 			std::map<std::string, ReadPair>* read_pairs);
 
-  // Find insert size distribution
-  bool ComputeInsertSizeDistribution(BamCramMultiReader* bamreader,
-       const Locus& locus,
-       double* mean, double* std_dev, int32_t* read_len);
+  // Implemented in BamInfoExtract. TODO delete
+  // // Find insert size distribution
+  // bool ComputeInsertSizeDistribution(BamCramMultiReader* bamreader,
+  //      const Locus& locus,
+  //      double* mean, double* std_dev, int32_t* read_len);
 
   // Check if read should be discarded
   bool FindDiscardedRead(BamAlignment alignment,
@@ -92,7 +90,7 @@ class ReadExtractor {
 		  BamAlignment alignment, BamAlignment* matepair);
 
 private:
-Options options;
+const Options options;
 ofstream readfile_;
 };
 

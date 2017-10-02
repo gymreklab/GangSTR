@@ -88,8 +88,11 @@ class LikelihoodMaximizer {
 			     const int32_t& allele2,
 			     const Locus& locus,
 			     double* lob1, double* hib1, double* lob2, double* hib2);
-  // Update read class options
-  void UpdateOptions();
+
+  // // Not needed. since options are updated before creating likelihood maximizer object
+  // // TODO delete
+  // //Update read class options
+  // void UpdateOptions();
 
   // Print read pool
   void PrintReadPool();
