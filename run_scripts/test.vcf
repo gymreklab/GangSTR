@@ -1,5 +1,5 @@
 ##fileformat=VCFv4.1
-##command=GangSTR-1.0 --bam /storage/resources/datasets/repeat-expansions/bams/SRR4243186_51_14.rmdup.bam --ref /storage/resources/dbase/human/hg19/Homo_sapiens_assembly19.fasta --regions /storage/nmmsv/GangSTR//tests/HTT.bed --out test --frrweight 0.12 --enclweight 1.0 --spanweight 1.0 --flankweight 0.5 --ploidy 2 --numbstrap 100 --verbose
+##command=GangSTR-1.0 --bam /storage/resources/datasets/repeat-expansions/bams/SRR4243395_43_23.rmdup.bam --ref /storage/resources/dbase/human/hg19/Homo_sapiens_assembly19.fasta --regions /storage/nmmsv/GangSTR/tests/HTT.bed --out test --frrweight 0.12 --enclweight 1.0 --spanweight 1.0 --flankweight 0.5 --ploidy 2 --numbstrap 100 --minmatch 4 --minscore 80
 ##INFO=<ID=END,Number=1,Type=Integer,Description="End position of variant">
 ##INFO=<ID=RU,Number=1,Type=String,Description="Repeat motif">
 ##INFO=<ID=REF,Number=1,Type=Float,Description="Reference copy number">
@@ -11,3 +11,4 @@
 ##FORMAT=<ID=Q,Number=1,Type=Float,Description="Min. negative likelihood">
 ##FORMAT=<ID=INS,Number=1,Type=String,Description="Insert size mean and stddev">
 #CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	sample
+4	3076604	.	cagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcag	cagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcag,cagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcag	.	.	END=3076660;RU=cag;REF=19	GT:DP:GB:CI:RC:Q:INS	1/2:228:22,36:22-25,33-40:1,54,47,126:972.35:166.266,70.2513
