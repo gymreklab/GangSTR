@@ -1,1 +1,503 @@
-# dummy
+tests/GangSTRTests-Realignment_test.o: tests/Realignment_test.cpp \
+ /usr/include/stdc-predef.h ../src/tests/Realignment_test.h \
+ /usr/include/cppunit/extensions/HelperMacros.h \
+ /usr/include/cppunit/TestCaller.h /usr/include/cppunit/Exception.h \
+ /usr/include/cppunit/Portability.h /usr/include/cppunit/config-auto.h \
+ /usr/include/cppunit/config/CppUnitApi.h \
+ /usr/include/cppunit/config/SelectDllLoader.h \
+ /usr/include/cppunit/Message.h \
+ /usr/include/cppunit/portability/CppUnitDeque.h \
+ /usr/local/include/c++/4.9.2/deque \
+ /usr/local/include/c++/4.9.2/bits/stl_algobase.h \
+ /usr/local/include/c++/4.9.2/x86_64-unknown-linux-gnu/bits/c++config.h \
+ /usr/local/include/c++/4.9.2/x86_64-unknown-linux-gnu/bits/os_defines.h \
+ /usr/include/features.h /usr/include/sys/cdefs.h \
+ /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h \
+ /usr/include/gnu/stubs-64.h \
+ /usr/local/include/c++/4.9.2/x86_64-unknown-linux-gnu/bits/cpu_defines.h \
+ /usr/local/include/c++/4.9.2/bits/functexcept.h \
+ /usr/local/include/c++/4.9.2/bits/exception_defines.h \
+ /usr/local/include/c++/4.9.2/bits/cpp_type_traits.h \
+ /usr/local/include/c++/4.9.2/ext/type_traits.h \
+ /usr/local/include/c++/4.9.2/ext/numeric_traits.h \
+ /usr/local/include/c++/4.9.2/bits/stl_pair.h \
+ /usr/local/include/c++/4.9.2/bits/move.h \
+ /usr/local/include/c++/4.9.2/bits/concept_check.h \
+ /usr/local/include/c++/4.9.2/bits/stl_iterator_base_types.h \
+ /usr/local/include/c++/4.9.2/bits/stl_iterator_base_funcs.h \
+ /usr/local/include/c++/4.9.2/debug/debug.h \
+ /usr/local/include/c++/4.9.2/bits/stl_iterator.h \
+ /usr/local/include/c++/4.9.2/bits/ptr_traits.h \
+ /usr/local/include/c++/4.9.2/bits/predefined_ops.h \
+ /usr/local/include/c++/4.9.2/bits/allocator.h \
+ /usr/local/include/c++/4.9.2/x86_64-unknown-linux-gnu/bits/c++allocator.h \
+ /usr/local/include/c++/4.9.2/ext/new_allocator.h \
+ /usr/local/include/c++/4.9.2/new /usr/local/include/c++/4.9.2/exception \
+ /usr/local/include/c++/4.9.2/bits/atomic_lockfree_defines.h \
+ /usr/local/include/c++/4.9.2/bits/memoryfwd.h \
+ /usr/local/include/c++/4.9.2/bits/stl_construct.h \
+ /usr/local/include/c++/4.9.2/ext/alloc_traits.h \
+ /usr/local/include/c++/4.9.2/bits/stl_uninitialized.h \
+ /usr/local/include/c++/4.9.2/bits/stl_deque.h \
+ /usr/local/include/c++/4.9.2/bits/range_access.h \
+ /usr/local/include/c++/4.9.2/bits/deque.tcc \
+ /usr/local/include/c++/4.9.2/string \
+ /usr/local/include/c++/4.9.2/bits/stringfwd.h \
+ /usr/local/include/c++/4.9.2/bits/char_traits.h \
+ /usr/local/include/c++/4.9.2/bits/postypes.h \
+ /usr/local/include/c++/4.9.2/cwchar /usr/include/wchar.h \
+ /usr/include/stdio.h \
+ /usr/local/lib/gcc/x86_64-unknown-linux-gnu/4.9.2/include/stdarg.h \
+ /usr/include/bits/wchar.h \
+ /usr/local/lib/gcc/x86_64-unknown-linux-gnu/4.9.2/include/stddef.h \
+ /usr/include/xlocale.h /usr/local/include/c++/4.9.2/bits/localefwd.h \
+ /usr/local/include/c++/4.9.2/x86_64-unknown-linux-gnu/bits/c++locale.h \
+ /usr/local/include/c++/4.9.2/clocale /usr/include/locale.h \
+ /usr/include/bits/locale.h /usr/local/include/c++/4.9.2/iosfwd \
+ /usr/local/include/c++/4.9.2/cctype /usr/include/ctype.h \
+ /usr/include/bits/types.h /usr/include/bits/typesizes.h \
+ /usr/include/endian.h /usr/include/bits/endian.h \
+ /usr/include/bits/byteswap.h /usr/include/bits/byteswap-16.h \
+ /usr/local/include/c++/4.9.2/bits/ostream_insert.h \
+ /usr/local/include/c++/4.9.2/bits/cxxabi_forced.h \
+ /usr/local/include/c++/4.9.2/bits/stl_function.h \
+ /usr/local/include/c++/4.9.2/backward/binders.h \
+ /usr/local/include/c++/4.9.2/bits/basic_string.h \
+ /usr/local/include/c++/4.9.2/ext/atomicity.h \
+ /usr/local/include/c++/4.9.2/x86_64-unknown-linux-gnu/bits/gthr.h \
+ /usr/local/include/c++/4.9.2/x86_64-unknown-linux-gnu/bits/gthr-default.h \
+ /usr/include/pthread.h /usr/include/sched.h /usr/include/time.h \
+ /usr/include/bits/sched.h /usr/include/bits/time.h \
+ /usr/include/bits/timex.h /usr/include/bits/pthreadtypes.h \
+ /usr/include/bits/setjmp.h \
+ /usr/local/include/c++/4.9.2/x86_64-unknown-linux-gnu/bits/atomic_word.h \
+ /usr/local/include/c++/4.9.2/bits/basic_string.tcc \
+ /usr/include/cppunit/SourceLine.h /usr/include/cppunit/TestCase.h \
+ /usr/include/cppunit/TestLeaf.h /usr/include/cppunit/Test.h \
+ /usr/include/cppunit/TestAssert.h /usr/include/cppunit/Asserter.h \
+ /usr/include/cppunit/AdditionalMessage.h \
+ /usr/include/cppunit/portability/Stream.h \
+ /usr/local/include/c++/4.9.2/sstream \
+ /usr/local/include/c++/4.9.2/istream /usr/local/include/c++/4.9.2/ios \
+ /usr/local/include/c++/4.9.2/bits/ios_base.h \
+ /usr/local/include/c++/4.9.2/bits/locale_classes.h \
+ /usr/local/include/c++/4.9.2/bits/locale_classes.tcc \
+ /usr/local/include/c++/4.9.2/streambuf \
+ /usr/local/include/c++/4.9.2/bits/streambuf.tcc \
+ /usr/local/include/c++/4.9.2/bits/basic_ios.h \
+ /usr/local/include/c++/4.9.2/bits/locale_facets.h \
+ /usr/local/include/c++/4.9.2/cwctype /usr/include/wctype.h \
+ /usr/local/include/c++/4.9.2/x86_64-unknown-linux-gnu/bits/ctype_base.h \
+ /usr/local/include/c++/4.9.2/bits/streambuf_iterator.h \
+ /usr/local/include/c++/4.9.2/x86_64-unknown-linux-gnu/bits/ctype_inline.h \
+ /usr/local/include/c++/4.9.2/bits/locale_facets.tcc \
+ /usr/local/include/c++/4.9.2/bits/basic_ios.tcc \
+ /usr/local/include/c++/4.9.2/ostream \
+ /usr/local/include/c++/4.9.2/bits/ostream.tcc \
+ /usr/local/include/c++/4.9.2/bits/istream.tcc \
+ /usr/local/include/c++/4.9.2/bits/sstream.tcc \
+ /usr/local/include/c++/4.9.2/fstream \
+ /usr/local/include/c++/4.9.2/bits/codecvt.h \
+ /usr/local/include/c++/4.9.2/cstdio /usr/include/libio.h \
+ /usr/include/_G_config.h /usr/include/bits/stdio_lim.h \
+ /usr/include/bits/sys_errlist.h /usr/include/bits/stdio.h \
+ /usr/local/include/c++/4.9.2/x86_64-unknown-linux-gnu/bits/basic_file.h \
+ /usr/local/include/c++/4.9.2/x86_64-unknown-linux-gnu/bits/c++io.h \
+ /usr/local/include/c++/4.9.2/bits/fstream.tcc \
+ /usr/local/include/c++/4.9.2/iostream \
+ /usr/local/lib/gcc/x86_64-unknown-linux-gnu/4.9.2/include/float.h \
+ /usr/include/cppunit/TestFixture.h \
+ /usr/include/cppunit/extensions/TypeInfoHelper.h \
+ /usr/local/include/c++/4.9.2/typeinfo /usr/include/cppunit/TestSuite.h \
+ /usr/include/cppunit/TestComposite.h \
+ /usr/include/cppunit/portability/CppUnitVector.h \
+ /usr/local/include/c++/4.9.2/vector \
+ /usr/local/include/c++/4.9.2/bits/stl_vector.h \
+ /usr/local/include/c++/4.9.2/bits/stl_bvector.h \
+ /usr/local/include/c++/4.9.2/bits/vector.tcc \
+ /usr/include/cppunit/extensions/AutoRegisterSuite.h \
+ /usr/include/cppunit/extensions/TestSuiteFactory.h \
+ /usr/include/cppunit/extensions/TestFactory.h \
+ /usr/include/cppunit/extensions/TestFactoryRegistry.h \
+ /usr/include/cppunit/portability/CppUnitSet.h \
+ /usr/local/include/c++/4.9.2/functional /usr/local/include/c++/4.9.2/set \
+ /usr/local/include/c++/4.9.2/bits/stl_tree.h \
+ /usr/local/include/c++/4.9.2/bits/stl_set.h \
+ /usr/local/include/c++/4.9.2/bits/stl_multiset.h \
+ /usr/include/cppunit/extensions/ExceptionTestCaseDecorator.h \
+ /usr/include/cppunit/extensions/TestCaseDecorator.h \
+ /usr/include/cppunit/extensions/TestFixtureFactory.h \
+ /usr/include/cppunit/extensions/TestNamer.h \
+ /usr/include/cppunit/extensions/TestSuiteBuilderContext.h \
+ /usr/include/cppunit/portability/CppUnitMap.h \
+ /usr/local/include/c++/4.9.2/map \
+ /usr/local/include/c++/4.9.2/bits/stl_map.h \
+ /usr/local/include/c++/4.9.2/bits/stl_multimap.h \
+ /usr/local/include/c++/4.9.2/memory \
+ /usr/local/include/c++/4.9.2/bits/stl_tempbuf.h \
+ /usr/local/include/c++/4.9.2/bits/stl_raw_storage_iter.h \
+ /usr/local/include/c++/4.9.2/backward/auto_ptr.h ../src/realignment.h \
+ /usr/local/lib/gcc/x86_64-unknown-linux-gnu/4.9.2/include/stdint.h \
+ /usr/include/stdint.h ../src/ssw_cpp.h /usr/include/math.h \
+ /usr/include/bits/huge_val.h /usr/include/bits/huge_valf.h \
+ /usr/include/bits/huge_vall.h /usr/include/bits/inf.h \
+ /usr/include/bits/nan.h /usr/include/bits/mathdef.h \
+ /usr/include/bits/mathcalls.h /usr/include/bits/mathinline.h
+
+/usr/include/stdc-predef.h:
+
+../src/tests/Realignment_test.h:
+
+/usr/include/cppunit/extensions/HelperMacros.h:
+
+/usr/include/cppunit/TestCaller.h:
+
+/usr/include/cppunit/Exception.h:
+
+/usr/include/cppunit/Portability.h:
+
+/usr/include/cppunit/config-auto.h:
+
+/usr/include/cppunit/config/CppUnitApi.h:
+
+/usr/include/cppunit/config/SelectDllLoader.h:
+
+/usr/include/cppunit/Message.h:
+
+/usr/include/cppunit/portability/CppUnitDeque.h:
+
+/usr/local/include/c++/4.9.2/deque:
+
+/usr/local/include/c++/4.9.2/bits/stl_algobase.h:
+
+/usr/local/include/c++/4.9.2/x86_64-unknown-linux-gnu/bits/c++config.h:
+
+/usr/local/include/c++/4.9.2/x86_64-unknown-linux-gnu/bits/os_defines.h:
+
+/usr/include/features.h:
+
+/usr/include/sys/cdefs.h:
+
+/usr/include/bits/wordsize.h:
+
+/usr/include/gnu/stubs.h:
+
+/usr/include/gnu/stubs-64.h:
+
+/usr/local/include/c++/4.9.2/x86_64-unknown-linux-gnu/bits/cpu_defines.h:
+
+/usr/local/include/c++/4.9.2/bits/functexcept.h:
+
+/usr/local/include/c++/4.9.2/bits/exception_defines.h:
+
+/usr/local/include/c++/4.9.2/bits/cpp_type_traits.h:
+
+/usr/local/include/c++/4.9.2/ext/type_traits.h:
+
+/usr/local/include/c++/4.9.2/ext/numeric_traits.h:
+
+/usr/local/include/c++/4.9.2/bits/stl_pair.h:
+
+/usr/local/include/c++/4.9.2/bits/move.h:
+
+/usr/local/include/c++/4.9.2/bits/concept_check.h:
+
+/usr/local/include/c++/4.9.2/bits/stl_iterator_base_types.h:
+
+/usr/local/include/c++/4.9.2/bits/stl_iterator_base_funcs.h:
+
+/usr/local/include/c++/4.9.2/debug/debug.h:
+
+/usr/local/include/c++/4.9.2/bits/stl_iterator.h:
+
+/usr/local/include/c++/4.9.2/bits/ptr_traits.h:
+
+/usr/local/include/c++/4.9.2/bits/predefined_ops.h:
+
+/usr/local/include/c++/4.9.2/bits/allocator.h:
+
+/usr/local/include/c++/4.9.2/x86_64-unknown-linux-gnu/bits/c++allocator.h:
+
+/usr/local/include/c++/4.9.2/ext/new_allocator.h:
+
+/usr/local/include/c++/4.9.2/new:
+
+/usr/local/include/c++/4.9.2/exception:
+
+/usr/local/include/c++/4.9.2/bits/atomic_lockfree_defines.h:
+
+/usr/local/include/c++/4.9.2/bits/memoryfwd.h:
+
+/usr/local/include/c++/4.9.2/bits/stl_construct.h:
+
+/usr/local/include/c++/4.9.2/ext/alloc_traits.h:
+
+/usr/local/include/c++/4.9.2/bits/stl_uninitialized.h:
+
+/usr/local/include/c++/4.9.2/bits/stl_deque.h:
+
+/usr/local/include/c++/4.9.2/bits/range_access.h:
+
+/usr/local/include/c++/4.9.2/bits/deque.tcc:
+
+/usr/local/include/c++/4.9.2/string:
+
+/usr/local/include/c++/4.9.2/bits/stringfwd.h:
+
+/usr/local/include/c++/4.9.2/bits/char_traits.h:
+
+/usr/local/include/c++/4.9.2/bits/postypes.h:
+
+/usr/local/include/c++/4.9.2/cwchar:
+
+/usr/include/wchar.h:
+
+/usr/include/stdio.h:
+
+/usr/local/lib/gcc/x86_64-unknown-linux-gnu/4.9.2/include/stdarg.h:
+
+/usr/include/bits/wchar.h:
+
+/usr/local/lib/gcc/x86_64-unknown-linux-gnu/4.9.2/include/stddef.h:
+
+/usr/include/xlocale.h:
+
+/usr/local/include/c++/4.9.2/bits/localefwd.h:
+
+/usr/local/include/c++/4.9.2/x86_64-unknown-linux-gnu/bits/c++locale.h:
+
+/usr/local/include/c++/4.9.2/clocale:
+
+/usr/include/locale.h:
+
+/usr/include/bits/locale.h:
+
+/usr/local/include/c++/4.9.2/iosfwd:
+
+/usr/local/include/c++/4.9.2/cctype:
+
+/usr/include/ctype.h:
+
+/usr/include/bits/types.h:
+
+/usr/include/bits/typesizes.h:
+
+/usr/include/endian.h:
+
+/usr/include/bits/endian.h:
+
+/usr/include/bits/byteswap.h:
+
+/usr/include/bits/byteswap-16.h:
+
+/usr/local/include/c++/4.9.2/bits/ostream_insert.h:
+
+/usr/local/include/c++/4.9.2/bits/cxxabi_forced.h:
+
+/usr/local/include/c++/4.9.2/bits/stl_function.h:
+
+/usr/local/include/c++/4.9.2/backward/binders.h:
+
+/usr/local/include/c++/4.9.2/bits/basic_string.h:
+
+/usr/local/include/c++/4.9.2/ext/atomicity.h:
+
+/usr/local/include/c++/4.9.2/x86_64-unknown-linux-gnu/bits/gthr.h:
+
+/usr/local/include/c++/4.9.2/x86_64-unknown-linux-gnu/bits/gthr-default.h:
+
+/usr/include/pthread.h:
+
+/usr/include/sched.h:
+
+/usr/include/time.h:
+
+/usr/include/bits/sched.h:
+
+/usr/include/bits/time.h:
+
+/usr/include/bits/timex.h:
+
+/usr/include/bits/pthreadtypes.h:
+
+/usr/include/bits/setjmp.h:
+
+/usr/local/include/c++/4.9.2/x86_64-unknown-linux-gnu/bits/atomic_word.h:
+
+/usr/local/include/c++/4.9.2/bits/basic_string.tcc:
+
+/usr/include/cppunit/SourceLine.h:
+
+/usr/include/cppunit/TestCase.h:
+
+/usr/include/cppunit/TestLeaf.h:
+
+/usr/include/cppunit/Test.h:
+
+/usr/include/cppunit/TestAssert.h:
+
+/usr/include/cppunit/Asserter.h:
+
+/usr/include/cppunit/AdditionalMessage.h:
+
+/usr/include/cppunit/portability/Stream.h:
+
+/usr/local/include/c++/4.9.2/sstream:
+
+/usr/local/include/c++/4.9.2/istream:
+
+/usr/local/include/c++/4.9.2/ios:
+
+/usr/local/include/c++/4.9.2/bits/ios_base.h:
+
+/usr/local/include/c++/4.9.2/bits/locale_classes.h:
+
+/usr/local/include/c++/4.9.2/bits/locale_classes.tcc:
+
+/usr/local/include/c++/4.9.2/streambuf:
+
+/usr/local/include/c++/4.9.2/bits/streambuf.tcc:
+
+/usr/local/include/c++/4.9.2/bits/basic_ios.h:
+
+/usr/local/include/c++/4.9.2/bits/locale_facets.h:
+
+/usr/local/include/c++/4.9.2/cwctype:
+
+/usr/include/wctype.h:
+
+/usr/local/include/c++/4.9.2/x86_64-unknown-linux-gnu/bits/ctype_base.h:
+
+/usr/local/include/c++/4.9.2/bits/streambuf_iterator.h:
+
+/usr/local/include/c++/4.9.2/x86_64-unknown-linux-gnu/bits/ctype_inline.h:
+
+/usr/local/include/c++/4.9.2/bits/locale_facets.tcc:
+
+/usr/local/include/c++/4.9.2/bits/basic_ios.tcc:
+
+/usr/local/include/c++/4.9.2/ostream:
+
+/usr/local/include/c++/4.9.2/bits/ostream.tcc:
+
+/usr/local/include/c++/4.9.2/bits/istream.tcc:
+
+/usr/local/include/c++/4.9.2/bits/sstream.tcc:
+
+/usr/local/include/c++/4.9.2/fstream:
+
+/usr/local/include/c++/4.9.2/bits/codecvt.h:
+
+/usr/local/include/c++/4.9.2/cstdio:
+
+/usr/include/libio.h:
+
+/usr/include/_G_config.h:
+
+/usr/include/bits/stdio_lim.h:
+
+/usr/include/bits/sys_errlist.h:
+
+/usr/include/bits/stdio.h:
+
+/usr/local/include/c++/4.9.2/x86_64-unknown-linux-gnu/bits/basic_file.h:
+
+/usr/local/include/c++/4.9.2/x86_64-unknown-linux-gnu/bits/c++io.h:
+
+/usr/local/include/c++/4.9.2/bits/fstream.tcc:
+
+/usr/local/include/c++/4.9.2/iostream:
+
+/usr/local/lib/gcc/x86_64-unknown-linux-gnu/4.9.2/include/float.h:
+
+/usr/include/cppunit/TestFixture.h:
+
+/usr/include/cppunit/extensions/TypeInfoHelper.h:
+
+/usr/local/include/c++/4.9.2/typeinfo:
+
+/usr/include/cppunit/TestSuite.h:
+
+/usr/include/cppunit/TestComposite.h:
+
+/usr/include/cppunit/portability/CppUnitVector.h:
+
+/usr/local/include/c++/4.9.2/vector:
+
+/usr/local/include/c++/4.9.2/bits/stl_vector.h:
+
+/usr/local/include/c++/4.9.2/bits/stl_bvector.h:
+
+/usr/local/include/c++/4.9.2/bits/vector.tcc:
+
+/usr/include/cppunit/extensions/AutoRegisterSuite.h:
+
+/usr/include/cppunit/extensions/TestSuiteFactory.h:
+
+/usr/include/cppunit/extensions/TestFactory.h:
+
+/usr/include/cppunit/extensions/TestFactoryRegistry.h:
+
+/usr/include/cppunit/portability/CppUnitSet.h:
+
+/usr/local/include/c++/4.9.2/functional:
+
+/usr/local/include/c++/4.9.2/set:
+
+/usr/local/include/c++/4.9.2/bits/stl_tree.h:
+
+/usr/local/include/c++/4.9.2/bits/stl_set.h:
+
+/usr/local/include/c++/4.9.2/bits/stl_multiset.h:
+
+/usr/include/cppunit/extensions/ExceptionTestCaseDecorator.h:
+
+/usr/include/cppunit/extensions/TestCaseDecorator.h:
+
+/usr/include/cppunit/extensions/TestFixtureFactory.h:
+
+/usr/include/cppunit/extensions/TestNamer.h:
+
+/usr/include/cppunit/extensions/TestSuiteBuilderContext.h:
+
+/usr/include/cppunit/portability/CppUnitMap.h:
+
+/usr/local/include/c++/4.9.2/map:
+
+/usr/local/include/c++/4.9.2/bits/stl_map.h:
+
+/usr/local/include/c++/4.9.2/bits/stl_multimap.h:
+
+/usr/local/include/c++/4.9.2/memory:
+
+/usr/local/include/c++/4.9.2/bits/stl_tempbuf.h:
+
+/usr/local/include/c++/4.9.2/bits/stl_raw_storage_iter.h:
+
+/usr/local/include/c++/4.9.2/backward/auto_ptr.h:
+
+../src/realignment.h:
+
+/usr/local/lib/gcc/x86_64-unknown-linux-gnu/4.9.2/include/stdint.h:
+
+/usr/include/stdint.h:
+
+../src/ssw_cpp.h:
+
+/usr/include/math.h:
+
+/usr/include/bits/huge_val.h:
+
+/usr/include/bits/huge_valf.h:
+
+/usr/include/bits/huge_vall.h:
+
+/usr/include/bits/inf.h:
+
+/usr/include/bits/nan.h:
+
+/usr/include/bits/mathdef.h:
+
+/usr/include/bits/mathcalls.h:
+
+/usr/include/bits/mathinline.h:

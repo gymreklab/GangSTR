@@ -89,6 +89,8 @@ GangSTRTests_SOURCES = \
 	stringops.h stringops.cpp \
 	read_pair.h read_pair.cpp \
 	realignment.h realignment.cpp \
+	ssw.h ssw.c \
+	ssw_cpp.h ssw_cpp.cpp \
 	tests/ReadClass_test.h tests/ReadClass_test.cpp \
 	tests/LiketestslihoodMaximizer_test.h tests/LikelihoodMaximizer_test.cpp \
 	tests/ReadExtractor_test.h tests/ReadExtractor_test.cpp \

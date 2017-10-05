@@ -31,8 +31,8 @@ class RealignmentTest: public CppUnit::TestFixture {
   CPPUNIT_TEST_SUITE(RealignmentTest);
   CPPUNIT_TEST(test_ExpansionAwareRealign);
   CPPUNIT_TEST(test_SmithWaterman);
-  CPPUNIT_TEST(test_CreateScoreMatrix);
-  CPPUNIT_TEST(test_CalcScore);
+  // CPPUNIT_TEST(test_CreateScoreMatrix);
+  // CPPUNIT_TEST(test_CalcScore);
   CPPUNIT_TEST(test_ClassifyRealignedRead);
   CPPUNIT_TEST_SUITE_END();
 
@@ -42,13 +42,14 @@ class RealignmentTest: public CppUnit::TestFixture {
  private:
   void test_ExpansionAwareRealign();
   void test_SmithWaterman();
-  void test_CreateScoreMatrix();
-  void test_CalcScore();
+  // void test_CreateScoreMatrix();
+  // void test_CalcScore();
   void test_ClassifyRealignedRead();
   std::string ConstructSeq(const std::string& prefix,
 			   const std::string& suffix,
 			   const std::string& motif,
 			   const int32_t& nCopy);
+  int32_t min_match;
 };
 
 #endif //  SRC_TESTS_REALIGNMENT_H_

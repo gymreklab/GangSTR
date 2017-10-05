@@ -41,11 +41,14 @@ void LikelihoodMaximizerTest::setUp() {
   options.enclosing_weight = 1.0;
   options.spanning_weight = 1.0;
   options.verbose = false;
+  options.min_match = 0;
+  options.read_len = 100;
   likelihood_maximizer_ = new LikelihoodMaximizer(options);
   likelihood_maximizer_->Reset();
   read_len = 100;
   motif_len = 3;
   ref_count = 10;
+  resampled = false;
 
 
   test_dir = getenv("GANGSTR_TEST_DIR");
@@ -117,7 +120,7 @@ void LikelihoodMaximizerTest::test_GetGenotypeNegLogLikelihood() {
 
   double gt_ll;
   if (!likelihood_maximizer_->GetGenotypeNegLogLikelihood(allele1, allele2,
-          read_len, motif_len, ref_count, &gt_ll)){
+          read_len, motif_len, ref_count, resampled, &gt_ll)){
     CPPUNIT_FAIL( "Running GetGenotypeNegLogLikelihood failed." );
   }
 
@@ -151,7 +154,7 @@ void LikelihoodMaximizerTest::test_OptimizeLikelihood() {
   std::string fastafile = test_dir + "/CACNA1A_5k_region.fa";
   RefGenome refgenome(fastafile);
 
-  ReadExtractor* read_extractor = new ReadExtractor();
+  ReadExtractor* read_extractor = new ReadExtractor(options);
 
   std::string bam_file = test_dir + "/54_nc_40.sorted.bam";
   std::vector<std::string> files(0);
@@ -176,16 +179,17 @@ void LikelihoodMaximizerTest::test_OptimizeLikelihood() {
   // Load all read data
   likelihood_maximizer_opt->Reset();
   if (!read_extractor->ExtractReads(bamreader, locus, options.regionsize,
-            likelihood_maximizer_opt)) {
+            options.min_match, likelihood_maximizer_opt)) {
     CPPUNIT_FAIL( "Running OptimizeLikelihood failed." );
   }
   // Maximize the likelihood
   int32_t allele1, allele2;
-  int32_t read_len = read_extractor->guessed_read_length;
+  int32_t read_len = options.read_len;
+
   int32_t ref_count = (int32_t)((locus.end-locus.start+1)/locus.motif.size());
   double min_negLike;
   if (!likelihood_maximizer_opt->OptimizeLikelihood(read_len, (int32_t)(locus.motif.size()),
-            ref_count,
+            ref_count, resampled,
             &allele1, &allele2, &min_negLike)) {
     CPPUNIT_FAIL( "Running OptimizeLikelihood failed." );
   }
