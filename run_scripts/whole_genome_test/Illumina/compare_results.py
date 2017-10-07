@@ -15,7 +15,9 @@ for sample in genotype:
 	ls = subprocess.Popen(['ls', bam_dir], stdout=subprocess.PIPE)
 	bam_name = subprocess.Popen(['grep', sample], stdin=ls.stdout, stdout=subprocess.PIPE)
 	for line in bam_name.stdout:
-		bam[sample] = line.strip().split('.cip')[0]
+		str_line = line.strip()
+		if str_line[-3:] == 'bam':
+			bam[sample] = str_line
 		# print sample, line.strip().split('.cip')[0]
 	# print sample, genotype[sample]
 

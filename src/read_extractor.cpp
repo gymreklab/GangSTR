@@ -56,6 +56,10 @@ bool ReadExtractor::ExtractReads(BamCramMultiReader* bamreader,
   /* Load data into likelihood maximizer */
   for (std::map<std::string, ReadPair>::const_iterator iter = read_pairs.begin();
        iter != read_pairs.end(); iter++) {
+
+    // if (iter->second.read_type != RC_DISCARD and iter->second.read_type != RC_UNKNOWN)
+    //   cout<<iter->first<<"\t"<<iter->second.read_type<<"\t"<<iter->second.data_value<<endl;
+    
     if (iter->second.read_type == RC_SPAN) {
       if (iter->second.data_value > options.dist_mean - 2 * options.dist_sdev and
             iter->second.data_value < options.dist_max){
@@ -122,7 +126,7 @@ bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
     return false;
   }
   // Get bam alignments from the relevant region
-  bamreader->SetRegion(locus.chrom, locus.start-regionsize, locus.end+regionsize);
+  bamreader->SetRegion(locus.chrom, locus.start-regionsize, locus.end+regionsize + 1000);
 
   // Keep track of which file we're processing
   int32_t file_index = 0;
@@ -139,11 +143,13 @@ bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
     if (debug) {
       std::cerr << "Processing " << alignment.Name() << std::endl;
     }
+
     // Check if we should skip this read
     if (alignment.IsSupplementary()) {
       continue;
     }
-    
+
+
     // Check if we've moved to a different file
     if (prev_file.compare(alignment.Filename()) != 0) {
       prev_file = alignment.Filename();
@@ -430,7 +436,6 @@ bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
               int32_t* score_value,
               ReadType* read_type,
               SingleReadType* srt) {
-
   *srt = SR_UNKNOWN;
   /* If read in vicinity but not close to STR, save for later */
   if (alignment.RefID() == chrom_ref_id &&
@@ -472,6 +477,7 @@ bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
              (int32_t)locus.pre_flank.size(), min_match, locus.pre_flank, locus.post_flank, srt)) {
     return false;
   }
+
   // Set as UNKNOWN if doesn't pass the score threshold.
   if (score < options.min_score / 100.0 * double(SSW_MATCH_SCORE * options.read_len)){
     *data_value = 0;

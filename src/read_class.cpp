@@ -122,6 +122,7 @@ void ReadClass::Reset() {
   read_class_data_.clear();
 }
 
+
 std::size_t ReadClass::GetDataSize() {
   return read_class_data_.size();
 }

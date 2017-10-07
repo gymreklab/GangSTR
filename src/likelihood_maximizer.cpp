@@ -320,7 +320,6 @@ bool LikelihoodMaximizer::OptimizeLikelihood(const int32_t& read_len, const int3
     *allele1 = *allele2;
     *allele2 = temp;
   }
-
   // cerr<<endl<<*allele1<<"\t"<<*allele2<<"\t"<<*min_negLike<<endl;
   return true;    // TODO add false
 }
@@ -336,12 +335,14 @@ bool LikelihoodMaximizer::findBestAlleleListTuple(std::vector<int32_t> allele_li
     for (std::vector<int32_t>::iterator a1_it = allele_list.begin();
             a1_it != allele_list.end();
             a1_it++){
-      // cerr<<*a1_it<<endl;
+      // if (!resampled)
+      //   cerr<<*a1_it<<endl;
       for (std::vector<int32_t>::iterator a2_it = allele_list.begin();
             a2_it != allele_list.end();
             a2_it++){
         GetGenotypeNegLogLikelihood(*a1_it, *a2_it, read_len, motif_len, ref_count, resampled, &gt_ll);
-        // cerr<<endl<<*a1_it<<"\t"<<*a2_it<<"\t"<<gt_ll<<endl;
+        // if (!resampled)
+        //   cerr<<endl<<*a1_it<<"\t"<<*a2_it<<"\t"<<gt_ll<<endl;
           if (gt_ll < *min_negLike){
             *min_negLike = gt_ll;
             best_a1 = *a1_it;

@@ -143,10 +143,14 @@ void LikelihoodMaximizerTest::test_GetGenotypeNegLogLikelihood() {
 
 void LikelihoodMaximizerTest::test_OptimizeLikelihood() {
   options.dist_mean = 500;
+  options.dist_sdev = 50;
   options.flanklen = 3000;
-  options.frr_weight = 0.3;
+  options.frr_weight = 0.5;
   options.enclosing_weight = 1.0;
   options.spanning_weight = 1.0;
+  options.flanking_weight = 1.0;
+  options.read_len = 100;
+  options.dist_max = 1000;
 
   LikelihoodMaximizer* likelihood_maximizer_opt = new LikelihoodMaximizer(options);
   likelihood_maximizer_opt->Reset();
@@ -193,9 +197,9 @@ void LikelihoodMaximizerTest::test_OptimizeLikelihood() {
             &allele1, &allele2, &min_negLike)) {
     CPPUNIT_FAIL( "Running OptimizeLikelihood failed." );
   }
-  CPPUNIT_ASSERT_EQUAL(allele1, 42);
-  CPPUNIT_ASSERT_EQUAL(allele2, 65);
-  CPPUNIT_ASSERT_EQUAL(roundf(min_negLike * 100)/100, roundf(1324.73*100)/100);
+  CPPUNIT_ASSERT_EQUAL(allele1, 31);
+  CPPUNIT_ASSERT_EQUAL(allele2, 60);
+  CPPUNIT_ASSERT_EQUAL(roundf(min_negLike * 100)/100, roundf(1725.53*100)/100); 
 }
 
 

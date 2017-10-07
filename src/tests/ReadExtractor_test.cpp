@@ -37,14 +37,19 @@ void ReadExtractorTest::setUp() {
   locus.chrom = "3";
   locus.start = 63898362;
   locus.end = 63898391;
-  locus.pre_flank = "TAGGAGCGGAAAGAATGTCGGAGCGGGCCGCGGATGACGTCAGGGGGGAGCCGCGCCGCGCGGCGGCGGCGGCGGGCGGAGCAGCGGCCGCGGCCGCCCGG";
-  locus.post_flank = "CCGCCGCCTCCGCAGCCCCAGCGGCAGCAGCACCCGCCACCGCCGCCACGGCGCACACGGCCGGAGGACGGCGGGCCCGGCGCCGCCTCCACCTCGGCCGC";
-  locus.motif = "CAG";
+  locus.pre_flank = "taggagcggaaagaatgtcggagcgggccgcggatgacgtcaggggggagccgcgccgcgcggcggcggcggcgggcggagcagcggccgcggccgcccgg";
+  locus.post_flank = "ccgccgcctccgcagccccagcggcagcagcacccgccaccgccgccacggcgcacacggccggaggacggcgggcccggcgccgcctccacctcggccgc";
+  locus.motif = "cag";
   locus.period = 3;
   std::string answers_file = test_dir + "/test_pair_answers.tab";
   LoadAnswers(answers_file, &read_type_answers, &data_answers);
   regionsize = 5000;
   min_match = 0;
+  options.dist_mean = 500;
+  options.dist_sdev = 50;
+  options.flanklen = 3000;
+  options.read_len = 100;
+  options.dist_max = 1000;
   read_extractor_ = new ReadExtractor(options);
 }
 
@@ -61,8 +66,9 @@ void ReadExtractorTest::test_ExtractReads() {
   }
   // Check each class has at least as many as the python code found
   CPPUNIT_ASSERT(likmax->GetEnclosingDataSize()>=10);
-  CPPUNIT_ASSERT(likmax->GetSpanningDataSize()>=9);
-  CPPUNIT_ASSERT(likmax->GetFRRDataSize()>=10);
+  CPPUNIT_ASSERT(likmax->GetSpanningDataSize()>=40);
+  CPPUNIT_ASSERT(likmax->GetFRRDataSize()>=30);
+  CPPUNIT_ASSERT(likmax->GetFlankingDataSize()>=55);
 }
 
 void ReadExtractorTest::LoadAnswers(const std::string& answers_file,
@@ -76,9 +82,9 @@ void ReadExtractorTest::LoadAnswers(const std::string& answers_file,
     }
     std::vector<std::string> items;
     split_by_delim(line, '\t', items);
-    std::string read_name = "1_" + items[0];
-    ReadType rt = (ReadType)atoi(items[1].c_str());
-    int32_t data = (int32_t)atoi(items[2].c_str());
+    std::string read_name = "1_" + items[3];
+    ReadType rt = (ReadType)atoi(items[4].c_str());
+    int32_t data = (int32_t)atoi(items[5].c_str());
     read_type_answers->insert(std::pair<std::string, ReadType>(read_name, rt));
     data_answers->insert(std::pair<std::string, int32_t>(read_name, data));
   }

@@ -44,16 +44,26 @@ void GenotyperTest::tearDown() {}
 void GenotyperTest::test_SetFlanks() {
   Options options;
   options.realignment_flanklen = 99;
+  options.dist_mean = 500;
+  options.dist_sdev = 50;
+  options.flanklen = 3000;
+  options.frr_weight = 0.5;
+  options.enclosing_weight = 1.0;
+  options.spanning_weight = 1.0;
+  options.flanking_weight = 1.0;
+  options.read_len = 100;
+  options.dist_max = 1000;
+
   locus.chrom = "3";
   locus.start = 201;
   locus.end = 230;
-  locus.motif = "CAG";
+  locus.motif = "cag";
   locus.period = 3;
   std::string fastafile = test_dir + "/test.fa";
   RefGenome refgenome(fastafile);
   Genotyper genotyper(refgenome, options);
-  std::string pre_flank = "GGAGCGGAAAGAATGTCGGAGCGGGCCGCGGATGACGTCAGGGGGGAGCCGCGCCGCGCGGCGGCGGCGGCGGGCGGAGCAGCGGCCGCGGCCGCCCGG";
-  std::string post_flank = "CCGCCGCCTCCGCAGCCCCAGCGGCAGCAGCACCCGCCACCGCCGCCACGGCGCACACGGCCGGAGGACGGCGGGCCCGGCGCCGCCTCCACCTCGGCC";
+  std::string pre_flank = "ggagcggaaagaatgtcggagcgggccgcggatgacgtcaggggggagccgcgccgcgcggcggcggcggcgggcggagcagcggccgcggccgcccgg";
+  std::string post_flank = "ccgccgcctccgcagccccagcggcagcagcacccgccaccgccgccacggcgcacacggccggaggacggcgggcccggcgccgcctccacctcggcc";
   if (!genotyper.SetFlanks(&locus)) {
     CPPUNIT_FAIL("SetFlanks returned false unexpectedly");
   }
@@ -64,6 +74,15 @@ void GenotyperTest::test_SetFlanks() {
 void GenotyperTest::test_ProcessLocus() {
   Options options;
   options.realignment_flanklen = 99;
+  options.dist_mean = 500;
+  options.dist_sdev = 50;
+  options.flanklen = 3000;
+  options.frr_weight = 0.5;
+  options.enclosing_weight = 1.0;
+  options.spanning_weight = 1.0;
+  options.flanking_weight = 1.0;
+  options.read_len = 100;
+  options.dist_max = 1000;
   std::string fastafile = test_dir + "/CACNA1A_5k_region.fa";
   // std::string fastafile = "/storage/reslsources/dbase/human/hs37d5/hs37d5.fa";
   RefGenome refgenome(fastafile);

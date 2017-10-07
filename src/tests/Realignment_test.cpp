@@ -61,7 +61,7 @@ void RealignmentTest::test_ExpansionAwareRealign() {
     }
     CPPUNIT_ASSERT_EQUAL(i, nCopy);
     CPPUNIT_ASSERT_EQUAL(0, pos);
-    CPPUNIT_ASSERT_EQUAL((int32_t)seq.size()*MATCH_SCORE, score);
+    CPPUNIT_ASSERT_EQUAL((int32_t)seq.size()*SSW_MATCH_SCORE, score);
   }
   // Case 2 - preflank
   for (int32_t i=0; i<50; i++) {
@@ -73,7 +73,7 @@ void RealignmentTest::test_ExpansionAwareRealign() {
     }
     CPPUNIT_ASSERT_EQUAL(i, nCopy);
     CPPUNIT_ASSERT_EQUAL(0, pos);
-    CPPUNIT_ASSERT_EQUAL((int32_t)seq.size()*MATCH_SCORE, score);
+    CPPUNIT_ASSERT_EQUAL((int32_t)seq.size()*SSW_MATCH_SCORE, score);
   }
   // Case 3 - postflank
   for (int32_t i=0; i<50; i++) {
@@ -115,7 +115,7 @@ void RealignmentTest::test_SmithWaterman() {
   if (!striped_smith_waterman(seq1, seq2, qual, &pos, &pos_temp, &score)) {
     CPPUNIT_FAIL("striped_smith_waterman returned false unexpectedly");
   }
-  CPPUNIT_ASSERT_EQUAL(MATCH_SCORE*4, score);
+  CPPUNIT_ASSERT_EQUAL(SSW_MATCH_SCORE*4, score);
   CPPUNIT_ASSERT_EQUAL(0, pos);
   // Case 2
   seq1 = "ATCACGT";
@@ -124,7 +124,7 @@ void RealignmentTest::test_SmithWaterman() {
   if (!striped_smith_waterman(seq1, seq2, qual, &pos, &pos_temp, &score)) {
     CPPUNIT_FAIL("striped_smith_waterman returned false unexpectedly");
   }
-  CPPUNIT_ASSERT_EQUAL(MATCH_SCORE*6+MISMATCH_SCORE, score);
+  CPPUNIT_ASSERT_EQUAL(SSW_MATCH_SCORE*6-SSW_MISMATCH_SCORE, score);
   CPPUNIT_ASSERT_EQUAL(0, pos);
   // Case 3
   seq1 = "ATCACGT";
@@ -132,7 +132,7 @@ void RealignmentTest::test_SmithWaterman() {
   if (!striped_smith_waterman(seq1, seq2, qual, &pos, &pos_temp, &score)) {
     CPPUNIT_FAIL("striped_smith_waterman returned false unexpectedly");
   }
-  CPPUNIT_ASSERT_EQUAL(MATCH_SCORE*5, score);
+  CPPUNIT_ASSERT_EQUAL(SSW_MATCH_SCORE*5, score);
   CPPUNIT_ASSERT_EQUAL(2, pos);
 }
 
