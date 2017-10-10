@@ -52,11 +52,13 @@ class ReadExtractorTest: public CppUnit::TestFixture {
 		   std::map<std::string, ReadType>* read_type_answers,
 		   std::map<std::string, int32_t>* data_answers);
   std::string test_dir;
-  ReadExtractor read_extractor;
+  ReadExtractor* read_extractor_;
   Locus locus;
   std::map<std::string, ReadType> read_type_answers;
   std::map<std::string, int32_t> data_answers;
   int32_t regionsize;
+  int32_t min_match;
+  Options options;
 };
 
 #endif //  SRC_TESTS_READEXTRACTOR_H_

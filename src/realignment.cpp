@@ -66,7 +66,6 @@ bool expansion_aware_realign(const std::string& seq,
            const std::string& post_flank,
            const std::string& motif,
            int32_t* nCopy, int32_t* start_pos, int32_t* end_pos, int32_t* score) {
-
   int32_t read_len = (int32_t)seq.size();
   int32_t period = (int32_t)motif.size();
   int32_t min_nCopy = 0;
@@ -89,6 +88,7 @@ bool expansion_aware_realign(const std::string& seq,
   //   cerr<<pre_flank<<endl;
   //   cerr<<post_flank<<endl;
   // }
+
   for (current_nCopy=min_nCopy; current_nCopy<(int32_t)(read_len/period)+2; current_nCopy++) {
     std::stringstream var_realign_ss;
     var_realign_ss << pre_flank;
@@ -129,8 +129,8 @@ bool expansion_aware_realign(const std::string& seq,
   // cout << max_score << "\t" << second_best_score<<endl;
   // cout << max_nCopy << "\t" << second_best_nCopy<<endl<<endl;
 
-  // if (seq == "GCCGCCGCAGCAGCAGCAGCAGCCGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAG"){
-  //   cerr<<seq<<endl;
+  // if (seq == "GGCGGGCGGAGCAGCGGCCGCGGCCGCCCGGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCCGCCGCCT"){
+  //   cerr<<"In realignment!"<<endl;
   // }
   *nCopy = max_nCopy;
   *score = max_score;

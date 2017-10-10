@@ -50,13 +50,13 @@ class LikelihoodMaximizerTest: public CppUnit::TestFixture {
   void test_GetGenotypeNegLogLikelihood();
   void test_OptimizeLikelihood();
 
-  int read_len, motif_len, ref_count;
  private:
   LikelihoodMaximizer* likelihood_maximizer_;
   Locus locus;
   std::string test_dir;
   Options options;
-
+  int read_len, motif_len, ref_count;
+  bool resampled;
 };
 
 #endif //  SRC_TESTS_LIKELIHOODMAXIMIZER_H_
