@@ -300,9 +300,8 @@ int main(int argc, char* argv[]) {
     }
   }
   if (options.dist_max == -1){
-    options.dist_max = options.dist_mean + 2 * options.dist_sdev;
+    options.dist_max = options.dist_mean * 4;
   }
-
 
   // Process each region
   region_reader.Reset();
