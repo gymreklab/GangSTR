@@ -43,14 +43,14 @@ with open (bam_file_list, 'r') as bam_list:
 									"--ref", ref_genome, \
 									"--regions", bed_dir, \
 									"--out", "test", \
-									"--frrweight", str(0.5), \
+									"--frrweight", str(0.35), \
 									"--enclweight", "1.0", \
 									"--spanweight", "1.0", \
 									"--flankweight", str(1.0),\
 									"--ploidy", str(2),\
 									"--numbstrap", str(100),\
-									"--minmatch", str(4),\
-									"--minscore", str(80)], stdout=subprocess.PIPE)
+									"--minmatch", str(5),\
+									"--minscore", str(75)], stdout=subprocess.PIPE)
 			cmd.wait()
 			for line in cmd.stdout:
 				result = line.rstrip()

@@ -61,8 +61,7 @@ bool ReadExtractor::ExtractReads(BamCramMultiReader* bamreader,
     //   cout<<iter->first<<"\t"<<iter->second.read_type<<"\t"<<iter->second.data_value<<endl;
     
     if (iter->second.read_type == RC_SPAN) {
-      if (iter->second.data_value > options.dist_mean - 2 * options.dist_sdev and
-            iter->second.data_value < options.dist_max){
+      if (iter->second.data_value < options.dist_max){
         if (options.output_readinfo) {
   	readfile_ << locus.chrom << "\t" << locus.start << "\t" << locus.end << "\t"
   		  << iter->first << "\t" << "SPAN" << "\t" << iter->second.data_value << "\t" << iter->second.found_pair << std::endl;
