@@ -1,22 +1,11 @@
-# More Urgent
-* Add unit test for new functions.
-
-
-# Less urgent
+# New features
 * Ability to read from S3 files
 * Ability to have per-locus stutter model
 * Multi-sample calling
-* multithreading by locus
-* to save memory, don't need to store read1 and read2 in ReadPair
+* multithreading by locus (or use built in multithreading of SSW/nlopt libraries)
 
 # Make compiling easy
 * Automatically check for necessary libraries (cppunit, gsl, nlopt)
 * Make sure lib/htslib gets added to LD_LIBRARY_PATH somehow
-
-
-# Done
-* require minimum matching at read ends, at least for enclosing reads
-* command line options for setting insert size, stutter, etc.
-* option to automatically detect insert size parameters
-* VCF output format
-* Confidence intervals and/or quality scores
+* Shared library issues (error while loading shared libraries: libhts.so.2: cannot open shared object file)
+* Fail gracefully when files (e.g. reference loci) not formatted correctly
