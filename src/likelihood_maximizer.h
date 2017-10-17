@@ -66,6 +66,15 @@ class LikelihoodMaximizer {
   std::size_t GetFlankingDataSize();
   std::size_t GetReadPoolSize();
 
+  // Plot likelihood
+  void PlotLikelihood(int32_t fix_allele,
+                          int32_t start,
+                          int32_t end,
+                          int32_t step,
+                          int32_t read_len,
+                          int32_t motif_len,
+                          int32_t ref_count);
+  
   // Main likelihood function
   bool GetGenotypeNegLogLikelihood(const int32_t& allele1, const int32_t& allele2,
 				   const int32_t& read_len, const int32_t& motif_len,
@@ -118,6 +127,7 @@ class LikelihoodMaximizer {
 
   // Write bootstrap samples to file
   ofstream bsfile_;
+  ofstream plotfile_;
   // Random number generator
   gsl_rng * r;
 };

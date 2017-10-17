@@ -47,7 +47,7 @@ bool ReadExtractor::ExtractReads(BamCramMultiReader* bamreader,
   if (!ProcessReadPairs(bamreader, locus, regionsize, min_match, &read_pairs)) {
     return false;
   }
-  int32_t frr = 0, span = 0, encl = 0;
+  int32_t frr = 0, span = 0, encl = 0, flank = 0;
   if (read_pairs.size() == 0){
     // TODO print error "Not enough extracted reads"
     PrintMessageDieOnError("\tNot enough reads extracted. Aborting..", M_PROGRESS);
@@ -76,6 +76,7 @@ bool ReadExtractor::ExtractReads(BamCramMultiReader* bamreader,
 		    << iter->first << "\t" << "SPFLNK" << "\t" << iter->second.max_nCopy - 1 << "\t" << iter->second.found_pair << std::endl;
 	}
         likelihood_maximizer->AddFlankingData(iter->second.max_nCopy - 1);  // -1 because flanking is always picked up +1
+        flank++;
       }
     } else if (iter->second.read_type == RC_ENCL) {
       if (options.output_readinfo) {
@@ -97,6 +98,7 @@ bool ReadExtractor::ExtractReads(BamCramMultiReader* bamreader,
 		  << iter->first << "\t" << "BOUND" << "\t" << iter->second.data_value - 1 << "\t" << iter->second.found_pair << std::endl;
       }
       likelihood_maximizer->AddFlankingData(iter->second.data_value - 1); // -1 because flanking is always picked up +1
+      flank++;
     } else {
       continue;
     }
@@ -110,6 +112,8 @@ bool ReadExtractor::ExtractReads(BamCramMultiReader* bamreader,
   // std::cerr << "~~Enclose:\t" << encl << endl;
   // std::cerr << "~~Span:\t\t" << span << endl;
   // std::cerr << "~~FRR:\t\t" << frr << endl;
+  // std::cerr << "~~Flank:\t" << flank << endl;
+
   return true;
 }
 
