@@ -67,11 +67,12 @@ do
 	${maxperiod} \
 	-d -h -l 1;     \
         cat ${tmpdir}/chr${chrom}.fa.2.7.7.80.10.24.100.dat | \
-	awk -F\" \" '(NF==15)' | \
-	awk -v \"chrom=$chrom\" -F\" \" '{print chrom \"\t\" \$1 \"\t\" \$2 \"\t\" \$3 \"\t\" \$14 \"\t\" \$15}' > \
+	awk -F\' \' \'(NF==15)\' | \
+	awk -v \"chrom=$chrom\" -F\' \' \'{print chrom \"\t\" \$1 \"\t\" \$2 \"\t\" \$3 \"\t\" \$14 \"\t\" \$15}\' > \
 	${tmpdir}/chr${chrom}.trf.bed"
 done | xargs -P${NUMPROC} -I% -n 1 sh -c "%"
-
+exit 1
+# TODO implement here any other filters we would like to have on the reference
 for chrom in $(seq 1 22)
 do
     cat ${tmpdir}/chr${chrom}.trf.bed | \
