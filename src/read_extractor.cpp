@@ -172,6 +172,7 @@ bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
             << " " << rp_iter->second.read_type
             << std::endl;
       }
+
       rp_iter->second.found_pair = true;
       rp_iter->second.read2 = alignment;
       // We will check the mate in any case (not just UNKONWN) 
@@ -237,7 +238,6 @@ bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
             rp_iter->second.max_nCopy = nCopy_value;
         }
 
-        // cout<<"YOLO"<<rp_iter->first<<"\t"<<rp_iter->second.max_nCopy<<endl;
       }
 
       continue; // move on to next read
@@ -247,6 +247,7 @@ bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
     if (debug) {
       std::cerr << "Checking for discard" << std::endl;
     }
+    
     if (FindDiscardedRead(alignment, chrom_ref_id, locus)) {
       ReadPair read_pair;
       read_pair.read_type = RC_DISCARD;
@@ -254,6 +255,8 @@ bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
       read_pairs->insert(std::pair<std::string, ReadPair>(aln_key, read_pair));
       continue;
     }
+
+
 
     /* Check if read is spanning */
     if (debug) {
@@ -392,13 +395,15 @@ bool ReadExtractor::FindDiscardedRead(BamAlignment alignment,
               const Locus& locus) {
   // Get read length
   int32_t read_length = options.read_len;
-
+  
   // 5.2_filter_spanning_only_core.py 
   bool discard1 = alignment.RefID() == chrom_ref_id && alignment.Position() <= locus.start-read_length &&
     alignment.MateRefID() == chrom_ref_id && alignment.MatePosition() <= locus.start-read_length;
   bool discard2 = alignment.RefID() == chrom_ref_id && alignment.Position() >= locus.end &&
     alignment.MateRefID() == chrom_ref_id && alignment.MatePosition() >= locus.end;
-  return discard1 || discard2;
+  // Keep reads that both mates mapped to the same place (sign of unmapped mate)
+  bool keep = alignment.RefID() == alignment.MateRefID() && alignment.Position() == alignment.MatePosition();
+  return !keep && (discard1 || discard2);
 }
 
 /*
@@ -440,13 +445,17 @@ bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
               ReadType* read_type,
               SingleReadType* srt) {
   *srt = SR_UNKNOWN;
-  /* If read in vicinity but not close to STR, save for later */
-  if (alignment.RefID() == chrom_ref_id &&
+
+
+  /* If mapped read in vicinity but not close to STR, save for later */
+  if (alignment.IsMapped() && alignment.IsMateMapped() &&
+      alignment.RefID() == chrom_ref_id &&
       (alignment.Position() > locus.end || alignment.GetEndPosition() < locus.start)) {
     *read_type = RC_UNKNOWN;
     *score_value = 0;
     return true;
   }
+  
   int32_t start_pos, start_pos_rev;
   int32_t end_pos, end_pos_rev;
   int32_t score, score_rev;
@@ -467,6 +476,7 @@ bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
     return false;
   }
 
+
   if (score_rev > score) {
     nCopy = nCopy_rev;
     start_pos = start_pos_rev;
@@ -476,11 +486,20 @@ bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
   }
   *nCopy_value = nCopy;
   *score_value = score;
+  
   if (!classify_realigned_read(seq, locus.motif, start_pos, end_pos, nCopy, score, 
-             (int32_t)locus.pre_flank.size(), min_match, locus.pre_flank, locus.post_flank, srt)) {
+             (int32_t)locus.pre_flank.size(), min_match, alignment.IsMapped(), locus.pre_flank, locus.post_flank, srt)) {
     return false;
   }
-
+  // For Unmapped potential IRRs, check if mate is mapped in vicinity of STR locus
+  if (*srt == SR_UM_POT_IRR){
+    if (alignment.IsMateMapped() &&  alignment.MatePosition() < locus.end + options.dist_mean && alignment.MatePosition() > locus.start - options.dist_mean){
+      // cerr << "\nFRR\n"<< alignment.MatePosition() << endl;
+      *srt = SR_IRR;
+      // cerr << "Seq:   " << alignment.QueryBases() << endl;
+      // cerr << "BaseQ: " << alignment.Qualities() << endl;
+    }
+  }
   // Set as UNKNOWN if doesn't pass the score threshold.
   if (score < options.min_score / 100.0 * double(SSW_MATCH_SCORE * options.read_len)){
     *data_value = 0;

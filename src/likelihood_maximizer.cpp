@@ -336,10 +336,17 @@ bool LikelihoodMaximizer::OptimizeLikelihood(const int32_t& read_len, const int3
     *allele1 = *allele2;
     *allele2 = temp;
   }
+  // if (!resampled){
+  //   double gt_ll;
+  //   for (int jj = 20; jj < 100; jj += 10){
+  //     GetGenotypeNegLogLikelihood(*allele1, jj, read_len, motif_len, ref_count, resampled, &gt_ll);
+  //     cerr<<*allele1<<","<<jj<<"\t"<<gt_ll<<endl;
+  //   }
+  // }
   // cerr<<endl<<*allele1<<"\t"<<*allele2<<"\t"<<*min_negLike<<endl;
-  if (!resampled){
-    PlotLikelihood(30, 10, 100, 5, read_len, motif_len, ref_count);
-  }
+  // if (!resampled){
+  //   PlotLikelihood(30, 10, 100, 5, read_len, motif_len, ref_count);
+  // }
   return true;    // TODO add false
 }
 

@@ -101,6 +101,7 @@ bool ReadClass::GetAlleleLogLikelihood(const int32_t& allele,
     return false;
   }
   *allele_ll = log_class_prob + log_read_prob;
+  // *allele_ll = log_read_prob + log(allele);
   return true;
 }
 
