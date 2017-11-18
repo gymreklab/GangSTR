@@ -486,23 +486,19 @@ bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
   }
   *nCopy_value = nCopy;
   *score_value = score;
-  if (seq == "gcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcgggggcgggggcgccggcggccggcggcgcgggggccgggggcggggggggggggggggggggg"){
-    cerr << "### Before!\t"<<*srt<<endl;
-  }
+
   if (!classify_realigned_read(seq, locus.motif, start_pos, end_pos, nCopy, score, 
              (int32_t)locus.pre_flank.size(), min_match, alignment.IsMapped(), locus.pre_flank, locus.post_flank, srt)) {
     return false;
   }
-  if (seq == "gcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcgggggcgggggcgccggcggccggcggcgcgggggccgggggcggggggggggggggggggggg"){
-    cerr << "### YOLO!\t"<<*srt<<endl;
-  }
+
   // For Unmapped potential IRRs, check if mate is mapped in vicinity of STR locus
   if (*srt == SR_UM_POT_IRR){
     if (alignment.IsMateMapped() &&  alignment.MatePosition() < locus.end + options.dist_mean && alignment.MatePosition() > locus.start - options.dist_mean){
       // cerr << "\nFRR\n"<< alignment.MatePosition() << endl;
       *srt = SR_IRR;
-      cerr << "Seq:   " << alignment.QueryBases() << endl;
-      cerr<< "Score: "<< score << "\tnCopy: " << nCopy << endl;
+      // cerr << "Seq:   " << alignment.QueryBases() << endl;
+      // cerr<< "Score: "<< score << "\tnCopy: " << nCopy << endl;
       // cerr << "BaseQ: " << alignment.Qualities() << endl;
     }
   }
