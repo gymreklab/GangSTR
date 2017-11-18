@@ -357,20 +357,9 @@ bool classify_realigned_read(const std::string& seq,
   }
 
   // Set threshold for match
-  int32_t score_threshold = (int32_t)(MATCH_PERC_THRESHOLD*seq.size()*SSW_MATCH_SCORE);
-  if (!isMapped){
-    // if (seq == "gcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcgggggcgggggcgccggcggccggcggcgcgggggccgggggcggggggggggggggggggggg"){
-    //   cerr<<"\n\nIn the ELSE!"<<endl;
-    //   cerr<<start_in_str<<endl<<end_in_str<<endl<<score_threshold<<endl;
-    //   cerr<<"In the ELSE!\n\n"<<endl;
-    // }
-    if (nCopy > 0.8 * seq.size() / motif.size() && score > 0.7 * score_threshold){
-      // cerr<<"nCopy: " << nCopy<<"\tscore: "<<score<<"/"<<seq.size()*SSW_MATCH_SCORE<<endl;
-      *single_read_class = SR_UM_POT_IRR;
-    }
-    return true;
-  }
-  else if (score < score_threshold || nCopy == 0) {
+  int32_t score_threshold = (int32_t)(MATCH_PERC_THRESHOLD*seq.size()*SSW_MATCH_SCORE);  
+
+  if (isMapped && (score < score_threshold || nCopy == 0)) {
     *single_read_class = SR_UNKNOWN;
     return true;
   } else if (start_in_str && end_in_str) {
@@ -382,17 +371,10 @@ bool classify_realigned_read(const std::string& seq,
   } else if (!start_in_str && end_in_str) {
     *single_read_class = SR_PREFLANK;
     return true;
-  } else if (start_pos < start_str && end_pos > end_str) {
+  } else if (start_pos < start_str && end_pos > end_str && score > score_threshold &&
+    (start_str - start_pos <= seq.size() - (end_str - start_str))) {
     *single_read_class = SR_ENCLOSING;
 
-    if (start_str - start_pos <= seq.size() - (end_str - start_str)){
-      // cerr<<std::string(start_str - start_pos, ' ')<<seq.substr(start_str - start_pos, end_str - start_str)<<endl;
-    }
-    else{
-      // cerr<<"REPEAT OUT OF RANGE"<<endl;
-      *single_read_class = SR_UNKNOWN;
-      return true;
-    }
     // Pre flank check
     flank_match = true;
     j = start_str - start_pos >= min_match ? start_str - min_match : start_pos;
@@ -459,6 +441,19 @@ bool classify_realigned_read(const std::string& seq,
     }
     return true;
   } else {
-    return false;
+    // if (seq == "gcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcgggggcgggggcgccggcggccggcggcgcgggggccgggggcggggggggggggggggggggg"){
+    //   cerr<<"\n\nIn the ELSE!"<<endl;
+    //   cerr<<start_in_str<<endl<<end_in_str<<endl<<score_threshold<<endl;
+    //   cerr<<"In the ELSE!\n\n"<<endl;
+    // }
+
+    if (!isMapped){ // If isMapped is false
+      if (nCopy > 0.7 * seq.size() / motif.size() && score > 0.7 * score_threshold){
+        // cerr<<"nCopy: " << nCopy<<"\tscore: "<<score<<"/"<<seq.size()*SSW_MATCH_SCORE<<endl;
+        *single_read_class = SR_UM_POT_IRR;
+      }
+      return true;
+    }
   }
+  return false;
 }
