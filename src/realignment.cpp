@@ -466,7 +466,11 @@ bool classify_realigned_read(const std::string& seq,
        // }
     }
     // If either flanks didn't match reference
-    if (!flank_match){
+    if (flank_match){
+      *single_read_class = SR_ENCLOSING;
+      return true;
+    }
+    else {
       failed_flank_test = true;
       *single_read_class = SR_UNKNOWN;
     }
