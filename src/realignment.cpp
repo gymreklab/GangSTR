@@ -129,9 +129,6 @@ bool expansion_aware_realign(const std::string& seq,
   // cout << max_score << "\t" << second_best_score<<endl;
   // cout << max_nCopy << "\t" << second_best_nCopy<<endl<<endl;
 
-  // if (seq == "GGCGGGCGGAGCAGCGGCCGCGGCCGCCCGGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCCGCCGCCT"){
-  //   cerr<<"In realignment!"<<endl;
-  // }
   *nCopy = max_nCopy;
   *score = max_score;
   *start_pos = max_start_pos;
@@ -337,13 +334,14 @@ bool classify_realigned_read(const std::string& seq,
            const int32_t& score,
            const int32_t& prefix_length,
            const int32_t& min_match,
+           const bool& isMapped,
            const std::string& pre_flank,
            const std::string& post_flank,
            SingleReadType* single_read_class) {
 
   int32_t i,j, limit;
-  bool flank_match;
-
+  bool flank_match, failed_flank_test = false;
+  *single_read_class = SR_UNKNOWN;
   // Get coords of the STR
   int32_t start_str = prefix_length;
   int32_t end_str = prefix_length + nCopy*(int32_t)motif.size();
@@ -359,37 +357,58 @@ bool classify_realigned_read(const std::string& seq,
   }
 
   // Set threshold for match
-  int32_t score_threshold = (int32_t)(MATCH_PERC_THRESHOLD*seq.size()*MATCH_SCORE);
+  int32_t score_threshold = (int32_t)(MATCH_PERC_THRESHOLD*seq.size()*SSW_MATCH_SCORE);  
 
-  if (score < score_threshold || nCopy == 0) {
+  if (isMapped && (score < score_threshold || nCopy == 0)) {
     *single_read_class = SR_UNKNOWN;
     return true;
   } else if (start_in_str && end_in_str) {
     *single_read_class = SR_IRR;
     return true;
   } else if (start_in_str && !end_in_str) {
-    *single_read_class = SR_POSTFLANK;
-    return true;
-  } else if (!start_in_str && end_in_str) {
-    *single_read_class = SR_PREFLANK;
-    return true;
-  } else if (start_pos < start_str && end_pos > end_str) {
-    *single_read_class = SR_ENCLOSING;
-
-    // cerr<<endl;
-    // cerr<<"start_str:\t"<<start_str<<endl;
-    // cerr<<"end_str:\t"<<end_str<<endl;
-    // cerr<<"start_pos:\t"<<start_pos<<endl;
-    // cerr<<"end_pos:\t"<<end_pos<<endl;
-    // cerr<<seq<<"\t"<<nCopy<<"\t"<<max(start_str - start_pos - min_match, 0)<<endl;
-    if (start_str - start_pos <= seq.size() - (end_str - start_str)){
-      // cerr<<std::string(start_str - start_pos, ' ')<<seq.substr(start_str - start_pos, end_str - start_str)<<endl;
+    // Post flank check
+    flank_match = true;
+    j = 0;
+    limit = (end_pos - end_str >= min_match ? end_str - start_pos + min_match - 1 : end_pos - start_pos - 1);
+    for (i = min(end_str - start_pos, (int32_t)seq.size() - 1) ; 
+       i <= min(limit, (int32_t)seq.size() - 1);
+       i++){
+     if (seq.at(i)!=post_flank.at(j)){
+       flank_match = false;
+     }
+     j++;   
     }
-    else{
-      // cerr<<"REPEAT OUT OF RANGE"<<endl;
-      *single_read_class = SR_UNKNOWN;
+    if (flank_match){
+      *single_read_class = SR_POSTFLANK;
       return true;
     }
+    else{
+      failed_flank_test = true;
+      *single_read_class = SR_UNKNOWN;
+    }
+  } else if (!start_in_str && end_in_str) {
+    // Pre flank check
+    flank_match = true;
+    j = start_str - start_pos >= min_match ? start_str - min_match : start_pos;
+    for (i = min(max(start_str - start_pos - min_match, 0), (int32_t)seq.size())
+            ; i <min(start_str - start_pos, (int32_t)seq.size()) ; i++){
+      if (seq.at(i)!=pre_flank.at(j)){
+        flank_match = false;
+      }
+      j++;
+    }
+    if(flank_match){
+      *single_read_class = SR_PREFLANK;
+      return true;
+    }
+    else{
+      failed_flank_test = true;
+      *single_read_class = SR_UNKNOWN;
+    }
+  } else if (start_pos < start_str && end_pos > end_str && score > score_threshold &&
+    (start_str - start_pos <= seq.size() - (end_str - start_str))) {
+    *single_read_class = SR_ENCLOSING;
+
     // Pre flank check
     flank_match = true;
     j = start_str - start_pos >= min_match ? start_str - min_match : start_pos;
@@ -446,19 +465,28 @@ bool classify_realigned_read(const std::string& seq,
        //  j++;
        // }
     }
-    // cerr<<endl<<endl;
-
     // If either flanks didn't match reference
-    if (!flank_match){
-      *single_read_class = SR_UNKNOWN;
+    if (flank_match){
+      *single_read_class = SR_ENCLOSING;
       return true;
     }
-    else{
-      // cerr<<seq<<"\t"<<nCopy<<"\t"<<max(start_str - start_pos - min_match, 0)<<endl;
-      // cerr<<std::string(start_str - start_pos, ' ')<<seq.substr(start_str - start_pos, end_str - start_str)<<endl;
+    else {
+      failed_flank_test = true;
+      *single_read_class = SR_UNKNOWN;
     }
-    return true;
-  } else {
-    return false;
   }
+
+
+  if (!isMapped or failed_flank_test){ // If isMapped is false, or failed flank test, check if FRR
+    if (nCopy > 0.7 * seq.size() / motif.size() && score > 0.7 * score_threshold){
+      // cerr<<"nCopy: " << nCopy<<"\tscore: "<<score<<"/"<<seq.size()*SSW_MATCH_SCORE<<endl;
+      *single_read_class = SR_UM_POT_IRR;
+      return true;
+    }
+  }
+
+  // If no other class matches this read pair:
+  *single_read_class = SR_UNKNOWN;
+  return true; 
+
 }

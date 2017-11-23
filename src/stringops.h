@@ -9,6 +9,7 @@ void split_by_delim(const std::string &s, char delim,
 		    std::vector<std::string>& substrings);
 
 std::string uppercase(std::string str);
+std::string lowercase(std::string str);
 
 bool string_starts_with(std::string& s, std::string prefix);
 

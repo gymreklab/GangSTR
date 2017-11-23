@@ -46,6 +46,7 @@ LikelihoodMaximizer::LikelihoodMaximizer(Options& _options) {
   if (options->output_bootstrap) {
     bsfile_.open((options->outprefix + ".bootstrap.tab").c_str());
   }
+  plotfile_.open((options->outprefix + ".plot.tab").c_str());
 
   // Setup random number generator
   const gsl_rng_type * T;
@@ -105,6 +106,21 @@ void LikelihoodMaximizer::AddFlankingData(const int32_t& data) {
   rec.read_type = RC_BOUND;
   rec.data = data;
   read_pool.push_back(rec);
+}
+
+void LikelihoodMaximizer::PlotLikelihood(int32_t fix_allele,
+                                          int32_t start,
+                                          int32_t end,
+                                          int32_t step,
+                                          int32_t read_len,
+                                          int32_t motif_len,
+                                          int32_t ref_count){
+  double gt_ll;
+  for (int32_t var_allele = start; var_allele <= end; var_allele+=step){
+    GetGenotypeNegLogLikelihood(fix_allele, var_allele, read_len, motif_len, ref_count, false, &gt_ll);
+    plotfile_ << fix_allele << "\t" << var_allele << "\t"
+        << gt_ll << endl;
+  }
 }
 
 void LikelihoodMaximizer::PrintReadPool(){
@@ -320,7 +336,17 @@ bool LikelihoodMaximizer::OptimizeLikelihood(const int32_t& read_len, const int3
     *allele1 = *allele2;
     *allele2 = temp;
   }
+  // if (!resampled){
+  //   double gt_ll;
+  //   for (int jj = 20; jj < 100; jj += 10){
+  //     GetGenotypeNegLogLikelihood(*allele1, jj, read_len, motif_len, ref_count, resampled, &gt_ll);
+  //     cerr<<*allele1<<","<<jj<<"\t"<<gt_ll<<endl;
+  //   }
+  // }
   // cerr<<endl<<*allele1<<"\t"<<*allele2<<"\t"<<*min_negLike<<endl;
+  // if (!resampled){
+  //   PlotLikelihood(30, 10, 100, 5, read_len, motif_len, ref_count);
+  // }
   return true;    // TODO add false
 }
 

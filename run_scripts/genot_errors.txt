@@ -1,4 +1,0 @@
-nc_7_80.sorted.bam	7	81
-nc_15_50.sorted.bam	15	47
-nc_35_35.sorted.bam	31	39
-nc_60_100.sorted.bam	58	95

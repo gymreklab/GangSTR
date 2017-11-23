@@ -52,7 +52,7 @@ enum SingleReadType {
   SR_POSTFLANK = 1,
   SR_ENCLOSING = 2,
   SR_IRR = 3,
-  SR_MAPPED_BEFORE = 4, // Not used TODO delete
+  SR_UM_POT_IRR = 4, // Unmapped potential IRR
   SR_MAPPED_AFTER = 5,	// Not used TODO delete
   SR_UNKNOWN = 6,
   SR_NOT_FOUND = 7,		// Not used TODO delete
@@ -114,6 +114,7 @@ bool classify_realigned_read(const std::string& seq,
 			     const int32_t& score,
 			     const int32_t& prefix_length,
            		 const int32_t& min_match,
+           		 const bool& isMapped,
 			     const std::string& pre_flank,
 			     const std::string& post_flank,
 			     SingleReadType* single_read_class);
