@@ -460,10 +460,9 @@ bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
   int32_t end_pos, end_pos_rev;
   int32_t score, score_rev;
   int32_t nCopy, nCopy_rev;
-  std::string seq = alignment.QueryBases();
-  std::transform(seq.begin(), seq.end(), seq.begin(), ::tolower);
-  std::string qual = alignment.Qualities();
+  std::string seq = lowercase(alignment.QueryBases());
   std::string seq_rev = reverse_complement(seq);
+  std::string qual = alignment.Qualities();
   int32_t read_length = (int32_t)seq.size();
 
   /* Perform realignment and classification */

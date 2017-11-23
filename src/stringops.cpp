@@ -21,6 +21,13 @@ std::string uppercase(std::string str){
   return res.str();
 }
 
+std::string lowercase(std::string str){
+  std::stringstream res;
+  for (size_t i = 0; i < str.size(); i++)
+    res << static_cast<char>(tolower(str[i]));
+  return res.str();
+}
+
 bool string_starts_with(std::string&s, std::string prefix){
   if (s.size() < prefix.size())
     return false;
@@ -66,16 +73,16 @@ char complement(const char nucleotide) {
   switch (nucleotide) {
   case 'A':
   case 'a':
-    return 'T';
+    return 't';
   case 'T':
   case 't':
-    return 'A';
+    return 'a';
   case 'G':
   case 'g':
-    return 'C';
+    return 'c';
   case 'C':
   case 'c':
-    return 'G';
+    return 'g';
   default:
     return 'N';
   }
