@@ -105,8 +105,8 @@ bool BamInfoExtract::GetInsertSizeDistribution(double* mean, double* std_dev){
 			temp_len_vec.push_back(abs(alignment.TemplateLength()));
 			size++;
 		}
-		// if there's enough reads, compute and return TODO set 1000 to a different number...
-		if (temp_len_vec.size() > 1000) {
+		// if there's enough reads, compute and return TODO set 100 to a different number...
+		if (temp_len_vec.size() > 100) {
 			sort(temp_len_vec.begin(), temp_len_vec.end());
 			median = temp_len_vec.at(int32_t(size / 2));
 
