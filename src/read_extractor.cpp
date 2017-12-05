@@ -490,7 +490,10 @@ bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
              (int32_t)locus.pre_flank.size(), min_match, alignment.IsMapped(), locus.pre_flank, locus.post_flank, srt)) {
     return false;
   }
-
+  if (alignment.IsMapped() == false && alignment.MatePosition() < locus.end + options.dist_mean && alignment.MatePosition() > locus.start - options.dist_mean){
+  	readfile_ << locus.chrom << "\t" << alignment.Position() << "\t" << alignment.MatePosition() << "\t"
+  		  << alignment.Name() << "\t" << "UNMAPPED" << std::endl << alignment.QueryBases()<<std::endl;
+  }
   // For Unmapped potential IRRs, check if mate is mapped in vicinity of STR locus
   if (*srt == SR_UM_POT_IRR){
     if (alignment.IsMateMapped() &&  alignment.MatePosition() < locus.end + options.dist_mean && alignment.MatePosition() > locus.start - options.dist_mean){
