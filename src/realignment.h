@@ -37,7 +37,7 @@ const static int32_t GAP_SCORE = -1;
 
 
 // SSW Parameters
-const static int32_t SSW_MATCH_SCORE = 4;
+const static int32_t SSW_MATCH_SCORE = 2;
 const static int32_t SSW_MISMATCH_SCORE = 2;
 const static int32_t SSW_GAP_OPEN = 3;
 const static int32_t SSW_GAP_EXTEND = 1;

@@ -97,6 +97,8 @@ bool expansion_aware_realign(const std::string& seq,
     }
     var_realign_ss << post_flank;
     std::string var_realign_string = var_realign_ss.str();
+
+
     if (!striped_smith_waterman(var_realign_string, seq, qual, &current_start_pos, &current_end_pos, &current_score)) {
       return false;
     }
@@ -209,6 +211,9 @@ bool striped_smith_waterman(const std::string& ref,
   maskLen = 15;
   aligner->Align(seq.c_str(), ref.c_str(), (int32_t)ref.size(), *filter, alignment, maskLen);
 
+  // if (seq == "gggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggccgcggcggcggcggcggcggcgccggccgcggcgccggccgcggccgcggcgggggcccccgcggccgcgcgcg"){
+  //   ssw_PrintAlignment(*alignment);
+  // }
   // ssw_PrintAlignment(*alignment);
   *pos = alignment->ref_begin;
   *end = alignment->ref_end;
