@@ -375,9 +375,11 @@ bool classify_realigned_read(const std::string& seq,
     flank_match = true;
     j = 0;
     limit = (end_pos - end_str >= min_match ? end_str - start_pos + min_match - 1 : end_pos - start_pos - 1);
-    for (i = min(end_str - start_pos, (int32_t)seq.size() - 1) ; 
+    
+    for (i = max(min(end_str - start_pos, (int32_t)seq.size() - 1),0) ; 
        i <= min(limit, (int32_t)seq.size() - 1);
        i++){
+
      if (seq.at(i)!=post_flank.at(j)){
        flank_match = false;
      }
@@ -448,7 +450,7 @@ bool classify_realigned_read(const std::string& seq,
        // cerr << (end_pos - end_str >= min_match) << endl;
        // cerr << end_str - start_pos + min_match - 1 << endl;
        // cerr << "Size: "<< seq.size() - 1 << endl;
-       for (i = min(end_str - start_pos, (int32_t)seq.size() - 1) ; 
+       for (i = max(min(end_str - start_pos, (int32_t)seq.size() - 1),0) ; 
           i <= min(limit, (int32_t)seq.size() - 1);
           i++){
         // cerr<<seq.at(i);

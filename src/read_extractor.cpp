@@ -142,6 +142,7 @@ bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
 
   // Go through each alignment in the region
   BamAlignment alignment;
+
   while (bamreader->GetNextAlignment(alignment)) {
     if (debug) {
       std::cerr << "Processing " << alignment.Name() << std::endl;
@@ -380,6 +381,7 @@ bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
     }
 
   }
+
   return true;
 }
 
