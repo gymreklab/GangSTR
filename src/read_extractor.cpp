@@ -488,6 +488,7 @@ bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
   *nCopy_value = nCopy;
   *score_value = score;
 
+
   if (!classify_realigned_read(seq, locus.motif, start_pos, end_pos, nCopy, score, 
              (int32_t)locus.pre_flank.size(), min_match, alignment.IsMapped(), locus.pre_flank, locus.post_flank, srt)) {
     return false;
@@ -498,7 +499,9 @@ bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
   }
   // For Unmapped potential IRRs, check if mate is mapped in vicinity of STR locus
   if (*srt == SR_UM_POT_IRR){
-    if (alignment.IsMateMapped() &&  alignment.MatePosition() < locus.end + options.dist_mean && alignment.MatePosition() > locus.start - options.dist_mean){
+    if (alignment.IsMateMapped() &&  
+    	alignment.MatePosition() < locus.end + (options.dist_mean - options.read_len) && 
+    	alignment.MatePosition() > locus.start - (options.dist_mean - options.read_len)){
       // cerr << "\nFRR\n"<< alignment.MatePosition() << endl;
       *srt = SR_IRR;
       // cerr << "Seq:   " << alignment.QueryBases() << endl;
