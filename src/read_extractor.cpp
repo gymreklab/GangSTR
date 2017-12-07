@@ -207,6 +207,7 @@ bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
         if (read_type == RC_FRR || srt == SR_IRR){ // if new guess is FRR
           rp_iter->second.read_type = RC_FRR;
           rp_iter->second.data_value = data_value;
+
           if (rp_iter->second.max_nCopy < nCopy_value){
             rp_iter->second.max_nCopy = nCopy_value;
           }
@@ -330,6 +331,7 @@ bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
 
     // We need to check srt, because rescued reads will be classified as RC_UNKNOWN
     // ^^reason: They originate from a different chrom that ProcessSingleRead cannot deal with
+
     if ((read_type == RC_FRR || srt == SR_IRR)          // if new guess is FRR
             && nCopy_value >= read_length / locus.period - 1  // and there are enough copies present
             && score_value >= 0.8 * MATCH_SCORE * read_length){ // and the score is high enough TODO set threshold
@@ -340,6 +342,7 @@ bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
       } else {
         data = iter->second.read1.Position() - locus.end;
       }
+
       iter->second.data_value = data;
       if (iter->second.max_nCopy < nCopy_value){
         iter->second.max_nCopy = nCopy_value;
@@ -497,6 +500,7 @@ bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
   	readfile_ << locus.chrom << "\t" << alignment.Position() << "\t" << alignment.MatePosition() << "\t"
   		  << alignment.Name() << "\t" << "UNMAPPED" << std::endl << alignment.QueryBases()<<std::endl;
   }
+
   // For Unmapped potential IRRs, check if mate is mapped in vicinity of STR locus
   if (*srt == SR_UM_POT_IRR){
     if (alignment.IsMateMapped() &&  
@@ -509,12 +513,15 @@ bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
       // cerr << "BaseQ: " << alignment.Qualities() << endl;
     }
   }
+
   // Set as UNKNOWN if doesn't pass the score threshold.
   if (score < options.min_score / 100.0 * double(SSW_MATCH_SCORE * options.read_len)){
     *data_value = 0;
+    *srt = SR_UNKNOWN;
     *read_type = RC_UNKNOWN;
     return true;
   }
+  
   if (debug) {
     std::cerr << "Processing single read found " << score << " " << start_pos << " " << srt << std::endl;
   }
