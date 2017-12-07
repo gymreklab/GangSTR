@@ -61,6 +61,7 @@ void show_help() {
      << "--stutterdown  Stutter down parameter (refer to the stutter model)\n"
      << "--stutterprob  Stutter probability (refer to the stutter model)\n"
      << "--numbstrap    Number of bootsrap resamples\n"
+     << "--read-prob-mode Use only read probability (ignore class probability)\n"
      << "--seed         Random number generator initial seed\n"
 	   << "--output-bootstraps  Output file with bootstrap samples\n"
 	   << "--output-readinfo    Output read class info (for debugging)\n"
@@ -94,6 +95,7 @@ void parse_commandline_options(int argc, char* argv[], Options* options) {
     OPT_STUTDW,
     OPT_STUTPR,
     OPT_NBSTRAP,
+    OPT_RDPROB,
     OPT_OUTBS,
     OPT_OUTREADINFO,
     OPT_SEED,
@@ -121,6 +123,7 @@ void parse_commandline_options(int argc, char* argv[], Options* options) {
     {"stutterdown", required_argument,  NULL, OPT_STUTDW},
     {"stutterprob", required_argument,  NULL, OPT_STUTPR},
     {"numbstrap",   required_argument,  NULL, OPT_NBSTRAP},
+    {"read-prob-mode",   no_argument,  NULL, OPT_RDPROB},
     {"output-bootstraps", no_argument,      NULL, OPT_OUTBS},
     {"output-readinfo", no_argument,        NULL, OPT_OUTREADINFO},
     {"seed",        required_argument,  NULL, OPT_SEED},
@@ -199,6 +202,9 @@ void parse_commandline_options(int argc, char* argv[], Options* options) {
       break;
     case OPT_OUTBS:
       options->output_bootstrap++;
+      break;
+    case OPT_RDPROB:
+      options->read_prob_mode++;
       break;
     case OPT_OUTREADINFO:
       options->output_readinfo++;
