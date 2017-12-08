@@ -63,39 +63,39 @@ bool ReadExtractor::ExtractReads(BamCramMultiReader* bamreader,
     if (iter->second.read_type == RC_SPAN) {
       if (iter->second.data_value < options.dist_max){
         if (options.output_readinfo) {
-  	readfile_ << locus.chrom << "\t" << locus.start << "\t" << locus.end << "\t"
-  		  << iter->first << "\t" << "SPAN" << "\t" << iter->second.data_value << "\t" << iter->second.found_pair << std::endl;
+    readfile_ << locus.chrom << "\t" << locus.start << "\t" << locus.end << "\t"
+        << iter->first << "\t" << "SPAN" << "\t" << iter->second.data_value << "\t" << iter->second.found_pair << std::endl;
         }
         likelihood_maximizer->AddSpanningData(iter->second.data_value);
         span++;
       }
       // In spanning case, we can also have flanking reads:
       if (iter->second.max_nCopy > 0) {
-	if (options.output_readinfo) {
-	  readfile_ << locus.chrom << "\t" << locus.start << "\t" << locus.end << "\t"
-		    << iter->first << "\t" << "SPFLNK" << "\t" << iter->second.max_nCopy - 1 << "\t" << iter->second.found_pair << std::endl;
-	}
+  if (options.output_readinfo) {
+    readfile_ << locus.chrom << "\t" << locus.start << "\t" << locus.end << "\t"
+        << iter->first << "\t" << "SPFLNK" << "\t" << iter->second.max_nCopy - 1 << "\t" << iter->second.found_pair << std::endl;
+  }
         likelihood_maximizer->AddFlankingData(iter->second.max_nCopy - 1);  // -1 because flanking is always picked up +1
         flank++;
       }
     } else if (iter->second.read_type == RC_ENCL) {
       if (options.output_readinfo) {
-	readfile_ << locus.chrom << "\t" << locus.start << "\t" << locus.end << "\t"
-		  << iter->first << "\t" << "ENCLOSE" << "\t" << iter->second.data_value << "\t" << iter->second.found_pair << std::endl;
+  readfile_ << locus.chrom << "\t" << locus.start << "\t" << locus.end << "\t"
+      << iter->first << "\t" << "ENCLOSE" << "\t" << iter->second.data_value << "\t" << iter->second.found_pair << std::endl;
       }
       likelihood_maximizer->AddEnclosingData(iter->second.data_value);
       encl++;
     } else if (iter->second.read_type == RC_FRR) {
       if (options.output_readinfo) {
-	readfile_ << locus.chrom << "\t" << locus.start << "\t" << locus.end << "\t"
-		  << iter->first << "\t" << "FRR" << "\t" << iter->second.data_value << "\t" << iter->second.found_pair << std::endl;
+  readfile_ << locus.chrom << "\t" << locus.start << "\t" << locus.end << "\t"
+      << iter->first << "\t" << "FRR" << "\t" << iter->second.data_value << "\t" << iter->second.found_pair << std::endl;
       }
       likelihood_maximizer->AddFRRData(iter->second.data_value);
       frr++;
     } else if (iter->second.read_type == RC_BOUND) {
       if (options.output_readinfo) {
-	readfile_ << locus.chrom << "\t" << locus.start << "\t" << locus.end << "\t"
-		  << iter->first << "\t" << "BOUND" << "\t" << iter->second.data_value - 1 << "\t" << iter->second.found_pair << std::endl;
+  readfile_ << locus.chrom << "\t" << locus.start << "\t" << locus.end << "\t"
+      << iter->first << "\t" << "BOUND" << "\t" << iter->second.data_value - 1 << "\t" << iter->second.found_pair << std::endl;
       }
       likelihood_maximizer->AddFlankingData(iter->second.data_value - 1); // -1 because flanking is always picked up +1
       flank++;
@@ -461,7 +461,7 @@ bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
     return true;
   }
   
-  int32_t start_pos, start_pos_rev;
+  int32_t start_pos, start_pos_rev, pos_frr, end_frr, score_frr, mismatches_frr;
   int32_t end_pos, end_pos_rev;
   int32_t score, score_rev;
   int32_t nCopy, nCopy_rev;
@@ -496,16 +496,35 @@ bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
              (int32_t)locus.pre_flank.size(), min_match, alignment.IsMapped(), locus.pre_flank, locus.post_flank, srt)) {
     return false;
   }
+
+  if (*srt == SR_UNKNOWN && 
+      alignment.IsMateMapped() &&
+      alignment.MatePosition() < locus.end + (options.dist_mean - options.read_len) && 
+      alignment.MatePosition() > locus.start - (options.dist_mean - options.read_len)){
+    std::stringstream var_realign_frr;
+    for (int i = 0; i<(seq.size() / locus.motif.size() + 5); i++) {
+      var_realign_frr << locus.motif;
+    }
+    std::string frr_ref = var_realign_frr.str();
+    striped_smith_waterman(frr_ref, seq, qual, &pos_frr, &end_frr, &score_frr, &mismatches_frr);
+    // cerr << mismatches_frr << "\t" << seq << endl;
+    if (score_frr > 0.70 * seq.size() * SSW_MATCH_SCORE && mismatches_frr <= .10 * seq.size()){
+      // cerr << seq << endl;
+      // cerr << mismatches_frr << "\t" << score_frr << endl;
+      *srt = SR_IRR;
+    }
+  }
+
   if (alignment.IsMapped() == false && alignment.MatePosition() < locus.end + options.dist_mean && alignment.MatePosition() > locus.start - options.dist_mean){
-  	readfile_ << locus.chrom << "\t" << alignment.Position() << "\t" << alignment.MatePosition() << "\t"
-  		  << alignment.Name() << "\t" << "UNMAPPED" << std::endl << alignment.QueryBases()<<std::endl;
+    readfile_ << locus.chrom << "\t" << alignment.Position() << "\t" << alignment.MatePosition() << "\t"
+        << alignment.Name() << "\t" << "UNMAPPED" << std::endl << alignment.QueryBases()<<std::endl;
   }
 
   // For Unmapped potential IRRs, check if mate is mapped in vicinity of STR locus
   if (*srt == SR_UM_POT_IRR){
     if (alignment.IsMateMapped() &&  
-    	alignment.MatePosition() < locus.end + (options.dist_mean - options.read_len) && 
-    	alignment.MatePosition() > locus.start - (options.dist_mean - options.read_len)){
+      alignment.MatePosition() < locus.end + (options.dist_mean - options.read_len) && 
+      alignment.MatePosition() > locus.start - (options.dist_mean - options.read_len)){
       // cerr << "\nFRR\n"<< alignment.MatePosition() << endl;
       *srt = SR_IRR;
       // cerr << "Seq:   " << alignment.QueryBases() << endl;

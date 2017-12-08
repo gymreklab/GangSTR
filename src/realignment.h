@@ -92,7 +92,7 @@ bool smith_waterman(const std::string& seq1,
 bool striped_smith_waterman(const std::string& ref,
         const std::string& seq,
         const std::string& qual,
-        int32_t* pos, int32_t* pos_temp, int32_t* score);
+        int32_t* pos, int32_t* pos_temp, int32_t* score, int32_t* mismatches);
 static void ssw_PrintAlignment(const StripedSmithWaterman::Alignment& alignment);
 bool create_score_matrix(const int32_t& rows, const int32_t& cols,
 			 const std::string& seq1,
