@@ -57,7 +57,7 @@ cd ${tmpdir}
 
 echo "Running in ${tmpdir}"
 
-for chrom in $(seq 1 22) remove, testing
+for chrom in $(seq 1 22)
 do
     echo "${TRF} \
 	${CHROMFA}/chr${chrom}.fa \
