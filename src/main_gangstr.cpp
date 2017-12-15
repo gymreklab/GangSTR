@@ -306,7 +306,7 @@ int main(int argc, char* argv[]) {
     }
   }
   if (options.dist_max == -1){
-    options.dist_max = options.dist_mean * 4;
+    options.dist_max = options.dist_mean + options.dist_sdev * 3;
   }
 
   // Process each region
