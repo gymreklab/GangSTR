@@ -40,6 +40,7 @@ void ReadClass::SetOptions(const Options& options) {
   stutter_up = options.stutter_up;
   stutter_down = options.stutter_down;
   stutter_p = options.stutter_p;
+  read_prob_mode = options.read_prob_mode;
 }
 
 void ReadClass::AddData(const int32_t& data) {
@@ -100,8 +101,13 @@ bool ReadClass::GetAlleleLogLikelihood(const int32_t& allele,
   if (!GetLogReadProb(allele, data, read_len, motif_len, ref_count, &log_read_prob)) {
     return false;
   }
-  *allele_ll = log_class_prob + log_read_prob;
-  // *allele_ll = log_read_prob + log(allele);
+  if (read_prob_mode){
+    *allele_ll = log_read_prob - log(allele);
+  }
+  else{
+    *allele_ll = log_class_prob + log_read_prob;
+  }
+  
   return true;
 }
 

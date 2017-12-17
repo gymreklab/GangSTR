@@ -37,7 +37,7 @@ const static int32_t GAP_SCORE = -1;
 
 
 // SSW Parameters
-const static int32_t SSW_MATCH_SCORE = 4;
+const static int32_t SSW_MATCH_SCORE = 2;
 const static int32_t SSW_MISMATCH_SCORE = 2;
 const static int32_t SSW_GAP_OPEN = 3;
 const static int32_t SSW_GAP_EXTEND = 1;
@@ -92,7 +92,7 @@ bool smith_waterman(const std::string& seq1,
 bool striped_smith_waterman(const std::string& ref,
         const std::string& seq,
         const std::string& qual,
-        int32_t* pos, int32_t* pos_temp, int32_t* score);
+        int32_t* pos, int32_t* pos_temp, int32_t* score, int32_t* mismatches);
 static void ssw_PrintAlignment(const StripedSmithWaterman::Alignment& alignment);
 bool create_score_matrix(const int32_t& rows, const int32_t& cols,
 			 const std::string& seq1,

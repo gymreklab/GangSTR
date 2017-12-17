@@ -79,7 +79,7 @@ bool expansion_aware_realign(const std::string& seq,
   int32_t max_end_pos = 0;
   int32_t current_score = 0;
   int32_t current_start_pos = 0, current_end_pos = 0;
-  int32_t current_nCopy;
+  int32_t current_nCopy, current_num_mismatch;
   int32_t prev_score = 0;
   MARGIN = 1 * period - 1;
 
@@ -97,7 +97,9 @@ bool expansion_aware_realign(const std::string& seq,
     }
     var_realign_ss << post_flank;
     std::string var_realign_string = var_realign_ss.str();
-    if (!striped_smith_waterman(var_realign_string, seq, qual, &current_start_pos, &current_end_pos, &current_score)) {
+
+
+    if (!striped_smith_waterman(var_realign_string, seq, qual, &current_start_pos, &current_end_pos, &current_score, &current_num_mismatch)) {
       return false;
     }
 
@@ -191,7 +193,7 @@ bool next_move(std::vector<std::vector<int32_t> > score_matrix,
 bool striped_smith_waterman(const std::string& ref,
         const std::string& seq,
         const std::string& qual,
-        int32_t* pos, int32_t* end, int32_t* score) {
+        int32_t* pos, int32_t* end, int32_t* score, int32_t* mismatches) {
 
   // SSW Objects
   StripedSmithWaterman::Aligner* aligner;
@@ -209,10 +211,15 @@ bool striped_smith_waterman(const std::string& ref,
   maskLen = 15;
   aligner->Align(seq.c_str(), ref.c_str(), (int32_t)ref.size(), *filter, alignment, maskLen);
 
+  // if (seq == "ggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggggcgcggcgcggccgccgcccgcggcggggcggcgggccgccg"){
+  //   cerr << ref.size() << endl;
+  //   ssw_PrintAlignment(*alignment);
+  // }
   // ssw_PrintAlignment(*alignment);
   *pos = alignment->ref_begin;
   *end = alignment->ref_end;
   *score = alignment->sw_score;
+  *mismatches = alignment->mismatches;
   // cerr<<ref.substr(alignment->ref_begin, alignment->ref_end)<<endl;
   return true;
 }
@@ -357,8 +364,12 @@ bool classify_realigned_read(const std::string& seq,
   }
 
   // Set threshold for match
-  int32_t score_threshold = (int32_t)(MATCH_PERC_THRESHOLD*seq.size()*SSW_MATCH_SCORE);  
-
+  int32_t score_threshold = (int32_t)(MATCH_PERC_THRESHOLD*seq.size()*SSW_MATCH_SCORE);
+  // if (seq == "ggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggggcgcggcgcggccgccgcccgcggcggggcggcgggccgccg"){
+  //   cerr << nCopy << endl;
+  //   cerr << pre_flank << endl;
+  //   cerr << post_flank << endl;
+  // }
   if (isMapped && (score < score_threshold || nCopy == 0)) {
     *single_read_class = SR_UNKNOWN;
     return true;
@@ -370,9 +381,11 @@ bool classify_realigned_read(const std::string& seq,
     flank_match = true;
     j = 0;
     limit = (end_pos - end_str >= min_match ? end_str - start_pos + min_match - 1 : end_pos - start_pos - 1);
-    for (i = min(end_str - start_pos, (int32_t)seq.size() - 1) ; 
+    
+    for (i = max(min(end_str - start_pos, (int32_t)seq.size() - 1),0) ; 
        i <= min(limit, (int32_t)seq.size() - 1);
        i++){
+
      if (seq.at(i)!=post_flank.at(j)){
        flank_match = false;
      }
@@ -397,6 +410,7 @@ bool classify_realigned_read(const std::string& seq,
       }
       j++;
     }
+
     if(flank_match){
       *single_read_class = SR_PREFLANK;
       return true;
@@ -443,7 +457,7 @@ bool classify_realigned_read(const std::string& seq,
        // cerr << (end_pos - end_str >= min_match) << endl;
        // cerr << end_str - start_pos + min_match - 1 << endl;
        // cerr << "Size: "<< seq.size() - 1 << endl;
-       for (i = min(end_str - start_pos, (int32_t)seq.size() - 1) ; 
+       for (i = max(min(end_str - start_pos, (int32_t)seq.size() - 1),0); 
           i <= min(limit, (int32_t)seq.size() - 1);
           i++){
         // cerr<<seq.at(i);
@@ -476,9 +490,11 @@ bool classify_realigned_read(const std::string& seq,
     }
   }
 
-
+  double FRR_slip = 0.1 * prefix_length;
   if (!isMapped or failed_flank_test){ // If isMapped is false, or failed flank test, check if FRR
-    if (nCopy > 0.7 * seq.size() / motif.size() && score > 0.7 * score_threshold){
+    if (start_pos < start_str + FRR_slip && start_pos > start_str - FRR_slip &&
+      end_pos < end_str + FRR_slip && end_pos > end_str - FRR_slip &&
+      nCopy > 0.7 * seq.size() / motif.size() && score > 0.7 * score_threshold){
       // cerr<<"nCopy: " << nCopy<<"\tscore: "<<score<<"/"<<seq.size()*SSW_MATCH_SCORE<<endl;
       *single_read_class = SR_UM_POT_IRR;
       return true;

@@ -66,6 +66,8 @@ class Options {
   int32_t ploidy;
   // Number of bootsrap resamples
   int32_t num_boot_samp;
+  // Read probability only mode (ignore class probability)
+  bool read_prob_mode;
   // Output bootstrap samples to file
   bool output_bootstrap;
   // Output debug info for reads

@@ -74,6 +74,7 @@ class ReadClass {
   double stutter_up;
   double stutter_down;
   double stutter_p;
+  bool read_prob_mode;
   // Store vector of data for this class
   std::vector<int32_t> read_class_data_;
   

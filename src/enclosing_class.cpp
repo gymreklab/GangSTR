@@ -24,6 +24,7 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 #include <math.h>
 #include <iostream>
 #include <algorithm>
+#include <map>
 using namespace std;
 
 bool EnclosingClass::GetLogClassProb(const int32_t& allele,
@@ -75,13 +76,24 @@ bool EnclosingClass::GetLogReadProb(const int32_t& allele,
 }
 
 bool EnclosingClass::ExtractEnclosingAlleles(std::vector<int> *alleles){
+    std::map<int32_t, int32_t> allele_repeats;
+
 	for (std::vector<int32_t>::iterator data_it = this->read_class_data_.begin();
        data_it != this->read_class_data_.end();
        data_it++) {
-    	if(std::find((*alleles).begin(), (*alleles).end(), *data_it) == (*alleles).end()) {
-		    /* alleles does not contain this data */
-		    (*alleles).push_back(*data_it);
-		}
+       	if (allele_repeats.find(*data_it) == allele_repeats.end()){
+       		allele_repeats[*data_it] = 1;
+       	}
+       	else{
+       		allele_repeats[*data_it]++;
+       	}
+  	}
+
+  	for (map<int32_t, int32_t>::iterator it = allele_repeats.begin(); it != allele_repeats.end(); it++){
+  		if (it->second >= 2){
+		    (*alleles).push_back(it->first);
+  			cerr << it->first << "\t" << it -> second << endl;
+  		}
   	}
 	return true;	//TODO add false
 }
