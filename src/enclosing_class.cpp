@@ -92,7 +92,7 @@ bool EnclosingClass::ExtractEnclosingAlleles(std::vector<int> *alleles){
   	for (map<int32_t, int32_t>::iterator it = allele_repeats.begin(); it != allele_repeats.end(); it++){
   		if (it->second >= 2){
 		    (*alleles).push_back(it->first);
-  			cerr << it->first << "\t" << it -> second << endl;
+  			// cerr << it->first << "\t" << it -> second << endl;
   		}
   	}
 	return true;	//TODO add false
