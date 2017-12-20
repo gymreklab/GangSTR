@@ -52,6 +52,7 @@ void show_help() {
      << "--flankweight weight of flanking reads in the likelihood model\n"
      << "--ploidy       Indicate whether data is haploid (1) or diploid (2)\n"
      << "--readlength   Read length\n"
+     << "--coverage     Average coverage. Must be set for whole exome or targeted data.\n"
      << "--insertmean   Insert size mean\n"
      << "--insertsdev   Insert size standard deviation\n"
      << "--insertmax    Maximum insert size\n"
@@ -86,6 +87,7 @@ void parse_commandline_options(int argc, char* argv[], Options* options) {
     OPT_WFLANK,
     OPT_PLOIDY,
     OPT_READLEN,
+    OPT_COVERAGE,
     OPT_INSMEAN,
     OPT_INSSDEV,
     OPT_INSMAX,
@@ -114,6 +116,7 @@ void parse_commandline_options(int argc, char* argv[], Options* options) {
     {"flankweight", required_argument,  NULL, OPT_WFLANK},
     {"ploidy",      required_argument,  NULL, OPT_PLOIDY},
     {"readlength",  required_argument,  NULL, OPT_READLEN},
+    {"coverage",    required_argument,  NULL, OPT_COVERAGE},
     {"insertmean",  required_argument,  NULL, OPT_INSMEAN},
     {"insertsdev",  required_argument,  NULL, OPT_INSSDEV},
     {"insertmax",   required_argument,  NULL, OPT_INSMAX},
@@ -170,6 +173,9 @@ void parse_commandline_options(int argc, char* argv[], Options* options) {
       break;
     case OPT_READLEN:
       options->read_len = atoi(optarg);
+      break;
+    case OPT_COVERAGE:
+      options->coverage = atof(optarg);
       break;
     case OPT_INSMEAN:
       options->dist_mean = atoi(optarg);
@@ -271,7 +277,7 @@ int main(int argc, char* argv[]) {
 
   // Extract information from bam file (read length, insert size distribution, ..)
   int32_t read_len;
-  double mean, std_dev;
+  double mean, std_dev, coverage;
   BamInfoExtract bam_info(&options, &bamreader, &region_reader);
 
   if(options.read_len == -1){  // if read_len wasn't set, we need to extract from bam.
@@ -279,7 +285,7 @@ int main(int argc, char* argv[]) {
       PrintMessageDieOnError("\tExtracting read length", M_PROGRESS);
     }
     if(!bam_info.GetReadLen(&read_len)){
-      PrintMessageDieOnError("No Locus contains enough reads to extract read length.", M_ERROR);
+      PrintMessageDieOnError("No Locus contains enough reads to extract read length. (Possible mismatch in chromosome names)", M_ERROR);
     }
     options.read_len = read_len;
     options.realignment_flanklen = read_len;
@@ -290,18 +296,27 @@ int main(int argc, char* argv[]) {
     }
   }
   region_reader.Reset();
-  if(options.dist_mean == -1 or options.dist_sdev == -1){
+  if(options.dist_mean == -1 or options.dist_sdev == -1 or options.coverage == -1){
     if (options.verbose) {
-      PrintMessageDieOnError("\tComputing insert size distribution", M_PROGRESS);
+      PrintMessageDieOnError("\tComputing insert size distribution and coverage", M_PROGRESS);
     }
-    if(!bam_info.GetInsertSizeDistribution(&mean, &std_dev)){
-      PrintMessageDieOnError("No Locus contains enough reads to extract insert size mean and standard deviation.", M_ERROR);
+    if(!bam_info.GetInsertSizeDistribution(&mean, &std_dev, &coverage)){
+      PrintMessageDieOnError("No Locus contains enough reads to extract insert size mean and standard deviation. (Possible mismatch in chromosome names)", M_ERROR);
     }
-    options.dist_mean = mean;
-    options.dist_sdev = std_dev;
+    if (options.dist_mean == -1 or options.dist_sdev == -1){
+      options.dist_mean = mean;
+      options.dist_sdev = std_dev;
+    }
+    if (options.coverage == -1){
+      cerr << coverage << endl;
+      if (coverage < 10){
+        PrintMessageDieOnError("Low coverage or targeted data. Please set coverage manually.", M_ERROR);
+      }
+      options.coverage = coverage;
+    }
     if (options.verbose) {
       stringstream ss;
-      ss << "\tMean=" << mean << " SD=" << std_dev;
+      ss << "\tMean=" << mean << " SD=" << std_dev<<" Cov="<<coverage;
       PrintMessageDieOnError(ss.str(), M_PROGRESS);
     }
   }

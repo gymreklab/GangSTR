@@ -31,18 +31,22 @@ BamInfoExtract::BamInfoExtract(Options* options_,
 
 bool BamInfoExtract::GetReadLen(int32_t* read_len){
 	*read_len = -1;
-	int32_t flank_size = 2000;
+	int32_t flank_size = 20000;
 	int32_t req_streak = 10;
-	bool found_read_len = false;
+	bool found_read_len = false, has_reads = false;
 	// Header has info about chromosome names
 	const BamHeader* bam_header = bamreader->bam_header();
 	int32_t chrom_ref_id, num_reads;
 	BamAlignment alignment;
 
-	int32_t curr_len, curr_streak = 0;
+	int32_t curr_len = 0, curr_streak = 0;
 
 	while(region_reader->GetNextRegion(&locus) and !found_read_len){
 		chrom_ref_id = bam_header->ref_id(locus.chrom);
+		// if (chrom_ref_id == -1){
+		// 	chrom_ref_id = bam_header->ref_id(locus.chrom.substr(3));
+		// }
+
 		// collecting reads mapped around locus
 		bamreader->SetRegion(locus.chrom, 
 			locus.start - flank_size > 0 ? locus.start - flank_size : 0, 
@@ -51,6 +55,7 @@ bool BamInfoExtract::GetReadLen(int32_t* read_len){
 		curr_streak = 0;
 		// Go through each alignment in the region until you have enough reads
 		while (bamreader->GetNextAlignment(alignment) and curr_streak < req_streak) {
+			has_reads = true;
 			if(alignment.QueryBases().size() == curr_len){
 				curr_streak++;
 			}
@@ -59,7 +64,8 @@ bool BamInfoExtract::GetReadLen(int32_t* read_len){
 				curr_streak = 0;
 			}
 		}
-		if (req_streak >= req_streak){
+
+		if (curr_streak >= req_streak){
 			*read_len = curr_len;
 			found_read_len = true;
 		}
@@ -67,18 +73,19 @@ bool BamInfoExtract::GetReadLen(int32_t* read_len){
 	return found_read_len;
 }
 
-bool BamInfoExtract::GetInsertSizeDistribution(double* mean, double* std_dev){
+bool BamInfoExtract::GetInsertSizeDistribution(double* mean, double* std_dev, double* coverage){
 	// TODO change 200000 flank size to something appropriate
 	int32_t flank_size = 200000;
 	int32_t exclusion_margin = 1000;
-	bool found_ins_distribution = false;
+	bool found_ins_distribution = false, found_coverage = false;
 	double mean_b, mean_a, std_b, std_a; // mean and std dev, before and after locus
 	int* valid_temp_len_arr;
 	std::vector<int32_t> temp_len_vec, valid_temp_len_vec;
 
+	int reads_before = 0, reads_after = 0;
 	// Header has info about chromosome names
 	const BamHeader* bam_header = bamreader->bam_header();
-	while(region_reader->GetNextRegion(&locus) and !found_ins_distribution){
+	while(region_reader->GetNextRegion(&locus) and !found_ins_distribution and !found_coverage){
 		const int32_t chrom_ref_id = bam_header->ref_id(locus.chrom);
 
 		int32_t median, size = 0, sum = 0, valid_size = 0, sum_std = 0;
@@ -90,7 +97,9 @@ bool BamInfoExtract::GetInsertSizeDistribution(double* mean, double* std_dev){
 			locus.start - exclusion_margin > 0 ? locus.start - exclusion_margin : 0);
 
 		// Go through each alignment in the region
+		reads_before = 0;
 		while (bamreader->GetNextAlignment(alignment)) {
+			reads_before++;
 			// Set template length
 			temp_len_vec.push_back(abs(alignment.TemplateLength()));
 			size++;
@@ -100,13 +109,24 @@ bool BamInfoExtract::GetInsertSizeDistribution(double* mean, double* std_dev){
 			locus.start + exclusion_margin, 
 			locus.start + flank_size);
 		// Go through each alignment in the region
+		reads_after = 0;
 		while (bamreader->GetNextAlignment(alignment)) {
+			reads_after++;
 			// Set template length
 			temp_len_vec.push_back(abs(alignment.TemplateLength()));
 			size++;
 		}
 		// if there's enough reads, compute and return TODO set 100 to a different number...
 		if (temp_len_vec.size() > 100) {
+			if (reads_before > reads_after){
+				*coverage = float(reads_before * alignment.QueryBases().size()) / float(flank_size - exclusion_margin - alignment.QueryBases().size());
+				found_coverage = true;
+			}
+			else {
+				*coverage = float(reads_after * alignment.QueryBases().size()) / float(flank_size - exclusion_margin - alignment.QueryBases().size());
+				found_coverage = true;
+			}
+
 			sort(temp_len_vec.begin(), temp_len_vec.end());
 			median = temp_len_vec.at(int32_t(size / 2));
 

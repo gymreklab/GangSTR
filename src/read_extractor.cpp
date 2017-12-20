@@ -511,11 +511,6 @@ bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
     if (score_frr > 0.70 * seq.size() * SSW_MATCH_SCORE && mismatches_frr <= .05 * seq.size()){
       // cerr << seq << endl;
       // cerr << mismatches_frr << "\t" << score_frr << endl;
-      if (alignment.Name() == "HKFMYALXX:6:2205:2099548:0"){
-        cerr << score_frr << endl;
-        cerr << mismatches_frr << endl;
-        cerr << int(*srt == SR_UNKNOWN) << endl;
-      }
       *srt = SR_IRR;
     }
   }
