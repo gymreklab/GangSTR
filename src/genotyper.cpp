@@ -87,7 +87,7 @@ bool Genotyper::ProcessLocus(BamCramMultiReader* bamreader, Locus* locus) {
   bool resampled = false;
 
   if (!likelihood_maximizer->OptimizeLikelihood(read_len, (int32_t)(locus->motif.size()),
-						ref_count, resampled,
+						ref_count, resampled, options->ploidy, 0,
 						&allele1, &allele2, &min_negLike)) {
     return false;
   }

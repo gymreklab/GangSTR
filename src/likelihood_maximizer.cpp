@@ -183,7 +183,7 @@ bool LikelihoodMaximizer::GetConfidenceInterval(const int32_t& read_len,
   int32_t allele1, allele2;
   // TODO allow change of alpha
   double alpha = 0.05;   // Tail error on each end
-  if (allele1 > allele2){
+  if (all1 > all2){
     allele2 = all1;
     allele1 = all2;
   }
@@ -192,18 +192,42 @@ bool LikelihoodMaximizer::GetConfidenceInterval(const int32_t& read_len,
     allele2 = all2;
   }
   int32_t num_boot_samp = options->num_boot_samp;
+  int32_t boot_al1_1, boot_al1_2, boot_al2_1, boot_al2_2;
   int32_t boot_al1, boot_al2;
   double min_negLike;
   std::vector<int32_t> small_alleles, large_alleles;
   for (int i = 0; i < num_boot_samp; i++){
     ResampleReadPool();
-    OptimizeLikelihood(read_len, motif_len, ref_count, true, &boot_al1, &boot_al2, &min_negLike);
-    
+    if (options->ploidy == 2){
+      OptimizeLikelihood(read_len, motif_len, ref_count, true, 1, allele1, &boot_al2_1, &boot_al2_2, &min_negLike);
+      OptimizeLikelihood(read_len, motif_len, ref_count, true, 1, allele2, &boot_al1_1, &boot_al1_2, &min_negLike);
+      if (boot_al1_1 == allele2)
+	boot_al1 = boot_al1_2;
+      else if (boot_al1_2 == allele2)
+	boot_al1 = boot_al1_1;
+      else
+	cerr<< "Hell Na\n";
+
+      if (boot_al2_1 == allele1)
+	boot_al2 = boot_al2_2;
+      else if (boot_al2_2 == allele1)
+	boot_al2 = boot_al2_1;
+      else
+	cerr<< "Hell Na\n";
+      double gt_ll1, gt_ll2;
+      GetGenotypeNegLogLikelihood(allele1, boot_al1, read_len, motif_len, ref_count, true, &gt_ll1);
+      GetGenotypeNegLogLikelihood(allele2, boot_al2, read_len, motif_len, ref_count, true, &gt_ll2);
+      //cerr << allele1 << ", "<< boot_al1 << "\t" << gt_ll1  << "\n";
+      //cerr << allele2 << ", "<< boot_al2 << "\t" << gt_ll2  << "\n";
+      // cerr << allele1 << "\t" << boot_al1 << endl;
+      // cerr << allele2 << "\t" << boot_al2 << endl;
+
+    }    
     // cerr<<min(boot_al1, boot_al2)<<"\t"<<max(boot_al1, boot_al2)<<endl;
     // small_alleles.push_back(min(boot_al1, boot_al2) - allele1);
     // large_alleles.push_back(max(boot_al1, boot_al2) - allele2);
-    small_alleles.push_back(min(boot_al1, boot_al2));
-    large_alleles.push_back(max(boot_al1, boot_al2));
+    small_alleles.push_back(boot_al1);
+    large_alleles.push_back(boot_al2);
     if (options->output_bootstrap) {
       bsfile_ << locus.chrom << "\t" << locus.start << "\t" << locus.end << "\t"
 	      << min(boot_al1, boot_al2) << "\t" << max(boot_al1, boot_al2) << endl;
@@ -274,7 +298,8 @@ bool LikelihoodMaximizer::GetGenotypeNegLogLikelihood(const int32_t& allele1,
 }
 
 bool LikelihoodMaximizer::OptimizeLikelihood(const int32_t& read_len, const int32_t& motif_len,
-					     const int32_t& ref_count, const bool& resampled,
+					     const int32_t& ref_count, const bool& resampled, 
+					     const int32_t& ploidy, const int32_t& fix_allele,
 					     int32_t* allele1, int32_t* allele2, double* min_negLike) {
 
   int32_t a1, a2, result, temp;
@@ -300,7 +325,7 @@ bool LikelihoodMaximizer::OptimizeLikelihood(const int32_t& read_len, const int3
   lower_bound_1d = 1;
   lower_bound_2d = 1;
 
-  if (options->ploidy == 2){
+  if (ploidy == 2){
 
     for (std::vector<int32_t>::iterator allele_it = allele_list.begin();
          allele_it != allele_list.end();
@@ -324,13 +349,17 @@ bool LikelihoodMaximizer::OptimizeLikelihood(const int32_t& read_len, const int3
           allele_list.push_back(*subl_it);
       }
     }
-  }
-  else if (options->ploidy == 1){
-    nlopt_1D_optimize(read_len, motif_len, ref_count, lower_bound_1d, upper_bound, resampled, this, 0, &a1, &result, &minf);
-    allele_list.push_back(a1);
-  }
-  findBestAlleleListTuple(allele_list, read_len, motif_len, ref_count, resampled,
+    findBestAlleleListTuple(allele_list, read_len, motif_len, ref_count, resampled, ploidy, 0,
                             allele1, allele2, min_negLike);
+
+  }
+  else if (ploidy == 1){
+    nlopt_1D_optimize(read_len, motif_len, ref_count, lower_bound_1d, upper_bound, resampled, this, fix_allele, &a1, &result, &minf);
+    allele_list.push_back(a1);
+    findBestAlleleListTuple(allele_list, read_len, motif_len, ref_count, resampled, ploidy, fix_allele,
+                            allele1, allele2, min_negLike);
+
+  }
   if (*allele1 > *allele2){
     temp = *allele1;
     *allele1 = *allele2;
@@ -353,11 +382,12 @@ bool LikelihoodMaximizer::OptimizeLikelihood(const int32_t& read_len, const int3
 
 bool LikelihoodMaximizer::findBestAlleleListTuple(std::vector<int32_t> allele_list,
                           int32_t read_len, int32_t motif_len, int32_t ref_count, bool resampled,
+			  int32_t ploidy, int32_t fix_allele,
                           int32_t* allele1, int32_t* allele2, double* min_negLike){
   double gt_ll;
   *min_negLike = 1000000;
   int32_t best_a1 = 0, best_a2 = 0;
-  if (options->ploidy == 2){
+  if (ploidy == 2){
     for (std::vector<int32_t>::iterator a1_it = allele_list.begin();
             a1_it != allele_list.end();
             a1_it++){
@@ -377,13 +407,13 @@ bool LikelihoodMaximizer::findBestAlleleListTuple(std::vector<int32_t> allele_li
       }
     }
   }
-  else if (options->ploidy == 1){
-    best_a2 = 0;
+  else if (ploidy == 1){
+    best_a2 = fix_allele;
     for (std::vector<int32_t>::iterator a1_it = allele_list.begin();
             a1_it != allele_list.end();
             a1_it++){
-      GetGenotypeNegLogLikelihood(*a1_it, 0, read_len, motif_len, ref_count, resampled, &gt_ll);
-      // cerr<<endl<<*a1_it<<"\t"<<*a2_it<<"\t"<<gt_ll<<endl;
+      GetGenotypeNegLogLikelihood(*a1_it, fix_allele, read_len, motif_len, ref_count, resampled, &gt_ll);
+      // cerr<<">> "<<fix_allele<<"\t"<<*a1_it<<"\t"<<gt_ll<<endl;
       if (gt_ll < *min_negLike){
         *min_negLike = gt_ll;
         best_a1 = *a1_it;
