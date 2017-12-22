@@ -77,6 +77,7 @@ void LikelihoodMaximizer::Reset() {
   frr_class_.Reset();
   spanning_class_.Reset();
   flanking_class_.Reset();
+  read_pool.clear();
 }
 
 void LikelihoodMaximizer::AddEnclosingData(const int32_t& data) {
@@ -215,10 +216,11 @@ bool LikelihoodMaximizer::GetConfidenceInterval(const int32_t& read_len,
       else
 	cerr<< "Hell Na\n";
       double gt_ll1, gt_ll2;
+      //PrintReadPool();
       GetGenotypeNegLogLikelihood(allele1, boot_al1, read_len, motif_len, ref_count, true, &gt_ll1);
-      GetGenotypeNegLogLikelihood(allele2, boot_al2, read_len, motif_len, ref_count, true, &gt_ll2);
+      GetGenotypeNegLogLikelihood(allele2, 6, read_len, motif_len, ref_count, true, &gt_ll2);
       //cerr << allele1 << ", "<< boot_al1 << "\t" << gt_ll1  << "\n";
-      //cerr << allele2 << ", "<< boot_al2 << "\t" << gt_ll2  << "\n";
+      //cerr << allele2 << ", "<< 6 << "\t" << gt_ll2  << "\n";
       // cerr << allele1 << "\t" << boot_al1 << endl;
       // cerr << allele2 << "\t" << boot_al2 << endl;
 
