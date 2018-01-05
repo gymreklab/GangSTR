@@ -432,6 +432,7 @@ LikelihoodMaximizer::~LikelihoodMaximizer() {
   if (options->output_bootstrap) {
     bsfile_.close();
   }
+  gsl_rng_free(r);
 }
 
 double nloptNegLikelihood(unsigned n, const double *x, double *grad, void *data)

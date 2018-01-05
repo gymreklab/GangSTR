@@ -221,6 +221,9 @@ bool striped_smith_waterman(const std::string& ref,
   *score = alignment->sw_score;
   *mismatches = alignment->mismatches;
   // cerr<<ref.substr(alignment->ref_begin, alignment->ref_end)<<endl;
+  delete aligner;
+  delete filter;
+  delete alignment;
   return true;
 }
 

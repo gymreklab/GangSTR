@@ -64,4 +64,6 @@ bool RefGenome::GetSequence(const std::string& _chrom,
   return true;
 }
 
-RefGenome::~RefGenome() {}
+RefGenome::~RefGenome() {
+  //fai_destroy(refindex);
+}
