@@ -278,25 +278,51 @@ bool LikelihoodMaximizer::GetGenotypeNegLogLikelihood(const int32_t& allele1,
 						      const int32_t& ref_count,
                   const bool& resampled,
 						      double* gt_ll) {
-  double frr_ll, span_ll, encl_ll, flank_ll = 0.0;
+  double frr_count_ll, frr_ll, span_ll, encl_ll, flank_ll = 0.0;
+  double count_weight = log(options->coverage);
   if (!resampled){
-    frr_class_.GetClassLogLikelihood(allele1, allele2, read_len, motif_len, ref_count, options->ploidy, &frr_ll);
-    spanning_class_.GetClassLogLikelihood(allele1, allele2, read_len, motif_len, ref_count, options->ploidy, &span_ll);
-    enclosing_class_.GetClassLogLikelihood(allele1, allele2, read_len, motif_len, ref_count, options->ploidy, &encl_ll);
+    frr_class_.GetClassLogLikelihood(allele1, allele2, 
+				     read_len, motif_len, ref_count, 
+				     options->ploidy, &frr_ll);
+    spanning_class_.GetClassLogLikelihood(allele1, allele2, 
+					  read_len, motif_len, ref_count, 
+					  options->ploidy, &span_ll);
+    enclosing_class_.GetClassLogLikelihood(allele1, allele2, 
+					   read_len, motif_len, ref_count, 
+					   options->ploidy, &encl_ll);
     // flanking class overloads GetClassLogLikelihood function
-    flanking_class_.FlankingClass::GetClassLogLikelihood(allele1, allele2, read_len, motif_len, ref_count, options->ploidy, &flank_ll);
+    flanking_class_.FlankingClass::GetClassLogLikelihood(allele1, allele2, 
+							 read_len, motif_len, ref_count, 
+							 options->ploidy, &flank_ll);
+    if (options->coverage > 0 && frr_class_.GetDataSize() > 0){
+      frr_class_.GetCountLogLikelihood(allele1, allele2,
+				    read_len, motif_len, options->coverage,
+				    options->ploidy, &frr_count_ll);
+      //      cerr << allele1 << " " << allele2 << " " << 
+      //	frr_class_.GetDataSize() << "\t"<<
+      //	count_weight * frr_count_ll<<endl;
+    }
   }
   else {
-    resampled_frr_class_.GetClassLogLikelihood(allele1, allele2, read_len, motif_len, ref_count, options->ploidy, &frr_ll);
-    resampled_spanning_class_.GetClassLogLikelihood(allele1, allele2, read_len, motif_len, ref_count, options->ploidy, &span_ll);
-    resampled_enclosing_class_.GetClassLogLikelihood(allele1, allele2, read_len, motif_len, ref_count, options->ploidy, &encl_ll);
+    resampled_frr_class_.GetClassLogLikelihood(allele1, allele2, 
+					       read_len, motif_len, ref_count, 
+					       options->ploidy, &frr_ll);
+    resampled_spanning_class_.GetClassLogLikelihood(allele1, allele2, 
+						    read_len, motif_len, ref_count, 
+						    options->ploidy, &span_ll);
+    resampled_enclosing_class_.GetClassLogLikelihood(allele1, allele2, 
+						     read_len, motif_len, ref_count, 
+						     options->ploidy, &encl_ll);
     // flanking class overloads GetClassLogLikelihood function
-    resampled_flanking_class_.FlankingClass::GetClassLogLikelihood(allele1, allele2, read_len, motif_len, ref_count, options->ploidy, &flank_ll); 
+    resampled_flanking_class_.FlankingClass::GetClassLogLikelihood(allele1, allele2, 
+								   read_len, motif_len, ref_count, 
+								   options->ploidy, &flank_ll); 
   }
   *gt_ll = -1*(options->frr_weight*frr_ll +
 	       options->spanning_weight*span_ll +
 	       options->enclosing_weight*encl_ll + 
-         options->flanking_weight*flank_ll);
+	       options->flanking_weight*flank_ll);
+	       // count_weight * frr_count_ll);
 }
 
 bool LikelihoodMaximizer::OptimizeLikelihood(const int32_t& read_len, const int32_t& motif_len,
