@@ -197,7 +197,7 @@ bool LikelihoodMaximizer::GetConfidenceInterval(const int32_t& read_len,
   int32_t boot_al1, boot_al2;
   double min_negLike;
   std::vector<int32_t> small_alleles, large_alleles;
-  for (int i = 0; i < num_boot_samp; i++){
+  for (int i = 0; i < num_boot_samp + 1; i++){
     ResampleReadPool();
     if (options->ploidy == 2){
       OptimizeLikelihood(read_len, motif_len, ref_count, true, 1, allele1, &boot_al2_1, &boot_al2_2, &min_negLike);
@@ -223,8 +223,8 @@ bool LikelihoodMaximizer::GetConfidenceInterval(const int32_t& read_len,
       //cerr << allele2 << ", "<< 6 << "\t" << gt_ll2  << "\n";
       // cerr << allele1 << "\t" << boot_al1 << endl;
       // cerr << allele2 << "\t" << boot_al2 << endl;
-
     }    
+    
     // cerr<<min(boot_al1, boot_al2)<<"\t"<<max(boot_al1, boot_al2)<<endl;
     // small_alleles.push_back(min(boot_al1, boot_al2) - allele1);
     // large_alleles.push_back(max(boot_al1, boot_al2) - allele2);
