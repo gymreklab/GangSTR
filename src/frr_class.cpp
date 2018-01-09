@@ -110,6 +110,7 @@ bool FRRClass::GetCountLogLikelihood(const int32_t& allele1,
 				     const double& coverage,
 				     const int32_t& ploidy,
 				     double* count_ll){
+  
   int32_t frr_count = GetDataSize();
   double frr_thresh = double(read_len) / double(motif_len);
   double exp_count1 = coverage / double(read_len) * double(allele1 * motif_len);
