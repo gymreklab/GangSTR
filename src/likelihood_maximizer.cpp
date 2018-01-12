@@ -278,8 +278,13 @@ bool LikelihoodMaximizer::GetGenotypeNegLogLikelihood(const int32_t& allele1,
 						      const int32_t& ref_count,
                   const bool& resampled,
 						      double* gt_ll) {
-  double frr_count_ll, frr_ll, span_ll, encl_ll, flank_ll = 0.0;
-  double count_weight = log(options->coverage);
+  double frr_count_ll = 0.0, frr_ll, span_ll, encl_ll, flank_ll = 0.0;
+  double count_weight = 0.001 * options->coverage;
+  double cov = options -> coverage;
+  int frr_count = frr_class_.GetDataSize();
+  int read_count = frr_count + enclosing_class_.GetDataSize() +
+      spanning_class_.GetDataSize() + flanking_class_.GetDataSize();
+
   if (!resampled){
     frr_class_.GetClassLogLikelihood(allele1, allele2, 
 				     read_len, motif_len, ref_count, 
@@ -294,9 +299,6 @@ bool LikelihoodMaximizer::GetGenotypeNegLogLikelihood(const int32_t& allele1,
     flanking_class_.FlankingClass::GetClassLogLikelihood(allele1, allele2, 
 							 read_len, motif_len, ref_count, 
 							 options->ploidy, &flank_ll);
-    double cov = options -> coverage;
-    int frr_count = frr_class_.GetDataSize();
-    
     // TODO Substituting these lines changes optimization result. Find out why?!
     //if ((options->coverage > 0) && (frr_class_.GetDataSize() > 0)){
     if (cov > 0 && frr_count > 0){
@@ -320,11 +322,11 @@ bool LikelihoodMaximizer::GetGenotypeNegLogLikelihood(const int32_t& allele1,
 								   read_len, motif_len, ref_count, 
 								   options->ploidy, &flank_ll); 
   }
-  *gt_ll = -1*(options->frr_weight*frr_ll +
-	       options->spanning_weight*span_ll +
-	       options->enclosing_weight*encl_ll + 
-	       options->flanking_weight*flank_ll);
-  //	       count_weight * frr_count_ll);
+  *gt_ll = -1*(1.0 / read_count * (options->frr_weight * frr_ll +
+				options->spanning_weight * span_ll +
+				options->enclosing_weight * encl_ll + 
+				options->flanking_weight * flank_ll) + 
+  	       count_weight * frr_count_ll);
 }
 
 bool LikelihoodMaximizer::OptimizeLikelihood(const int32_t& read_len, const int32_t& motif_len,
@@ -352,15 +354,16 @@ bool LikelihoodMaximizer::OptimizeLikelihood(const int32_t& read_len, const int3
   //   lower_bound_2d = int32_t((read_len - 2 * MARGIN) / motif_len - 1);
   // }
   
-
-  /*
+    
+  if (!resampled){
   double res;
-  for (int ii = 10; ii <180 ; ii+=20){
-    GetGenotypeNegLogLikelihood(ii, 0, read_len, motif_len, ref_count, resampled, &res);
-    cerr << ii <<" ->\t" << res << endl;
+  int fix = 60;
+  for (int ii = 10; ii <100 ; ii+=10){
+    GetGenotypeNegLogLikelihood(ii, fix, read_len, motif_len, ref_count, resampled, &res);
+    cerr << ii << ", "<< fix <<" ->\t" << res << endl;
   } 
-
-  */
+  }
+  
 
 
 
@@ -512,7 +515,7 @@ bool nlopt_2D_optimize(const int32_t& read_len, const int32_t& motif_len,
                const int32_t& ref_count, const int32_t& lower_bound,
                const int32_t& upper_bound, const bool& resampled, LikelihoodMaximizer* lm_ptr,
                int32_t* allele1, int32_t* allele2, int32_t* ret_result, double* minf_ret) {
-  nlopt::opt opt(nlopt::LN_COBYLA, 2);
+  nlopt::opt opt(nlopt::LN_BOBYQA, 2);
   // opt.set_local_optimizer(nlopt::LN_COBYLA)   // TODO check nlopt::G_MLSL_LDS->multiple local
   std::vector<double> lb(2);
   lb[0] = lower_bound;
