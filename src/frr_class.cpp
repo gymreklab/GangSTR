@@ -113,10 +113,12 @@ bool FRRClass::GetCountLogLikelihood(const int32_t& allele1,
   
   int32_t frr_count = GetDataSize();
   double frr_thresh = double(read_len) / double(motif_len);
-  double exp_count1 = coverage / double(read_len) * double(allele1 * motif_len);
-  double exp_count2 = coverage / double(read_len) * double(allele2 * motif_len); 
-  double lambda = (allele1 >= frr_thresh ? exp_count1 - 1 : 0) + 
-    (allele2 >= frr_thresh ? exp_count2 - 1: 0);// Poisson parameter: Total expected number of FRRs
+  double exp_count1 = coverage / 2.0 / double(read_len) * double(allele1 * motif_len - read_len);
+  double exp_count2 = coverage / 2.0 / double(read_len) * double(allele2 * motif_len - read_len); 
+  double lambda = (allele1 >= frr_thresh ? exp_count1 : 0) + 
+    (allele2 >= frr_thresh ? exp_count2: 0);// Poisson parameter: Total expected number of FRRs
+  //  std::cerr<<allele1<< ": "<< exp_count1<<", "<<allele2<<": "<< exp_count2<<endl;
+  //  std::cerr<<allele1<<", "<<allele2<<"\texp:"<<lambda<<"\treal:"<<frr_count<<endl;
   double prob = 0;
   if (lambda <= 0){
     *count_ll = NEG_INF;

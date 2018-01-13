@@ -354,7 +354,7 @@ bool LikelihoodMaximizer::OptimizeLikelihood(const int32_t& read_len, const int3
   //   lower_bound_2d = int32_t((read_len - 2 * MARGIN) / motif_len - 1);
   // }
   
-    
+  /*    
   if (!resampled){
   double res;
   int fix = 60;
@@ -363,7 +363,7 @@ bool LikelihoodMaximizer::OptimizeLikelihood(const int32_t& read_len, const int3
     cerr << ii << ", "<< fix <<" ->\t" << res << endl;
   } 
   }
-  
+  */
 
 
 
