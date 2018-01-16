@@ -279,13 +279,16 @@ bool LikelihoodMaximizer::GetGenotypeNegLogLikelihood(const int32_t& allele1,
                   const bool& resampled,
 						      double* gt_ll) {
   double frr_count_ll = 0.0, frr_ll, span_ll, encl_ll, flank_ll = 0.0;
-  double count_weight = 0.01 * options->coverage;
+  double count_weight = .01 * options->coverage;
   double cov = options -> coverage;
-  int frr_count = frr_class_.GetDataSize();
-  int read_count = frr_count + enclosing_class_.GetDataSize() +
-      spanning_class_.GetDataSize() + flanking_class_.GetDataSize();
+  int frr_count;
+  int read_count;
 
   if (!resampled){
+    frr_count = frr_class_.GetDataSize();
+    read_count = frr_count + enclosing_class_.GetDataSize() +
+      spanning_class_.GetDataSize() + flanking_class_.GetDataSize();
+
     frr_class_.GetClassLogLikelihood(allele1, allele2, 
 				     read_len, motif_len, ref_count, 
 				     options->ploidy, &frr_ll);
@@ -308,6 +311,10 @@ bool LikelihoodMaximizer::GetGenotypeNegLogLikelihood(const int32_t& allele1,
     }
   }
   else {
+    frr_count = resampled_frr_class_.GetDataSize();
+    read_count = frr_count + resampled_enclosing_class_.GetDataSize() +
+      resampled_spanning_class_.GetDataSize() + resampled_flanking_class_.GetDataSize();
+
     resampled_frr_class_.GetClassLogLikelihood(allele1, allele2, 
 					       read_len, motif_len, ref_count, 
 					       options->ploidy, &frr_ll);
@@ -321,6 +328,13 @@ bool LikelihoodMaximizer::GetGenotypeNegLogLikelihood(const int32_t& allele1,
     resampled_flanking_class_.FlankingClass::GetClassLogLikelihood(allele1, allele2, 
 								   read_len, motif_len, ref_count, 
 								   options->ploidy, &flank_ll); 
+    
+    if (cov > 0 && frr_count > 0){
+      resampled_frr_class_.GetCountLogLikelihood(allele1, allele2,
+      				    read_len, motif_len, options->coverage,
+      				    options->ploidy, &frr_count_ll);
+    
+    }
   }
   *gt_ll = -1*(1.0 / read_count * (options->frr_weight * frr_ll +
 				options->spanning_weight * span_ll +
@@ -342,29 +356,17 @@ bool LikelihoodMaximizer::OptimizeLikelihood(const int32_t& read_len, const int3
   ResampleReadPool();
   int32_t upper_bound = 500; // TODO Change 200 for number depending the parameters
   int32_t lower_bound_1d, lower_bound_2d;
-  // if (allele_list.size() == 0){
-  //   lower_bound_1d = 1;
-  //   lower_bound_2d = 1;
-  // } else if (allele_list.size() == 1){
-  //   lower_bound_1d = int32_t((read_len) / motif_len);
-  //   lower_bound_2d = 1;
-  // }
-  // else if (allele_list.size() >= 2) {
-  //   lower_bound_1d = int32_t((read_len) / motif_len);
-  //   lower_bound_2d = int32_t((read_len - 2 * MARGIN) / motif_len - 1);
-  // }
   
-  /*    
+  /*
   if (!resampled){
   double res;
-  int fix = 75;
-  for (int ii = 10; ii <100 ; ii+=10){
+  int fix = 29;
+  for (int ii = 10; ii <120 ; ii+=10){
     GetGenotypeNegLogLikelihood(ii, fix, read_len, motif_len, ref_count, resampled, &res);
     cerr << ii << ", "<< fix <<" ->\t" << res << endl;
   } 
   }
   */
-
 
 
   lower_bound_1d = 1;
@@ -396,7 +398,6 @@ bool LikelihoodMaximizer::OptimizeLikelihood(const int32_t& read_len, const int3
     }
     findBestAlleleListTuple(allele_list, read_len, motif_len, ref_count, resampled, ploidy, 0,
                             allele1, allele2, min_negLike);
-
   }
   else if (ploidy == 1){
     nlopt_1D_optimize(read_len, motif_len, ref_count, lower_bound_1d, upper_bound, resampled, this, fix_allele, &a1, &result, &minf);
@@ -410,17 +411,6 @@ bool LikelihoodMaximizer::OptimizeLikelihood(const int32_t& read_len, const int3
     *allele1 = *allele2;
     *allele2 = temp;
   }
-  // if (!resampled){
-  //   double gt_ll;
-  //   for (int jj = 20; jj < 100; jj += 10){
-  //     GetGenotypeNegLogLikelihood(*allele1, jj, read_len, motif_len, ref_count, resampled, &gt_ll);
-  //     cerr<<*allele1<<","<<jj<<"\t"<<gt_ll<<endl;
-  //   }
-  // }
-  // cerr<<endl<<*allele1<<"\t"<<*allele2<<"\t"<<*min_negLike<<endl;
-  // if (!resampled){
-  //   PlotLikelihood(30, 10, 100, 5, read_len, motif_len, ref_count);
-  // }
   return true;    // TODO add false
 }
 
