@@ -279,7 +279,7 @@ bool LikelihoodMaximizer::GetGenotypeNegLogLikelihood(const int32_t& allele1,
                   const bool& resampled,
 						      double* gt_ll) {
   double frr_count_ll = 0.0, frr_ll, span_ll, encl_ll, flank_ll = 0.0;
-  double count_weight = 0.001 * options->coverage;
+  double count_weight = 0.01 * options->coverage;
   double cov = options -> coverage;
   int frr_count = frr_class_.GetDataSize();
   int read_count = frr_count + enclosing_class_.GetDataSize() +
@@ -357,7 +357,7 @@ bool LikelihoodMaximizer::OptimizeLikelihood(const int32_t& read_len, const int3
   /*    
   if (!resampled){
   double res;
-  int fix = 60;
+  int fix = 75;
   for (int ii = 10; ii <100 ; ii+=10){
     GetGenotypeNegLogLikelihood(ii, fix, read_len, motif_len, ref_count, resampled, &res);
     cerr << ii << ", "<< fix <<" ->\t" << res << endl;
@@ -515,7 +515,7 @@ bool nlopt_2D_optimize(const int32_t& read_len, const int32_t& motif_len,
                const int32_t& ref_count, const int32_t& lower_bound,
                const int32_t& upper_bound, const bool& resampled, LikelihoodMaximizer* lm_ptr,
                int32_t* allele1, int32_t* allele2, int32_t* ret_result, double* minf_ret) {
-  nlopt::opt opt(nlopt::LN_BOBYQA, 2);
+  nlopt::opt opt(nlopt::LN_COBYLA, 2);
   // opt.set_local_optimizer(nlopt::LN_COBYLA)   // TODO check nlopt::G_MLSL_LDS->multiple local
   std::vector<double> lb(2);
   lb[0] = lower_bound;
@@ -532,16 +532,26 @@ bool nlopt_2D_optimize(const int32_t& read_len, const int32_t& motif_len,
 
   opt.set_min_objective(nloptNegLikelihood, data);    // Change to max for maximization
 
-  opt.set_xtol_rel(1e-5);   // TODO set something appropriate
+  opt.set_xtol_rel(.00005);   // TODO set something appropriate
 
   std::vector<double> xx(2);
-  xx[0] = int32_t(1.1 * (read_len / motif_len));
-  xx[1] = int32_t(1.2 * (read_len / motif_len));
-  double minf;
-  nlopt::result result = opt.optimize(xx, minf);
-  *allele1 = int32_t(xx[0]);
-  *allele2 = int32_t(xx[1]);
-  *ret_result = result;
+  double minf=100000.0, f;
+  nlopt::result result;
+  for (double j = 0.6; j <= 1.4 ; j+=0.4) {
+    xx[0] = int32_t(j * (read_len / motif_len));
+    xx[1] = int32_t((j + .1) * (read_len / motif_len));
+    
+    result = opt.optimize(xx, f);
+    if (f < minf){
+      *allele1 = int32_t(xx[0]);
+      *allele2 = int32_t(xx[1]);
+      *ret_result = result;
+      
+      minf = f;
+    }
+    
+  }
+  
   *minf_ret = minf;
   return true;  // TODO add false
 }
@@ -566,7 +576,7 @@ bool nlopt_1D_optimize(const int32_t& read_len, const int32_t& motif_len,
   
   opt.set_min_objective(nloptNegLikelihood, data);    // Change to max for maximization
 
-  opt.set_xtol_rel(1e-5);   // TODO set something appropriate
+  opt.set_xtol_rel(.0005);   // TODO set something appropriate
 
   std::vector<double> xx(1);
   xx[0] = int32_t(1.1 * (read_len / motif_len));
