@@ -498,9 +498,10 @@ class BamCramReader {
     sam_close(in_);
 
     hts_idx_destroy(idx_);
-
+    
     if (iter_ != NULL)
       hts_itr_destroy(iter_);
+    
   }
 
   bool GetNextAlignment(BamAlignment& aln);

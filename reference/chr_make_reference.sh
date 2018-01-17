@@ -43,8 +43,8 @@ if ! type ${TRF} > /dev/null 2>&1; then
 fi
 
 matchscore=2
-mismatchscore=10
-indelscore=7
+mismatchscore=5
+indelscore=17
 maxperiod=10 # Largest repeat unit
 pm=80
 pi=10
@@ -71,8 +71,8 @@ done | xargs -P${NUMPROC} -I% -n 1 sh -c "%"
 # TODO implement here any other filters we would like to have on the reference
 for chrom in $(seq 1 22)
 do
-    cat ${tmpdir}/chr${chrom}.fa.2.7.7.80.10.24.100.dat | \
+    cat ${tmpdir}/chr${chrom}.fa.${matchscore}.${mismatchscore}.${indelscore}.${pm}.${pi}.${minscore}.${maxperiod}.dat | \
 	awk -F' ' '(NF==15)' | \
-	awk -v "chrom=$chrom" -F' ' '{print chrom "\t" $1 "\t" $2 "\t" $3 "\t" $14 "\t" $15}' | \
+	awk -v "chrom=$chrom" -F' ' '{print "chr" chrom "\t" $1 "\t" $2 "\t" $3 "\t" $14 "\t" $15}' | \
 	awk -v "maxlen=${maxlen}" '(($3-$2) <= maxlen)'
 done > ${OUTFILE}

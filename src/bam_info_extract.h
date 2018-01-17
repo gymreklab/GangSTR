@@ -34,7 +34,7 @@ public:
 						RegionReader* region_reader_);
 	~BamInfoExtract();
 	bool GetReadLen(int32_t* read_len);
-	bool GetInsertSizeDistribution(double* mean, double* std_dev);
+	bool GetInsertSizeDistribution(double* mean, double* std_dev, double *coverage);
 private:
 	Options* options;
 	RegionReader* region_reader;

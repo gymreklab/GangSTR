@@ -508,7 +508,7 @@ bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
     std::string frr_ref = var_realign_frr.str();
     striped_smith_waterman(frr_ref, seq, qual, &pos_frr, &end_frr, &score_frr, &mismatches_frr);
     // cerr << mismatches_frr << "\t" << seq << endl;
-    if (score_frr > 0.70 * seq.size() * SSW_MATCH_SCORE && mismatches_frr <= .10 * seq.size()){
+    if (score_frr > 0.70 * seq.size() * SSW_MATCH_SCORE && mismatches_frr <= .05 * seq.size()){
       // cerr << seq << endl;
       // cerr << mismatches_frr << "\t" << score_frr << endl;
       *srt = SR_IRR;

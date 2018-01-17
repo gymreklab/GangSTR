@@ -45,6 +45,7 @@ Options::Options() {
   outprefix = "";
   dist_mean = -1;
   dist_sdev = -1;
+  coverage = -1;
   read_len = -1;
   dist_max = -1;
   min_score = 75;

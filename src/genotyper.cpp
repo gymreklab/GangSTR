@@ -87,7 +87,7 @@ bool Genotyper::ProcessLocus(BamCramMultiReader* bamreader, Locus* locus) {
   bool resampled = false;
 
   if (!likelihood_maximizer->OptimizeLikelihood(read_len, (int32_t)(locus->motif.size()),
-						ref_count, resampled,
+						ref_count, resampled, options->ploidy, 0,
 						&allele1, &allele2, &min_negLike)) {
     return false;
   }
@@ -113,28 +113,30 @@ bool Genotyper::ProcessLocus(BamCramMultiReader* bamreader, Locus* locus) {
   //   cout<<">>Resampled Results:\t"<<allele1<<", "<<allele2<<"\tlikelihood = "<<min_negLike<<"\n";
   // }
 
-  if (options->verbose) {
-    PrintMessageDieOnError("\tGetting confidence intervals", M_PROGRESS);
-  }
-  if (!likelihood_maximizer->GetConfidenceInterval(read_len, (int32_t)(locus->motif.size()),
+  if (options->num_boot_samp > 0){
+    if (options->verbose) {
+      PrintMessageDieOnError("\tGetting confidence intervals", M_PROGRESS);
+    }
+    if (!likelihood_maximizer->GetConfidenceInterval(read_len, (int32_t)(locus->motif.size()),
 						   ref_count, allele1, allele2, *locus,
 						   &lob1, &hib1, &lob2, &hib2)) {
-    return false;
+      return false;
+    }
+    locus->lob1 = lob1;
+    locus->lob2 = lob2;
+    locus->hib1 = hib1;
+    locus->hib2 = hib2;
+    // Bootstrapping method from Davison and Hinkley 1997
+    // cout<<"@@Small Allele Bound:\t["<<2 * allele1 - hib1<<", "<<2 * allele1 - lob1<<"]\n";
+    // cout<<"@@Large Allele Bound:\t["<<2 * allele2 - hib2<<", "<<2 * allele2 - lob2<<"]\n";
+    locus->lob1 = lob1;
+    locus->hib1 = hib1;
+    locus->lob2 = lob2;
+    locus->hib2 = hib2;
+    // 
+    cout<<"@@Small Allele Bound:\t["<<lob1<<", "<<hib1<<"]\n";
+    cout<<"@@Large Allele Bound:\t["<<lob2<<", "<<hib2<<"]\n";
   }
-  locus->lob1 = lob1;
-  locus->lob2 = lob2;
-  locus->hib1 = hib1;
-  locus->hib2 = hib2;
-  // Bootstrapping method from Davison and Hinkley 1997
-  // cout<<"@@Small Allele Bound:\t["<<2 * allele1 - hib1<<", "<<2 * allele1 - lob1<<"]\n";
-  // cout<<"@@Large Allele Bound:\t["<<2 * allele2 - hib2<<", "<<2 * allele2 - lob2<<"]\n";
-  locus->lob1 = lob1;
-  locus->hib1 = hib1;
-  locus->lob2 = lob2;
-  locus->hib2 = hib2;
-  // 
-  cout<<"@@Small Allele Bound:\t["<<lob1<<", "<<hib1<<"]\n";
-  cout<<"@@Large Allele Bound:\t["<<lob2<<", "<<hib2<<"]\n";
   return true;
 }
 
