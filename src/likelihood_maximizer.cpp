@@ -283,6 +283,10 @@ bool LikelihoodMaximizer::GetGenotypeNegLogLikelihood(const int32_t& allele1,
   double cov = options -> coverage;
   int frr_count;
   int read_count;
+  if (allele1 <= 0 || allele2 <= 0){
+    *gt_ll = frr_class_.NEG_INF;
+    return true;
+  }
 
   if (!resampled){
     frr_count = frr_class_.GetDataSize();
@@ -336,11 +340,13 @@ bool LikelihoodMaximizer::GetGenotypeNegLogLikelihood(const int32_t& allele1,
     
     }
   }
+
   *gt_ll = -1*(1.0 / read_count * (options->frr_weight * frr_ll +
 				options->spanning_weight * span_ll +
 				options->enclosing_weight * encl_ll + 
 				options->flanking_weight * flank_ll) + 
   	       count_weight * frr_count_ll);
+  return true;
 }
 
 bool LikelihoodMaximizer::OptimizeLikelihood(const int32_t& read_len, const int32_t& motif_len,
@@ -357,11 +363,11 @@ bool LikelihoodMaximizer::OptimizeLikelihood(const int32_t& read_len, const int3
   int32_t upper_bound = 500; // TODO Change 200 for number depending the parameters
   int32_t lower_bound_1d, lower_bound_2d;
   
-  /*
+  /*  
   if (!resampled){
   double res;
-  int fix = 29;
-  for (int ii = 10; ii <120 ; ii+=10){
+  int fix = 214;
+  for (int ii = 10; ii <280 ; ii+=30){
     GetGenotypeNegLogLikelihood(ii, fix, read_len, motif_len, ref_count, resampled, &res);
     cerr << ii << ", "<< fix <<" ->\t" << res << endl;
   } 
