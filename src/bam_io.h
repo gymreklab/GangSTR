@@ -214,6 +214,7 @@ class BamAlignment {
   bool IsFirstMate()         const { return (b_->core.flag & BAM_FREAD1)       != 0;}
   bool IsSecondMate()        const { return (b_->core.flag & BAM_FREAD2)       != 0;}
   bool IsSupplementary()     const { return (b_->core.flag & BAM_FSUPPLEMENTARY) != 0;}
+  bool IsSecondary() const { return (b_->core.flag & BAM_FSECONDARY) != 0;}
 
   bool StartsWithSoftClip(){
     if (!built_) ExtractSequenceFields();

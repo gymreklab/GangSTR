@@ -56,15 +56,19 @@ bool ReadExtractor::ExtractReads(BamCramMultiReader* bamreader,
   /* Load data into likelihood maximizer */
   for (std::map<std::string, ReadPair>::const_iterator iter = read_pairs.begin();
        iter != read_pairs.end(); iter++) {
-
-    // if (iter->second.read_type != RC_DISCARD and iter->second.read_type != RC_UNKNOWN)
-    //   cout<<iter->first<<"\t"<<iter->second.read_type<<"\t"<<iter->second.data_value<<endl;
-    
+    /*
+    if (iter->second.read_type != RC_DISCARD and iter->second.read_type != RC_UNKNOWN)
+    {
+      cout<<iter->first<<"\t"<<iter->second.read_type<<"\t"<<iter->second.data_value<<endl;
+      cout<<((BamAlignment)iter->second.read1).QueryBases()<<endl;
+      cout<<((BamAlignment)iter->second.read2).QueryBases()<<endl;
+    }
+    */
     if (iter->second.read_type == RC_SPAN) {
       if (iter->second.data_value < options.dist_max){
         if (options.output_readinfo) {
-    readfile_ << locus.chrom << "\t" << locus.start << "\t" << locus.end << "\t"
-        << iter->first << "\t" << "SPAN" << "\t" << iter->second.data_value << "\t" << iter->second.found_pair << std::endl;
+	  readfile_ << locus.chrom << "\t" << locus.start << "\t" << locus.end << "\t"
+	  << iter->first << "\t" << "SPAN" << "\t" << iter->second.data_value << "\t" << iter->second.found_pair << std::endl;
         }
         likelihood_maximizer->AddSpanningData(iter->second.data_value);
         span++;
@@ -147,9 +151,9 @@ bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
     if (debug) {
       std::cerr << "Processing " << alignment.Name() << std::endl;
     }
-
+    
     // Check if we should skip this read
-    if (alignment.IsSupplementary()) {
+    if (alignment.IsSupplementary() || alignment.IsSecondary()) {
       continue;
     }
 
@@ -200,7 +204,7 @@ bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
         SingleReadType srt;
         ProcessSingleRead(alignment, chrom_ref_id, locus, min_match,
               &data_value, &nCopy_value, &score_value, &read_type, &srt);
-
+ 
         if (debug) {
           std::cerr << "Mate found to be   " << read_type << std:: endl;
         }
@@ -298,7 +302,6 @@ bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
   /*  Second pass through reads where only one end processed */
   for (std::map<std::string, ReadPair>::iterator iter = read_pairs->begin();
        iter != read_pairs->end(); iter++) {
-
     if (iter->second.found_pair || iter->second.read_type == RC_FRR || 
                   iter->second.read_type == RC_ENCL) {  // Changed similar to first pass
       continue;
@@ -314,8 +317,8 @@ bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
       std::cerr << "Found mate for " << iter->first << std::endl;
     }
 
-
     iter->second.read2 = matepair;
+
     iter->second.found_pair = true;
     int32_t data_value, score_value;
     int32_t nCopy_value = 0;
@@ -624,6 +627,7 @@ bool ReadExtractor::RescueMate(BamCramMultiReader* bamreader,
   bamreader->SetRegion(bam_header->ref_name(alignment.MateRefID()),
            alignment.MatePosition()-1, alignment.MatePosition()+1);
   BamAlignment aln;
+
   while (bamreader->GetNextAlignment(aln)) {
     std::string aln_key2 = trim_alignment_name(aln);
     if (debug) {
