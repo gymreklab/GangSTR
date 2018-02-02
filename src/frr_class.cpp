@@ -117,7 +117,7 @@ bool FRRClass::GetCountLogLikelihood(const int32_t& allele1,
   double exp_count2 = coverage / 2.0 / double(read_len) * double(allele2 * motif_len - read_len); 
   double lambda = (allele1 >= frr_thresh ? exp_count1 : 0) + 
     (allele2 >= frr_thresh ? exp_count2: 0);// Poisson parameter: Total expected number of FRRs
-  lambda = lambda * 1.4;
+  lambda = lambda * 1.0;
   // std::cerr<<allele1<< ": "<< exp_count1<<", "<<allele2<<": "<< exp_count2<<endl;
   // std::cerr<<allele1<<", "<<allele2<<"\texp:"<<lambda<<"\treal:"<<frr_count<<endl;
 

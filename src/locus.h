@@ -51,6 +51,11 @@ class Locus {
   size_t frr_reads;
   size_t flanking_reads;
   size_t depth;
+
+  // Off target loci
+  std::string offchrom;
+  int offstart;
+  int offend;
 };
 
 #endif  // SRC_LOCUS_H__

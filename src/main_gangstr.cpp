@@ -334,6 +334,10 @@ int main(int argc, char* argv[]) {
     ss.str("");
     ss.clear();
     ss << "Processing " << locus.chrom << ":" << locus.start;
+    locus.offchrom = "chr18";
+      locus.offstart = 55586148;
+      locus.offend = 55586156;
+
     PrintMessageDieOnError(ss.str(), M_PROGRESS);
     locus.insert_size_mean = options.dist_mean;
     locus.insert_size_stddev = options.dist_sdev = std_dev;
