@@ -43,9 +43,8 @@ Locus::Locus() {
   flanking_reads = 0;
   depth = 0;
 
-  offchrom = "";
-  offstart = -1;
-  offend = -1;
+  offtarget_set = false;
+  
 }
 
 Locus::~Locus() {}

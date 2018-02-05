@@ -46,24 +46,24 @@ void show_help() {
 	   << "--out <outprefix> "
 	   << "\n\nOptions:\n"
 	   << "-h,--help      display this help screen\n"
-     << "--frrweight   weight of FRR reads in the likelihood model\n"
-     << "--enclweight  weight of enclosing reads in the likelihood model\n"
-     << "--spanweight  weight of spanning reads in the likelihood model\n"
-     << "--flankweight weight of flanking reads in the likelihood model\n"
-     << "--ploidy       Indicate whether data is haploid (1) or diploid (2)\n"
-     << "--readlength   Read length\n"
-     << "--coverage     Average coverage. Must be set for whole exome or targeted data.\n"
-     << "--insertmean   Insert size mean\n"
-     << "--insertsdev   Insert size standard deviation\n"
-     << "--insertmax    Maximum insert size\n"
-     << "--minscore     Minimum alignment score (out of 100)\n"
-     << "--minmatch     Minimum number of matching basepairs on each end of enclosing reads\n"
-     << "--stutterup    Stutter up parameter (refer to the stutter model)\n"
-     << "--stutterdown  Stutter down parameter (refer to the stutter model)\n"
-     << "--stutterprob  Stutter probability (refer to the stutter model)\n"
-     << "--numbstrap    Number of bootsrap resamples\n"
-     << "--read-prob-mode Use only read probability (ignore class probability)\n"
-     << "--seed         Random number generator initial seed\n"
+	   << "--frrweight   weight of FRR reads in the likelihood model\n"
+	   << "--enclweight  weight of enclosing reads in the likelihood model\n"
+	   << "--spanweight  weight of spanning reads in the likelihood model\n"
+	   << "--flankweight weight of flanking reads in the likelihood model\n"
+	   << "--ploidy       Indicate whether data is haploid (1) or diploid (2)\n"
+	   << "--readlength   Read length\n"
+	   << "--coverage     Average coverage. Must be set for whole exome or targeted data.\n"
+	   << "--insertmean   Insert size mean\n"
+	   << "--insertsdev   Insert size standard deviation\n"
+	   << "--insertmax    Maximum insert size\n"
+	   << "--minscore     Minimum alignment score (out of 100)\n"
+	   << "--minmatch     Minimum number of matching basepairs on each end of enclosing reads\n"
+	   << "--stutterup    Stutter up parameter (refer to the stutter model)\n"
+	   << "--stutterdown  Stutter down parameter (refer to the stutter model)\n"
+	   << "--stutterprob  Stutter probability (refer to the stutter model)\n"
+	   << "--numbstrap    Number of bootsrap resamples\n"
+	   << "--read-prob-mode Use only read probability (ignore class probability)\n"
+	   << "--seed         Random number generator initial seed\n"
 	   << "--output-bootstraps  Output file with bootstrap samples\n"
 	   << "--output-readinfo    Output read class info (for debugging)\n"
 	   << "-v,--verbose   print out useful progress messages\n"
@@ -334,10 +334,12 @@ int main(int argc, char* argv[]) {
     ss.str("");
     ss.clear();
     ss << "Processing " << locus.chrom << ":" << locus.start;
-    locus.offchrom = "chr18";
-      locus.offstart = 55586148;
-      locus.offend = 55586156;
-
+    /*
+    for (std::vector<GenomeRegion>::iterator it = locus.offtarget_regions.begin();
+	 it != locus.offtarget_regions.end(); it++){
+      cerr << it->chrom << " " << it->start << " " << it->end << endl;
+    }
+    */
     PrintMessageDieOnError(ss.str(), M_PROGRESS);
     locus.insert_size_mean = options.dist_mean;
     locus.insert_size_stddev = options.dist_sdev = std_dev;

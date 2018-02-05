@@ -26,6 +26,7 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 #include "src/region_reader.h"
 #include "src/stringops.h"
 
+#include <iostream>
 using namespace std;
 
 RegionReader::RegionReader(const std::string& filename) {
@@ -55,6 +56,19 @@ bool RegionReader::GetNextRegion(Locus* locus) {
   locus->period = atoi(items[3].c_str());
   locus->motif = items[4];
   std::transform(locus->motif.begin(), locus->motif.end(), locus->motif.begin(), ::tolower);
+  while (std::getline(*freader, line)){
+    items.clear();
+    split_by_delim(line, '\t', items);
+    if (items.size() < 3){
+      PrintMessageDieOnError("Off-target regions not formatted correctly", M_ERROR);
+    }
+    locus->offtarget_set = true;
+    GenomeRegion offtarget;
+    offtarget.chrom = items[0];
+    offtarget.start = atoi(items[1].c_str());
+    offtarget.end = atoi(items[2].c_str());
+    locus->offtarget_regions.push_back(offtarget);
+  }
   return true;
 }
 

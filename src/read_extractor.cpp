@@ -382,49 +382,53 @@ bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
 
   }
 
-
+  /*
   // Get bam alignments from off target region
-  bamreader->SetRegion(locus.offchrom, locus.offstart, locus.offend);
+  if (locus.offtarget_set){
+    for (std::vector<GenomeRegion>::iterator reg_it = locus.offtarget_regions.begin();
+	 reg_it != locus.offtarget_regions.end(); reg_it++){
+      bamreader->SetRegion(locus.offchrom, locus.offstart, locus.offend);
 
-  const int32_t offchrom_ref_id = bam_header->ref_id(locus.offchrom);
+      const int32_t offchrom_ref_id = bam_header->ref_id(locus.offchrom);
 
-  // Go through each alignment in the region
-  //BamAlignment alignment;
+      // Go through each alignment in the region
+      //BamAlignment alignment;
 
-  while (bamreader->GetNextAlignment(alignment)) {
-    if (alignment.IsSecondary() or alignment.IsSupplementary())
-      continue;
-     // Set key to keep track of this mate pair
-    std::string aln_key = file_label + trim_alignment_name(alignment);
+      while (bamreader->GetNextAlignment(alignment)) {
+	if (alignment.IsSecondary() or alignment.IsSupplementary())
+	  continue;
+	// Set key to keep track of this mate pair
+	std::string aln_key = file_label + trim_alignment_name(alignment);
 
-    /*  Check if read's mate already processed */
-    std::map<std::string, ReadPair>::iterator rp_iter = read_pairs->find(aln_key);
-    if (rp_iter != read_pairs->end()) {
-      // do another round of rescue maybe?! Currently, naive rescue:
-      if (rp_iter->second.read_type == RC_UNKNOWN){
-	rp_iter->second.read_type = RC_FRR;
-	int32_t data = 0;
-	int32_t read_length = (int32_t)rp_iter->second.read1.QueryBases().size();
-	if (rp_iter->second.read1.Position() < locus.start) {
-	  data = locus.start - (rp_iter->second.read1.Position()+read_length);
-	} else {
-	  data = rp_iter->second.read1.Position() - locus.end;
+	//  Check if read's mate already processed 
+	std::map<std::string, ReadPair>::iterator rp_iter = read_pairs->find(aln_key);
+	if (rp_iter != read_pairs->end()) {
+	  // do another round of rescue maybe?! Currently, naive rescue:
+	  if (rp_iter->second.read_type == RC_UNKNOWN){
+	    rp_iter->second.read_type = RC_FRR;
+	    int32_t data = 0;
+	    int32_t read_length = (int32_t)rp_iter->second.read1.QueryBases().size();
+	    if (rp_iter->second.read1.Position() < locus.start) {
+	      data = locus.start - (rp_iter->second.read1.Position()+read_length);
+	    } else {
+	      data = rp_iter->second.read1.Position() - locus.end;
+	    }
+	    rp_iter->second.data_value = data;
+	  }
+	  continue;
 	}
-	rp_iter->second.data_value = data;
-      }
-      continue;
-    }
-    int32_t read_length = (int32_t)alignment.QueryBases().size();
-    ReadPair read_pair;
-    read_pair.read_type = RC_FRR;
-    read_pair.read1 = alignment;
-    read_pair.data_value = -read_length;
-    read_pairs->insert(std::pair<std::string, ReadPair>(aln_key, read_pair));
+	int32_t read_length = (int32_t)alignment.QueryBases().size();
+	ReadPair read_pair;
+	read_pair.read_type = RC_FRR;
+	read_pair.read1 = alignment;
+	read_pair.data_value = -read_length;
+	read_pairs->insert(std::pair<std::string, ReadPair>(aln_key, read_pair));
       
-    //    cerr << alignment.QueryBases() << endl;
-    
+	//    cerr << alignment.QueryBases() << endl;
+    }
+  }    
   }  
-
+  */
   return true;
 }
 

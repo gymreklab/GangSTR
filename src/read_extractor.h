@@ -46,7 +46,7 @@ class ReadExtractor {
   bool ExtractReads(BamCramMultiReader* bamreader,
 		    const Locus& locus,
 		    const int32_t& regionsize,
-        const int32_t& min_match, 
+		    const int32_t& min_match, 
 		    LikelihoodMaximizer* likelihood_maximizer);
 
  protected:
@@ -56,8 +56,8 @@ class ReadExtractor {
   // Process all read pairs
   bool ProcessReadPairs(BamCramMultiReader* bamreader,
 			const Locus& locus, 
-      const int32_t& regionsize,
-      const int32_t& min_match, 
+			const int32_t& regionsize,
+			const int32_t& min_match, 
 			std::map<std::string, ReadPair>* read_pairs);
 
   // Implemented in BamInfoExtract. TODO delete
