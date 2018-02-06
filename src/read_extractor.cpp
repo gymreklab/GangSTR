@@ -75,34 +75,52 @@ bool ReadExtractor::ExtractReads(BamCramMultiReader* bamreader,
       }
       // In spanning case, we can also have flanking reads:
       if (iter->second.max_nCopy > 0) {
-  if (options.output_readinfo) {
-    readfile_ << locus.chrom << "\t" << locus.start << "\t" << locus.end << "\t"
-        << iter->first << "\t" << "SPFLNK" << "\t" << iter->second.max_nCopy - 1 << "\t" << iter->second.found_pair << std::endl;
+	if (options.output_readinfo) {
+	  readfile_ << locus.chrom << "\t" << locus.start << "\t" << locus.end << "\t"
+		    << iter->first << "\t" << "SPFLNK" << "\t" 
+		    << iter->second.max_nCopy - 1 << "\t" 
+		    << iter->second.found_pair << std::endl;
   }
         likelihood_maximizer->AddFlankingData(iter->second.max_nCopy - 1);  // -1 because flanking is always picked up +1
         flank++;
       }
     } else if (iter->second.read_type == RC_ENCL) {
       if (options.output_readinfo) {
-  readfile_ << locus.chrom << "\t" << locus.start << "\t" << locus.end << "\t"
-      << iter->first << "\t" << "ENCLOSE" << "\t" << iter->second.data_value << "\t" << iter->second.found_pair << std::endl;
+	readfile_ << locus.chrom << "\t" << locus.start << "\t" << locus.end << "\t"
+		  << iter->first << "\t" << "ENCLOSE" << "\t" 
+		  << iter->second.data_value << "\t" 
+		  << iter->second.found_pair << std::endl;
       }
       likelihood_maximizer->AddEnclosingData(iter->second.data_value);
       encl++;
     } else if (iter->second.read_type == RC_FRR) {
       if (options.output_readinfo) {
-  readfile_ << locus.chrom << "\t" << locus.start << "\t" << locus.end << "\t"
-      << iter->first << "\t" << "FRR" << "\t" << iter->second.data_value << "\t" << iter->second.found_pair << std::endl;
+	readfile_ << locus.chrom << "\t" << locus.start << "\t" << locus.end << "\t"
+		  << iter->first << "\t" << "FRR" << "\t" 
+		  << iter->second.data_value << "\t" 
+		  << iter->second.found_pair << std::endl;
       }
       likelihood_maximizer->AddFRRData(iter->second.data_value);
       frr++;
     } else if (iter->second.read_type == RC_BOUND) {
       if (options.output_readinfo) {
-  readfile_ << locus.chrom << "\t" << locus.start << "\t" << locus.end << "\t"
-      << iter->first << "\t" << "BOUND" << "\t" << iter->second.data_value - 1 << "\t" << iter->second.found_pair << std::endl;
+	readfile_ << locus.chrom << "\t" << locus.start << "\t" << locus.end << "\t"
+		  << iter->first << "\t" << "BOUND" << "\t" 
+		  << iter->second.data_value - 1 << "\t" 
+		  << iter->second.found_pair << std::endl;
       }
       likelihood_maximizer->AddFlankingData(iter->second.data_value - 1); // -1 because flanking is always picked up +1
       flank++;
+    } else if (iter->second.read_type == RC_DOUBLE_FRR){
+      if (options.output_readinfo) {
+	readfile_ << locus.chrom << "\t" << locus.start << "\t" << locus.end << "\t"
+		  << iter->first << "\t" << "DOBFRR" << "\t" 
+		  << iter->second.data_value - 1 << "\t" 
+		  << iter->second.found_pair << std::endl;
+      }
+      likelihood_maximizer->AddFRRData(iter->second.data_value);
+      likelihood_maximizer->AddFRRData(iter->second.data_value);
+      frr++; frr++;
     } else {
       continue;
     }
@@ -382,53 +400,66 @@ bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
 
   }
 
-  /*
+  
   // Get bam alignments from off target region
   if (locus.offtarget_set){
-    for (std::vector<GenomeRegion>::iterator reg_it = locus.offtarget_regions.begin();
+    for (std::vector<GenomeRegion>::const_iterator reg_it = locus.offtarget_regions.begin();
 	 reg_it != locus.offtarget_regions.end(); reg_it++){
-      bamreader->SetRegion(locus.offchrom, locus.offstart, locus.offend);
+      bamreader->SetRegion(reg_it->chrom, reg_it->start, reg_it->end);
 
-      const int32_t offchrom_ref_id = bam_header->ref_id(locus.offchrom);
+      const int32_t offchrom_ref_id = bam_header->ref_id(reg_it->chrom);
 
       // Go through each alignment in the region
-      //BamAlignment alignment;
-
       while (bamreader->GetNextAlignment(alignment)) {
 	if (alignment.IsSecondary() or alignment.IsSupplementary())
 	  continue;
 	// Set key to keep track of this mate pair
 	std::string aln_key = file_label + trim_alignment_name(alignment);
-
+	int32_t read_length = (int32_t)alignment.QueryBases().size();
+	int32_t data_value, score_value;
+	int32_t nCopy_value = 0;
+	ReadType read_type;
+	ReadPair read_pair;
+	SingleReadType srt;
+	ProcessSingleRead(alignment, chrom_ref_id, locus, min_match,
+			  &data_value, &nCopy_value, &score_value, &read_type, &srt);
+	
 	//  Check if read's mate already processed 
 	std::map<std::string, ReadPair>::iterator rp_iter = read_pairs->find(aln_key);
+	if (rp_iter->second.found_pair){
+	  continue;
+	} 
 	if (rp_iter != read_pairs->end()) {
 	  // do another round of rescue maybe?! Currently, naive rescue:
-	  if (rp_iter->second.read_type == RC_UNKNOWN){
-	    rp_iter->second.read_type = RC_FRR;
-	    int32_t data = 0;
-	    int32_t read_length = (int32_t)rp_iter->second.read1.QueryBases().size();
-	    if (rp_iter->second.read1.Position() < locus.start) {
-	      data = locus.start - (rp_iter->second.read1.Position()+read_length);
-	    } else {
-	      data = rp_iter->second.read1.Position() - locus.end;
+	  rp_iter->second.read2 = alignment;
+	  if (read_type == RC_FRR or srt == SR_IRR){
+	    if (rp_iter->second.read_type == RC_FRR){
+	      rp_iter->second.read_type = RC_DOUBLE_FRR;
+	      rp_iter->second.data_value = -read_length;
 	    }
-	    rp_iter->second.data_value = data;
+	    else{
+	      rp_iter->second.read_type = RC_FRR;
+	      rp_iter->second.data_value = data_value;
+	    }
 	  }
-	  continue;
+	  else{
+	    if (rp_iter->second.read_type == RC_UNKNOWN){
+	      rp_iter->second.read_type = read_type;
+	      rp_iter->second.data_value = data_value;
+	    }
+	  }
 	}
-	int32_t read_length = (int32_t)alignment.QueryBases().size();
-	ReadPair read_pair;
-	read_pair.read_type = RC_FRR;
-	read_pair.read1 = alignment;
-	read_pair.data_value = -read_length;
-	read_pairs->insert(std::pair<std::string, ReadPair>(aln_key, read_pair));
-      
+	else{
+	  read_pair.read_type = RC_FRR;
+	  read_pair.read1 = alignment;
+	  read_pair.data_value = -read_length;
+	  read_pairs->insert(std::pair<std::string, ReadPair>(aln_key, read_pair));
+	}
 	//    cerr << alignment.QueryBases() << endl;
     }
   }    
   }  
-  */
+  
   return true;
 }
 

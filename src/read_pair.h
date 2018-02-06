@@ -31,7 +31,7 @@ enum ReadType {
   RC_UNKNOWN = 3,
   RC_DISCARD = 4,
   RC_BOUND = 5,
-  RC_OFF_FRR = 6
+  RC_DOUBLE_FRR = 6
 };
 
 class ReadPair {
