@@ -450,10 +450,12 @@ bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
 	  }
 	}
 	else{
-	  read_pair.read_type = RC_FRR;
-	  read_pair.read1 = alignment;
-	  read_pair.data_value = -read_length;
-	  read_pairs->insert(std::pair<std::string, ReadPair>(aln_key, read_pair));
+	  if (read_type == RC_FRR){
+	    read_pair.read_type = RC_FRR;
+	    read_pair.read1 = alignment;
+	    read_pair.data_value = -read_length;
+	    read_pairs->insert(std::pair<std::string, ReadPair>(aln_key, read_pair));
+	  }
 	}
 	//    cerr << alignment.QueryBases() << endl;
     }
