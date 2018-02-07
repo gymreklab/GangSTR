@@ -450,6 +450,7 @@ bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
 	  }
 	}
 	else{
+	  //cerr << read_type << " " << alignment.Name() << endl;
 	  if (read_type == RC_FRR){
 	    read_pair.read_type = RC_FRR;
 	    read_pair.read1 = alignment;
@@ -568,7 +569,7 @@ bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
   *nCopy_value = nCopy;
   *score_value = score;
 
-
+  
   if (!classify_realigned_read(seq, locus.motif, start_pos, end_pos, nCopy, score, 
              (int32_t)locus.pre_flank.size(), min_match, alignment.IsMapped(), locus.pre_flank, locus.post_flank, srt)) {
     return false;
@@ -656,7 +657,8 @@ bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
   // Added this line to fix issues with mates being mapped to different chroms
   if (*srt == SR_IRR) {
     if (alignment.MateRefID() != chrom_ref_id){
-      *read_type = RC_UNKNOWN;
+      *read_type = RC_FRR;
+      *data_value = -read_length;
       return true;
     }
     *read_type = RC_FRR;
