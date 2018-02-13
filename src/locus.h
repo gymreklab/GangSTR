@@ -63,6 +63,7 @@ class Locus {
   // Off target loci
   bool offtarget_set;
   std::vector<GenomeRegion> offtarget_regions;
+  double offtarget_share;
 };
 
 #endif  // SRC_LOCUS_H__

@@ -44,7 +44,7 @@ Locus::Locus() {
   depth = 0;
 
   offtarget_set = false;
-  
+  offtarget_share = 0.0;
 }
 
 Locus::~Locus() {}

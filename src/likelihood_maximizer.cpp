@@ -55,6 +55,8 @@ LikelihoodMaximizer::LikelihoodMaximizer(Options& _options) {
   r = gsl_rng_alloc (T);
 
   gsl_rng_set(r, options->seed);
+  
+  offtarget_share = 0.0;
 }
 
 // // Not needed. since options are updated before creating likelihood maximizer object
@@ -200,8 +202,8 @@ bool LikelihoodMaximizer::GetConfidenceInterval(const int32_t& read_len,
   for (int i = 0; i < num_boot_samp + 1; i++){
     ResampleReadPool();
     if (options->ploidy == 2){
-      OptimizeLikelihood(read_len, motif_len, ref_count, true, 1, allele1, &boot_al2_1, &boot_al2_2, &min_negLike);
-      OptimizeLikelihood(read_len, motif_len, ref_count, true, 1, allele2, &boot_al1_1, &boot_al1_2, &min_negLike);
+      OptimizeLikelihood(read_len, motif_len, ref_count, true, 1, allele1, offtarget_share, &boot_al2_1, &boot_al2_2, &min_negLike);
+      OptimizeLikelihood(read_len, motif_len, ref_count, true, 1, allele2, offtarget_share, &boot_al1_1, &boot_al1_2, &min_negLike);
       if (boot_al1_1 == allele2)
 	boot_al1 = boot_al1_2;
       else if (boot_al1_2 == allele2)
@@ -276,12 +278,12 @@ bool LikelihoodMaximizer::GetGenotypeNegLogLikelihood(const int32_t& allele1,
 						      const int32_t& read_len,
 						      const int32_t& motif_len,
 						      const int32_t& ref_count,
-                  const bool& resampled,
+						      const bool& resampled,
 						      double* gt_ll) {
   double frr_count_ll = 0.0, frr_ll, span_ll, encl_ll, flank_ll = 0.0;
   double count_weight = .01 * options->coverage;
   double cov = options -> coverage;
-  int frr_count;
+  int frr_count, offtarget_count = 0;
   int read_count;
   if (allele1 < 0 || allele2 < 0){
     *gt_ll = frr_class_.NEG_INF;
@@ -309,9 +311,14 @@ bool LikelihoodMaximizer::GetGenotypeNegLogLikelihood(const int32_t& allele1,
     // TODO Substituting these lines changes optimization result. Find out why?!
     //if ((options->coverage > 0) && (frr_class_.GetDataSize() > 0)){
     if (cov > 0 && frr_count > 0){
-      frr_class_.GetCountLogLikelihood(allele1, allele2,
-      				    read_len, motif_len, options->coverage,
-      				    options->ploidy, &frr_count_ll);
+      frr_class_.GetCountLogLikelihood(allele1, 
+				       allele2,
+				       read_len, 
+				       motif_len, 
+				       options->coverage,
+				       options->ploidy, 
+				       offtarget_count * offtarget_share, 
+				       &frr_count_ll);
     }
 
   }
@@ -335,9 +342,14 @@ bool LikelihoodMaximizer::GetGenotypeNegLogLikelihood(const int32_t& allele1,
 								   options->ploidy, &flank_ll); 
     
     if (cov > 0 && frr_count > 0){
-      resampled_frr_class_.GetCountLogLikelihood(allele1, allele2,
-      				    read_len, motif_len, options->coverage,
-      				    options->ploidy, &frr_count_ll);
+      resampled_frr_class_.GetCountLogLikelihood(allele1, 
+				       allele2,
+				       read_len, 
+				       motif_len, 
+				       options->coverage,
+				       options->ploidy, 
+				       offtarget_count * offtarget_share, 
+				       &frr_count_ll);
     
     }
   }
@@ -350,11 +362,15 @@ bool LikelihoodMaximizer::GetGenotypeNegLogLikelihood(const int32_t& allele1,
   return true;
 }
 
-bool LikelihoodMaximizer::OptimizeLikelihood(const int32_t& read_len, const int32_t& motif_len,
-					     const int32_t& ref_count, const bool& resampled, 
-					     const int32_t& ploidy, const int32_t& fix_allele,
+bool LikelihoodMaximizer::OptimizeLikelihood(const int32_t& read_len, 
+					     const int32_t& motif_len,
+					     const int32_t& ref_count, 
+					     const bool& resampled, 
+					     const int32_t& ploidy, 
+					     const int32_t& fix_allele,
+					     const double& off_share,
 					     int32_t* allele1, int32_t* allele2, double* min_negLike) {
-
+  offtarget_share = off_share;
   int32_t a1, a2, result, temp;
   double minf;
   std::vector<int32_t> allele_list;

@@ -39,11 +39,12 @@ class FRRClass: public ReadClass {
 		      const int32_t& ref_count,
 		      double* log_allele_prob);
   bool GetCountLogLikelihood(const int32_t& allele1,
-				     const int32_t& allele2,
-				     const int32_t& read_len,
-				     const int32_t& motif_len,
-				     const double& coverage,
-				     const int32_t& ploidy,
+			     const int32_t& allele2,
+			     const int32_t& read_len,
+			     const int32_t& motif_len,
+			     const double& coverage,
+			     const int32_t& ploidy,
+			     const int32_t& offtarget_count,
 			     double* count_ll);
 
 };

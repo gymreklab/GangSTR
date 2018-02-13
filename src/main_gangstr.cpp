@@ -343,6 +343,7 @@ int main(int argc, char* argv[]) {
     PrintMessageDieOnError(ss.str(), M_PROGRESS);
     locus.insert_size_mean = options.dist_mean;
     locus.insert_size_stddev = options.dist_sdev = std_dev;
+
     if (genotyper.ProcessLocus(&bamreader, &locus)) {
       vcfwriter.WriteRecord(locus);
     }

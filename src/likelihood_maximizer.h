@@ -81,9 +81,13 @@ class LikelihoodMaximizer {
 				   const int32_t& ref_count, const bool& resampled,
 				   double* gt_ll);
   // Main optimization function - TODO also return other data
-  bool OptimizeLikelihood(const int32_t& read_len, const int32_t& motif_len,
-			  const int32_t& ref_count, const bool& resampled, 
-			  const int32_t& ploidy, const int32_t& fix_allele,
+  bool OptimizeLikelihood(const int32_t& read_len, 
+			  const int32_t& motif_len,
+			  const int32_t& ref_count, 
+			  const bool& resampled, 
+			  const int32_t& ploidy, 
+			  const int32_t& fix_allele,
+			  const double& off_share,
 			  int32_t* allele1, int32_t* allele2, double* min_negLike);
   // Go over the list of the discovered alleles to find the best pair
   bool findBestAlleleListTuple(std::vector<int32_t> allele_list,
@@ -132,6 +136,8 @@ class LikelihoodMaximizer {
   ofstream plotfile_;
   // Random number generator
   gsl_rng * r;
+  // percentage of off-target reads
+  double offtarget_share;
 };
 
 // Helper struct for NLOPT gradient optimizer
