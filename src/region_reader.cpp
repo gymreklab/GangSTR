@@ -43,6 +43,7 @@ RegionReader::RegionReader(const std::string& filename) {
 bool RegionReader::GetNextRegion(Locus* locus) {
   std::string line;
   std::vector<std::string> items;
+  bool stat;
   if (!std::getline(*freader, line)) {
     return false;
   }
@@ -56,7 +57,8 @@ bool RegionReader::GetNextRegion(Locus* locus) {
   locus->period = atoi(items[3].c_str());
   locus->motif = items[4];
   std::transform(locus->motif.begin(), locus->motif.end(), locus->motif.begin(), ::tolower);
-  while (std::getline(*freader, line)){
+  stat = std::getline(*freader, line);
+  while (stat && line != "**"){
     items.clear();
     split_by_delim(line, '\t', items);
     if (items.size() < 3){
@@ -68,6 +70,7 @@ bool RegionReader::GetNextRegion(Locus* locus) {
     offtarget.start = atoi(items[1].c_str());
     offtarget.end = atoi(items[2].c_str());
     locus->offtarget_regions.push_back(offtarget);
+    stat = std::getline(*freader, line);
   }
   return true;
 }
