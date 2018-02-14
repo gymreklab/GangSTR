@@ -68,8 +68,11 @@ bool ReadExtractor::ExtractReads(BamCramMultiReader* bamreader,
     if (iter->second.read_type == RC_SPAN) {
       if (iter->second.data_value < options.dist_max){
         if (options.output_readinfo) {
-	  readfile_ << locus.chrom << "\t" << locus.start << "\t" << locus.end << "\t"
-		    << iter->first << "\t" << "SPAN" << "\t" 
+	  readfile_ << locus.chrom << "\t" 
+		    << locus.start << "\t" 
+		    << locus.end << "\t"
+		    << iter->first << "\t" 
+		    << "SPAN" << "\t" 
 		    << iter->second.data_value << "\t" 
 		    << iter->second.found_pair << std::endl;
         }
@@ -79,8 +82,11 @@ bool ReadExtractor::ExtractReads(BamCramMultiReader* bamreader,
       // In spanning case, we can also have flanking reads:
       if (iter->second.max_nCopy > 0) {
 	if (options.output_readinfo) {
-	  readfile_ << locus.chrom << "\t" << locus.start << "\t" << locus.end << "\t"
-		    << iter->first << "\t" << "SPFLNK" << "\t" 
+	  readfile_ << locus.chrom << "\t" 
+		    << locus.start << "\t" 
+		    << locus.end << "\t"
+		    << iter->first << "\t" 
+		    << "SPFLNK" << "\t" 
 		    << iter->second.max_nCopy - 1 << "\t" 
 		    << iter->second.found_pair << std::endl;
   }
@@ -89,8 +95,11 @@ bool ReadExtractor::ExtractReads(BamCramMultiReader* bamreader,
       }
     } else if (iter->second.read_type == RC_ENCL) {
       if (options.output_readinfo) {
-	readfile_ << locus.chrom << "\t" << locus.start << "\t" << locus.end << "\t"
-		  << iter->first << "\t" << "ENCLOSE" << "\t" 
+	readfile_ << locus.chrom << "\t" 
+		  << locus.start << "\t" 
+		  << locus.end << "\t"
+		  << iter->first << "\t" 
+		  << "ENCLOSE" << "\t" 
 		  << iter->second.data_value << "\t" 
 		  << iter->second.found_pair << std::endl;
       }
@@ -98,8 +107,11 @@ bool ReadExtractor::ExtractReads(BamCramMultiReader* bamreader,
       encl++;
     } else if (iter->second.read_type == RC_FRR) {
       if (options.output_readinfo) {
-	readfile_ << locus.chrom << "\t" << locus.start << "\t" << locus.end << "\t"
-		  << iter->first << "\t" << "FRR" << "\t" 
+	readfile_ << locus.chrom << "\t" 
+		  << locus.start << "\t" 
+		  << locus.end << "\t"
+		  << iter->first << "\t" 
+		  << "FRR" << "\t" 
 		  << iter->second.data_value << "\t" 
 		  << iter->second.found_pair << std::endl;
       }
@@ -107,8 +119,11 @@ bool ReadExtractor::ExtractReads(BamCramMultiReader* bamreader,
       frr++;
     } else if (iter->second.read_type == RC_BOUND) {
       if (options.output_readinfo) {
-	readfile_ << locus.chrom << "\t" << locus.start << "\t" << locus.end << "\t"
-		  << iter->first << "\t" << "BOUND" << "\t" 
+	readfile_ << locus.chrom << "\t" 
+		  << locus.start << "\t" 
+		  << locus.end << "\t"
+		  << iter->first << "\t" 
+		  << "BOUND" << "\t" 
 		  << iter->second.data_value - 1 << "\t" 
 		  << iter->second.found_pair << std::endl;
       }
@@ -116,8 +131,11 @@ bool ReadExtractor::ExtractReads(BamCramMultiReader* bamreader,
       flank++;
     } else if (iter->second.read_type == RC_OFFT){
       if (options.output_readinfo) {
-	readfile_ << locus.chrom << "\t" << locus.start << "\t" << locus.end << "\t"
-		  << iter->first << "\t" << "OFFT" << "\t" 
+	readfile_ << locus.chrom << "\t" 
+		  << locus.start << "\t" 
+		  << locus.end << "\t"
+		  << iter->first << "\t" 
+		  << "OFFT" << "\t" 
 		  << iter->second.data_value << "\t" 
 		  << iter->second.found_pair << std::endl;
       }
@@ -144,7 +162,9 @@ bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
     return false;
   }
   // Get bam alignments from the relevant region
-  bamreader->SetRegion(locus.chrom, locus.start-regionsize, locus.end+regionsize + 1000);
+  bamreader->SetRegion(locus.chrom, 
+		       locus.start-regionsize, 
+		       locus.end+regionsize + 1000);
 
   // Keep track of which file we're processing
   int32_t file_index = 0;
@@ -196,7 +216,8 @@ bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
       if (rp_iter->second.read_type != RC_FRR && rp_iter->second.read_type != RC_ENCL){ 
       // if (rp_iter->second.read_type == RC_UNKNOWN) {
         if (debug) {
-          std::cerr << "Checking mate " << alignment.Name() << " " << alignment.QueryBases() << std:: endl;
+          std::cerr << "Checking mate " << alignment.Name() 
+		    << " " << alignment.QueryBases() << std:: endl;
         }
 
         int32_t insert_size;
@@ -433,7 +454,6 @@ bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
 	  rp_iter->second.read2 = alignment;
 	  if (read_type == RC_FRR or srt == SR_IRR){
 	    if (rp_iter->second.read_type == RC_POT_OFFT){
-	      
 	      //cerr << "2\t" << locus.chrom << " " << alignment.QueryBases() << endl;
 	      rp_iter->second.read_type = RC_OFFT;
 	      rp_iter->second.data_value = -read_length;
@@ -451,7 +471,6 @@ bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
 	  }
 	}
 	else{
-	  //cerr << read_type << " " << alignment.Name() << endl;
 	  if (read_type == RC_FRR){
 	    //cerr << "1\t" << locus.chrom << " " << alignment.Name() << endl;
 	    read_pair.read_type = RC_POT_OFFT;
@@ -460,7 +479,6 @@ bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
 	    read_pairs->insert(std::pair<std::string, ReadPair>(aln_key, read_pair));
 	  }
 	}
-	//    cerr << alignment.QueryBases() << endl;
     }
   }    
   }  
