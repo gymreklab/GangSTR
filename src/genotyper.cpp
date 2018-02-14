@@ -61,7 +61,6 @@ bool Genotyper::ProcessLocus(BamCramMultiReader* bamreader, Locus* locus) {
   }
 
   likelihood_maximizer->Reset();
-  
 
   // Load all read data
   if (options->verbose) {

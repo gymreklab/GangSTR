@@ -47,4 +47,29 @@ Locus::Locus() {
   offtarget_share = 0.0;
 }
 
+void Locus::Reset(){
+  chrom = "";
+  start = -1;
+  end = -1;
+  period = -1;
+
+  insert_size_mean = -1.0;
+  insert_size_stddev = -1.0;
+  allele1 = -1;
+  allele2 = -1;
+  lob1 = -1;
+  hib1 = -1;
+  lob2 = -1;
+  hib2 = -1;
+  min_neg_lik = 0;
+  enclosing_reads = 0;
+  spanning_reads = 0;
+  frr_reads = 0;
+  flanking_reads = 0;
+  depth = 0;
+
+  offtarget_set = false;
+  offtarget_regions.clear();
+  offtarget_share = 0.0;
+}
 Locus::~Locus() {}

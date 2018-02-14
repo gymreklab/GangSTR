@@ -44,10 +44,11 @@ bool ReadExtractor::ExtractReads(BamCramMultiReader* bamreader,
          LikelihoodMaximizer* likelihood_maximizer) {
   // This will keep track of information for each read pair
   std::map<std::string, ReadPair> read_pairs;
+
   if (!ProcessReadPairs(bamreader, locus, regionsize, min_match, &read_pairs)) {
     return false;
   }
-  int32_t frr = 0, span = 0, encl = 0, flank = 0;
+  int32_t frr = 0, span = 0, encl = 0, flank = 0, offt = 0;
   if (read_pairs.size() == 0){
     // TODO print error "Not enough extracted reads"
     PrintMessageDieOnError("\tNot enough reads extracted. Aborting..", M_PROGRESS);
@@ -68,7 +69,9 @@ bool ReadExtractor::ExtractReads(BamCramMultiReader* bamreader,
       if (iter->second.data_value < options.dist_max){
         if (options.output_readinfo) {
 	  readfile_ << locus.chrom << "\t" << locus.start << "\t" << locus.end << "\t"
-	  << iter->first << "\t" << "SPAN" << "\t" << iter->second.data_value << "\t" << iter->second.found_pair << std::endl;
+		    << iter->first << "\t" << "SPAN" << "\t" 
+		    << iter->second.data_value << "\t" 
+		    << iter->second.found_pair << std::endl;
         }
         likelihood_maximizer->AddSpanningData(iter->second.data_value);
         span++;
@@ -81,7 +84,7 @@ bool ReadExtractor::ExtractReads(BamCramMultiReader* bamreader,
 		    << iter->second.max_nCopy - 1 << "\t" 
 		    << iter->second.found_pair << std::endl;
   }
-        likelihood_maximizer->AddFlankingData(iter->second.max_nCopy - 1);  // -1 because flanking is always picked up +1
+        likelihood_maximizer->AddFlankingData(iter->second.max_nCopy-1); //-1 because flanking is always picked up +1
         flank++;
       }
     } else if (iter->second.read_type == RC_ENCL) {
@@ -111,25 +114,21 @@ bool ReadExtractor::ExtractReads(BamCramMultiReader* bamreader,
       }
       likelihood_maximizer->AddFlankingData(iter->second.data_value - 1); // -1 because flanking is always picked up +1
       flank++;
-    } else if (iter->second.read_type == RC_DOUBLE_FRR){
+    } else if (iter->second.read_type == RC_OFFT){
       if (options.output_readinfo) {
 	readfile_ << locus.chrom << "\t" << locus.start << "\t" << locus.end << "\t"
-		  << iter->first << "\t" << "DOBFRR" << "\t" 
-		  << iter->second.data_value - 1 << "\t" 
+		  << iter->first << "\t" << "OFFT" << "\t" 
+		  << iter->second.data_value << "\t" 
 		  << iter->second.found_pair << std::endl;
       }
-      likelihood_maximizer->AddFRRData(iter->second.data_value);
-      likelihood_maximizer->AddFRRData(iter->second.data_value);
-      frr++; frr++;
+      likelihood_maximizer->AddOffTargetData(iter->second.data_value);
+      offt++;
     } else {
       continue;
     }
     
-    // if(print_read_data) {
-    //   std::cerr<<"\t\t"<<((BamAlignment)iter->second.read1).QueryBases()<<endl;
-    //   std::cerr<<"\t\t"<<((BamAlignment)iter->second.read2).QueryBases()<<endl;
-    // }
   }
+  //cerr << span << " " << encl << " " << frr << " " << flank << " " << offt << endl;
   return true;
 }
 
@@ -433,8 +432,10 @@ bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
 	  // do another round of rescue maybe?! Currently, naive rescue:
 	  rp_iter->second.read2 = alignment;
 	  if (read_type == RC_FRR or srt == SR_IRR){
-	    if (rp_iter->second.read_type == RC_FRR){
-	      rp_iter->second.read_type = RC_DOUBLE_FRR;
+	    if (rp_iter->second.read_type == RC_POT_OFFT){
+	      
+	      //cerr << "2\t" << locus.chrom << " " << alignment.QueryBases() << endl;
+	      rp_iter->second.read_type = RC_OFFT;
 	      rp_iter->second.data_value = -read_length;
 	    }
 	    else{
@@ -452,7 +453,8 @@ bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
 	else{
 	  //cerr << read_type << " " << alignment.Name() << endl;
 	  if (read_type == RC_FRR){
-	    read_pair.read_type = RC_FRR;
+	    //cerr << "1\t" << locus.chrom << " " << alignment.Name() << endl;
+	    read_pair.read_type = RC_POT_OFFT;
 	    read_pair.read1 = alignment;
 	    read_pair.data_value = -read_length;
 	    read_pairs->insert(std::pair<std::string, ReadPair>(aln_key, read_pair));

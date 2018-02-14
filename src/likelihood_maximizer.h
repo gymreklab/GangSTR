@@ -59,11 +59,13 @@ class LikelihoodMaximizer {
   void AddSpanningData(const int32_t& data);
   void AddFRRData(const int32_t& data);
   void AddFlankingData(const int32_t& data);
+  void AddOffTargetData(const int32_t& data);
   // Check data size
   std::size_t GetEnclosingDataSize();
   std::size_t GetSpanningDataSize();
   std::size_t GetFRRDataSize();
   std::size_t GetFlankingDataSize();
+  std::size_t GetOffTargetDataSize();
   std::size_t GetReadPoolSize();
 
   // Plot likelihood
@@ -124,6 +126,7 @@ class LikelihoodMaximizer {
   FRRClass frr_class_;
   SpanningClass spanning_class_;
   FlankingClass flanking_class_;
+  FRRClass offtarget_class_;
   std::vector<ReadRecord> read_pool;
   std::vector<ReadRecord> resampled_pool;
   EnclosingClass resampled_enclosing_class_;

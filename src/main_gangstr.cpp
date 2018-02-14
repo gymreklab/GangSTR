@@ -347,5 +347,6 @@ int main(int argc, char* argv[]) {
     if (genotyper.ProcessLocus(&bamreader, &locus)) {
       vcfwriter.WriteRecord(locus);
     }
+    locus.Reset();
   };
 }

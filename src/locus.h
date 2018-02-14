@@ -34,7 +34,7 @@ class Locus {
  public:
   Locus();
   virtual ~Locus();
-
+  void Reset();
   std::string chrom;
   int start;
   int end;

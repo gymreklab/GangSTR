@@ -79,6 +79,7 @@ void LikelihoodMaximizer::Reset() {
   frr_class_.Reset();
   spanning_class_.Reset();
   flanking_class_.Reset();
+  offtarget_class_.Reset();
   read_pool.clear();
 }
 
@@ -107,6 +108,13 @@ void LikelihoodMaximizer::AddFlankingData(const int32_t& data) {
   flanking_class_.AddData(data);
   ReadRecord rec;
   rec.read_type = RC_BOUND;
+  rec.data = data;
+  read_pool.push_back(rec);
+}
+void LikelihoodMaximizer::AddOffTargetData(const int32_t& data) {
+  offtarget_class_.AddData(data);
+  ReadRecord rec;
+  rec.read_type = RC_OFFT;
   rec.data = data;
   read_pool.push_back(rec);
 }
@@ -269,6 +277,9 @@ std::size_t LikelihoodMaximizer::GetFRRDataSize() {
 std::size_t LikelihoodMaximizer::GetFlankingDataSize() {
   return flanking_class_.GetDataSize();
 }
+std::size_t LikelihoodMaximizer::GetOffTargetDataSize() {
+  return offtarget_class_.GetDataSize();
+}
 std::size_t LikelihoodMaximizer::GetReadPoolSize() {
   return read_pool.size();
 }
@@ -283,7 +294,8 @@ bool LikelihoodMaximizer::GetGenotypeNegLogLikelihood(const int32_t& allele1,
   double frr_count_ll = 0.0, frr_ll, span_ll, encl_ll, flank_ll = 0.0;
   double count_weight = .01 * options->coverage;
   double cov = options -> coverage;
-  int frr_count, offtarget_count = 0;
+  int frr_count, offtarget_count = offtarget_class_.GetDataSize();
+
   int read_count;
   if (allele1 < 0 || allele2 < 0){
     *gt_ll = frr_class_.NEG_INF;
@@ -320,7 +332,6 @@ bool LikelihoodMaximizer::GetGenotypeNegLogLikelihood(const int32_t& allele1,
 				       offtarget_count * offtarget_share, 
 				       &frr_count_ll);
     }
-
   }
   else {
     frr_count = resampled_frr_class_.GetDataSize();
