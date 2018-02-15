@@ -58,6 +58,12 @@ enum SingleReadType {
   SR_NOT_FOUND = 7,		// Not used TODO delete
 };
 
+enum FlankMatchState{
+  FM_NOMATCH = 0,
+  FM_PARTIAL = 1,
+  FM_COMPLETE = 2
+};
+
 enum sw_move{
 	SW_END = 0,
 	SW_DIAG = 1,
@@ -78,11 +84,17 @@ bool next_move(std::vector<std::vector<int32_t> > score_matrix,
             sw_move* move);
 
 bool expansion_aware_realign(const std::string& seq,
-				 const std::string& qual,
+			     const std::string& qual,
 			     const std::string& pre_flank,
 			     const std::string& post_flank,
 			     const std::string& motif,
-			     int32_t* nCopy, int32_t* start_pos, int32_t* end_pos, int32_t* score);		      
+			     const int32_t& min_match,
+			     int32_t* nCopy, 
+			     int32_t* start_pos, 
+			     int32_t* end_pos, 
+			     int32_t* score,
+			     FlankMatchState* fm_start,
+			     FlankMatchState* fm_end);		      
 
 bool smith_waterman(const std::string& seq1,
 		    const std::string& seq2,
@@ -113,10 +125,12 @@ bool classify_realigned_read(const std::string& seq,
 			     const int32_t& nCopy,
 			     const int32_t& score,
 			     const int32_t& prefix_length,
-           		 const int32_t& min_match,
-           		 const bool& isMapped,
+			     const int32_t& min_match,
+			     const bool& isMapped,
 			     const std::string& pre_flank,
 			     const std::string& post_flank,
+			     const FlankMatchState& fm_start,
+			     const FlankMatchState& fm_end,
 			     SingleReadType* single_read_class);
 
 #endif  // SRC_REALIGNMENT_H__

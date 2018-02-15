@@ -563,18 +563,19 @@ bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
   int32_t end_pos, end_pos_rev;
   int32_t score, score_rev;
   int32_t nCopy, nCopy_rev;
+  FlankMatchState fm_start, fm_end, fm_start_rev, fm_end_rev;
   std::string seq = lowercase(alignment.QueryBases());
   std::string seq_rev = reverse_complement(seq);
   std::string qual = alignment.Qualities();
   int32_t read_length = (int32_t)seq.size();
 
   /* Perform realignment and classification */
-  if (!expansion_aware_realign(seq, qual, locus.pre_flank, locus.post_flank, locus.motif,
-             &nCopy, &start_pos, &end_pos, &score)) {
+  if (!expansion_aware_realign(seq, qual, locus.pre_flank, locus.post_flank, locus.motif, min_match,
+			       &nCopy, &start_pos, &end_pos, &score, &fm_start, &fm_end)) {
     return false;
   }
-  if (!expansion_aware_realign(seq_rev, qual, locus.pre_flank, locus.post_flank, locus.motif,
-             &nCopy_rev, &start_pos_rev, &end_pos_rev, &score_rev)) {
+  if (!expansion_aware_realign(seq_rev, qual, locus.pre_flank, locus.post_flank, locus.motif, min_match,
+			       &nCopy_rev, &start_pos_rev, &end_pos_rev, &score_rev, &fm_start_rev, &fm_end_rev)) {
     return false;
   }
 
@@ -585,13 +586,19 @@ bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
     score = score_rev;
     seq = seq_rev;
     end_pos = end_pos_rev;
+    fm_start = fm_start_rev;
+    fm_end = fm_end_rev;
   }
   *nCopy_value = nCopy;
   *score_value = score;
 
   
-  if (!classify_realigned_read(seq, locus.motif, start_pos, end_pos, nCopy, score, 
-             (int32_t)locus.pre_flank.size(), min_match, alignment.IsMapped(), locus.pre_flank, locus.post_flank, srt)) {
+  if (!classify_realigned_read(seq, locus.motif, 
+			       start_pos, end_pos, nCopy, score,
+			       (int32_t)locus.pre_flank.size(), 
+			       min_match, alignment.IsMapped(), 
+			       locus.pre_flank, locus.post_flank, 
+			       fm_start, fm_end, srt)) {
     return false;
   }
 
