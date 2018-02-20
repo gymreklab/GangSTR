@@ -443,7 +443,9 @@ bool classify_realigned_read(const std::string& seq,
   } else if (start_in_str && end_in_str) {
     *single_read_class = SR_IRR;
     return true;
-  } else if (start_in_str && !end_in_str) {
+  } 
+  /*
+  else if (start_in_str && !end_in_str) {
     // Post flank check
     flank_match = true;
     j = 0;
@@ -568,7 +570,7 @@ bool classify_realigned_read(const std::string& seq,
       return true;
     }
   }
-
+  */
   // If no other class matches this read pair:
   *single_read_class = SR_UNKNOWN;
   return true; 
