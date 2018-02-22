@@ -102,7 +102,7 @@ bool expansion_aware_realign(const std::string& seq,
   int32_t prev_score = 0;
   std::string template_sub, sequence_sub;
   MARGIN = 1 * period - 1;
-
+  
   //cerr << min_nCopy << " ";
   for (current_nCopy=min_nCopy; current_nCopy<(int32_t)(read_len/period)+2; current_nCopy++) {
     std::stringstream var_realign_ss;
@@ -112,7 +112,7 @@ bool expansion_aware_realign(const std::string& seq,
     }
     var_realign_ss << post_flank;
     std::string var_realign_string = var_realign_ss.str();
-
+    
 
     if (!striped_smith_waterman(var_realign_string, seq, qual, &current_start_pos, &current_end_pos, &current_score, &current_num_mismatch)) {
       return false;
@@ -175,7 +175,6 @@ bool expansion_aware_realign(const std::string& seq,
     }
     prev_score = current_score;
   }
-
   //cerr << current_nCopy << endl;
   *nCopy = max_nCopy;
   *score = max_score;
@@ -437,11 +436,7 @@ bool classify_realigned_read(const std::string& seq,
 
   // Set threshold for match
   int32_t score_threshold = (int32_t)(MATCH_PERC_THRESHOLD*seq.size()*SSW_MATCH_SCORE);
-  // if (seq == "ggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggggcgcggcgcggccgccgcccgcggcggggcggcgggccgccg"){
-  //   cerr << nCopy << endl;
-  //   cerr << pre_flank << endl;
-  //   cerr << post_flank << endl;
-  // }
+
   if (isMapped && (score < score_threshold || nCopy == 0)) {
     *single_read_class = SR_UNKNOWN;
     return true;

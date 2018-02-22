@@ -613,7 +613,13 @@ bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
 			       fm_start, fm_end, srt)) {
     return false;
   }
-
+  
+    
+  if (*srt == SR_UNKNOWN){
+    *nCopy_value = 0;
+  }  
+  
+  
   if (*srt == SR_UNKNOWN && 
       alignment.IsMateMapped() &&
       alignment.MatePosition() < locus.end + (options.dist_mean - options.read_len) && 
@@ -652,6 +658,7 @@ bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
 
   // Set as UNKNOWN if doesn't pass the score threshold.
   if (score < options.min_score / 100.0 * double(SSW_MATCH_SCORE * options.read_len)){
+    *nCopy_value = 0;
     *data_value = 0;
     *srt = SR_UNKNOWN;
     *read_type = RC_UNKNOWN;
