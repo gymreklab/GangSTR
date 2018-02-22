@@ -522,12 +522,20 @@ bool ReadExtractor::FindSpanningRead(BamAlignment alignment,
   int32_t read_length = (int32_t)alignment.QueryBases().size();
   // Similar to 5.2_filter_spanning_only_core.py:57
   // Only includes obvious cases, pre/post flank taken care of elsewhere
-  bool span1 = alignment.RefID() == chrom_ref_id && alignment.GetEndPosition() <= locus.start &&
+  bool span1 = !alignment.StartsWithSoftClip() && alignment.RefID() == chrom_ref_id && alignment.GetEndPosition() <= locus.start &&
     alignment.MateRefID() == chrom_ref_id && alignment.MatePosition() >= locus.end - locus.period; // Margin of size period to find reads that are post flaknking by 1-2 base pairs (may not be found with realigner)
   bool span2 = alignment.RefID() == chrom_ref_id && alignment.Position() >= locus.end &&
     alignment.MateRefID() == chrom_ref_id && alignment.MatePosition() <= locus.start-read_length + locus.period; // Margin of size period to find reads that are pre flaknking by 1-2 base pairs (may not be found with realigner) 
   if (span1 || span2) {
-    *insert_size = abs(alignment.TemplateLength());
+    if ((abs(alignment.TemplateLength()) < 
+	 .5 * (abs(alignment.Position() - alignment.MatePosition()) + alignment.Length())) ||
+	(abs(alignment.TemplateLength()) > 
+	 1.5 * (abs(alignment.Position() - alignment.MatePosition()) + alignment.Length()))){
+      *insert_size = abs(alignment.Position() - alignment.MatePosition()) + alignment.Length();
+    }
+    else{
+      *insert_size = abs(alignment.TemplateLength());
+    }
     return true;
   }
   return false;
@@ -568,6 +576,10 @@ bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
   std::string seq_rev = reverse_complement(seq);
   std::string qual = alignment.Qualities();
   int32_t read_length = (int32_t)seq.size();
+  //cerr << alignment.RefID() << ":" << alignment.Position()
+  //     <<"\tMapped:" << alignment.IsMapped()
+  //     <<"\tRev: "<<alignment.IsReverseStrand() 
+  //     << "\n" << alignment.QueryBases() << "\n";
 
   /* Perform realignment and classification */
   if (!expansion_aware_realign(seq, qual, locus.pre_flank, locus.post_flank, locus.motif, min_match,
