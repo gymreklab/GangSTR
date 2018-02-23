@@ -54,6 +54,31 @@ bool ReadExtractor::ExtractReads(BamCramMultiReader* bamreader,
     PrintMessageDieOnError("\tNot enough reads extracted. Aborting..", M_PROGRESS);
     return false;
   }
+
+  // Find maximum bound, only pick up FRRs if max_bound > 0.2 * read_len / motif_len
+  int32_t max_bound = 0;
+  int32_t max_enclose = 0;
+  for (std::map<std::string, ReadPair>::const_iterator iter = read_pairs.begin();
+       iter != read_pairs.end(); iter++) {
+    if (iter->second.read_type == RC_SPAN){
+      if (iter->second.max_nCopy - 1 > max_bound){
+	max_bound = iter->second.max_nCopy - 1;
+      }
+    } else if (iter->second.read_type == RC_BOUND){
+      if (iter->second.data_value - 1 > max_bound){
+	max_bound = iter->second.data_value -1;
+      }
+    } else if (iter->second.read_type == RC_ENCL){
+      if (iter->second.data_value > max_enclose){
+	max_enclose = iter->second.data_value;
+      }
+    }
+  }
+  float read_cap = float(options.read_len) / float(locus.motif.size());
+  bool accept_FRR = ((max_bound > max_enclose) && 
+		     (max_bound > 0.2 * read_cap)) || 
+    (max_bound > 0.5 * read_cap);
+
   /* Load data into likelihood maximizer */
   for (std::map<std::string, ReadPair>::const_iterator iter = read_pairs.begin();
        iter != read_pairs.end(); iter++) {
@@ -106,7 +131,7 @@ bool ReadExtractor::ExtractReads(BamCramMultiReader* bamreader,
       likelihood_maximizer->AddEnclosingData(iter->second.data_value);
       encl++;
     } else if (iter->second.read_type == RC_FRR) {
-      if (iter->second.data_value < options.dist_max - options.read_len){
+      if (accept_FRR && iter->second.data_value < options.dist_max - options.read_len){
 	if (options.output_readinfo) {
 	  readfile_ << locus.chrom << "\t" 
 		    << locus.start << "\t" 
