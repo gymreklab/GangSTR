@@ -106,17 +106,19 @@ bool ReadExtractor::ExtractReads(BamCramMultiReader* bamreader,
       likelihood_maximizer->AddEnclosingData(iter->second.data_value);
       encl++;
     } else if (iter->second.read_type == RC_FRR) {
-      if (options.output_readinfo) {
-	readfile_ << locus.chrom << "\t" 
-		  << locus.start << "\t" 
-		  << locus.end << "\t"
-		  << iter->first << "\t" 
-		  << "FRR" << "\t" 
-		  << iter->second.data_value << "\t" 
-		  << iter->second.found_pair << std::endl;
+      if (iter->second.data_value < options.dist_max - options.read_len){
+	if (options.output_readinfo) {
+	  readfile_ << locus.chrom << "\t" 
+		    << locus.start << "\t" 
+		    << locus.end << "\t"
+		    << iter->first << "\t" 
+		    << "FRR" << "\t" 
+		    << iter->second.data_value << "\t" 
+		    << iter->second.found_pair << std::endl;
+	}
+	likelihood_maximizer->AddFRRData(iter->second.data_value);
+	frr++;
       }
-      likelihood_maximizer->AddFRRData(iter->second.data_value);
-      frr++;
     } else if (iter->second.read_type == RC_BOUND) {
       if (options.output_readinfo) {
 	readfile_ << locus.chrom << "\t" 
