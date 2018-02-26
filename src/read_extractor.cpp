@@ -54,27 +54,60 @@ bool ReadExtractor::ExtractReads(BamCramMultiReader* bamreader,
     PrintMessageDieOnError("\tNot enough reads extracted. Aborting..", M_PROGRESS);
     return false;
   }
-
+  
+  // Find median bound, and filter out any bound reads with data > 3 * median
   // Find maximum bound, only pick up FRRs if max_bound > 0.2 * read_len / motif_len
-  int32_t max_bound = 0;
+  int32_t max_bound = 0, median_bound = 0, bound_thresh = 0;
   int32_t max_enclose = 0;
+  std::vector<int32_t> bound_vals;
   for (std::map<std::string, ReadPair>::const_iterator iter = read_pairs.begin();
        iter != read_pairs.end(); iter++) {
     if (iter->second.read_type == RC_SPAN){
-      if (iter->second.max_nCopy - 1 > max_bound){
-	max_bound = iter->second.max_nCopy - 1;
+      if (iter->second.max_nCopy - 1 > 0){
+	bound_vals.push_back(iter->second.max_nCopy - 1);
       }
+	//if (iter->second.max_nCopy - 1 > max_bound){
+	//max_bound = iter->second.max_nCopy - 1;
+	//}
     } else if (iter->second.read_type == RC_BOUND){
-      if (iter->second.data_value - 1 > max_bound){
-	max_bound = iter->second.data_value -1;
-      }
+      bound_vals.push_back(iter->second.data_value - 1);
+      //if (iter->second.data_value - 1 > max_bound){
+      //max_bound = iter->second.data_value -1;
+      //}
     } else if (iter->second.read_type == RC_ENCL){
       if (iter->second.data_value > max_enclose){
 	max_enclose = iter->second.data_value;
       }
     }
   }
+  size_t bound_size = bound_vals.size();
   float read_cap = float(options.read_len) / float(locus.motif.size());
+  if (bound_size == 0){
+    max_bound = 0;
+    median_bound = 0;
+  }
+  else if (bound_size == 1){
+    if (bound_vals[0] > max_enclose){
+      max_bound = 0;
+      median_bound = 0;
+    }
+    else{
+      max_bound = bound_vals[0];
+      median_bound = bound_vals[0];
+    }
+  }
+  else{
+    sort(bound_vals.begin(), bound_vals.end());
+    median_bound = bound_vals[int(bound_size / 2)];
+    bound_thresh = 3 * median_bound;
+    size_t idx = bound_size - 1;
+    while (bound_vals[idx] > bound_thresh){
+      idx--;
+    }
+    max_bound = bound_vals[idx];
+  }
+  
+
   bool accept_FRR = ((max_bound > max_enclose) && 
 		     (max_bound > 0.2 * read_cap)) || 
     (max_bound > 0.5 * read_cap);
@@ -105,7 +138,7 @@ bool ReadExtractor::ExtractReads(BamCramMultiReader* bamreader,
         span++;
       }
       // In spanning case, we can also have flanking reads:
-      if (iter->second.max_nCopy > 0) {
+      if (iter->second.max_nCopy > 0 and iter->second.max_nCopy < bound_thresh) {
 	if (options.output_readinfo) {
 	  readfile_ << locus.chrom << "\t" 
 		    << locus.start << "\t" 
@@ -144,7 +177,7 @@ bool ReadExtractor::ExtractReads(BamCramMultiReader* bamreader,
 	likelihood_maximizer->AddFRRData(iter->second.data_value);
 	frr++;
       }
-    } else if (iter->second.read_type == RC_BOUND) {
+    } else if (iter->second.read_type == RC_BOUND and iter->second.data_value < bound_thresh) {
       if (options.output_readinfo) {
 	readfile_ << locus.chrom << "\t" 
 		  << locus.start << "\t" 
@@ -631,6 +664,7 @@ bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
   *nCopy_value = nCopy;
   *score_value = score;
 
+  
   
   if (!classify_realigned_read(seq, locus.motif, 
 			       start_pos, end_pos, nCopy, score,

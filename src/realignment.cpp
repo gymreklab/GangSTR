@@ -159,7 +159,6 @@ bool expansion_aware_realign(const std::string& seq,
       max_start_pos = current_start_pos;
       max_end_pos = current_end_pos;
     }
-
     if (*fm_start == FM_COMPLETE && *fm_end == FM_COMPLETE){
       break;
     }
@@ -180,6 +179,7 @@ bool expansion_aware_realign(const std::string& seq,
   *score = max_score;
   *start_pos = max_start_pos;
   *end_pos = max_end_pos;
+
   return true;
 }
 
