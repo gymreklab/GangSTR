@@ -391,17 +391,17 @@ bool LikelihoodMaximizer::OptimizeLikelihood(const int32_t& read_len,
   int32_t upper_bound = 500; // TODO Change 200 for number depending the parameters
   int32_t lower_bound_1d, lower_bound_2d;
   
-  /*  
+    
   if (!resampled){
     double res;
-    int fix = 5;
-    for (int ii = 10; ii <280 ; ii+=30){
+    int fix = 6;
+    for (int ii = 10; ii <20 ; ii+=1){
       GetGenotypeNegLogLikelihood(ii, fix, read_len, motif_len, ref_count, resampled, &res);
       cerr << ii << ", "<< fix <<" ->\t" << res << endl;
     } 
   }
   
-*/
+
 
   lower_bound_1d = 1;
   lower_bound_2d = 1;

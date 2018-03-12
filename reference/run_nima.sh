@@ -4,4 +4,4 @@
     /storage/nmmsv/ref_genome/chromFa/ \
     /storage/nmmsv/reference_TRF/chr_ref_grch38_upto15bp.bed \
     trf \
-    1
+    4

@@ -76,7 +76,7 @@ bool BamInfoExtract::GetReadLen(int32_t* read_len){
 bool BamInfoExtract::GetInsertSizeDistribution(double* mean, double* std_dev, double* coverage){
 	// TODO change 200000 flank size to something appropriate
 	int32_t flank_size = 400000;
-	int32_t exclusion_margin = 100000;
+	int32_t exclusion_margin = 1000;
 	bool found_ins_distribution = false, found_coverage = false;
 	double mean_b, mean_a, std_b, std_a; // mean and std dev, before and after locus
 	int* valid_temp_len_arr;

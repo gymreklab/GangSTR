@@ -140,6 +140,7 @@ bool expansion_aware_realign(const std::string& seq,
 	read_len - current_start_pos + current_nCopy * period - min_match >= 0){ //Full match is possible
       sequence_sub = seq.substr(read_len - current_start_pos + current_nCopy * period - min_match, 2 * min_match);
       template_sub = var_realign_string.substr(read_len + current_nCopy * period - min_match, 2 * min_match);
+      
       if (sequence_sub == template_sub){
 	*fm_end = FM_COMPLETE;
       }
@@ -150,7 +151,6 @@ bool expansion_aware_realign(const std::string& seq,
     else{
       *fm_end = FM_NOMATCH;
     }
-   
     if (current_score >= max_score) {
       second_best_score = max_score;
       second_best_nCopy = max_nCopy;
@@ -175,11 +175,15 @@ bool expansion_aware_realign(const std::string& seq,
     prev_score = current_score;
   }
   //cerr << current_nCopy << endl;
+  if (max_nCopy < 0.85 * read_len / period and 
+      *fm_start == FM_NOMATCH and *fm_end == FM_NOMATCH){
+    max_nCopy = 0;
+  }
   *nCopy = max_nCopy;
   *score = max_score;
   *start_pos = max_start_pos;
   *end_pos = max_end_pos;
-
+  
   return true;
 }
 

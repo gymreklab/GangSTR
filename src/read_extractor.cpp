@@ -651,7 +651,6 @@ bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
     return false;
   }
 
-
   if (score_rev > score) {
     nCopy = nCopy_rev;
     start_pos = start_pos_rev;
@@ -674,6 +673,7 @@ bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
 			       fm_start, fm_end, srt)) {
     return false;
   }
+ 
   
     
   if (*srt == SR_UNKNOWN){
@@ -692,7 +692,9 @@ bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
     std::string frr_ref = var_realign_frr.str();
     striped_smith_waterman(frr_ref, seq, qual, &pos_frr, &end_frr, &score_frr, &mismatches_frr);
     // cerr << mismatches_frr << "\t" << seq << endl;
-    if (score_frr > 0.70 * seq.size() * SSW_MATCH_SCORE && mismatches_frr <= .05 * seq.size()){
+
+    // Tune 0.75 for false positive rate
+    if (score_frr > 0.75 * seq.size() * SSW_MATCH_SCORE && mismatches_frr < int(.05 * seq.size())){
       // cerr << seq << endl;
       // cerr << mismatches_frr << "\t" << score_frr << endl;
       *srt = SR_IRR;
