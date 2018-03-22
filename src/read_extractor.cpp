@@ -111,7 +111,7 @@ bool ReadExtractor::ExtractReads(BamCramMultiReader* bamreader,
   bool accept_FRR = ((max_bound > max_enclose) && 
 		     (max_bound > 0.2 * read_cap)) || 
     (max_bound > 0.5 * read_cap);
-
+  
   /* Load data into likelihood maximizer */
   for (std::map<std::string, ReadPair>::const_iterator iter = read_pairs.begin();
        iter != read_pairs.end(); iter++) {
@@ -675,29 +675,34 @@ bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
   }
  
   
-    
   if (*srt == SR_UNKNOWN){
     *nCopy_value = 0;
   }  
   
-  
-  if (*srt == SR_UNKNOWN && 
+
+  if ((*srt == SR_UNKNOWN || *srt == SR_UM_POT_IRR || *srt == SR_IRR) && 
       alignment.IsMateMapped() &&
       alignment.MatePosition() < locus.end + (options.dist_mean - options.read_len) && 
       alignment.MatePosition() > locus.start - (options.dist_mean - options.read_len)){
     std::stringstream var_realign_frr;
-    for (int i = 0; i<(seq.size() / locus.motif.size() + 5); i++) {
+    for (int i = 0; i<(seq.size() / locus.motif.size() + 1); i++) {
       var_realign_frr << locus.motif;
     }
     std::string frr_ref = var_realign_frr.str();
     striped_smith_waterman(frr_ref, seq, qual, &pos_frr, &end_frr, &score_frr, &mismatches_frr);
+    int gaps_frr = abs(int(end_frr - pos_frr - seq.size()));
     // cerr << mismatches_frr << "\t" << seq << endl;
-
+    
     // Tune 0.75 for false positive rate
-    if (score_frr > 0.75 * seq.size() * SSW_MATCH_SCORE && mismatches_frr < int(.05 * seq.size())){
+    if (score_frr > 0.75 * seq.size() * SSW_MATCH_SCORE && 
+	mismatches_frr < int(.05 * seq.size()) && 
+	gaps_frr < int(.05 * seq.size())){
       // cerr << seq << endl;
       // cerr << mismatches_frr << "\t" << score_frr << endl;
       *srt = SR_IRR;
+    }
+    else{
+      *srt = SR_UNKNOWN;
     }
   }
 
@@ -706,6 +711,7 @@ bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
         << alignment.Name() << "\t" << "UNMAPPED" << std::endl << alignment.QueryBases()<<std::endl;
   }
 
+  /*
   // For Unmapped potential IRRs, check if mate is mapped in vicinity of STR locus
   if (*srt == SR_UM_POT_IRR){
     if (alignment.IsMateMapped() &&  
@@ -718,7 +724,7 @@ bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
       // cerr << "BaseQ: " << alignment.Qualities() << endl;
     }
   }
-
+  */
   // Set as UNKNOWN if doesn't pass the score threshold.
   if (score < options.min_score / 100.0 * double(SSW_MATCH_SCORE * options.read_len)){
     *nCopy_value = 0;

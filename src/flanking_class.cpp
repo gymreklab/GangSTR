@@ -41,7 +41,8 @@ bool FlankingClass::GetAlleleLogLikelihood(const int32_t& allele,
 	if (max_nCopy == data) max_nCopy++;
 	if (read_class_data_.size() == 0) return false;
 	if (allele >= data && data > 0){
-	  likelihood = 1.0 / (max_nCopy - data) * 1.0 / read_class_data_.size();
+	  //likelihood = 1.0 / (max_nCopy - data) * 1.0 / read_class_data_.size();
+	  likelihood = 1.0 / (allele);
 	}
 	else{
 		likelihood = 0.0;

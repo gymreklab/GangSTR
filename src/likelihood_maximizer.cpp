@@ -394,8 +394,8 @@ bool LikelihoodMaximizer::OptimizeLikelihood(const int32_t& read_len,
     
   if (!resampled){
     double res;
-    int fix = 6;
-    for (int ii = 10; ii <20 ; ii+=1){
+    int fix = 14;
+    for (int ii = 10; ii <55 ; ii+=5){
       GetGenotypeNegLogLikelihood(ii, fix, read_len, motif_len, ref_count, resampled, &res);
       cerr << ii << ", "<< fix <<" ->\t" << res << endl;
     } 

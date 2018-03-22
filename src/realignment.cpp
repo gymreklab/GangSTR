@@ -159,6 +159,7 @@ bool expansion_aware_realign(const std::string& seq,
       max_start_pos = current_start_pos;
       max_end_pos = current_end_pos;
     }
+    
     if (*fm_start == FM_COMPLETE && *fm_end == FM_COMPLETE){
       break;
     }
@@ -445,7 +446,7 @@ bool classify_realigned_read(const std::string& seq,
     *single_read_class = SR_UNKNOWN;
     return true;
   } else if (start_in_str && end_in_str) {
-    *single_read_class = SR_IRR;
+    *single_read_class = SR_UM_POT_IRR;
     return true;
   } 
   /*
