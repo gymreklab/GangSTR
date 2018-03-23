@@ -38,9 +38,9 @@ const static int32_t GAP_SCORE = -1;
 
 // SSW Parameters
 const static int32_t SSW_MATCH_SCORE = 2;
-const static int32_t SSW_MISMATCH_SCORE = 2;
-const static int32_t SSW_GAP_OPEN = 3;
-const static int32_t SSW_GAP_EXTEND = 1;
+const static int32_t SSW_MISMATCH_SCORE = 5;
+const static int32_t SSW_GAP_OPEN = 4;
+const static int32_t SSW_GAP_EXTEND = 2;
 
 // amount of slip we allow between alignment position and STR start and end
 static int32_t MARGIN = 5;		// This value is reset in expansion_aware_realign

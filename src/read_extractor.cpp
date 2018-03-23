@@ -663,7 +663,7 @@ bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
   *nCopy_value = nCopy;
   *score_value = score;
 
-  
+
   
   if (!classify_realigned_read(seq, locus.motif, 
 			       start_pos, end_pos, nCopy, score,
@@ -679,7 +679,7 @@ bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
     *nCopy_value = 0;
   }  
   
-
+  
   if ((*srt == SR_UNKNOWN || *srt == SR_UM_POT_IRR || *srt == SR_IRR) && 
       alignment.IsMateMapped() &&
       alignment.MatePosition() < locus.end + (options.dist_mean - options.read_len) && 
