@@ -82,17 +82,31 @@ bool SpanningClass::GetLogReadProb(const int32_t& allele,
 				   const int32_t& motif_len,
 				   const int32_t& ref_count,
 				   double* log_allele_prob) {
-	int mean_A = dist_mean - motif_len * (allele - ref_count);
+  
+  int shift = motif_len * (allele - ref_count);
+  int mean_A = dist_mean - shift;
+  double allele_prob = 0.0;
 
-	double allele_prob = gsl_ran_gaussian_pdf(data - mean_A, dist_sdev);
-	if (allele_prob > 0){
-		*log_allele_prob = log(allele_prob);
-		return true;
-	}
-	else if (allele_prob == 0){
-		*log_allele_prob = NEG_INF;
-		return true;
-	}
-	else
-		return false;
+  allele_prob = gsl_ran_gaussian_pdf(data - mean_A, dist_sdev);
+  /*
+  if (gsl_cdf_gaussian_P(motif_len * allele - mean_A, dist_sdev) < 1.0){
+    allele_prob = 1.0 / (1.0 - gsl_cdf_gaussian_P(motif_len * allele - mean_A, dist_sdev)) * gsl_ran_gaussian_pdf(data - mean_A, dist_sdev);
+  }
+  else { // allele is too large to use spanning reads anyway.
+    allele_prob = 0.0;
+  }
+  */
+
+  //  cerr << allele_prob << "\t" << gsl_cdf_gaussian_P(motif_len * allele - mean_A, dist_sdev) << endl;  
+  if (allele_prob > 0){
+    *log_allele_prob = log(allele_prob);
+    //cerr << allele << " " << data << " " << *log_allele_prob << endl;
+    return true;
+  }
+  else if (allele_prob == 0){
+    *log_allele_prob = NEG_INF;
+    return true;
+  }
+  else
+    return false;
 }

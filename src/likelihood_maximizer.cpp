@@ -56,7 +56,7 @@ LikelihoodMaximizer::LikelihoodMaximizer(Options& _options) {
 
   gsl_rng_set(r, options->seed);
   
-  offtarget_share = 0.0;
+  //offtarget_share = 0.0;
 }
 
 // // Not needed. since options are updated before creating likelihood maximizer object
@@ -294,6 +294,7 @@ bool LikelihoodMaximizer::GetGenotypeNegLogLikelihood(const int32_t& allele1,
   double frr_count_ll = 0.0, frr_ll, span_ll, encl_ll, flank_ll = 0.0;
   double count_weight = .01 * options->coverage;
   double cov = options -> coverage;
+  bool use_cov = options -> use_cov;
   int frr_count, offtarget_count = offtarget_class_.GetDataSize();
 
   int read_count;
@@ -322,15 +323,16 @@ bool LikelihoodMaximizer::GetGenotypeNegLogLikelihood(const int32_t& allele1,
 							 options->ploidy, &flank_ll);
     // TODO Substituting these lines changes optimization result. Find out why?!
     //if ((options->coverage > 0) && (frr_class_.GetDataSize() > 0)){
-    if (cov > 0 && frr_count > 0){
+    if (use_cov && cov > 0 && frr_count > 0){
       frr_class_.GetCountLogLikelihood(allele1, 
 				       allele2,
 				       read_len, 
 				       motif_len, 
 				       options->coverage,
 				       options->ploidy, 
-				       offtarget_count * offtarget_share, 
+				       2 * offtarget_count * offtarget_share, 
 				       &frr_count_ll);
+      //cerr << allele1 << ","<< allele2 << "\t"<< frr_count << " " << frr_count_ll << endl; 
     }
   }
   else {
@@ -352,14 +354,14 @@ bool LikelihoodMaximizer::GetGenotypeNegLogLikelihood(const int32_t& allele1,
 								   read_len, motif_len, ref_count, 
 								   options->ploidy, &flank_ll); 
     
-    if (cov > 0 && frr_count > 0){
+    if (use_cov && cov > 0 && frr_count > 0){
       resampled_frr_class_.GetCountLogLikelihood(allele1, 
 				       allele2,
 				       read_len, 
 				       motif_len, 
 				       options->coverage,
 				       options->ploidy, 
-				       offtarget_count * offtarget_share, 
+				       2 * offtarget_count * offtarget_share, 
 				       &frr_count_ll);
     
     }
@@ -394,14 +396,13 @@ bool LikelihoodMaximizer::OptimizeLikelihood(const int32_t& read_len,
     
   if (!resampled){
     double res;
-    int fix = 14;
-    for (int ii = 10; ii <55 ; ii+=5){
+    int fix = 20;
+    for (int ii = 1; ii <25 ; ii+=20){
       GetGenotypeNegLogLikelihood(ii, fix, read_len, motif_len, ref_count, resampled, &res);
       cerr << ii << ", "<< fix <<" ->\t" << res << endl;
     } 
   }
-  
-
+  //return false;
 
   lower_bound_1d = 1;
   lower_bound_2d = 1;

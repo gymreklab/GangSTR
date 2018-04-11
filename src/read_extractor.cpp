@@ -109,9 +109,8 @@ bool ReadExtractor::ExtractReads(BamCramMultiReader* bamreader,
   
 
   bool accept_FRR = ((max_bound > max_enclose) && 
-		     (max_bound > 0.2 * read_cap)) || 
-    (max_bound > 0.5 * read_cap);
-  
+		     (max_bound > 0.5 * read_cap)) || 
+    (max_bound > 0.8 * read_cap);
   /* Load data into likelihood maximizer */
   for (std::map<std::string, ReadPair>::const_iterator iter = read_pairs.begin();
        iter != read_pairs.end(); iter++) {
@@ -224,7 +223,7 @@ bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
   // Get bam alignments from the relevant region
   bamreader->SetRegion(locus.chrom, 
 		       locus.start-regionsize, 
-		       locus.end+regionsize + 1000);
+		       locus.end+regionsize);
 
   // Keep track of which file we're processing
   int32_t file_index = 0;
@@ -485,6 +484,12 @@ bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
   if (locus.offtarget_set){
     for (std::vector<GenomeRegion>::const_iterator reg_it = locus.offtarget_regions.begin();
 	 reg_it != locus.offtarget_regions.end(); reg_it++){
+      if (options.verbose) {
+	stringstream ss;
+	ss << "\tAnalyzing off target region: " << reg_it->chrom << ':'
+	   << reg_it->start <<  '-' <<  reg_it->end;
+	  PrintMessageDieOnError(ss.str(), M_PROGRESS);
+      }
       bamreader->SetRegion(reg_it->chrom, reg_it->start, reg_it->end);
 
       const int32_t offchrom_ref_id = bam_header->ref_id(reg_it->chrom);
@@ -503,16 +508,16 @@ bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
 	SingleReadType srt;
 	ProcessSingleRead(alignment, chrom_ref_id, locus, min_match,
 			  &data_value, &nCopy_value, &score_value, &read_type, &srt);
-	
+
 	//  Check if read's mate already processed 
 	std::map<std::string, ReadPair>::iterator rp_iter = read_pairs->find(aln_key);
 	if (rp_iter->second.found_pair){
 	  continue;
-	} 
+	}
 	if (rp_iter != read_pairs->end()) {
 	  // do another round of rescue maybe?! Currently, naive rescue:
 	  rp_iter->second.read2 = alignment;
-	  if (read_type == RC_FRR or srt == SR_IRR){
+	  if (read_type == RC_FRR or srt == SR_UM_POT_IRR or srt == SR_IRR){
 	    if (rp_iter->second.read_type == RC_POT_OFFT){
 	      //cerr << "2\t" << locus.chrom << " " << alignment.QueryBases() << endl;
 	      rp_iter->second.read_type = RC_OFFT;
@@ -531,7 +536,7 @@ bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
 	  }
 	}
 	else{
-	  if (read_type == RC_FRR){
+	  if (read_type == RC_FRR or srt == SR_UM_POT_IRR){
 	    //cerr << "1\t" << locus.chrom << " " << alignment.Name() << endl;
 	    read_pair.read_type = RC_POT_OFFT;
 	    read_pair.read1 = alignment;
@@ -663,7 +668,6 @@ bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
   *nCopy_value = nCopy;
   *score_value = score;
 
-
   
   if (!classify_realigned_read(seq, locus.motif, 
 			       start_pos, end_pos, nCopy, score,
@@ -674,6 +678,10 @@ bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
     return false;
   }
  
+  if (alignment.Name() == "HKFMYALXX:6:1106:5609907:0"){
+    cerr << seq << endl;
+    cerr << *srt << endl;
+  }
   
   if (*srt == SR_UNKNOWN){
     *nCopy_value = 0;

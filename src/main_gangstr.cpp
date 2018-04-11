@@ -53,6 +53,8 @@ void show_help() {
 	   << "--ploidy       Indicate whether data is haploid (1) or diploid (2)\n"
 	   << "--readlength   Read length\n"
 	   << "--coverage     Average coverage. Must be set for whole exome or targeted data.\n"
+	   << "--nonuniform   Indicate wether data has nonuniform coverage (i.e., whole exome data).\n"
+	   << "--useofftarget Use offtarget regions included in bam file.\n"
 	   << "--insertmean   Insert size mean\n"
 	   << "--insertsdev   Insert size standard deviation\n"
 	   << "--insertmax    Maximum insert size\n"
@@ -88,6 +90,8 @@ void parse_commandline_options(int argc, char* argv[], Options* options) {
     OPT_PLOIDY,
     OPT_READLEN,
     OPT_COVERAGE,
+    OPT_USEOFF,
+    OPT_NONUNIF,
     OPT_INSMEAN,
     OPT_INSSDEV,
     OPT_INSMAX,
@@ -117,6 +121,8 @@ void parse_commandline_options(int argc, char* argv[], Options* options) {
     {"ploidy",      required_argument,  NULL, OPT_PLOIDY},
     {"readlength",  required_argument,  NULL, OPT_READLEN},
     {"coverage",    required_argument,  NULL, OPT_COVERAGE},
+    {"nonuniform",  no_argument,  NULL, OPT_NONUNIF},
+    {"useofftarget",no_argument,  NULL, OPT_USEOFF},
     {"insertmean",  required_argument,  NULL, OPT_INSMEAN},
     {"insertsdev",  required_argument,  NULL, OPT_INSSDEV},
     {"insertmax",   required_argument,  NULL, OPT_INSMAX},
@@ -176,6 +182,12 @@ void parse_commandline_options(int argc, char* argv[], Options* options) {
       break;
     case OPT_COVERAGE:
       options->coverage = atof(optarg);
+      break;
+    case OPT_NONUNIF:
+      options->use_cov = false;
+      break;
+    case OPT_USEOFF:
+      options->use_off = true;
       break;
     case OPT_INSMEAN:
       options->dist_mean = atoi(optarg);
@@ -307,12 +319,19 @@ int main(int argc, char* argv[]) {
       options.dist_mean = mean;
       options.dist_sdev = std_dev;
     }
-    if (options.coverage == -1){
-      cerr << coverage << endl;
-      if (coverage < 10){
-        PrintMessageDieOnError("Low coverage or targeted data. Please set coverage manually.", M_ERROR);
+    if (options.use_cov){
+      if (options.coverage == -1){
+	cerr << coverage << endl;
+	if (coverage < 10){
+	  PrintMessageDieOnError("Low coverage or targeted data. Please set coverage manually.", M_ERROR);
+	}
+	options.coverage = coverage;
       }
-      options.coverage = coverage;
+    }
+    else{
+      stringstream ss;
+      ss << "\tNonUniform mode selected. Not using coverage in compuations.";
+      PrintMessageDieOnError(ss.str(), M_PROGRESS);
     }
     if (options.verbose) {
       stringstream ss;
@@ -334,6 +353,13 @@ int main(int argc, char* argv[]) {
     ss.str("");
     ss.clear();
     ss << "Processing " << locus.chrom << ":" << locus.start;
+    if (options.use_off == true){
+      locus.offtarget_share = 1.0;
+    }
+    else{
+      locus.offtarget_share = 0.0;
+    }
+    
     /*
     for (std::vector<GenomeRegion>::iterator it = locus.offtarget_regions.begin();
 	 it != locus.offtarget_regions.end(); it++){

@@ -68,6 +68,8 @@ Options::Options() {
   output_readinfo = false;
   seed = time(NULL);
   min_match = 5;
+  use_cov = true;
+  use_off = false;
 }
 
 Options::~Options() {}
