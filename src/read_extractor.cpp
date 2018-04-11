@@ -108,9 +108,15 @@ bool ReadExtractor::ExtractReads(BamCramMultiReader* bamreader,
   }
   
 
-  bool accept_FRR = ((max_bound > max_enclose) && 
+  bool accept_FRR = ((max_enclose != 0) &&
+		     (max_bound > max_enclose) && 
 		     (max_bound > 0.5 * read_cap)) || 
     (max_bound > 0.8 * read_cap);
+  /*
+  cerr<<max_bound<<"\t"<<read_cap<<"\t"<<endl;
+  cerr << int(accept_FRR) << endl;
+  */
+
   /* Load data into likelihood maximizer */
   for (std::map<std::string, ReadPair>::const_iterator iter = read_pairs.begin();
        iter != read_pairs.end(); iter++) {
@@ -677,12 +683,12 @@ bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
 			       fm_start, fm_end, srt)) {
     return false;
   }
- 
-  if (alignment.Name() == "HKFMYALXX:6:1106:5609907:0"){
+  /*
+  if (alignment.Name() == "ERR194147.786796391"){
     cerr << seq << endl;
     cerr << *srt << endl;
   }
-  
+  */
   if (*srt == SR_UNKNOWN){
     *nCopy_value = 0;
   }  
