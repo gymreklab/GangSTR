@@ -55,8 +55,8 @@ libgangstr_a_SOURCES = \
 GangSTR_LDFLAGS = $(AM_LDFLAGS)
 GangSTR_SOURCES = main_gangstr.cpp
 GangSTR_CPPFLAGS = $(AM_CPPFLAGS) $(AM_PROG_CC_C_O)
-GangSTR_CFLAGS = $(AM_CFLAGS)
-GangSTR_CXXFLAGS = $(AM_CXXFLAGS)
+GangSTR_CFLAGS = $(CFLAGS)	# Change to AM_CXXFLAGS For -o0 (Valgrind)
+GangSTR_CXXFLAGS = $(CXXFLAGS) 	# Change to AM_CXXFLAGS For -o0 (Valgrind)
 GangSTR_LDADD = libgangstr.a $(GSL_LIBS) $(NLOP_LIBS) $(HTS_LIBS)
 
 # (Copied from coreutils' tests/local.mk)
