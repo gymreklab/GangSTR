@@ -69,6 +69,7 @@ void show_help() {
 	   << "--output-bootstraps  Output file with bootstrap samples\n"
 	   << "--output-readinfo    Output read class info (for debugging)\n"
 	   << "-v,--verbose   print out useful progress messages\n"
+	   << "--very         Print out more detailed progress messages for debugging\n"
 	   << "--version      print out the version of this software\n"
 	   << "This program takes in aligned reads in BAM format\n"
 	   << "and genotypes a reference set of STRs\n\n";
@@ -106,6 +107,7 @@ void parse_commandline_options(int argc, char* argv[], Options* options) {
     OPT_OUTREADINFO,
     OPT_SEED,
     OPT_VERBOSE,
+    OPT_VERYVERBOSE,
     OPT_VERSION,
   };
   static struct option long_options[] = {
@@ -137,6 +139,7 @@ void parse_commandline_options(int argc, char* argv[], Options* options) {
     {"output-readinfo", no_argument,        NULL, OPT_OUTREADINFO},
     {"seed",        required_argument,  NULL, OPT_SEED},
     {"verbose",     no_argument,        NULL, OPT_VERBOSE},
+    {"very",  no_argument, NULL, OPT_VERYVERBOSE},
     {"version",     no_argument,        NULL, OPT_VERSION},
     {NULL,          no_argument,        NULL, 0},
   };
@@ -234,6 +237,9 @@ void parse_commandline_options(int argc, char* argv[], Options* options) {
     case 'v':
       options->verbose++;
       break;
+    case OPT_VERYVERBOSE:
+      options->very_verbose++;
+      break;
     case OPT_VERSION:
       cerr << _GIT_VERSION << endl;
       exit(0);
@@ -321,7 +327,6 @@ int main(int argc, char* argv[]) {
     }
     if (options.use_cov){
       if (options.coverage == -1){
-	cerr << coverage << endl;
 	if (coverage < 10){
 	  PrintMessageDieOnError("Low coverage or targeted data. Please set coverage manually.", M_ERROR);
 	}

@@ -66,6 +66,7 @@ bool BamCramReader::SetRegion(const std::string& chrom, int32_t start, int32_t e
   std::stringstream region;
   region << chrom << ":" << start+1 << "-" << end;
   std::string region_str = region.str();
+  hts_itr_destroy(iter_); // Destroy previous allocations
   iter_ = sam_itr_querys(idx_, hdr_, region_str.c_str());
 
   if (iter_ != NULL){

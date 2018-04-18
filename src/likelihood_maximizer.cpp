@@ -383,12 +383,27 @@ bool LikelihoodMaximizer::OptimizeLikelihood(const int32_t& read_len,
 					     const int32_t& fix_allele,
 					     const double& off_share,
 					     int32_t* allele1, int32_t* allele2, double* min_negLike) {
+  if (options->very_verbose) {
+    if (!resampled) {
+      PrintMessageDieOnError("\t\tOptimizing Likelihood" , M_PROGRESS);
+    }
+    else {
+      PrintMessageDieOnError("\t\tOptimizing Likelihood (bootstrap)" , M_PROGRESS);
+    }
+   }
+
   offtarget_share = off_share;
   int32_t a1, a2, result, temp;
   double minf;
   std::vector<int32_t> allele_list;
   std::vector<int32_t> sublist;
+  if (options->very_verbose) {
+      PrintMessageDieOnError("\t\tExtracting enclosing alleles", M_PROGRESS);
+   }
   this->enclosing_class_.ExtractEnclosingAlleles(&allele_list);
+  if (options->very_verbose) {
+    PrintMessageDieOnError("\t\tResample read pool", M_PROGRESS);
+  }
   ResampleReadPool();
   int32_t upper_bound = 500; // TODO Change 200 for number depending the parameters
   int32_t lower_bound_1d, lower_bound_2d;
@@ -408,16 +423,34 @@ bool LikelihoodMaximizer::OptimizeLikelihood(const int32_t& read_len,
   lower_bound_2d = 1;
 
   if (ploidy == 2){
-
     for (std::vector<int32_t>::iterator allele_it = allele_list.begin();
          allele_it != allele_list.end();
          allele_it++) {
+        if (options->very_verbose) {
+	  stringstream msg;
+	  msg<<"\t\t\t1D optimization for enclosing allele  "<<*allele_it;
+	  PrintMessageDieOnError(msg.str(), M_PROGRESS);
+	}
+	
       nlopt_1D_optimize(read_len, motif_len, ref_count, lower_bound_1d, upper_bound, resampled, this, *allele_it, &a1, &result, &minf);
+      if (options->very_verbose) {
+	stringstream msg;
+	msg<<"\t\t\tResult: "<<*allele_it<<", "<<a1;
+	PrintMessageDieOnError(msg.str(), M_PROGRESS);
+      }
       sublist.push_back(a1);
       // cerr<<"ER:\t"<<*allele_it<<endl;
       // cerr<<"1D:\t"<<a1<<endl;
     }
+    if (options->very_verbose) {
+      PrintMessageDieOnError("\t\t2D optimization", M_PROGRESS);
+    }
     nlopt_2D_optimize(read_len, motif_len, ref_count, lower_bound_2d, upper_bound, resampled, this, &a1, &a2, &result, &minf);
+    if (options->very_verbose) {
+      stringstream msg;
+      msg<<"\t\t\tResult: "<<a1<<", "<<a2;
+      PrintMessageDieOnError(msg.str(), M_PROGRESS);
+    }
     sublist.push_back(a1);
     sublist.push_back(a2);
 
@@ -431,12 +464,28 @@ bool LikelihoodMaximizer::OptimizeLikelihood(const int32_t& read_len,
           allele_list.push_back(*subl_it);
       }
     }
+    if (options->very_verbose) {
+      PrintMessageDieOnError("\t\tFinding best allele tuple", M_PROGRESS);
+    }
     findBestAlleleListTuple(allele_list, read_len, motif_len, ref_count, resampled, ploidy, 0,
                             allele1, allele2, min_negLike);
   }
   else if (ploidy == 1){
+    if (options->very_verbose) {
+      stringstream msg;
+      msg<<"\t\t1D optimization for allele "<<fix_allele;
+      PrintMessageDieOnError(msg.str(), M_PROGRESS);
+    }
     nlopt_1D_optimize(read_len, motif_len, ref_count, lower_bound_1d, upper_bound, resampled, this, fix_allele, &a1, &result, &minf);
+    if (options->very_verbose) {
+      stringstream msg;
+      msg<<"\t\t\tResutlt:  "<<fix_allele<<","<<a1;
+      PrintMessageDieOnError(msg.str(), M_PROGRESS);
+    }
     allele_list.push_back(a1);
+    if (options->very_verbose) {
+      PrintMessageDieOnError("\t\tFinding best allele tuple", M_PROGRESS);
+    }
     findBestAlleleListTuple(allele_list, read_len, motif_len, ref_count, resampled, ploidy, fix_allele,
                             allele1, allele2, min_negLike);
 

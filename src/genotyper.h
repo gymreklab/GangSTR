@@ -34,7 +34,7 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 class Genotyper {
   friend class GenotyperTest;
  public:
-  Genotyper(RefGenome _refgenome,
+  Genotyper(RefGenome& _refgenome,
 	    Options& _options);
   virtual ~Genotyper();
 

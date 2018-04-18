@@ -25,7 +25,7 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 
 using namespace std;
 
-Genotyper::Genotyper(RefGenome _refgenome,
+Genotyper::Genotyper(RefGenome& _refgenome,
 		    Options& _options) {
   refgenome = &_refgenome;
   options = &_options;
@@ -105,7 +105,7 @@ bool Genotyper::ProcessLocus(BamCramMultiReader* bamreader, Locus* locus) {
   locus->frr_reads = likelihood_maximizer->GetFRRDataSize();
   locus->flanking_reads = likelihood_maximizer->GetFlankingDataSize();
   locus->depth = likelihood_maximizer->GetReadPoolSize();
-  cout<<">>Genotyper Results:\t"<<allele1<<", "<<allele2<<"\tlikelihood = "<<min_negLike<<"\n";
+
   locus->allele1 = allele1;
   locus->allele2 = allele2;
   // for (int jj = 0; jj < 10; jj++){
@@ -140,8 +140,9 @@ bool Genotyper::ProcessLocus(BamCramMultiReader* bamreader, Locus* locus) {
     locus->lob2 = lob2;
     locus->hib2 = hib2;
     // 
-    cout<<"@@Small Allele Bound:\t["<<lob1<<", "<<hib1<<"]\n";
-    cout<<"@@Large Allele Bound:\t["<<lob2<<", "<<hib2<<"]\n";
+    cerr<<">>Genotyper Results:\t"<<allele1<<", "<<allele2<<"\tlikelihood = "<<min_negLike<<"\n";
+    cerr<<"@@Small Allele Bound:\t["<<lob1<<", "<<hib1<<"]\n";
+    cerr<<"@@Large Allele Bound:\t["<<lob2<<", "<<hib2<<"]\n";
   }
   return true;
 }

@@ -59,6 +59,7 @@ class Options {
   double flanking_weight;
   // Helpers
   bool verbose;
+  bool very_verbose;
   // Experiment parameters for likelihood maximizer
   int32_t read_len;
   int32_t motif_len;

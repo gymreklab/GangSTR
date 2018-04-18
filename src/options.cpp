@@ -61,6 +61,7 @@ Options::Options() {
   spanning_weight = 1.0;
   flanking_weight = 1.0;
   verbose = false;
+  very_verbose = false;
   ploidy = 2;
   num_boot_samp = 100;
   read_prob_mode = false;
