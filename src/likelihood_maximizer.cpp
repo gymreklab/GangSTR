@@ -24,7 +24,7 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 #include <gsl/gsl_siman.h>
 #include "src/likelihood_maximizer.h"
 #include "src/mathops.h"
-#include "src/realignment.h" // for MARGIN 
+#include "src/realignment.h" // for MARGIN
 #include <iostream>
 #include <algorithm>
 using namespace std;
@@ -307,7 +307,10 @@ bool LikelihoodMaximizer::GetGenotypeNegLogLikelihood(const int32_t& allele1,
     frr_count = frr_class_.GetDataSize();
     read_count = frr_count + enclosing_class_.GetDataSize() +
       spanning_class_.GetDataSize() + flanking_class_.GetDataSize();
-
+    if (read_count == 0){
+      *gt_ll = frr_class_.NEG_INF;
+      return true;
+    }
     frr_class_.GetClassLogLikelihood(allele1, allele2, 
 				     read_len, motif_len, ref_count, 
 				     options->ploidy, &frr_ll);
@@ -339,7 +342,10 @@ bool LikelihoodMaximizer::GetGenotypeNegLogLikelihood(const int32_t& allele1,
     frr_count = resampled_frr_class_.GetDataSize();
     read_count = frr_count + resampled_enclosing_class_.GetDataSize() +
       resampled_spanning_class_.GetDataSize() + resampled_flanking_class_.GetDataSize();
-
+    if (read_count == 0){
+      *gt_ll = frr_class_.NEG_INF;
+      return true;
+    }
     resampled_frr_class_.GetClassLogLikelihood(allele1, allele2, 
 					       read_len, motif_len, ref_count, 
 					       options->ploidy, &frr_ll);
@@ -366,7 +372,7 @@ bool LikelihoodMaximizer::GetGenotypeNegLogLikelihood(const int32_t& allele1,
     
     }
   }
-
+  
   *gt_ll = -1*(1.0 / read_count * (options->frr_weight * frr_ll +
 				options->spanning_weight * span_ll +
 				options->enclosing_weight * encl_ll + 
@@ -391,7 +397,8 @@ bool LikelihoodMaximizer::OptimizeLikelihood(const int32_t& read_len,
       PrintMessageDieOnError("\t\tOptimizing Likelihood (bootstrap)" , M_PROGRESS);
     }
    }
-
+  
+  
   offtarget_share = off_share;
   int32_t a1, a2, result, temp;
   double minf;
@@ -569,7 +576,7 @@ double nloptNegLikelihood(unsigned n, const double *x, double *grad, void *data)
   if (n == 2){
     double A = x[0], B = x[1];
     if(!lm_ptr->GetGenotypeNegLogLikelihood(A, B, read_len, motif_len, ref_count, resampled, &gt_ll))
-      return -1.0;
+      return -100.0;
     else{
       return gt_ll;
     }
@@ -577,7 +584,7 @@ double nloptNegLikelihood(unsigned n, const double *x, double *grad, void *data)
   else{
     double A = x[0], B = fix_allele;
     if(!lm_ptr->GetGenotypeNegLogLikelihood(A, B, read_len, motif_len, ref_count, resampled, &gt_ll))
-      return -1.0;
+      return -100.0;
     else{
       return gt_ll;
     }

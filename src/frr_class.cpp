@@ -42,6 +42,12 @@ bool FRRClass::GetLogClassProb(const int32_t& allele,
 	// Compute normalization constant norm_const
 	double norm_const = gsl_cdf_gaussian_P(2 * flank_len + str_len - dist_mean, dist_sdev) -
 						gsl_cdf_gaussian_P(2 * read_len - dist_mean, dist_sdev); 
+	if (norm_const == 0 or
+	    (2.0 * flank_len + str_len - 2.0 * read_len) == 0){
+	  cerr << "Divide by Zero prevented!" << endl;
+	  *log_class_prob = NEG_INF;
+	  return true;
+	}
 	double coef0 = 1.0 / norm_const / (2.0 * flank_len + str_len - 2.0 * read_len);
 	double coef1 = - double(dist_sdev ^ 2);
 	double term1 = gsl_ran_gaussian_pdf(str_len - dist_mean, dist_sdev) -
@@ -89,7 +95,10 @@ bool FRRClass::GetLogReadProb(const int32_t& allele,
 
 	double term1 = gsl_cdf_gaussian_P(read_len + data + str_len - dist_mean, dist_sdev) - 
 			gsl_cdf_gaussian_P(2 * read_len + data - dist_mean, dist_sdev);
-
+	if (norm_const == 0){
+	  *log_allele_prob = NEG_INF;
+	  return true;
+	}
 	double allele_prob = 1 / norm_const * term1;
 	if (allele_prob > 0){
 		*log_allele_prob = log(allele_prob);
@@ -114,6 +123,13 @@ bool FRRClass::GetCountLogLikelihood(const int32_t& allele1,
   
   int32_t frr_count = GetDataSize() + offtarget_count;
   double frr_thresh = double(read_len) / double(motif_len);
+  if (allele1 * motif_len - read_len == 0 or
+      allele2 * motif_len - read_len == 0 or
+      read_len == 0){
+    cerr << "Divide by Zero prevented!" << endl;
+    *count_ll = 0;
+    return true;
+  }
   double exp_count1 = coverage / 2.0 / double(read_len) * double(allele1 * motif_len - read_len);
   double exp_count2 = coverage / 2.0 / double(read_len) * double(allele2 * motif_len - read_len); 
   double lambda = (allele1 >= frr_thresh ? exp_count1 : 0) + 
@@ -123,7 +139,7 @@ bool FRRClass::GetCountLogLikelihood(const int32_t& allele1,
   //std::cerr<< ">> "<<allele1<<", "<<allele2<<"\texp:"<<lambda<<"\treal:"<<frr_count << "\tll:" << *count_ll<<endl;
     
   double prob = 0;
-  if (lambda <= 0 || allele1 <= 0 || allele2 <= 0){
+  if (lambda <= 0 || allele1 <= 0 || allele2 <= 0 || frr_count <= 0){
     *count_ll = NEG_INF;
     return true;
   }

@@ -40,7 +40,16 @@ bool FlankingClass::GetAlleleLogLikelihood(const int32_t& allele,
 	int32_t max_nCopy = int32_t(read_len / motif_len);
 	int32_t str_len = allele * motif_len;
 	if (max_nCopy == data) max_nCopy++;
-	if (read_class_data_.size() == 0) return false;
+	if (read_class_data_.size() == 0){
+	  *allele_ll = NEG_INF;
+	  return true;
+	}
+	if (allele == 0 or double(2 * flank_len + str_len - 2 * read_len) == 0){
+	  cerr << "Divide by Zero prevented!" << endl;
+	  *allele_ll = NEG_INF;
+	  return true;
+	}
+	    
 	if (allele >= data && data > 0){
 	  //likelihood = 1.0 / (max_nCopy - data) * 1.0 / read_class_data_.size();
 	  if (str_len > read_len){

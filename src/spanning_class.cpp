@@ -35,6 +35,13 @@ bool SpanningClass::GetLogClassProb(const int32_t& allele,
 	int str_len = allele * motif_len;					// (L)
 	double norm_const = gsl_cdf_gaussian_P(2 * flank_len + str_len - dist_mean, dist_sdev) -
 						gsl_cdf_gaussian_P(2 * read_len - dist_mean, dist_sdev);  
+
+	if (norm_const == 0 or 
+	    double(2 * flank_len + str_len - 2 * read_len) == 0){
+	  cerr << "Divide by Zero prevented!" << endl;
+	  *log_class_prob = NEG_INF;
+	  return true;
+	}
 	//gsl_ran_gaussian_pdf
 
 	// int rv_dist = norm(loc = dist_mean, scale = dist_sdev)
