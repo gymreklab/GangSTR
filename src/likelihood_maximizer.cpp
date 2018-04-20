@@ -397,8 +397,7 @@ bool LikelihoodMaximizer::OptimizeLikelihood(const int32_t& read_len,
       PrintMessageDieOnError("\t\tOptimizing Likelihood (bootstrap)" , M_PROGRESS);
     }
    }
-  
-  
+
   offtarget_share = off_share;
   int32_t a1, a2, result, temp;
   double minf;
