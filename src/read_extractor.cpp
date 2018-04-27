@@ -396,6 +396,7 @@ bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
     read_pairs->insert(std::pair<std::string, ReadPair>(aln_key, read_pair));
   }
   /*  Second pass through reads where only one end processed */
+  int32_t num_rescue = 0;
   for (std::map<std::string, ReadPair>::iterator iter = read_pairs->begin();
        iter != read_pairs->end(); iter++) {
     if (iter->second.found_pair || iter->second.read_type == RC_FRR || 
@@ -404,6 +405,10 @@ bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
       continue;
     }
     
+    num_rescue++;
+    if (num_rescue > 200){
+      continue;
+    }
 
     if (debug) {
       std::cerr << "Attempting to rescue mate " << iter->first << std::endl;
@@ -835,9 +840,13 @@ bool ReadExtractor::RescueMate(BamCramMultiReader* bamreader,
   bamreader->SetRegion(bam_header->ref_name(alignment.MateRefID()),
            alignment.MatePosition()-1, alignment.MatePosition()+1);
   BamAlignment aln;
-
+  int32_t count = 0;
   while (bamreader->GetNextAlignment(aln)) {
     std::string aln_key2 = trim_alignment_name(aln);
+    count++;
+    if (count > 50){ // Skip this region if mate was not found in the first 50 alignments
+      return false;
+    }
     if (debug) {
       std::cerr << "Looking for " << aln_key1 << " found " << aln_key2 << std::endl;
     }

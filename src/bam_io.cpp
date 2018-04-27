@@ -62,7 +62,7 @@ bool BamCramReader::SetRegion(const std::string& chrom, int32_t start, int32_t e
   bool reuse_offset = (min_offset_ != 0 && chrom.compare(chrom_) == 0 && start >= start_);
   if (reuse_offset && first_aln_.GetEndPosition() > start && first_aln_.Position() < end)
     reuse_offset = false;
-
+  //std::cerr << chrom << "\t" << start << std::endl;
   std::stringstream region;
   region << chrom << ":" << start+1 << "-" << end;
   std::string region_str = region.str();
