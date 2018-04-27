@@ -153,6 +153,8 @@ void LikelihoodMaximizer::PrintReadPool(){
 }
 
 void LikelihoodMaximizer::ResampleReadPool(){
+  // Seed reset! ~~
+  gsl_rng_set(r, options->seed);
   int32_t pool_size = read_pool.size();
   if (!resampled_pool.empty()){
     resampled_pool.clear();
@@ -181,7 +183,7 @@ void LikelihoodMaximizer::ResampleReadPool(){
     }
   }
 
-  // PrintReadPool();
+  //PrintReadPool();
 }
 
 bool LikelihoodMaximizer::GetConfidenceInterval(const int32_t& read_len, 
@@ -212,6 +214,8 @@ bool LikelihoodMaximizer::GetConfidenceInterval(const int32_t& read_len,
     if (options->ploidy == 2){
       OptimizeLikelihood(read_len, motif_len, ref_count, true, 1, allele1, offtarget_share, &boot_al2_1, &boot_al2_2, &min_negLike);
       OptimizeLikelihood(read_len, motif_len, ref_count, true, 1, allele2, offtarget_share, &boot_al1_1, &boot_al1_2, &min_negLike);
+      //cerr << allele1 << ":\t" << boot_al2_1 << "\t" << boot_al2_2 << "\n"
+      //	   << allele2 << ":\t" << boot_al1_1 << "\t" << boot_al1_2 << "\n";
       if (boot_al1_1 == allele2)
 	boot_al1 = boot_al1_2;
       else if (boot_al1_2 == allele2)
@@ -226,11 +230,11 @@ bool LikelihoodMaximizer::GetConfidenceInterval(const int32_t& read_len,
       else
 	cerr<< "Hell Na\n";
       double gt_ll1, gt_ll2;
-      //PrintReadPool();
-      GetGenotypeNegLogLikelihood(allele1, boot_al1, read_len, motif_len, ref_count, true, &gt_ll1);
-      GetGenotypeNegLogLikelihood(allele2, 6, read_len, motif_len, ref_count, true, &gt_ll2);
-      //cerr << allele1 << ", "<< boot_al1 << "\t" << gt_ll1  << "\n";
-      //cerr << allele2 << ", "<< 6 << "\t" << gt_ll2  << "\n";
+      // PrintReadPool();
+      //GetGenotypeNegLogLikelihood(allele1, boot_al1, read_len, motif_len, ref_count, true, &gt_ll1);
+      //GetGenotypeNegLogLikelihood(allele2, boot_al1, read_len, motif_len, ref_count, true, &gt_ll2);
+      //cerr << allele1 << ", "<< boot_al2 << "\t" << gt_ll1  << "\n";
+      //cerr << allele2 << ", "<< boot_al1 << "\t" << gt_ll2  << "\n";
       // cerr << allele1 << "\t" << boot_al1 << endl;
       // cerr << allele2 << "\t" << boot_al2 << endl;
     }    
@@ -404,27 +408,27 @@ bool LikelihoodMaximizer::OptimizeLikelihood(const int32_t& read_len,
   std::vector<int32_t> allele_list;
   std::vector<int32_t> sublist;
   if (options->very_verbose) {
-      PrintMessageDieOnError("\t\tExtracting enclosing alleles", M_PROGRESS);
-   }
+    PrintMessageDieOnError("\t\tExtracting enclosing alleles", M_PROGRESS);
+  }
   this->enclosing_class_.ExtractEnclosingAlleles(&allele_list);
   if (options->very_verbose) {
     PrintMessageDieOnError("\t\tResample read pool", M_PROGRESS);
   }
-  ResampleReadPool();
+  //ResampleReadPool();
   int32_t upper_bound = 500; // TODO Change 200 for number depending the parameters
   int32_t lower_bound_1d, lower_bound_2d;
   
   /*  
   if (!resampled){
     double res;
-    int fix = 20;
-    for (int ii = 1; ii <25 ; ii+=20){
+    int fix = 16;
+    for (int ii = 5; ii <20 ; ii+=1){
       GetGenotypeNegLogLikelihood(ii, fix, read_len, motif_len, ref_count, resampled, &res);
       cerr << ii << ", "<< fix <<" ->\t" << res << endl;
     } 
   }
-  //return false;
   */
+  
   lower_bound_1d = 1;
   lower_bound_2d = 1;
 
@@ -438,7 +442,9 @@ bool LikelihoodMaximizer::OptimizeLikelihood(const int32_t& read_len,
 	  PrintMessageDieOnError(msg.str(), M_PROGRESS);
 	}
 	
-      nlopt_1D_optimize(read_len, motif_len, ref_count, lower_bound_1d, upper_bound, resampled, this, *allele_it, &a1, &result, &minf);
+	nlopt_1D_optimize(read_len, motif_len, ref_count, 
+			  lower_bound_1d, upper_bound, resampled, 
+			  options->seed, this, *allele_it, &a1, &result, &minf);
       if (options->very_verbose) {
 	stringstream msg;
 	msg<<"\t\t\tResult: "<<*allele_it<<", "<<a1;
@@ -451,7 +457,9 @@ bool LikelihoodMaximizer::OptimizeLikelihood(const int32_t& read_len,
     if (options->very_verbose) {
       PrintMessageDieOnError("\t\t2D optimization", M_PROGRESS);
     }
-    nlopt_2D_optimize(read_len, motif_len, ref_count, lower_bound_2d, upper_bound, resampled, this, &a1, &a2, &result, &minf);
+    nlopt_2D_optimize(read_len, motif_len, ref_count, 
+		      lower_bound_2d, upper_bound, resampled, 
+		      options->seed, this, &a1, &a2, &result, &minf);
     if (options->very_verbose) {
       stringstream msg;
       msg<<"\t\t\tResult: "<<a1<<", "<<a2;
@@ -482,7 +490,9 @@ bool LikelihoodMaximizer::OptimizeLikelihood(const int32_t& read_len,
       msg<<"\t\t1D optimization for allele "<<fix_allele;
       PrintMessageDieOnError(msg.str(), M_PROGRESS);
     }
-    nlopt_1D_optimize(read_len, motif_len, ref_count, lower_bound_1d, upper_bound, resampled, this, fix_allele, &a1, &result, &minf);
+    nlopt_1D_optimize(read_len, motif_len, ref_count, 
+		      lower_bound_1d, upper_bound, resampled, 
+		      options->seed, this, fix_allele, &a1, &result, &minf);
     if (options->very_verbose) {
       stringstream msg;
       msg<<"\t\t\tResutlt:  "<<fix_allele<<","<<a1;
@@ -592,9 +602,12 @@ double nloptNegLikelihood(unsigned n, const double *x, double *grad, void *data)
 }
 
 bool nlopt_2D_optimize(const int32_t& read_len, const int32_t& motif_len,
-               const int32_t& ref_count, const int32_t& lower_bound,
-               const int32_t& upper_bound, const bool& resampled, LikelihoodMaximizer* lm_ptr,
-               int32_t* allele1, int32_t* allele2, int32_t* ret_result, double* minf_ret) {
+		       const int32_t& ref_count, const int32_t& lower_bound,
+		       const int32_t& upper_bound, const bool& resampled, 
+		       const int& seed, LikelihoodMaximizer* lm_ptr,
+		       int32_t* allele1, int32_t* allele2, int32_t* ret_result, double* minf_ret) {
+  // Seed reset! ~~
+  nlopt::srand(seed);
   nlopt::opt opt(nlopt::LN_COBYLA, 2);
   // opt.set_local_optimizer(nlopt::LN_COBYLA)   // TODO check nlopt::G_MLSL_LDS->multiple local
   std::vector<double> lb(2);
@@ -637,11 +650,13 @@ bool nlopt_2D_optimize(const int32_t& read_len, const int32_t& motif_len,
 }
 
 bool nlopt_1D_optimize(const int32_t& read_len, const int32_t& motif_len,
-                const int32_t& ref_count, const int32_t& lower_bound,
-                const int32_t& upper_bound, const bool& resampled, LikelihoodMaximizer* lm_ptr,
-                const int32_t& fix_allele, int32_t* allele1,
-                int32_t* ret_result, double* minf_ret) {
-
+		       const int32_t& ref_count, const int32_t& lower_bound,
+		       const int32_t& upper_bound, const bool& resampled, 
+		       const int& seed, LikelihoodMaximizer* lm_ptr,
+		       const int32_t& fix_allele, int32_t* allele1,
+		       int32_t* ret_result, double* minf_ret) {
+  // Seed reset! ~~
+  nlopt::srand(seed);
   nlopt::opt opt(nlopt::LN_COBYLA, 1);
 
   std::vector<double> lb(1);

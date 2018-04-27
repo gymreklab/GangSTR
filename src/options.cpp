@@ -67,7 +67,9 @@ Options::Options() {
   read_prob_mode = false;
   output_bootstrap = false;
   output_readinfo = false;
-  seed = time(NULL);
+  //seed = time(NULL);
+  // Fixed seed
+  seed = 123;
   min_match = 5;
   use_cov = true;
   use_off = false;

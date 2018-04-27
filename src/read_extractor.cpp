@@ -44,7 +44,7 @@ bool ReadExtractor::ExtractReads(BamCramMultiReader* bamreader,
          LikelihoodMaximizer* likelihood_maximizer) {
   // This will keep track of information for each read pair
   std::map<std::string, ReadPair> read_pairs;
-
+  
   if (!ProcessReadPairs(bamreader, locus, regionsize, min_match, &read_pairs)) {
     return false;
   }
@@ -54,7 +54,6 @@ bool ReadExtractor::ExtractReads(BamCramMultiReader* bamreader,
     PrintMessageDieOnError("\tNot enough reads extracted. Aborting..", M_PROGRESS);
     return false;
   }
-  
   // Find median bound, and filter out any bound reads with data > 3 * median
   // Find maximum bound, only pick up FRRs if max_bound > 0.2 * read_len / motif_len
   int32_t max_bound = 0, median_bound = 0, bound_thresh = 0;
@@ -400,9 +399,12 @@ bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
   for (std::map<std::string, ReadPair>::iterator iter = read_pairs->begin();
        iter != read_pairs->end(); iter++) {
     if (iter->second.found_pair || iter->second.read_type == RC_FRR || 
-                  iter->second.read_type == RC_ENCL) {  // Changed similar to first pass
+	iter->second.read_type == RC_ENCL || 
+	iter->second.read_type == RC_DISCARD) {  
       continue;
     }
+    
+
     if (debug) {
       std::cerr << "Attempting to rescue mate " << iter->first << std::endl;
     }
@@ -829,6 +831,7 @@ bool ReadExtractor::RescueMate(BamCramMultiReader* bamreader,
     std::cerr << "Looking for mate in " << bam_header->ref_name(alignment.MateRefID()) <<
       " " << alignment.MatePosition() << std::endl;
   }
+
   bamreader->SetRegion(bam_header->ref_name(alignment.MateRefID()),
            alignment.MatePosition()-1, alignment.MatePosition()+1);
   BamAlignment aln;
