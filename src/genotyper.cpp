@@ -76,7 +76,18 @@ bool Genotyper::ProcessLocus(BamCramMultiReader* bamreader, Locus* locus) {
   locus->frr_reads = likelihood_maximizer->GetFRRDataSize();
   locus->flanking_reads = likelihood_maximizer->GetFlankingDataSize();
   // Set flags if only spanning reads available.
-
+  if (locus->frr_reads + locus->flanking_reads + locus->enclosing_reads == 0){
+    if (options->verbose) {
+      stringstream msg;
+      msg<<"\tNot enough reads extracted. Enclosing: "<<locus->enclosing_reads
+	 <<", Spanning: "<<locus->spanning_reads
+	 <<", FRR: "<<locus->frr_reads
+	 <<", Flanking: "<<locus->flanking_reads
+	 <<". Skipping locus";
+      PrintMessageDieOnError(msg.str(), M_PROGRESS);
+    }
+    return false;
+  }
 
   // Maximize the likelihood
   if (options->verbose) {

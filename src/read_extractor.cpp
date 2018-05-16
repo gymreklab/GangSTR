@@ -111,6 +111,7 @@ bool ReadExtractor::ExtractReads(BamCramMultiReader* bamreader,
 		     (max_bound > max_enclose) && 
 		     (max_bound > 0.5 * read_cap)) || 
     (max_bound > 0.8 * read_cap);
+
   /*
   cerr<<max_bound<<"\t"<<read_cap<<"\t"<<endl;
   cerr << int(accept_FRR) << endl;
