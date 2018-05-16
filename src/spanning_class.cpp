@@ -38,7 +38,7 @@ bool SpanningClass::GetLogClassProb(const int32_t& allele,
 
 	if (norm_const == 0 or 
 	    double(2 * flank_len + str_len - 2 * read_len) == 0){
-	  cerr << "Divide by Zero prevented!" << endl;
+	  cerr << "SpanClassProb::Divide by Zero prevented!" << endl;
 	  *log_class_prob = NEG_INF;
 	  return true;
 	}

@@ -44,8 +44,13 @@ bool FlankingClass::GetAlleleLogLikelihood(const int32_t& allele,
 	  *allele_ll = NEG_INF;
 	  return true;
 	}
-	if (allele == 0 or double(2 * flank_len + str_len - 2 * read_len) == 0){
-	  cerr << "Divide by Zero prevented!" << endl;
+	if (allele == 0){  // happens when dealing with haploid samples
+	  *allele_ll = 0;
+	  return true;
+	}
+	if (double(2 * flank_len + str_len - 2 * read_len) == 0){
+	  cerr << "FlankAlleleProb::Divide by Zero prevented!" << endl;
+	  cerr << allele << endl;
 	  *allele_ll = NEG_INF;
 	  return true;
 	}
