@@ -316,18 +316,18 @@ bool LikelihoodMaximizer::GetGenotypeNegLogLikelihood(const int32_t& allele1,
       return true;
     }
     frr_class_.GetClassLogLikelihood(allele1, allele2, 
-				     read_len, motif_len, ref_count, 
-				     options->ploidy, &frr_ll);
+    				     read_len, motif_len, ref_count, 
+    				     options->ploidy, &frr_ll);
     spanning_class_.GetClassLogLikelihood(allele1, allele2, 
-					  read_len, motif_len, ref_count, 
-					  options->ploidy, &span_ll);
+    					  read_len, motif_len, ref_count, 
+    					  options->ploidy, &span_ll);
     enclosing_class_.GetClassLogLikelihood(allele1, allele2, 
 					   read_len, motif_len, ref_count, 
 					   options->ploidy, &encl_ll);
     // flanking class overloads GetClassLogLikelihood function
     flanking_class_.FlankingClass::GetClassLogLikelihood(allele1, allele2, 
-							 read_len, motif_len, ref_count, 
-							 options->ploidy, &flank_ll);
+    							 read_len, motif_len, ref_count, 
+    							 options->ploidy, &flank_ll);
     // TODO Substituting these lines changes optimization result. Find out why?!
     //if ((options->coverage > 0) && (frr_class_.GetDataSize() > 0)){
     if (use_cov && cov > 0 && frr_count > 0){

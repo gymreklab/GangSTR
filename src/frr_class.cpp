@@ -44,7 +44,7 @@ bool FRRClass::GetLogClassProb(const int32_t& allele,
 						gsl_cdf_gaussian_P(2 * read_len - dist_mean, dist_sdev); 
 	if (norm_const == 0 or
 	    (2.0 * flank_len + str_len - 2.0 * read_len) == 0){
-	  cerr << "Divide by Zero prevented!" << endl;
+	  cerr << "FRRClassProb::Divide by Zero prevented!" << endl;
 	  *log_class_prob = NEG_INF;
 	  return true;
 	}
@@ -123,10 +123,9 @@ bool FRRClass::GetCountLogLikelihood(const int32_t& allele1,
   
   int32_t frr_count = GetDataSize() + offtarget_count;
   double frr_thresh = double(read_len) / double(motif_len);
-  if (allele1 * motif_len - read_len == 0 or
-      allele2 * motif_len - read_len == 0 or
-      read_len == 0){
-    cerr << "Divide by Zero prevented!" << endl;
+  if (read_len == 0){
+    cerr<< allele1 * motif_len << endl;
+    cerr << "FRRCountProb::Divide by Zero prevented!" << endl;
     *count_ll = 0;
     return true;
   }
