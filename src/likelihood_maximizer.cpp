@@ -153,8 +153,7 @@ void LikelihoodMaximizer::PrintReadPool(){
 }
 
 void LikelihoodMaximizer::ResampleReadPool(){
-  // Seed reset! ~~
-  gsl_rng_set(r, options->seed);
+  //gsl_rng_set(r, options->seed);   // Seed reset! ~~
   int32_t pool_size = read_pool.size();
   if (!resampled_pool.empty()){
     resampled_pool.clear();
@@ -212,8 +211,13 @@ bool LikelihoodMaximizer::GetConfidenceInterval(const int32_t& read_len,
   for (int i = 0; i < num_boot_samp + 1; i++){
     ResampleReadPool();
     if (options->ploidy == 2){
-      OptimizeLikelihood(read_len, motif_len, ref_count, true, 1, allele1, offtarget_share, &boot_al2_1, &boot_al2_2, &min_negLike);
-      OptimizeLikelihood(read_len, motif_len, ref_count, true, 1, allele2, offtarget_share, &boot_al1_1, &boot_al1_2, &min_negLike);
+      OptimizeLikelihood(read_len, motif_len, ref_count, 
+			 true, 1, allele1, offtarget_share, 
+			 &boot_al2_1, &boot_al2_2, &min_negLike);
+      OptimizeLikelihood(read_len, motif_len, ref_count, 
+			 true, 1, allele2, offtarget_share, 
+			 &boot_al1_1, &boot_al1_2, &min_negLike);
+      
       //cerr << allele1 << ":\t" << boot_al2_1 << "\t" << boot_al2_2 << "\n"
       //	   << allele2 << ":\t" << boot_al1_1 << "\t" << boot_al1_2 << "\n";
       if (boot_al1_1 == allele2)
@@ -237,11 +241,16 @@ bool LikelihoodMaximizer::GetConfidenceInterval(const int32_t& read_len,
       //cerr << allele2 << ", "<< boot_al1 << "\t" << gt_ll2  << "\n";
       // cerr << allele1 << "\t" << boot_al1 << endl;
       // cerr << allele2 << "\t" << boot_al2 << endl;
-    }    
-    
+    }
+    else{ // haploid
+      OptimizeLikelihood(read_len, motif_len, ref_count, 
+			 true, 1, 0, offtarget_share, 
+			 &boot_al1, &boot_al2, &min_negLike);
+    }
     // cerr<<min(boot_al1, boot_al2)<<"\t"<<max(boot_al1, boot_al2)<<endl;
     // small_alleles.push_back(min(boot_al1, boot_al2) - allele1);
     // large_alleles.push_back(max(boot_al1, boot_al2) - allele2);
+    
     small_alleles.push_back(boot_al1);
     large_alleles.push_back(boot_al2);
     if (options->output_bootstrap) {
