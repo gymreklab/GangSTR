@@ -107,10 +107,20 @@ bool ReadExtractor::ExtractReads(BamCramMultiReader* bamreader,
   }
   
 
-  bool accept_FRR = ((max_enclose != 0) &&
-		     (max_bound > max_enclose) && 
-		     (max_bound > 0.5 * read_cap)) || 
-    (max_bound > 0.8 * read_cap);
+  bool accept_FRR;
+  if (options.whole){ 
+    accept_FRR = ((max_enclose != 0) &&
+		  (max_bound > max_enclose) && 
+		  (max_bound > 0.5 * read_cap)) || 
+      (max_bound > 0.8 * read_cap);
+  }
+  else{
+    accept_FRR = ((max_enclose != 0) &&
+		  (max_bound > max_enclose) && 
+		  (max_bound > 0.5 * read_cap)) || 
+      (max_bound > 0.8 * read_cap);
+    accept_FRR = true;
+  }
 
   /*
   cerr<<max_bound<<"\t"<<read_cap<<"\t"<<endl;

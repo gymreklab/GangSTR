@@ -63,13 +63,13 @@ bool FlankingClass::GetAlleleLogLikelihood(const int32_t& allele,
 	  }
 	  else{
 	    likelihood = double(str_len) / double(2 * flank_len + str_len - 2 * read_len) 
-	      * 1.0 / (allele); // Class prob * read_prob
+             * 1.0 / (allele); // Class prob * read_prob
 	  }
 	}
 	else{
 		likelihood = 0.0;
 	}
-
+	
 	if (likelihood <= 0.0){
 		*allele_ll = NEG_INF;
 	}
