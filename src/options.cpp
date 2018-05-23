@@ -60,6 +60,7 @@ Options::Options() {
   enclosing_weight = 1.0;
   spanning_weight = 1.0;
   flanking_weight = 1.0;
+  whole = false;
   verbose = false;
   very_verbose = false;
   ploidy = 2;

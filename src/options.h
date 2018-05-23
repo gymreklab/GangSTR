@@ -57,6 +57,8 @@ class Options {
   double enclosing_weight;
   double spanning_weight;
   double flanking_weight;
+  // Whole genome mode
+  bool whole;
   // Helpers
   bool verbose;
   bool very_verbose;
