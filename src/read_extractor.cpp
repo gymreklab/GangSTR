@@ -108,7 +108,7 @@ bool ReadExtractor::ExtractReads(BamCramMultiReader* bamreader,
   
 
   bool accept_FRR;
-  if (options.whole){ 
+  if (options.genome_wide){ 
     accept_FRR = ((max_enclose != 0) &&
 		  (max_bound > max_enclose) && 
 		  (max_bound > 0.5 * read_cap)) || 

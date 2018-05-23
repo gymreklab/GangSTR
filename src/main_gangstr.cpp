@@ -50,7 +50,7 @@ void show_help() {
 	   << "--enclweight  weight of enclosing reads in the likelihood model\n"
 	   << "--spanweight  weight of spanning reads in the likelihood model\n"
 	   << "--flankweight weight of flanking reads in the likelihood model\n"
-	   << "--whole       Whole genome mode\n"
+	   << "--genomewide   Genome-wide mode\n"
 	   << "--ploidy       Indicate whether data is haploid (1) or diploid (2)\n"
 	   << "--readlength   Read length\n"
 	   << "--coverage     Average coverage. Must be set for whole exome or targeted data.\n"
@@ -89,7 +89,7 @@ void parse_commandline_options(int argc, char* argv[], Options* options) {
     OPT_WENCLOSE,
     OPT_WSPAN,
     OPT_WFLANK,
-    OPT_WHOLE,
+    OPT_GWIDE,
     OPT_PLOIDY,
     OPT_READLEN,
     OPT_COVERAGE,
@@ -122,7 +122,7 @@ void parse_commandline_options(int argc, char* argv[], Options* options) {
     {"enclweight",  required_argument,  NULL, OPT_WENCLOSE},
     {"spanweight",  required_argument,  NULL, OPT_WSPAN},
     {"flankweight", required_argument,  NULL, OPT_WFLANK},
-    {"whole",       no_argument, NULL, OPT_WHOLE},
+    {"genomewide",  no_argument, NULL, OPT_GWIDE},
     {"ploidy",      required_argument,  NULL, OPT_PLOIDY},
     {"readlength",  required_argument,  NULL, OPT_READLEN},
     {"coverage",    required_argument,  NULL, OPT_COVERAGE},
@@ -180,8 +180,8 @@ void parse_commandline_options(int argc, char* argv[], Options* options) {
     case OPT_WFLANK:
       options->flanking_weight = atof(optarg);
       break;
-    case OPT_WHOLE:
-      options->whole = true;
+    case OPT_GWIDE:
+      options->genome_wide = true;
       break;
     case OPT_PLOIDY:
       options->ploidy = atoi(optarg);
@@ -303,7 +303,7 @@ int main(int argc, char* argv[]) {
   int32_t read_len;
   double mean, std_dev, coverage;
   BamInfoExtract bam_info(&options, &bamreader, &region_reader);
-  if (options.whole == true){
+  if (options.genome_wide == true){
     PrintMessageDieOnError("\tRunning in whole genome mode", M_PROGRESS);
   }
   if(options.read_len == -1){  // if read_len wasn't set, we need to extract from bam.
