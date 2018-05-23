@@ -119,7 +119,8 @@ bool ReadExtractor::ExtractReads(BamCramMultiReader* bamreader,
 		  (max_bound > max_enclose) && 
 		  (max_bound > 0.5 * read_cap)) || 
       (max_bound > 0.8 * read_cap);
-    accept_FRR = true;
+    accept_FRR = true;  // accept all FRR reads
+    bound_thresh = read_cap + 5; // accept all bounding reads
   }
 
   /*
