@@ -324,7 +324,7 @@ int main(int argc, char* argv[]) {
   region_reader.Reset();
   if(options.dist_mean == -1 or options.dist_sdev == -1 or options.coverage == -1){
     if (options.verbose) {
-      PrintMessageDieOnError("\tComputing insert size distribution and coverage", M_PROGRESS);
+      PrintMessageDieOnError("\tComputing insert size distribution and/or coverage", M_PROGRESS);
     }
     if(!bam_info.GetInsertSizeDistribution(&mean, &std_dev, &coverage)){
       PrintMessageDieOnError("No Locus contains enough reads to extract insert size mean and standard deviation. (Possible mismatch in chromosome names)", M_ERROR);
@@ -339,6 +339,9 @@ int main(int argc, char* argv[]) {
 	  PrintMessageDieOnError("Low coverage or targeted data. Please set coverage manually.", M_ERROR);
 	}
 	options.coverage = coverage;
+      }
+      else{
+	coverage = options.coverage;
       }
     }
     else{

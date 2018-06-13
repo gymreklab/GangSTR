@@ -416,7 +416,6 @@ bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
 	iter->second.read_type == RC_DISCARD) {  
       continue;
     }
-    
     num_rescue++;
     if (num_rescue > 200){
       continue;
@@ -443,17 +442,16 @@ bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
     ProcessSingleRead(matepair, chrom_ref_id, locus, min_match,
           &data_value, &nCopy_value, &score_value, &read_type, &srt);
     int32_t read_length = (int32_t)matepair.QueryBases().size();
-
     if (debug) {
       std::cerr << "Processed mate, found " << read_type << " " << data_value << std::endl;
     }
-
+     
     // We need to check srt, because rescued reads will be classified as RC_UNKNOWN
     // ^^reason: They originate from a different chrom that ProcessSingleRead cannot deal with
-
-    if ((read_type == RC_FRR || srt == SR_IRR)          // if new guess is FRR
+     if ((read_type == RC_FRR || srt == SR_IRR || srt == SR_UM_POT_IRR)          // if new guess is FRR
             && nCopy_value >= read_length / locus.period - 1  // and there are enough copies present
             && score_value >= 0.8 * MATCH_SCORE * read_length){ // and the score is high enough TODO set threshold
+     
       iter->second.read_type = RC_FRR;
       int32_t data;
       if (iter->second.read1.Position() < locus.start) {
@@ -533,8 +531,8 @@ bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
 	SingleReadType srt;
 	ProcessSingleRead(alignment, chrom_ref_id, locus, min_match,
 			  &data_value, &nCopy_value, &score_value, &read_type, &srt);
-
-	//  Check if read's mate already processed 
+       
+	//  Check if read's mate already processed
 	std::map<std::string, ReadPair>::iterator rp_iter = read_pairs->find(aln_key);
 	if (rp_iter->second.found_pair){
 	  continue;

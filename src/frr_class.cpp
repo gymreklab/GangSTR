@@ -134,8 +134,6 @@ bool FRRClass::GetCountLogLikelihood(const int32_t& allele1,
   double lambda = (allele1 >= frr_thresh ? exp_count1 : 0) + 
     (allele2 >= frr_thresh ? exp_count2: 0);// Poisson parameter: Total expected number of FRRs
   
-  //std::cerr<< ">> "<<allele1<< ": "<< exp_count1<<", "<<allele2<<": "<< exp_count2<<endl;
-  //std::cerr<< ">> "<<allele1<<", "<<allele2<<"\texp:"<<lambda<<"\treal:"<<frr_count << "\tll:" << *count_ll<<endl;
     
   double prob = 0;
   if (lambda <= 0 || allele1 <= 0 || allele2 <= 0 || frr_count <= 0){
@@ -149,13 +147,22 @@ bool FRRClass::GetCountLogLikelihood(const int32_t& allele1,
     }
     else{
       // Approx for log of factorial by Srinivasa Ramanujan
-      double log_fact = frr_count * log(frr_count) - frr_count +
-	log(frr_count * (1 + 4 * frr_count * (1 + 2 * frr_count))) / 6 + 
-	log(3.141593) / 2;
+      double n = frr_count;
+      //double log_fact = n * log(n) - n + 
+      //log(n * (1 + 4 * n * (1 + 2 * n))) / 6 + 
+      //  log(3.141593) / 2;
+
+      // Approx for log of factorial: Stirling method      
+      double log_fact = (n + 0.5) * log(n) - n + 0.5 * log(2 * 3.141593);
       *count_ll = frr_count * log(lambda) - lambda - log_fact;
+      //std::cerr<<endl;
+      //std::cerr<< ">> "<<allele1<< ": "<< exp_count1<<", "<<allele2<<": "<< exp_count2<<endl;
+      //std::cerr<< ">> "<<allele1<<", "<<allele2<<"\texp:"<<lambda<<"\treal:"<<frr_count << "\tll:" << log_fact<<endl;
+
     }
+    
     return true;
   }
-
+  
   return true;
 }
