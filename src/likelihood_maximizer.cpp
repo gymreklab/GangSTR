@@ -424,7 +424,7 @@ bool LikelihoodMaximizer::OptimizeLikelihood(const int32_t& read_len,
     PrintMessageDieOnError("\t\tResample read pool", M_PROGRESS);
   }
   //ResampleReadPool();
-  int32_t upper_bound = 500; // TODO Change 200 for number depending the parameters
+  int32_t upper_bound = 600; // TODO Change 200 for number depending the parameters
   int32_t lower_bound_1d, lower_bound_2d;
   
   
@@ -640,19 +640,23 @@ bool nlopt_2D_optimize(const int32_t& read_len, const int32_t& motif_len,
   std::vector<double> xx(2);
   double minf=100000.0, f;
   nlopt::result result;
-  for (double j = 0.6; j <= 1.4 ; j+=0.4) {
-    xx[0] = int32_t(j * (read_len / motif_len));
-    xx[1] = int32_t((j + .1) * (read_len / motif_len));
-    
-    result = opt.optimize(xx, f);
-    if (f < minf){
-      *allele1 = int32_t(xx[0]);
-      *allele2 = int32_t(xx[1]);
-      *ret_result = result;
-      
-      minf = f;
+  for (double j = 0.6; j <= 1.4; j+=0.4) {
+    for (double k = 1; k <= 4; k+=2){
+      nlopt::srand(seed);
+      xx[0] = int32_t(j * (read_len / motif_len));
+      xx[1] = int32_t((j + k + .1) * (read_len / motif_len));
+      if (xx[0] > upper_bound) { xx[0] = upper_bound;}
+      if (xx[1] > upper_bound) { xx[1] = upper_bound;}
+      result = opt.optimize(xx, f);
+
+      if (f < minf){
+	*allele1 = int32_t(xx[0]);
+	*allele2 = int32_t(xx[1]);
+	*ret_result = result;
+	
+	minf = f;
+      }
     }
-    
   }
   
   *minf_ret = minf;
