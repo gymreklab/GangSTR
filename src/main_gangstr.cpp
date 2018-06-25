@@ -46,27 +46,31 @@ void show_help() {
 	   << "--out <outprefix> "
 	   << "\n\nOptions:\n"
 	   << "-h,--help      display this help screen\n"
-     << "--frrweight   weight of FRR reads in the likelihood model\n"
-     << "--enclweight  weight of enclosing reads in the likelihood model\n"
-     << "--spanweight  weight of spanning reads in the likelihood model\n"
-     << "--flankweight weight of flanking reads in the likelihood model\n"
-     << "--ploidy       Indicate whether data is haploid (1) or diploid (2)\n"
-     << "--readlength   Read length\n"
-     << "--coverage     Average coverage. Must be set for whole exome or targeted data.\n"
-     << "--insertmean   Insert size mean\n"
-     << "--insertsdev   Insert size standard deviation\n"
-     << "--insertmax    Maximum insert size\n"
-     << "--minscore     Minimum alignment score (out of 100)\n"
-     << "--minmatch     Minimum number of matching basepairs on each end of enclosing reads\n"
-     << "--stutterup    Stutter up parameter (refer to the stutter model)\n"
-     << "--stutterdown  Stutter down parameter (refer to the stutter model)\n"
-     << "--stutterprob  Stutter probability (refer to the stutter model)\n"
-     << "--numbstrap    Number of bootsrap resamples\n"
-     << "--read-prob-mode Use only read probability (ignore class probability)\n"
-     << "--seed         Random number generator initial seed\n"
+	   << "--frrweight   weight of FRR reads in the likelihood model\n"
+	   << "--enclweight  weight of enclosing reads in the likelihood model\n"
+	   << "--spanweight  weight of spanning reads in the likelihood model\n"
+	   << "--flankweight weight of flanking reads in the likelihood model\n"
+	   << "--genomewide   Genome-wide mode\n"
+	   << "--ploidy       Indicate whether data is haploid (1) or diploid (2)\n"
+	   << "--readlength   Read length\n"
+	   << "--coverage     Average coverage. Must be set for whole exome or targeted data.\n"
+	   << "--nonuniform   Indicate wether data has nonuniform coverage (i.e., whole exome data).\n"
+	   << "--useofftarget Use offtarget regions included in bam file.\n"
+	   << "--insertmean   Insert size mean\n"
+	   << "--insertsdev   Insert size standard deviation\n"
+	   << "--insertmax    Maximum insert size\n"
+	   << "--minscore     Minimum alignment score (out of 100)\n"
+	   << "--minmatch     Minimum number of matching basepairs on each end of enclosing reads\n"
+	   << "--stutterup    Stutter up parameter (refer to the stutter model)\n"
+	   << "--stutterdown  Stutter down parameter (refer to the stutter model)\n"
+	   << "--stutterprob  Stutter probability (refer to the stutter model)\n"
+	   << "--numbstrap    Number of bootsrap resamples\n"
+	   << "--read-prob-mode Use only read probability (ignore class probability)\n"
+	   << "--seed         Random number generator initial seed\n"
 	   << "--output-bootstraps  Output file with bootstrap samples\n"
 	   << "--output-readinfo    Output read class info (for debugging)\n"
 	   << "-v,--verbose   print out useful progress messages\n"
+	   << "--very         Print out more detailed progress messages for debugging\n"
 	   << "--version      print out the version of this software\n"
 	   << "This program takes in aligned reads in BAM format\n"
 	   << "and genotypes a reference set of STRs\n\n";
@@ -85,9 +89,12 @@ void parse_commandline_options(int argc, char* argv[], Options* options) {
     OPT_WENCLOSE,
     OPT_WSPAN,
     OPT_WFLANK,
+    OPT_GWIDE,
     OPT_PLOIDY,
     OPT_READLEN,
     OPT_COVERAGE,
+    OPT_USEOFF,
+    OPT_NONUNIF,
     OPT_INSMEAN,
     OPT_INSSDEV,
     OPT_INSMAX,
@@ -102,6 +109,7 @@ void parse_commandline_options(int argc, char* argv[], Options* options) {
     OPT_OUTREADINFO,
     OPT_SEED,
     OPT_VERBOSE,
+    OPT_VERYVERBOSE,
     OPT_VERSION,
   };
   static struct option long_options[] = {
@@ -114,9 +122,12 @@ void parse_commandline_options(int argc, char* argv[], Options* options) {
     {"enclweight",  required_argument,  NULL, OPT_WENCLOSE},
     {"spanweight",  required_argument,  NULL, OPT_WSPAN},
     {"flankweight", required_argument,  NULL, OPT_WFLANK},
+    {"genomewide",  no_argument, NULL, OPT_GWIDE},
     {"ploidy",      required_argument,  NULL, OPT_PLOIDY},
     {"readlength",  required_argument,  NULL, OPT_READLEN},
     {"coverage",    required_argument,  NULL, OPT_COVERAGE},
+    {"nonuniform",  no_argument,  NULL, OPT_NONUNIF},
+    {"useofftarget",no_argument,  NULL, OPT_USEOFF},
     {"insertmean",  required_argument,  NULL, OPT_INSMEAN},
     {"insertsdev",  required_argument,  NULL, OPT_INSSDEV},
     {"insertmax",   required_argument,  NULL, OPT_INSMAX},
@@ -131,6 +142,7 @@ void parse_commandline_options(int argc, char* argv[], Options* options) {
     {"output-readinfo", no_argument,        NULL, OPT_OUTREADINFO},
     {"seed",        required_argument,  NULL, OPT_SEED},
     {"verbose",     no_argument,        NULL, OPT_VERBOSE},
+    {"very",  no_argument, NULL, OPT_VERYVERBOSE},
     {"version",     no_argument,        NULL, OPT_VERSION},
     {NULL,          no_argument,        NULL, 0},
   };
@@ -168,6 +180,9 @@ void parse_commandline_options(int argc, char* argv[], Options* options) {
     case OPT_WFLANK:
       options->flanking_weight = atof(optarg);
       break;
+    case OPT_GWIDE:
+      options->genome_wide = true;
+      break;
     case OPT_PLOIDY:
       options->ploidy = atoi(optarg);
       break;
@@ -176,6 +191,12 @@ void parse_commandline_options(int argc, char* argv[], Options* options) {
       break;
     case OPT_COVERAGE:
       options->coverage = atof(optarg);
+      break;
+    case OPT_NONUNIF:
+      options->use_cov = false;
+      break;
+    case OPT_USEOFF:
+      options->use_off = true;
       break;
     case OPT_INSMEAN:
       options->dist_mean = atoi(optarg);
@@ -221,6 +242,9 @@ void parse_commandline_options(int argc, char* argv[], Options* options) {
     case OPT_VERBOSE:
     case 'v':
       options->verbose++;
+      break;
+    case OPT_VERYVERBOSE:
+      options->very_verbose++;
       break;
     case OPT_VERSION:
       cerr << _GIT_VERSION << endl;
@@ -279,7 +303,9 @@ int main(int argc, char* argv[]) {
   int32_t read_len;
   double mean, std_dev, coverage;
   BamInfoExtract bam_info(&options, &bamreader, &region_reader);
-
+  if (options.genome_wide == true){
+    PrintMessageDieOnError("\tRunning in whole genome mode", M_PROGRESS);
+  }
   if(options.read_len == -1){  // if read_len wasn't set, we need to extract from bam.
     if (options.verbose) {
       PrintMessageDieOnError("\tExtracting read length", M_PROGRESS);
@@ -298,7 +324,7 @@ int main(int argc, char* argv[]) {
   region_reader.Reset();
   if(options.dist_mean == -1 or options.dist_sdev == -1 or options.coverage == -1){
     if (options.verbose) {
-      PrintMessageDieOnError("\tComputing insert size distribution and coverage", M_PROGRESS);
+      PrintMessageDieOnError("\tComputing insert size distribution and/or coverage", M_PROGRESS);
     }
     if(!bam_info.GetInsertSizeDistribution(&mean, &std_dev, &coverage)){
       PrintMessageDieOnError("No Locus contains enough reads to extract insert size mean and standard deviation. (Possible mismatch in chromosome names)", M_ERROR);
@@ -307,12 +333,21 @@ int main(int argc, char* argv[]) {
       options.dist_mean = mean;
       options.dist_sdev = std_dev;
     }
-    if (options.coverage == -1){
-      cerr << coverage << endl;
-      if (coverage < 10){
-        PrintMessageDieOnError("Low coverage or targeted data. Please set coverage manually.", M_ERROR);
+    if (options.use_cov){
+      if (options.coverage == -1){
+	if (coverage < 10){
+	  PrintMessageDieOnError("Low coverage or targeted data. Please set coverage manually.", M_ERROR);
+	}
+	options.coverage = coverage;
       }
-      options.coverage = coverage;
+      else{
+	coverage = options.coverage;
+      }
+    }
+    else{
+      stringstream ss;
+      ss << "\tNonUniform mode selected. Not using coverage in compuations.";
+      PrintMessageDieOnError(ss.str(), M_PROGRESS);
     }
     if (options.verbose) {
       stringstream ss;
@@ -334,11 +369,26 @@ int main(int argc, char* argv[]) {
     ss.str("");
     ss.clear();
     ss << "Processing " << locus.chrom << ":" << locus.start;
+    if (options.use_off == true){
+      locus.offtarget_share = 1.0;
+    }
+    else{
+      locus.offtarget_share = 0.0;
+    }
+    
+    /*
+    for (std::vector<GenomeRegion>::iterator it = locus.offtarget_regions.begin();
+	 it != locus.offtarget_regions.end(); it++){
+      cerr << it->chrom << " " << it->start << " " << it->end << endl;
+    }
+    */
     PrintMessageDieOnError(ss.str(), M_PROGRESS);
     locus.insert_size_mean = options.dist_mean;
     locus.insert_size_stddev = options.dist_sdev = std_dev;
+
     if (genotyper.ProcessLocus(&bamreader, &locus)) {
       vcfwriter.WriteRecord(locus);
     }
+    locus.Reset();
   };
 }

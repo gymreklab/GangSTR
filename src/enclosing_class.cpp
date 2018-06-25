@@ -32,6 +32,12 @@ bool EnclosingClass::GetLogClassProb(const int32_t& allele,
 				     double* log_class_prob) {
 	int str_len = allele * motif_len;					// (L)
 	double class_prob;
+	if (double(2 * flank_len + str_len - 2 * read_len) == 0)
+	{
+	  cerr << "Divide by Zero prevented!" << endl;
+	  *log_class_prob = NEG_INF;
+	  return true;
+	}
 	if (read_len <= str_len)
 		class_prob = 0;
 	else

@@ -46,7 +46,7 @@ class ReadExtractor {
   bool ExtractReads(BamCramMultiReader* bamreader,
 		    const Locus& locus,
 		    const int32_t& regionsize,
-        const int32_t& min_match, 
+		    const int32_t& min_match, 
 		    LikelihoodMaximizer* likelihood_maximizer);
 
  protected:
@@ -56,8 +56,8 @@ class ReadExtractor {
   // Process all read pairs
   bool ProcessReadPairs(BamCramMultiReader* bamreader,
 			const Locus& locus, 
-      const int32_t& regionsize,
-      const int32_t& min_match, 
+			const int32_t& regionsize,
+			const int32_t& min_match, 
 			std::map<std::string, ReadPair>* read_pairs);
 
   // Implemented in BamInfoExtract. TODO delete
@@ -79,12 +79,12 @@ class ReadExtractor {
   bool ProcessSingleRead(BamAlignment alignment,
 			 const int32_t& chrom_ref_id,
 			 const Locus& locus,
-       const int32_t &min_match,
+			 const int32_t &min_match,
 			 int32_t* data_value,
-       int32_t* nCopy_value,
-       int32_t* score_value,
+			 int32_t* nCopy_value,
+			 int32_t* score_value,
 			 ReadType* read_type,
-       SingleReadType* srt);
+			 SingleReadType* srt);
   // Rescue mate pairs aligned elsewhere
   bool RescueMate(BamCramMultiReader* bamreader,
 		  BamAlignment alignment, BamAlignment* matepair);

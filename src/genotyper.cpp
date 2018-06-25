@@ -25,7 +25,7 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 
 using namespace std;
 
-Genotyper::Genotyper(RefGenome _refgenome,
+Genotyper::Genotyper(RefGenome& _refgenome,
 		    Options& _options) {
   refgenome = &_refgenome;
   options = &_options;
@@ -61,7 +61,6 @@ bool Genotyper::ProcessLocus(BamCramMultiReader* bamreader, Locus* locus) {
   }
 
   likelihood_maximizer->Reset();
-  
 
   // Load all read data
   if (options->verbose) {
@@ -76,6 +75,19 @@ bool Genotyper::ProcessLocus(BamCramMultiReader* bamreader, Locus* locus) {
   locus->spanning_reads = likelihood_maximizer->GetSpanningDataSize();
   locus->frr_reads = likelihood_maximizer->GetFRRDataSize();
   locus->flanking_reads = likelihood_maximizer->GetFlankingDataSize();
+  // Set flags if only spanning reads available.
+  if (locus->frr_reads + locus->flanking_reads + locus->enclosing_reads < 4){
+    if (options->verbose) {
+      stringstream msg;
+      msg<<"\tNot enough reads extracted. Enclosing: "<<locus->enclosing_reads
+	 <<", Spanning: "<<locus->spanning_reads
+	 <<", FRR: "<<locus->frr_reads
+	 <<", Flanking: "<<locus->flanking_reads
+	 <<". Skipping locus";
+      PrintMessageDieOnError(msg.str(), M_PROGRESS);
+    }
+    return false;
+  }
 
   // Maximize the likelihood
   if (options->verbose) {
@@ -85,57 +97,64 @@ bool Genotyper::ProcessLocus(BamCramMultiReader* bamreader, Locus* locus) {
   int32_t ref_count = (int32_t)((locus->end-locus->start+1)/locus->motif.size());
   double min_negLike, lob1, lob2, hib1, hib2;
   bool resampled = false;
-
-  if (!likelihood_maximizer->OptimizeLikelihood(read_len, (int32_t)(locus->motif.size()),
-						ref_count, resampled, options->ploidy, 0,
-						&allele1, &allele2, &min_negLike)) {
-    return false;
-  }
-  locus->allele1 = allele1;
-  locus->allele2 = allele2;
-  locus->min_neg_lik = min_negLike;
-  locus->enclosing_reads = likelihood_maximizer->GetEnclosingDataSize();
-  locus->spanning_reads = likelihood_maximizer->GetSpanningDataSize();
-  locus->frr_reads = likelihood_maximizer->GetFRRDataSize();
-  locus->flanking_reads = likelihood_maximizer->GetFlankingDataSize();
-  locus->depth = likelihood_maximizer->GetReadPoolSize();
-  cout<<">>Genotyper Results:\t"<<allele1<<", "<<allele2<<"\tlikelihood = "<<min_negLike<<"\n";
-  locus->allele1 = allele1;
-  locus->allele2 = allele2;
-  // for (int jj = 0; jj < 10; jj++){
-  //   likelihood_maximizer->ResampleReadPool();
-  //   resampled = true;
-  //   if (!likelihood_maximizer->OptimizeLikelihood(read_len, (int32_t)(locus->motif.size()),
-  //             ref_count, resampled,
-  //             &allele1, &allele2, &min_negLike)) {
-  //     return false;
-  //   }
-  //   cout<<">>Resampled Results:\t"<<allele1<<", "<<allele2<<"\tlikelihood = "<<min_negLike<<"\n";
-  // }
-
-  if (options->num_boot_samp > 0){
-    if (options->verbose) {
-      PrintMessageDieOnError("\tGetting confidence intervals", M_PROGRESS);
-    }
-    if (!likelihood_maximizer->GetConfidenceInterval(read_len, (int32_t)(locus->motif.size()),
-						   ref_count, allele1, allele2, *locus,
-						   &lob1, &hib1, &lob2, &hib2)) {
+  try {
+    if (!likelihood_maximizer->OptimizeLikelihood(read_len, 
+						(int32_t)(locus->motif.size()),
+						ref_count, 
+						resampled, 
+						options->ploidy, 
+						0,
+						locus->offtarget_share,
+						&allele1, 
+						&allele2, 
+						&min_negLike)) {
       return false;
     }
-    locus->lob1 = lob1;
-    locus->lob2 = lob2;
-    locus->hib1 = hib1;
-    locus->hib2 = hib2;
-    // Bootstrapping method from Davison and Hinkley 1997
-    // cout<<"@@Small Allele Bound:\t["<<2 * allele1 - hib1<<", "<<2 * allele1 - lob1<<"]\n";
-    // cout<<"@@Large Allele Bound:\t["<<2 * allele2 - hib2<<", "<<2 * allele2 - lob2<<"]\n";
-    locus->lob1 = lob1;
-    locus->hib1 = hib1;
-    locus->lob2 = lob2;
-    locus->hib2 = hib2;
-    // 
-    cout<<"@@Small Allele Bound:\t["<<lob1<<", "<<hib1<<"]\n";
-    cout<<"@@Large Allele Bound:\t["<<lob2<<", "<<hib2<<"]\n";
+    locus->allele1 = allele1;
+    locus->allele2 = allele2;
+    locus->min_neg_lik = min_negLike;
+    locus->enclosing_reads = likelihood_maximizer->GetEnclosingDataSize();
+    locus->spanning_reads = likelihood_maximizer->GetSpanningDataSize();
+    locus->frr_reads = likelihood_maximizer->GetFRRDataSize();
+    locus->flanking_reads = likelihood_maximizer->GetFlankingDataSize();
+    locus->depth = likelihood_maximizer->GetReadPoolSize();
+    
+    if (options->num_boot_samp > 0){
+      if (options->verbose) {
+	PrintMessageDieOnError("\tGetting confidence intervals", M_PROGRESS);
+      }
+      try{
+	if (!likelihood_maximizer->GetConfidenceInterval(read_len, (int32_t)(locus->motif.size()),
+							 ref_count, allele1, allele2, *locus,
+							 &lob1, &hib1, &lob2, &hib2)) {
+	  return false;
+	}
+	locus->lob1 = lob1;
+	locus->lob2 = lob2;
+	locus->hib1 = hib1;
+	locus->hib2 = hib2;
+	
+	cerr<<">>Genotyper Results:\t"<<allele1<<", "<<allele2<<"\tlikelihood = "<<min_negLike<<"\n";
+	cerr<<"@@Small Allele Bound:\t["<<lob1<<", "<<hib1<<"]\n";
+	cerr<<"@@Large Allele Bound:\t["<<lob2<<", "<<hib2<<"]\n";
+      }
+      catch (std::exception &exc){
+	if (options->verbose) {
+	  stringstream msg;
+	  msg<<"\tEncountered error("<< exc.what() <<") in likelihood maximization. Skipping locus";
+	  PrintMessageDieOnError(msg.str(), M_PROGRESS);
+	}
+	return false;
+      }
+    }
+  }
+  catch (std::exception &exc){
+    if (options->verbose) {
+      stringstream msg;
+      msg<<"\tEncountered error("<< exc.what() <<") in likelihood maximization. Skipping locus";
+      PrintMessageDieOnError(msg.str(), M_PROGRESS);
+    }
+    return false;
   }
   return true;
 }

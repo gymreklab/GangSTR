@@ -45,7 +45,7 @@ fi
 matchscore=2
 mismatchscore=5
 indelscore=17
-maxperiod=10 # Largest repeat unit
+maxperiod=15 # Largest repeat unit
 pm=80
 pi=10
 minscore=24 # Require at least 12 bp perfect matching

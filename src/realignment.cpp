@@ -26,13 +26,14 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 using namespace std;
 
 bool find_longest_stretch(const std::string& seq,
-            const std::string& motif,
-            int32_t* nCopy){
+			  const std::string& motif,
+			  int32_t* nCopy_stretch,
+			  int32_t* nCopy_total){
   int32_t read_len = (int32_t)seq.size();
   int32_t period = (int32_t)motif.size();
   bool motif_found;
   bool on_stretch = false;
-  int32_t longest_stretch = 0, current_stretch = 0;
+  int32_t longest_stretch = 0, current_stretch = 0, total = 0;
   for (int i = 0; i < read_len - period; i++){
     motif_found = true;
     for (int j = 0; j < period; j++){
@@ -43,6 +44,7 @@ bool find_longest_stretch(const std::string& seq,
       }
     }
     if (motif_found){
+      total++;
       i+=period-1;
       if (on_stretch){
         current_stretch++;
@@ -56,21 +58,38 @@ bool find_longest_stretch(const std::string& seq,
       longest_stretch = current_stretch;
     }
   }
-  *nCopy = longest_stretch;
+  *nCopy_stretch = longest_stretch;
+  *nCopy_total = total;
 }
 
 
 bool expansion_aware_realign(const std::string& seq,
-           const std::string& qual,
-           const std::string& pre_flank,
-           const std::string& post_flank,
-           const std::string& motif,
-           int32_t* nCopy, int32_t* start_pos, int32_t* end_pos, int32_t* score) {
+			     const std::string& qual,
+			     const std::string& pre_flank,
+			     const std::string& post_flank,
+			     const std::string& motif,
+			     const int32_t& min_match,
+			     int32_t* nCopy, 
+			     int32_t* start_pos, 
+			     int32_t* end_pos, 
+			     int32_t* score,
+			     FlankMatchState* fm_start,
+			     FlankMatchState* fm_end) {
+
+  *fm_start = FM_NOMATCH;
+  *fm_end = FM_NOMATCH;
   int32_t read_len = (int32_t)seq.size();
   int32_t period = (int32_t)motif.size();
-  int32_t min_nCopy = 0;
+  int32_t min_nCopy = 0, total_nCopy = 0;
   // Find longest stretch of motif as starting point of our search.
-  find_longest_stretch(seq, motif, &min_nCopy);
+  find_longest_stretch(seq, motif, &min_nCopy, &total_nCopy);
+  if (min_nCopy < 2 and total_nCopy < 10){
+      *nCopy = 0;
+      *score = 0;
+      *start_pos = 0;
+      *end_pos = 0;
+      return true;
+  }
   int32_t max_score = 0;
   int32_t second_best_score = 0;
   int32_t max_nCopy = 0;
@@ -81,14 +100,10 @@ bool expansion_aware_realign(const std::string& seq,
   int32_t current_start_pos = 0, current_end_pos = 0;
   int32_t current_nCopy, current_num_mismatch;
   int32_t prev_score = 0;
+  std::string template_sub, sequence_sub;
   MARGIN = 1 * period - 1;
-
-  // if (min_nCopy > 15){
-  //   cerr<<min_nCopy<<motif<<"\t"<<seq<<endl;
-  //   cerr<<pre_flank<<endl;
-  //   cerr<<post_flank<<endl;
-  // }
-
+  
+  //cerr << min_nCopy << " ";
   for (current_nCopy=min_nCopy; current_nCopy<(int32_t)(read_len/period)+2; current_nCopy++) {
     std::stringstream var_realign_ss;
     var_realign_ss << pre_flank;
@@ -97,12 +112,45 @@ bool expansion_aware_realign(const std::string& seq,
     }
     var_realign_ss << post_flank;
     std::string var_realign_string = var_realign_ss.str();
-
+    
 
     if (!striped_smith_waterman(var_realign_string, seq, qual, &current_start_pos, &current_end_pos, &current_score, &current_num_mismatch)) {
       return false;
     }
+    
 
+    // Flank match check
+    // Preflank
+    if (read_len - current_start_pos - min_match >= 0 &&
+	read_len - current_start_pos + min_match <= read_len){ //Full match is possible
+      sequence_sub = seq.substr(read_len - current_start_pos - min_match, 2 * min_match);
+      template_sub = var_realign_string.substr(read_len - min_match, 2 * min_match);
+      if (sequence_sub == template_sub){
+	*fm_start = FM_COMPLETE;
+      }
+      else{
+	*fm_start = FM_NOMATCH;
+      }
+    }
+    else{
+      *fm_start = FM_NOMATCH;
+    }
+    // Postflank
+    if (read_len - current_start_pos + current_nCopy * period + min_match <= read_len &&
+	read_len - current_start_pos + current_nCopy * period - min_match >= 0){ //Full match is possible
+      sequence_sub = seq.substr(read_len - current_start_pos + current_nCopy * period - min_match, 2 * min_match);
+      template_sub = var_realign_string.substr(read_len + current_nCopy * period - min_match, 2 * min_match);
+      
+      if (sequence_sub == template_sub){
+	*fm_end = FM_COMPLETE;
+      }
+      else{
+	*fm_end = FM_NOMATCH;
+      }
+    }
+    else{
+      *fm_end = FM_NOMATCH;
+    }
     if (current_score >= max_score) {
       second_best_score = max_score;
       second_best_nCopy = max_nCopy;
@@ -110,6 +158,10 @@ bool expansion_aware_realign(const std::string& seq,
       max_nCopy = current_nCopy;
       max_start_pos = current_start_pos;
       max_end_pos = current_end_pos;
+    }
+    
+    if (*fm_start == FM_COMPLETE && *fm_end == FM_COMPLETE){
+      break;
     }
     // Stop if score is relatively high, but lower than max
     if (current_score > 0.7 * SSW_MATCH_SCORE * read_len and 
@@ -123,18 +175,16 @@ bool expansion_aware_realign(const std::string& seq,
     }
     prev_score = current_score;
   }
-  // if (min_nCopy > 15){
-  //     cerr<<seq<<endl;
-  //     cerr<<"** "<<max_nCopy<<endl;
-  // }
-  // cerr <<seq<<endl;
-  // cout << max_score << "\t" << second_best_score<<endl;
-  // cout << max_nCopy << "\t" << second_best_nCopy<<endl<<endl;
-
+  //cerr << current_nCopy << endl;
+  if (max_nCopy < 0.85 * read_len / period and 
+      *fm_start == FM_NOMATCH and *fm_end == FM_NOMATCH){
+    max_nCopy = 0;
+  }
   *nCopy = max_nCopy;
   *score = max_score;
   *start_pos = max_start_pos;
   *end_pos = max_end_pos;
+  
   return true;
 }
 
@@ -337,17 +387,19 @@ bool calc_score(const int32_t& i, const int32_t& j,
 }
 
 bool classify_realigned_read(const std::string& seq,
-           const std::string& motif,
-           const int32_t& start_pos,
-           const int32_t& end_pos,
-           const int32_t& nCopy,
-           const int32_t& score,
-           const int32_t& prefix_length,
-           const int32_t& min_match,
-           const bool& isMapped,
-           const std::string& pre_flank,
-           const std::string& post_flank,
-           SingleReadType* single_read_class) {
+			     const std::string& motif,
+			     const int32_t& start_pos,
+			     const int32_t& end_pos,
+			     const int32_t& nCopy,
+			     const int32_t& score,
+			     const int32_t& prefix_length,
+			     const int32_t& min_match,
+			     const bool& isMapped,
+			     const std::string& pre_flank,
+			     const std::string& post_flank,
+			     const FlankMatchState& fm_start,
+			     const FlankMatchState& fm_end,
+			     SingleReadType* single_read_class) {
 
   int32_t i,j, limit;
   bool flank_match, failed_flank_test = false;
@@ -355,6 +407,7 @@ bool classify_realigned_read(const std::string& seq,
   // Get coords of the STR
   int32_t start_str = prefix_length;
   int32_t end_str = prefix_length + nCopy*(int32_t)motif.size();
+
 
   // Check if read starts in the STR
   bool start_in_str = false;
@@ -366,20 +419,38 @@ bool classify_realigned_read(const std::string& seq,
     end_in_str = true;
   }
 
+  // Check if perfect flanks exist:
+  if (fm_start == FM_COMPLETE && fm_end == FM_COMPLETE){
+    *single_read_class = SR_ENCLOSING;
+    return true;
+  }
+  else if (fm_start == FM_COMPLETE && end_in_str){
+    *single_read_class = SR_PREFLANK;
+    return true;
+  }
+  else if (fm_end == FM_COMPLETE && start_in_str){
+    *single_read_class = SR_POSTFLANK;
+    return true;
+  }
+
+  // TODO:
+  /*
+    Only check for FRR now, no need for checking for other types of reads.
+    Remove extra checks (specially flank checks)
+  */
+
   // Set threshold for match
   int32_t score_threshold = (int32_t)(MATCH_PERC_THRESHOLD*seq.size()*SSW_MATCH_SCORE);
-  // if (seq == "ggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggggcgcggcgcggccgccgcccgcggcggggcggcgggccgccg"){
-  //   cerr << nCopy << endl;
-  //   cerr << pre_flank << endl;
-  //   cerr << post_flank << endl;
-  // }
+
   if (isMapped && (score < score_threshold || nCopy == 0)) {
     *single_read_class = SR_UNKNOWN;
     return true;
   } else if (start_in_str && end_in_str) {
-    *single_read_class = SR_IRR;
+    *single_read_class = SR_UM_POT_IRR;
     return true;
-  } else if (start_in_str && !end_in_str) {
+  } 
+  /*
+  else if (start_in_str && !end_in_str) {
     // Post flank check
     flank_match = true;
     j = 0;
@@ -463,19 +534,20 @@ bool classify_realigned_read(const std::string& seq,
        for (i = max(min(end_str - start_pos, (int32_t)seq.size() - 1),0); 
           i <= min(limit, (int32_t)seq.size() - 1);
           i++){
-        // cerr<<seq.at(i);
+	 //cerr<<seq.at(i);
         if (seq.at(i)!=post_flank.at(j)){
           flank_match = false;
           // break;
         }
         j++;   
        }
-       // if (flank_match){
+       
+       //if (flank_match){
        //  cerr << " -> PASS!!";
-       // }
-       // cerr<<endl;
-       // j = 0;
-       // for (i = min(end_str - start_pos, (int32_t)seq.size() - 1) ; 
+       //}
+       //cerr<<endl;
+       //j = 0;
+       //for (i = min(end_str - start_pos, (int32_t)seq.size() - 1) ; 
        //    i <= min(limit, (int32_t)seq.size() - 1);
        //    i++){
        //  cerr<<post_flank.at(j);
@@ -503,7 +575,7 @@ bool classify_realigned_read(const std::string& seq,
       return true;
     }
   }
-
+  */
   // If no other class matches this read pair:
   *single_read_class = SR_UNKNOWN;
   return true; 

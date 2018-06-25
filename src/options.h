@@ -57,8 +57,11 @@ class Options {
   double enclosing_weight;
   double spanning_weight;
   double flanking_weight;
+  // Genome wide exploration mode
+  bool genome_wide;
   // Helpers
   bool verbose;
+  bool very_verbose;
   // Experiment parameters for likelihood maximizer
   int32_t read_len;
   int32_t motif_len;
@@ -73,6 +76,10 @@ class Options {
   bool output_bootstrap;
   // Output debug info for reads
   bool output_readinfo;
+  // Use coverage (set to 0 for whole exome)
+  bool use_cov;
+  // Use off target regions if specified in bam file
+  bool use_off;
   // Random number generator seed
   int32_t seed;
 };

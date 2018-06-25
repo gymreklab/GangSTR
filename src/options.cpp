@@ -60,14 +60,20 @@ Options::Options() {
   enclosing_weight = 1.0;
   spanning_weight = 1.0;
   flanking_weight = 1.0;
+  genome_wide = false;
   verbose = false;
+  very_verbose = false;
   ploidy = 2;
   num_boot_samp = 100;
   read_prob_mode = false;
   output_bootstrap = false;
   output_readinfo = false;
-  seed = time(NULL);
+  //seed = time(NULL);
+  // Fixed seed
+  seed = 123;
   min_match = 5;
+  use_cov = true;
+  use_off = false;
 }
 
 Options::~Options() {}

@@ -35,6 +35,13 @@ bool SpanningClass::GetLogClassProb(const int32_t& allele,
 	int str_len = allele * motif_len;					// (L)
 	double norm_const = gsl_cdf_gaussian_P(2 * flank_len + str_len - dist_mean, dist_sdev) -
 						gsl_cdf_gaussian_P(2 * read_len - dist_mean, dist_sdev);  
+
+	if (norm_const == 0 or 
+	    double(2 * flank_len + str_len - 2 * read_len) == 0){
+	  cerr << "SpanClassProb::Divide by Zero prevented!" << endl;
+	  *log_class_prob = NEG_INF;
+	  return true;
+	}
 	//gsl_ran_gaussian_pdf
 
 	// int rv_dist = norm(loc = dist_mean, scale = dist_sdev)
@@ -82,17 +89,31 @@ bool SpanningClass::GetLogReadProb(const int32_t& allele,
 				   const int32_t& motif_len,
 				   const int32_t& ref_count,
 				   double* log_allele_prob) {
-	int mean_A = dist_mean - motif_len * (allele - ref_count);
+  
+  int shift = motif_len * (allele - ref_count);
+  int mean_A = dist_mean - shift;
+  double allele_prob = 0.0;
 
-	double allele_prob = gsl_ran_gaussian_pdf(data - mean_A, dist_sdev);
-	if (allele_prob > 0){
-		*log_allele_prob = log(allele_prob);
-		return true;
-	}
-	else if (allele_prob == 0){
-		*log_allele_prob = NEG_INF;
-		return true;
-	}
-	else
-		return false;
+  allele_prob = gsl_ran_gaussian_pdf(data - mean_A, dist_sdev);
+  /*
+  if (gsl_cdf_gaussian_P(motif_len * allele - mean_A, dist_sdev) < 1.0){
+    allele_prob = 1.0 / (1.0 - gsl_cdf_gaussian_P(motif_len * allele - mean_A, dist_sdev)) * gsl_ran_gaussian_pdf(data - mean_A, dist_sdev);
+  }
+  else { // allele is too large to use spanning reads anyway.
+    allele_prob = 0.0;
+  }
+  */
+
+  //  cerr << allele_prob << "\t" << gsl_cdf_gaussian_P(motif_len * allele - mean_A, dist_sdev) << endl;  
+  if (allele_prob > 0){
+    *log_allele_prob = log(allele_prob);
+    //cerr << allele << " " << data << " " << *log_allele_prob << endl;
+    return true;
+  }
+  else if (allele_prob == 0){
+    *log_allele_prob = NEG_INF;
+    return true;
+  }
+  else
+    return false;
 }

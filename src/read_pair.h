@@ -30,7 +30,9 @@ enum ReadType {
   RC_FRR = 2,
   RC_UNKNOWN = 3,
   RC_DISCARD = 4,
-  RC_BOUND = 5
+  RC_BOUND = 5,
+  RC_OFFT = 6,
+  RC_POT_OFFT = 7
 };
 
 class ReadPair {

@@ -44,76 +44,185 @@ bool ReadExtractor::ExtractReads(BamCramMultiReader* bamreader,
          LikelihoodMaximizer* likelihood_maximizer) {
   // This will keep track of information for each read pair
   std::map<std::string, ReadPair> read_pairs;
+  
   if (!ProcessReadPairs(bamreader, locus, regionsize, min_match, &read_pairs)) {
     return false;
   }
-  int32_t frr = 0, span = 0, encl = 0, flank = 0;
+  int32_t frr = 0, span = 0, encl = 0, flank = 0, offt = 0;
   if (read_pairs.size() == 0){
     // TODO print error "Not enough extracted reads"
     PrintMessageDieOnError("\tNot enough reads extracted. Aborting..", M_PROGRESS);
     return false;
   }
+  // Find median bound, and filter out any bound reads with data > 3 * median
+  // Find maximum bound, only pick up FRRs if max_bound > 0.2 * read_len / motif_len
+  int32_t max_bound = 0, median_bound = 0, bound_thresh = 0;
+  int32_t max_enclose = 0;
+  std::vector<int32_t> bound_vals;
+  for (std::map<std::string, ReadPair>::const_iterator iter = read_pairs.begin();
+       iter != read_pairs.end(); iter++) {
+    if (iter->second.read_type == RC_SPAN){
+      if (iter->second.max_nCopy - 1 > 0){
+	bound_vals.push_back(iter->second.max_nCopy - 1);
+      }
+	//if (iter->second.max_nCopy - 1 > max_bound){
+	//max_bound = iter->second.max_nCopy - 1;
+	//}
+    } else if (iter->second.read_type == RC_BOUND){
+      bound_vals.push_back(iter->second.data_value - 1);
+      //if (iter->second.data_value - 1 > max_bound){
+      //max_bound = iter->second.data_value -1;
+      //}
+    } else if (iter->second.read_type == RC_ENCL){
+      if (iter->second.data_value > max_enclose){
+	max_enclose = iter->second.data_value;
+      }
+    }
+  }
+  size_t bound_size = bound_vals.size();
+  float read_cap = float(options.read_len) / float(locus.motif.size());
+  if (bound_size == 0){
+    max_bound = 0;
+    median_bound = 0;
+  }
+  else if (bound_size == 1){
+    if (bound_vals[0] > max_enclose){
+      max_bound = 0;
+      median_bound = 0;
+    }
+    else{
+      max_bound = bound_vals[0];
+      median_bound = bound_vals[0];
+    }
+  }
+  else{
+    sort(bound_vals.begin(), bound_vals.end());
+    median_bound = bound_vals[int(bound_size / 2)];
+    bound_thresh = 3 * median_bound;
+    size_t idx = bound_size - 1;
+    while (bound_vals[idx] > bound_thresh){
+      idx--;
+    }
+    max_bound = bound_vals[idx];
+  }
+  
+
+  bool accept_FRR;
+  if (options.genome_wide){ 
+    accept_FRR = ((max_enclose != 0) &&
+		  (max_bound > max_enclose) && 
+		  (max_bound > 0.5 * read_cap)) || 
+      (max_bound > 0.8 * read_cap);
+  }
+  else{
+    accept_FRR = ((max_enclose != 0) &&
+		  (max_bound > max_enclose) && 
+		  (max_bound > 0.5 * read_cap)) || 
+      (max_bound > 0.8 * read_cap);
+    accept_FRR = true;  // accept all FRR reads
+    bound_thresh = read_cap + 5; // accept all bounding reads
+  }
+
+  /*
+  cerr<<max_bound<<"\t"<<read_cap<<"\t"<<endl;
+  cerr << int(accept_FRR) << endl;
+  */
+
   /* Load data into likelihood maximizer */
   for (std::map<std::string, ReadPair>::const_iterator iter = read_pairs.begin();
        iter != read_pairs.end(); iter++) {
-
-    // if (iter->second.read_type != RC_DISCARD and iter->second.read_type != RC_UNKNOWN)
-    //   cout<<iter->first<<"\t"<<iter->second.read_type<<"\t"<<iter->second.data_value<<endl;
-    
+    /*
+    if (iter->second.read_type != RC_DISCARD and iter->second.read_type != RC_UNKNOWN)
+    {
+      cout<<iter->first<<"\t"<<iter->second.read_type<<"\t"<<iter->second.data_value<<endl;
+      cout<<((BamAlignment)iter->second.read1).QueryBases()<<endl;
+      cout<<((BamAlignment)iter->second.read2).QueryBases()<<endl;
+    }
+    */
     if (iter->second.read_type == RC_SPAN) {
       if (iter->second.data_value < options.dist_max){
         if (options.output_readinfo) {
-    readfile_ << locus.chrom << "\t" << locus.start << "\t" << locus.end << "\t"
-        << iter->first << "\t" << "SPAN" << "\t" << iter->second.data_value << "\t" << iter->second.found_pair << std::endl;
+	  readfile_ << locus.chrom << "\t" 
+		    << locus.start << "\t" 
+		    << locus.end << "\t"
+		    << iter->first << "\t" 
+		    << "SPAN" << "\t" 
+		    << iter->second.data_value << "\t" 
+		    << iter->second.found_pair << std::endl;
         }
         likelihood_maximizer->AddSpanningData(iter->second.data_value);
         span++;
       }
       // In spanning case, we can also have flanking reads:
-      if (iter->second.max_nCopy > 0) {
-  if (options.output_readinfo) {
-    readfile_ << locus.chrom << "\t" << locus.start << "\t" << locus.end << "\t"
-        << iter->first << "\t" << "SPFLNK" << "\t" << iter->second.max_nCopy - 1 << "\t" << iter->second.found_pair << std::endl;
+      if (iter->second.max_nCopy > 0 and iter->second.max_nCopy < bound_thresh) {
+	if (options.output_readinfo) {
+	  readfile_ << locus.chrom << "\t" 
+		    << locus.start << "\t" 
+		    << locus.end << "\t"
+		    << iter->first << "\t" 
+		    << "SPFLNK" << "\t" 
+		    << iter->second.max_nCopy - 1 << "\t" 
+		    << iter->second.found_pair << std::endl;
   }
-        likelihood_maximizer->AddFlankingData(iter->second.max_nCopy - 1);  // -1 because flanking is always picked up +1
+        likelihood_maximizer->AddFlankingData(iter->second.max_nCopy-1); //-1 because flanking is always picked up +1
         flank++;
       }
     } else if (iter->second.read_type == RC_ENCL) {
       if (options.output_readinfo) {
-  readfile_ << locus.chrom << "\t" << locus.start << "\t" << locus.end << "\t"
-      << iter->first << "\t" << "ENCLOSE" << "\t" << iter->second.data_value << "\t" << iter->second.found_pair << std::endl;
+	readfile_ << locus.chrom << "\t" 
+		  << locus.start << "\t" 
+		  << locus.end << "\t"
+		  << iter->first << "\t" 
+		  << "ENCLOSE" << "\t" 
+		  << iter->second.data_value << "\t" 
+		  << iter->second.found_pair << std::endl;
       }
       likelihood_maximizer->AddEnclosingData(iter->second.data_value);
       encl++;
     } else if (iter->second.read_type == RC_FRR) {
-      if (options.output_readinfo) {
-  readfile_ << locus.chrom << "\t" << locus.start << "\t" << locus.end << "\t"
-      << iter->first << "\t" << "FRR" << "\t" << iter->second.data_value << "\t" << iter->second.found_pair << std::endl;
+      if (accept_FRR && iter->second.data_value < options.dist_max - options.read_len){
+	if (options.output_readinfo) {
+	  readfile_ << locus.chrom << "\t" 
+		    << locus.start << "\t" 
+		    << locus.end << "\t"
+		    << iter->first << "\t" 
+		    << "FRR" << "\t" 
+		    << iter->second.data_value << "\t" 
+		    << iter->second.found_pair << std::endl;
+	}
+	likelihood_maximizer->AddFRRData(iter->second.data_value);
+	frr++;
       }
-      likelihood_maximizer->AddFRRData(iter->second.data_value);
-      frr++;
-    } else if (iter->second.read_type == RC_BOUND) {
+    } else if (iter->second.read_type == RC_BOUND and iter->second.data_value < bound_thresh) {
       if (options.output_readinfo) {
-  readfile_ << locus.chrom << "\t" << locus.start << "\t" << locus.end << "\t"
-      << iter->first << "\t" << "BOUND" << "\t" << iter->second.data_value - 1 << "\t" << iter->second.found_pair << std::endl;
+	readfile_ << locus.chrom << "\t" 
+		  << locus.start << "\t" 
+		  << locus.end << "\t"
+		  << iter->first << "\t" 
+		  << "BOUND" << "\t" 
+		  << iter->second.data_value - 1 << "\t" 
+		  << iter->second.found_pair << std::endl;
       }
       likelihood_maximizer->AddFlankingData(iter->second.data_value - 1); // -1 because flanking is always picked up +1
       flank++;
+    } else if (iter->second.read_type == RC_OFFT){
+      if (options.output_readinfo) {
+	readfile_ << locus.chrom << "\t" 
+		  << locus.start << "\t" 
+		  << locus.end << "\t"
+		  << iter->first << "\t" 
+		  << "OFFT" << "\t" 
+		  << iter->second.data_value << "\t" 
+		  << iter->second.found_pair << std::endl;
+      }
+      likelihood_maximizer->AddOffTargetData(iter->second.data_value);
+      offt++;
     } else {
       continue;
     }
     
-    // if(print_read_data) {
-    //   std::cerr<<"\t\t"<<((BamAlignment)iter->second.read1).QueryBases()<<endl;
-    //   std::cerr<<"\t\t"<<((BamAlignment)iter->second.read2).QueryBases()<<endl;
-    // }
   }
-  // TODO Delete
-  // std::cerr << "~~Enclose:\t" << encl << endl;
-  // std::cerr << "~~Span:\t\t" << span << endl;
-  // std::cerr << "~~FRR:\t\t" << frr << endl;
-  // std::cerr << "~~Flank:\t" << flank << endl;
-
+  //cerr << span << " " << encl << " " << frr << " " << flank << " " << offt << endl;
   return true;
 }
 
@@ -129,7 +238,9 @@ bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
     return false;
   }
   // Get bam alignments from the relevant region
-  bamreader->SetRegion(locus.chrom, locus.start-regionsize, locus.end+regionsize + 1000);
+  bamreader->SetRegion(locus.chrom, 
+		       locus.start-regionsize, 
+		       locus.end+regionsize);
 
   // Keep track of which file we're processing
   int32_t file_index = 0;
@@ -147,9 +258,9 @@ bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
     if (debug) {
       std::cerr << "Processing " << alignment.Name() << std::endl;
     }
-
+    
     // Check if we should skip this read
-    if (alignment.IsSupplementary()) {
+    if (alignment.IsSupplementary() || alignment.IsSecondary()) {
       continue;
     }
 
@@ -181,7 +292,8 @@ bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
       if (rp_iter->second.read_type != RC_FRR && rp_iter->second.read_type != RC_ENCL){ 
       // if (rp_iter->second.read_type == RC_UNKNOWN) {
         if (debug) {
-          std::cerr << "Checking mate " << alignment.Name() << " " << alignment.QueryBases() << std:: endl;
+          std::cerr << "Checking mate " << alignment.Name() 
+		    << " " << alignment.QueryBases() << std:: endl;
         }
 
         int32_t insert_size;
@@ -200,7 +312,7 @@ bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
         SingleReadType srt;
         ProcessSingleRead(alignment, chrom_ref_id, locus, min_match,
               &data_value, &nCopy_value, &score_value, &read_type, &srt);
-
+ 
         if (debug) {
           std::cerr << "Mate found to be   " << read_type << std:: endl;
         }
@@ -296,13 +408,19 @@ bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
     read_pairs->insert(std::pair<std::string, ReadPair>(aln_key, read_pair));
   }
   /*  Second pass through reads where only one end processed */
+  int32_t num_rescue = 0;
   for (std::map<std::string, ReadPair>::iterator iter = read_pairs->begin();
        iter != read_pairs->end(); iter++) {
-
     if (iter->second.found_pair || iter->second.read_type == RC_FRR || 
-                  iter->second.read_type == RC_ENCL) {  // Changed similar to first pass
+	iter->second.read_type == RC_ENCL || 
+	iter->second.read_type == RC_DISCARD) {  
       continue;
     }
+    num_rescue++;
+    if (num_rescue > 200){
+      continue;
+    }
+
     if (debug) {
       std::cerr << "Attempting to rescue mate " << iter->first << std::endl;
     }
@@ -314,8 +432,8 @@ bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
       std::cerr << "Found mate for " << iter->first << std::endl;
     }
 
-
     iter->second.read2 = matepair;
+
     iter->second.found_pair = true;
     int32_t data_value, score_value;
     int32_t nCopy_value = 0;
@@ -324,17 +442,16 @@ bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
     ProcessSingleRead(matepair, chrom_ref_id, locus, min_match,
           &data_value, &nCopy_value, &score_value, &read_type, &srt);
     int32_t read_length = (int32_t)matepair.QueryBases().size();
-
     if (debug) {
       std::cerr << "Processed mate, found " << read_type << " " << data_value << std::endl;
     }
-
+     
     // We need to check srt, because rescued reads will be classified as RC_UNKNOWN
     // ^^reason: They originate from a different chrom that ProcessSingleRead cannot deal with
-
-    if ((read_type == RC_FRR || srt == SR_IRR)          // if new guess is FRR
+     if ((read_type == RC_FRR || srt == SR_IRR || srt == SR_UM_POT_IRR)          // if new guess is FRR
             && nCopy_value >= read_length / locus.period - 1  // and there are enough copies present
             && score_value >= 0.8 * MATCH_SCORE * read_length){ // and the score is high enough TODO set threshold
+     
       iter->second.read_type = RC_FRR;
       int32_t data;
       if (iter->second.read1.Position() < locus.start) {
@@ -385,6 +502,75 @@ bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
 
   }
 
+  
+  // Get bam alignments from off target region
+  if (locus.offtarget_set){
+    for (std::vector<GenomeRegion>::const_iterator reg_it = locus.offtarget_regions.begin();
+	 reg_it != locus.offtarget_regions.end(); reg_it++){
+      if (options.verbose) {
+	stringstream ss;
+	ss << "\tAnalyzing off target region: " << reg_it->chrom << ':'
+	   << reg_it->start <<  '-' <<  reg_it->end;
+	  PrintMessageDieOnError(ss.str(), M_PROGRESS);
+      }
+      bamreader->SetRegion(reg_it->chrom, reg_it->start, reg_it->end);
+
+      const int32_t offchrom_ref_id = bam_header->ref_id(reg_it->chrom);
+
+      // Go through each alignment in the region
+      while (bamreader->GetNextAlignment(alignment)) {
+	if (alignment.IsSecondary() or alignment.IsSupplementary())
+	  continue;
+	// Set key to keep track of this mate pair
+	std::string aln_key = file_label + trim_alignment_name(alignment);
+	int32_t read_length = (int32_t)alignment.QueryBases().size();
+	int32_t data_value, score_value;
+	int32_t nCopy_value = 0;
+	ReadType read_type;
+	ReadPair read_pair;
+	SingleReadType srt;
+	ProcessSingleRead(alignment, chrom_ref_id, locus, min_match,
+			  &data_value, &nCopy_value, &score_value, &read_type, &srt);
+       
+	//  Check if read's mate already processed
+	std::map<std::string, ReadPair>::iterator rp_iter = read_pairs->find(aln_key);
+	if (rp_iter->second.found_pair){
+	  continue;
+	}
+	if (rp_iter != read_pairs->end()) {
+	  // do another round of rescue maybe?! Currently, naive rescue:
+	  rp_iter->second.read2 = alignment;
+	  if (read_type == RC_FRR or srt == SR_UM_POT_IRR or srt == SR_IRR){
+	    if (rp_iter->second.read_type == RC_POT_OFFT){
+	      //cerr << "2\t" << locus.chrom << " " << alignment.QueryBases() << endl;
+	      rp_iter->second.read_type = RC_OFFT;
+	      rp_iter->second.data_value = -read_length;
+	    }
+	    else{
+	      rp_iter->second.read_type = RC_FRR;
+	      rp_iter->second.data_value = data_value;
+	    }
+	  }
+	  else{
+	    if (rp_iter->second.read_type == RC_UNKNOWN){
+	      rp_iter->second.read_type = read_type;
+	      rp_iter->second.data_value = data_value;
+	    }
+	  }
+	}
+	else{
+	  if (read_type == RC_FRR or srt == SR_UM_POT_IRR){
+	    //cerr << "1\t" << locus.chrom << " " << alignment.Name() << endl;
+	    read_pair.read_type = RC_POT_OFFT;
+	    read_pair.read1 = alignment;
+	    read_pair.data_value = -read_length;
+	    read_pairs->insert(std::pair<std::string, ReadPair>(aln_key, read_pair));
+	  }
+	}
+    }
+  }    
+  }  
+  
   return true;
 }
 
@@ -424,12 +610,20 @@ bool ReadExtractor::FindSpanningRead(BamAlignment alignment,
   int32_t read_length = (int32_t)alignment.QueryBases().size();
   // Similar to 5.2_filter_spanning_only_core.py:57
   // Only includes obvious cases, pre/post flank taken care of elsewhere
-  bool span1 = alignment.RefID() == chrom_ref_id && alignment.GetEndPosition() <= locus.start &&
+  bool span1 = !alignment.StartsWithSoftClip() && alignment.RefID() == chrom_ref_id && alignment.GetEndPosition() <= locus.start &&
     alignment.MateRefID() == chrom_ref_id && alignment.MatePosition() >= locus.end - locus.period; // Margin of size period to find reads that are post flaknking by 1-2 base pairs (may not be found with realigner)
   bool span2 = alignment.RefID() == chrom_ref_id && alignment.Position() >= locus.end &&
     alignment.MateRefID() == chrom_ref_id && alignment.MatePosition() <= locus.start-read_length + locus.period; // Margin of size period to find reads that are pre flaknking by 1-2 base pairs (may not be found with realigner) 
   if (span1 || span2) {
-    *insert_size = abs(alignment.TemplateLength());
+    if ((abs(alignment.TemplateLength()) < 
+	 .5 * (abs(alignment.Position() - alignment.MatePosition()) + alignment.Length())) ||
+	(abs(alignment.TemplateLength()) > 
+	 1.5 * (abs(alignment.Position() - alignment.MatePosition()) + alignment.Length()))){
+      *insert_size = abs(alignment.Position() - alignment.MatePosition()) + alignment.Length();
+    }
+    else{
+      *insert_size = abs(alignment.TemplateLength());
+    }
     return true;
   }
   return false;
@@ -465,21 +659,25 @@ bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
   int32_t end_pos, end_pos_rev;
   int32_t score, score_rev;
   int32_t nCopy, nCopy_rev;
+  FlankMatchState fm_start, fm_end, fm_start_rev, fm_end_rev;
   std::string seq = lowercase(alignment.QueryBases());
   std::string seq_rev = reverse_complement(seq);
   std::string qual = alignment.Qualities();
   int32_t read_length = (int32_t)seq.size();
+  //cerr << alignment.RefID() << ":" << alignment.Position()
+  //     <<"\tMapped:" << alignment.IsMapped()
+  //     <<"\tRev: "<<alignment.IsReverseStrand() 
+  //     << "\n" << alignment.QueryBases() << "\n";
 
   /* Perform realignment and classification */
-  if (!expansion_aware_realign(seq, qual, locus.pre_flank, locus.post_flank, locus.motif,
-             &nCopy, &start_pos, &end_pos, &score)) {
+  if (!expansion_aware_realign(seq, qual, locus.pre_flank, locus.post_flank, locus.motif, min_match,
+			       &nCopy, &start_pos, &end_pos, &score, &fm_start, &fm_end)) {
     return false;
   }
-  if (!expansion_aware_realign(seq_rev, qual, locus.pre_flank, locus.post_flank, locus.motif,
-             &nCopy_rev, &start_pos_rev, &end_pos_rev, &score_rev)) {
+  if (!expansion_aware_realign(seq_rev, qual, locus.pre_flank, locus.post_flank, locus.motif, min_match,
+			       &nCopy_rev, &start_pos_rev, &end_pos_rev, &score_rev, &fm_start_rev, &fm_end_rev)) {
     return false;
   }
-
 
   if (score_rev > score) {
     nCopy = nCopy_rev;
@@ -487,31 +685,55 @@ bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
     score = score_rev;
     seq = seq_rev;
     end_pos = end_pos_rev;
+    fm_start = fm_start_rev;
+    fm_end = fm_end_rev;
   }
   *nCopy_value = nCopy;
   *score_value = score;
 
-
-  if (!classify_realigned_read(seq, locus.motif, start_pos, end_pos, nCopy, score, 
-             (int32_t)locus.pre_flank.size(), min_match, alignment.IsMapped(), locus.pre_flank, locus.post_flank, srt)) {
+  
+  if (!classify_realigned_read(seq, locus.motif, 
+			       start_pos, end_pos, nCopy, score,
+			       (int32_t)locus.pre_flank.size(), 
+			       min_match, alignment.IsMapped(), 
+			       locus.pre_flank, locus.post_flank, 
+			       fm_start, fm_end, srt)) {
     return false;
   }
-
-  if (*srt == SR_UNKNOWN && 
+  /*
+  if (alignment.Name() == "ERR194147.786796391"){
+    cerr << seq << endl;
+    cerr << *srt << endl;
+  }
+  */
+  if (*srt == SR_UNKNOWN){
+    *nCopy_value = 0;
+  }  
+  
+  
+  if ((*srt == SR_UNKNOWN || *srt == SR_UM_POT_IRR || *srt == SR_IRR) && 
       alignment.IsMateMapped() &&
       alignment.MatePosition() < locus.end + (options.dist_mean - options.read_len) && 
       alignment.MatePosition() > locus.start - (options.dist_mean - options.read_len)){
     std::stringstream var_realign_frr;
-    for (int i = 0; i<(seq.size() / locus.motif.size() + 5); i++) {
+    for (int i = 0; i<(seq.size() / locus.motif.size() + 1); i++) {
       var_realign_frr << locus.motif;
     }
     std::string frr_ref = var_realign_frr.str();
     striped_smith_waterman(frr_ref, seq, qual, &pos_frr, &end_frr, &score_frr, &mismatches_frr);
+    int gaps_frr = abs(int(end_frr - pos_frr - seq.size()));
     // cerr << mismatches_frr << "\t" << seq << endl;
-    if (score_frr > 0.70 * seq.size() * SSW_MATCH_SCORE && mismatches_frr <= .05 * seq.size()){
+    
+    // Tune 0.75 for false positive rate
+    if (score_frr > 0.75 * seq.size() * SSW_MATCH_SCORE && 
+	mismatches_frr < int(.05 * seq.size()) && 
+	gaps_frr < int(.05 * seq.size())){
       // cerr << seq << endl;
       // cerr << mismatches_frr << "\t" << score_frr << endl;
       *srt = SR_IRR;
+    }
+    else{
+      *srt = SR_UNKNOWN;
     }
   }
 
@@ -520,6 +742,7 @@ bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
         << alignment.Name() << "\t" << "UNMAPPED" << std::endl << alignment.QueryBases()<<std::endl;
   }
 
+  /*
   // For Unmapped potential IRRs, check if mate is mapped in vicinity of STR locus
   if (*srt == SR_UM_POT_IRR){
     if (alignment.IsMateMapped() &&  
@@ -532,9 +755,10 @@ bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
       // cerr << "BaseQ: " << alignment.Qualities() << endl;
     }
   }
-
+  */
   // Set as UNKNOWN if doesn't pass the score threshold.
   if (score < options.min_score / 100.0 * double(SSW_MATCH_SCORE * options.read_len)){
+    *nCopy_value = 0;
     *data_value = 0;
     *srt = SR_UNKNOWN;
     *read_type = RC_UNKNOWN;
@@ -579,7 +803,8 @@ bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
   // Added this line to fix issues with mates being mapped to different chroms
   if (*srt == SR_IRR) {
     if (alignment.MateRefID() != chrom_ref_id){
-      *read_type = RC_UNKNOWN;
+      *read_type = RC_FRR;
+      *data_value = -read_length;
       return true;
     }
     *read_type = RC_FRR;
@@ -621,11 +846,17 @@ bool ReadExtractor::RescueMate(BamCramMultiReader* bamreader,
     std::cerr << "Looking for mate in " << bam_header->ref_name(alignment.MateRefID()) <<
       " " << alignment.MatePosition() << std::endl;
   }
+
   bamreader->SetRegion(bam_header->ref_name(alignment.MateRefID()),
            alignment.MatePosition()-1, alignment.MatePosition()+1);
   BamAlignment aln;
+  int32_t count = 0;
   while (bamreader->GetNextAlignment(aln)) {
     std::string aln_key2 = trim_alignment_name(aln);
+    count++;
+    if (count > 50){ // Skip this region if mate was not found in the first 50 alignments
+      return false;
+    }
     if (debug) {
       std::cerr << "Looking for " << aln_key1 << " found " << aln_key2 << std::endl;
     }

@@ -38,9 +38,9 @@ const static int32_t GAP_SCORE = -1;
 
 // SSW Parameters
 const static int32_t SSW_MATCH_SCORE = 2;
-const static int32_t SSW_MISMATCH_SCORE = 2;
-const static int32_t SSW_GAP_OPEN = 3;
-const static int32_t SSW_GAP_EXTEND = 1;
+const static int32_t SSW_MISMATCH_SCORE = 5;
+const static int32_t SSW_GAP_OPEN = 4;
+const static int32_t SSW_GAP_EXTEND = 2;
 
 // amount of slip we allow between alignment position and STR start and end
 static int32_t MARGIN = 5;		// This value is reset in expansion_aware_realign
@@ -56,6 +56,12 @@ enum SingleReadType {
   SR_MAPPED_AFTER = 5,	// Not used TODO delete
   SR_UNKNOWN = 6,
   SR_NOT_FOUND = 7,		// Not used TODO delete
+};
+
+enum FlankMatchState{
+  FM_NOMATCH = 0,
+  FM_PARTIAL = 1,
+  FM_COMPLETE = 2
 };
 
 enum sw_move{
@@ -78,11 +84,17 @@ bool next_move(std::vector<std::vector<int32_t> > score_matrix,
             sw_move* move);
 
 bool expansion_aware_realign(const std::string& seq,
-				 const std::string& qual,
+			     const std::string& qual,
 			     const std::string& pre_flank,
 			     const std::string& post_flank,
 			     const std::string& motif,
-			     int32_t* nCopy, int32_t* start_pos, int32_t* end_pos, int32_t* score);		      
+			     const int32_t& min_match,
+			     int32_t* nCopy, 
+			     int32_t* start_pos, 
+			     int32_t* end_pos, 
+			     int32_t* score,
+			     FlankMatchState* fm_start,
+			     FlankMatchState* fm_end);		      
 
 bool smith_waterman(const std::string& seq1,
 		    const std::string& seq2,
@@ -113,10 +125,12 @@ bool classify_realigned_read(const std::string& seq,
 			     const int32_t& nCopy,
 			     const int32_t& score,
 			     const int32_t& prefix_length,
-           		 const int32_t& min_match,
-           		 const bool& isMapped,
+			     const int32_t& min_match,
+			     const bool& isMapped,
 			     const std::string& pre_flank,
 			     const std::string& post_flank,
+			     const FlankMatchState& fm_start,
+			     const FlankMatchState& fm_end,
 			     SingleReadType* single_read_class);
 
 #endif  // SRC_REALIGNMENT_H__

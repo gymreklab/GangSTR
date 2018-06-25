@@ -22,15 +22,23 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 #define SRC_LOCUS_H__
 
 #include <string>
+#include <vector>
+
+struct GenomeRegion{
+  std::string chrom;
+  int start;
+  int end;
+};
 
 class Locus {
  public:
   Locus();
   virtual ~Locus();
-
+  void Reset();
   std::string chrom;
   int start;
   int end;
+
   int period;
   std::string motif;
   std::string pre_flank;
@@ -51,6 +59,11 @@ class Locus {
   size_t frr_reads;
   size_t flanking_reads;
   size_t depth;
+
+  // Off target loci
+  bool offtarget_set;
+  std::vector<GenomeRegion> offtarget_regions;
+  double offtarget_share;
 };
 
 #endif  // SRC_LOCUS_H__
