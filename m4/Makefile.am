@@ -16,17 +16,12 @@
 # You should have received a copy of the GNU General Public License
 # along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 
-EXTRA_DIST = reconf configure \
-	config/git-version-gen \
-	$(top_srcdir)/.version
+# Install m4 macros in this directory
+m4datadir = $(datadir)/aclocal
 
-SUBDIRS = lib/htslib m4 src
-ACLOCAL_AMFLAGS = -I m4
+# List your m4 macros here
+m4macros = 
 
-BUILT_SOURCES = $(top_srcdir)/.version
-
-$(top_srcdir)/.version:
-	echo $(VERSION) > $@-t && mv $@-t $@
-
-dist-hook:
-	echo $(VERSION) > $(distdir)/.tarball-version
+# The following is boilerplate
+m4data_DATA = $(m4macros) 
+EXTRA_DIST = $(m4data_DATA) 

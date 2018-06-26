@@ -19,8 +19,8 @@
 HTS_LIBS = -lhts
 NLOP_LIBS = -lnlopt -lm
 
-AM_CPPFLAGS = -I$(top_srcdir) $(GSL_CFLAGS)
-AM_LDFLAGS = $(GSL_LIBS) $(NLOP_LIBS) -L../lib/htslib -Ilib/htslib
+AM_CPPFLAGS = -I$(top_srcdir)/src/ -I$(top_srcdir) $(GSL_CFLAGS)
+AM_LDFLAGS = $(GSL_LIBS) $(NLOP_LIBS) -L$(top_srcdir)/lib/htslib -I$(top_srcdir)/lib/htslib
 
 bin_PROGRAMS = GangSTR
 
@@ -92,7 +92,7 @@ GangSTRTests_SOURCES = \
 	ssw.h ssw.c \
 	ssw_cpp.h ssw_cpp.cpp \
 	tests/ReadClass_test.h tests/ReadClass_test.cpp \
-	tests/LiketestslihoodMaximizer_test.h tests/LikelihoodMaximizer_test.cpp \
+	tests/LikelihoodMaximizer_test.h tests/LikelihoodMaximizer_test.cpp \
 	tests/ReadExtractor_test.h tests/ReadExtractor_test.cpp \
 	tests/Genotyper_test.h tests/Genotyper_test.cpp \
 	tests/Realignment_test.h tests/Realignment_test.cpp \

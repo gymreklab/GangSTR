@@ -16,17 +16,37 @@
 # You should have received a copy of the GNU General Public License
 # along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 
-EXTRA_DIST = reconf configure \
-	config/git-version-gen \
-	$(top_srcdir)/.version
+rm -f config.cache
+rm -f aclocal.m4
+rm -rf ./autom4te.cache
 
-SUBDIRS = lib/htslib m4 src
-ACLOCAL_AMFLAGS = -I m4
+check_program()
+{
+	PROG="$1"
+	# If the program is found in the $PATH, just return
+	which "$PROG" >/dev/null && return
 
-BUILT_SOURCES = $(top_srcdir)/.version
+	# Otherwise, show an error with some helpful information
+	echo "
+--- GangSTR Compilation Error ---
+You are trying to compile GangSTR from a git repository.
+A required program '$PROG' was not found.
+To build GangSTR from a git repository, the following programs are needed:
+   autoconf
+   automake
+   libtool
+   pkg-config
+   A C++ compiler
+As well as several libraries:
+   CPPUNIT, GSL
+---
+"
+	exit 1
+}
 
-$(top_srcdir)/.version:
-	echo $(VERSION) > $@-t && mv $@-t $@
+for PROG in autoconf autoreconf automake libtool aclocal make ;
+do
+  check_program $PROG
+done
 
-dist-hook:
-	echo $(VERSION) > $(distdir)/.tarball-version
+autoreconf --force --install
