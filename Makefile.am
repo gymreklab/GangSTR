@@ -20,7 +20,7 @@ EXTRA_DIST = reconf configure \
 	config/git-version-gen \
 	$(top_srcdir)/.version
 
-SUBDIRS = lib/htslib m4 src
+SUBDIRS = m4 src
 ACLOCAL_AMFLAGS = -I m4
 
 BUILT_SOURCES = $(top_srcdir)/.version

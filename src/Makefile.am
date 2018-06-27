@@ -16,18 +16,15 @@
 # You should have received a copy of the GNU General Public License
 # along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 
-HTS_LIBS = -lhts
-NLOP_LIBS = -lnlopt -lm
+#HTS_LIBS = -lhts
+#NLOP_LIBS = -lnlopt -lm
 
-AM_CPPFLAGS = -I$(top_srcdir)/src/ -I$(top_srcdir) $(GSL_CFLAGS)
-AM_LDFLAGS = $(GSL_LIBS) $(NLOP_LIBS) -L$(top_srcdir)/lib/htslib -I$(top_srcdir)/lib/htslib
+AM_CPPFLAGS = -I$(top_srcdir)/src/ -I$(top_srcdir) $(GSL_CFLAGS) $(HTSLIB_CFLAGS) $(NLOPT_CFLAGS)
+AM_LDFLAGS = $(GSL_LIBS) $(HTSLIB_LIBS) $(NLOPT_LIBS)
 
 bin_PROGRAMS = GangSTR
 
-noinst_LIBRARIES = libgangstr.a
-
-libgangstr_a_CPPFLAGS = $(AM_CPPFLAGS)
-libgangstr_a_SOURCES = \
+GangSTR_SOURCES = main_gangstr.cpp \
 	common.h common.cpp \
 	options.h options.cpp \
 	locus.h locus.cpp \
@@ -52,12 +49,11 @@ libgangstr_a_SOURCES = \
 	vcf_writer.h vcf_writer.cpp \
 	bam_info_extract.h bam_info_extract.cpp
 
-GangSTR_LDFLAGS = $(AM_LDFLAGS)
-GangSTR_SOURCES = main_gangstr.cpp
 GangSTR_CPPFLAGS = $(AM_CPPFLAGS) $(AM_PROG_CC_C_O)
 GangSTR_CFLAGS = $(CFLAGS)	# Change to AM_CXXFLAGS For -o0 (Valgrind)
 GangSTR_CXXFLAGS = $(CXXFLAGS) 	# Change to AM_CXXFLAGS For -o0 (Valgrind)
-GangSTR_LDADD = libgangstr.a $(GSL_LIBS) $(NLOP_LIBS) $(HTS_LIBS)
+GangSTR_LDFLAGS = $(AM_LDFLAGS)
+GangSTR_LDADD = $(AM_LDFLAGS)
 
 # (Copied from coreutils' tests/local.mk)
 # Use automake's TESTS_ENVIRONMENT to point to the "tests" directory
@@ -98,5 +94,5 @@ GangSTRTests_SOURCES = \
 	tests/Realignment_test.h tests/Realignment_test.cpp \
 	tests/main_test.cpp
 GangSTRTests_CXXFLAGS = $(CPPUNIT_CFLAGS) $(GSL_CFLAGS) 
-GangSTRTests_LDFLAGS = -I/usr/local/lib $(CPPUNIT_LIBS) -ldl $(GSL_LIBS) $(HTS_LIBS) $(NLOP_LIBS) 
+GangSTRTests_LDFLAGS = -I/usr/local/lib $(CPPUNIT_LIBS) $(GSL_LIBS) $(HTSLIB_LIBS) $(NLOPT_LIBS) 
 GangSTRTests_LDADD = $(NLOP_LIBS)
