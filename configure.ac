@@ -54,7 +54,7 @@ AC_ARG_ENABLE(all-static,
                              [Build completely static (standalone) binaries.]),
                              [
                               if test "$enableval" = "yes" ; then
-                                      LT_LDFLAGS="-all-static -static -Bstatic $LT_LDFLAGS"
+                                      LT_LDFLAGS="-all-static  $LT_LDFLAGS"
                               elif test "$enableval" != "no" ; then
                                       AC_MSG_ERROR([--enable-all-static doesn't accept argument])
                                       fi
