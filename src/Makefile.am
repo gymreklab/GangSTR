@@ -53,7 +53,7 @@ GangSTR_CPPFLAGS = $(AM_CPPFLAGS) $(AM_PROG_CC_C_O)
 GangSTR_CFLAGS = $(CFLAGS)	# Change to AM_CXXFLAGS For -o0 (Valgrind)
 GangSTR_CXXFLAGS = $(CXXFLAGS) 	# Change to AM_CXXFLAGS For -o0 (Valgrind)
 GangSTR_LDFLAGS = $(AM_LDFLAGS)
-GangSTR_LDADD = $(AM_LDFLAGS)
+GangSTR_LDADD = $(AM_LDFLAGS) $(LT_LDFLAGS) 
 
 # (Copied from coreutils' tests/local.mk)
 # Use automake's TESTS_ENVIRONMENT to point to the "tests" directory
@@ -94,5 +94,5 @@ GangSTRTests_SOURCES = \
 	tests/Realignment_test.h tests/Realignment_test.cpp \
 	tests/main_test.cpp
 GangSTRTests_CXXFLAGS = $(CPPUNIT_CFLAGS) $(GSL_CFLAGS) 
-GangSTRTests_LDFLAGS = -I/usr/local/lib $(CPPUNIT_LIBS) $(GSL_LIBS) $(HTSLIB_LIBS) $(NLOPT_LIBS) 
-GangSTRTests_LDADD = $(NLOPT_LIBS)
+GangSTRTests_LDFLAGS = $(AM_LDFLAGS) $(LT_LDFLAGS)
+GangSTRTests_LDADD = $(NLOPT_LIBS) $(CPPUNIT_LIBS) $(LT_LDFLAGS)
