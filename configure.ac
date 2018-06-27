@@ -18,7 +18,7 @@
 
 AC_INIT([GangSTR],
 	[m4_esyscmd([config/git-version-gen .tarball-version])], 
-	[Nima Mousavie mousavi@ucsd.edu],
+	[Nima Mousavi mousavi@ucsd.edu],
 	[GangSTR])
 AC_CONFIG_AUX_DIR(config)
 AC_CONFIG_MACRO_DIR([m4])

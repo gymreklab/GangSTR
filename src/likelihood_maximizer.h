@@ -136,7 +136,7 @@ class LikelihoodMaximizer {
 
   // Write bootstrap samples to file
   ofstream bsfile_;
-  ofstream plotfile_;
+  //  ofstream plotfile_;
   // Random number generator
   gsl_rng * r;
   // percentage of off-target reads

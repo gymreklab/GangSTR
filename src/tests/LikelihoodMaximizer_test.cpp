@@ -153,6 +153,7 @@ void LikelihoodMaximizerTest::test_OptimizeLikelihood() {
   options.read_len = 100;
   options.dist_max = 1000;
 
+  /*
   LikelihoodMaximizer* likelihood_maximizer_opt = new LikelihoodMaximizer(options);
   likelihood_maximizer_opt->Reset();
 
