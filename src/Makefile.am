@@ -52,8 +52,8 @@ GangSTR_SOURCES = main_gangstr.cpp \
 GangSTR_CPPFLAGS = $(AM_CPPFLAGS) $(AM_PROG_CC_C_O)
 GangSTR_CFLAGS = $(CFLAGS)	# Change to AM_CXXFLAGS For -o0 (Valgrind)
 GangSTR_CXXFLAGS = $(CXXFLAGS) 	# Change to AM_CXXFLAGS For -o0 (Valgrind)
-GangSTR_LDFLAGS = $(AM_LDFLAGS)
-GangSTR_LDADD = $(AM_LDFLAGS) $(LT_LDFLAGS) 
+GangSTR_LDFLAGS = $(AM_LDFLAGS) $(LT_LDFLAGS)
+GangSTR_LDADD = $(AM_LDFLAGS) $(LT_LDFLAGS)
 
 # (Copied from coreutils' tests/local.mk)
 # Use automake's TESTS_ENVIRONMENT to point to the "tests" directory

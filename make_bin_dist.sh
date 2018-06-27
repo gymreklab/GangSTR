@@ -31,7 +31,7 @@ tar -xzf "$TARBALL" -C "$BUILD_ROOT_DIR" || die "tar -xf ../$TARBALL failed"
 # Build GangSTR, with special static options
 cd "$BUILD_SRC_DIR" || die "cd $BUILD_SRC_DIR failed"
 ./configure --enable-all-static --prefix "$BUILD_BIN_DIR" || die "Configure failed, check logs in $BUILD_SRC_DIR"
-make || die "make failed, check logs in $BUILD_SRC_DIR"
+make -j || die "make failed, check logs in $BUILD_SRC_DIR"
 make install || die "make install failed, check logs in $BUILD_SRC_DIR"
 ## The compiled binary files are now in "$BUILD_BIN_DIR"
 
