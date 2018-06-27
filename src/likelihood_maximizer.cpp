@@ -46,7 +46,8 @@ LikelihoodMaximizer::LikelihoodMaximizer(Options& _options) {
   if (options->output_bootstrap) {
     bsfile_.open((options->outprefix + ".bootstrap.tab").c_str());
   }
-  plotfile_.open((options->outprefix + ".plot.tab").c_str());
+  //plotfile_.open((options->outprefix + ".plot.tab").c_str());
+
 
   // Setup random number generator
   const gsl_rng_type * T;
@@ -129,8 +130,8 @@ void LikelihoodMaximizer::PlotLikelihood(int32_t fix_allele,
   double gt_ll;
   for (int32_t var_allele = start; var_allele <= end; var_allele+=step){
     GetGenotypeNegLogLikelihood(fix_allele, var_allele, read_len, motif_len, ref_count, false, &gt_ll);
-    plotfile_ << fix_allele << "\t" << var_allele << "\t"
-        << gt_ll << endl;
+    //    plotfile_ << fix_allele << "\t" << var_allele << "\t"
+    //    << gt_ll << endl;
   }
 }
 

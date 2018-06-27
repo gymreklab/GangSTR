@@ -13,9 +13,10 @@
 #include <vector>
 #include <sys/stat.h>
 
-#include "lib/htslib/htslib/bgzf.h"
-#include "lib/htslib/cram/cram.h"
-#include "lib/htslib/htslib/sam.h"
+#include "htslib/bgzf.h"
+//#include "htslib/cram.h"
+#define bam_ins_size(b)  (b)->core.isize;
+#include "htslib/sam.h"
 
 #include "src/common.h"
 
@@ -406,13 +407,13 @@ class BamHeader {
   std::string ref_name(int32_t ref_id) const {
     if (ref_id == -1)
       return "*";
-    if (ref_id >= 0 && ref_id < seq_names_.size())
+    if (ref_id >= 0 && ref_id < (int)seq_names_.size())
       return seq_names_[ref_id];
     PrintMessageDieOnError("Invalid reference ID provided to ref_name() function", M_ERROR);
   }
 
   uint32_t ref_length(int32_t ref_id) const {
-    if (ref_id >= 0 && ref_id < seq_lengths_.size())
+    if (ref_id >= 0 && ref_id < (int)seq_lengths_.size())
       return seq_lengths_[ref_id];
     PrintMessageDieOnError("Invalid reference ID provided to ref_length() function", M_ERROR);
   }
@@ -462,6 +463,8 @@ class BamCramReader {
       PrintMessageDieOnError("Failed to open file " + path, M_ERROR);
 
     if (in_->is_cram){
+      PrintMessageDieOnError("No support for CRAM files yet", M_ERROR);
+      /*
       if (fasta_path.empty())
 	PrintMessageDieOnError("Must specify a FASTA reference file path for CRAM file " + path, M_ERROR);
       
@@ -473,6 +476,7 @@ class BamCramReader {
       if (cram_load_reference(in_->fp.cram, fasta) < 0)
 	PrintMessageDieOnError("Failed to open FASTA reference file for CRAM file", M_ERROR);
       delete [] fasta;
+      */
     }
 
     // Read the header
@@ -558,7 +562,7 @@ class BamCramMultiReader {
   }
 
   const BamHeader* bam_header(int file_index) const {
-    if (file_index >= 0 && file_index < bam_readers_.size())
+    if (file_index >= 0 && file_index < (int)bam_readers_.size())
       return bam_readers_[file_index]->bam_header(); 
     PrintMessageDieOnError("Invalid file index provided to bam_header() function", M_ERROR);
   }

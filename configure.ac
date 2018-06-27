@@ -18,13 +18,13 @@
 
 AC_INIT([GangSTR],
 	[m4_esyscmd([config/git-version-gen .tarball-version])], 
-	[Nima Mousavie mousavi@ucsd.edu],
+	[Nima Mousavi mousavi@ucsd.edu],
 	[GangSTR])
 AC_CONFIG_AUX_DIR(config)
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_HEADER(config.h)
 AC_CONFIG_SRCDIR([src/main_gangstr.cpp])
-AM_INIT_AUTOMAKE([foreign -Wall -Werror subdir-objects])
+AM_INIT_AUTOMAKE([foreign -Werror subdir-objects])
 AM_PROG_AR
 
 LT_INIT([static])
@@ -33,9 +33,11 @@ AC_PROG_CXX
 AC_PROG_INSTALL
 AM_PROG_CC_C_O 
 
-# Check for GSL (GNU Scientific Library) and cppunit
+# Check for required packages
 PKG_CHECK_MODULES([GSL],[gsl])
 PKG_CHECK_MODULES([CPPUNIT],[cppunit])
+PKG_CHECK_MODULES([HTSLIB],[htslib])
+PKG_CHECK_MODULES([NLOPT],[nlopt])
 
 # To compile a static executable (before binary packaging?),
 # use:
@@ -67,7 +69,7 @@ MACHTYPE=`uname -m`
 AC_SUBST(MACHTYPE)
 
 # Compiler warnings to add
-COMPILER_WARNINGS="-Wall -Wextra -Wswitch-default -Wno-strict-aliasing"
+#COMPILER_WARNINGS="-Wextra -Wswitch-default -Wno-strict-aliasing"
 
 # Custom Flags to add to CFLAGS/CXXFLAGS
 GANGSTR_CFLAGS="-D_GIT_VERSION=\"\\\"${GIT_VERSION}\\\"\" -D_MACHTYPE=\"\\\"${MACHTYPE}\\\"\""
@@ -90,6 +92,8 @@ AC_MSG_RESULT([    CFLAGS:   $CFLAGS])
 AC_MSG_RESULT([    CPPFLAGS: $CPPFLAGS])
 AC_MSG_RESULT([    CXXFLAGS: $CXXFLAGS])
 AC_MSG_RESULT([    LDFLAGS:  $LDFLAGS])
+AC_MSG_RESULT([    HTSLIB_LIBS:  $HTSLIB_LIBS])
+AC_MSG_RESULT([    HTSLIB_CFLAGS: $HTSLIB_CFLAGS])
 AC_MSG_RESULT([    GANGSTR_CFLAGS: $GANGSTR_CFLAGS])
 AC_MSG_RESULT([])
 AC_MSG_RESULT([ Default installtion directories:])

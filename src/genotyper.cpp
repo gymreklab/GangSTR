@@ -176,7 +176,7 @@ void Genotyper::Debug(BamCramMultiReader* bamreader) {
   cerr << "testing GSL" << endl;
   double x = TestGSL();
   cerr << "gsl_ran_gaussian_pdf(0, 1) " << x << endl;
-  double y = TestNLOPT();
+  //  double y = TestNLOPT();
 }
 
 Genotyper::~Genotyper() {
