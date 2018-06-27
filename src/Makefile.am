@@ -95,4 +95,4 @@ GangSTRTests_SOURCES = \
 	tests/main_test.cpp
 GangSTRTests_CXXFLAGS = $(CPPUNIT_CFLAGS) $(GSL_CFLAGS) 
 GangSTRTests_LDFLAGS = -I/usr/local/lib $(CPPUNIT_LIBS) $(GSL_LIBS) $(HTSLIB_LIBS) $(NLOPT_LIBS) 
-GangSTRTests_LDADD = $(NLOP_LIBS)
+GangSTRTests_LDADD = $(NLOPT_LIBS)

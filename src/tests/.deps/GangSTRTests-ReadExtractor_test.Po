@@ -105,31 +105,15 @@ tests/GangSTRTests-ReadExtractor_test.o: tests/ReadExtractor_test.cpp \
  /usr/local/include/c++/4.9.2/bits/stl_vector.h \
  /usr/local/include/c++/4.9.2/bits/stl_bvector.h \
  /usr/local/include/c++/4.9.2/bits/vector.tcc /usr/include/sys/stat.h \
- /usr/include/bits/stat.h ../lib/htslib/htslib/bgzf.h \
+ /usr/include/bits/stat.h /usr/local/include/htslib/bgzf.h \
  /usr/include/libio.h /usr/include/_G_config.h \
  /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h \
  /usr/include/bits/stdio.h /usr/include/zlib.h /usr/include/zconf.h \
  /usr/include/unistd.h /usr/include/bits/posix_opt.h \
  /usr/include/bits/environments.h /usr/include/bits/confname.h \
- /usr/include/getopt.h ../lib/htslib/htslib/hts_defs.h \
- ../lib/htslib/cram/cram.h ../lib/htslib/cram/cram_samtools.h \
- ../lib/htslib/cram/../htslib/sam.h ../lib/htslib/cram/../htslib/hts.h \
- ../lib/htslib/cram/../htslib/hts_defs.h ../lib/htslib/cram/sam_header.h \
- ../lib/htslib/cram/string_alloc.h ../lib/htslib/cram/pooled_alloc.h \
- ../lib/htslib/cram/../htslib/khash.h /usr/include/string.h \
- /usr/local/lib/gcc/x86_64-unknown-linux-gnu/4.9.2/include-fixed/limits.h \
- /usr/local/lib/gcc/x86_64-unknown-linux-gnu/4.9.2/include-fixed/syslimits.h \
- /usr/include/limits.h /usr/include/bits/posix1_lim.h \
- /usr/include/bits/local_lim.h /usr/include/linux/limits.h \
- /usr/include/bits/posix2_lim.h /usr/include/bits/xopen_lim.h \
- ../lib/htslib/cram/../htslib/kstring.h ../lib/htslib/cram/cram_structs.h \
- ../lib/htslib/cram/../htslib/thread_pool.h ../lib/htslib/cram/mFILE.h \
- ../lib/htslib/cram/cram_io.h ../lib/htslib/cram/misc.h \
- ../lib/htslib/cram/os.h ../lib/htslib/cram/../htslib/hts_endian.h \
- ../lib/htslib/cram/cram_encode.h ../lib/htslib/cram/cram_decode.h \
- ../lib/htslib/cram/cram_stats.h ../lib/htslib/cram/cram_codecs.h \
- ../lib/htslib/cram/cram_index.h ../lib/htslib/cram/../htslib/cram.h \
- ../lib/htslib/htslib/sam.h ../src/common.h ../src/stringops.h \
+ /usr/include/getopt.h /usr/local/include/htslib/hts_defs.h \
+ /usr/local/include/htslib/sam.h /usr/local/include/htslib/hts.h \
+ /usr/local/include/htslib/hts_log.h ../src/common.h ../src/stringops.h \
  ../src/likelihood_maximizer.h ../src/enclosing_class.h \
  ../src/read_class.h ../src/options.h ../src/frr_class.h \
  ../src/flanking_class.h ../src/spanning_class.h ../src/read_pair.h \
@@ -505,7 +489,7 @@ tests/GangSTRTests-ReadExtractor_test.o: tests/ReadExtractor_test.cpp \
 
 /usr/include/bits/stat.h:
 
-../lib/htslib/htslib/bgzf.h:
+/usr/local/include/htslib/bgzf.h:
 
 /usr/include/libio.h:
 
@@ -531,73 +515,13 @@ tests/GangSTRTests-ReadExtractor_test.o: tests/ReadExtractor_test.cpp \
 
 /usr/include/getopt.h:
 
-../lib/htslib/htslib/hts_defs.h:
+/usr/local/include/htslib/hts_defs.h:
 
-../lib/htslib/cram/cram.h:
+/usr/local/include/htslib/sam.h:
 
-../lib/htslib/cram/cram_samtools.h:
+/usr/local/include/htslib/hts.h:
 
-../lib/htslib/cram/../htslib/sam.h:
-
-../lib/htslib/cram/../htslib/hts.h:
-
-../lib/htslib/cram/../htslib/hts_defs.h:
-
-../lib/htslib/cram/sam_header.h:
-
-../lib/htslib/cram/string_alloc.h:
-
-../lib/htslib/cram/pooled_alloc.h:
-
-../lib/htslib/cram/../htslib/khash.h:
-
-/usr/include/string.h:
-
-/usr/local/lib/gcc/x86_64-unknown-linux-gnu/4.9.2/include-fixed/limits.h:
-
-/usr/local/lib/gcc/x86_64-unknown-linux-gnu/4.9.2/include-fixed/syslimits.h:
-
-/usr/include/limits.h:
-
-/usr/include/bits/posix1_lim.h:
-
-/usr/include/bits/local_lim.h:
-
-/usr/include/linux/limits.h:
-
-/usr/include/bits/posix2_lim.h:
-
-/usr/include/bits/xopen_lim.h:
-
-../lib/htslib/cram/../htslib/kstring.h:
-
-../lib/htslib/cram/cram_structs.h:
-
-../lib/htslib/cram/../htslib/thread_pool.h:
-
-../lib/htslib/cram/mFILE.h:
-
-../lib/htslib/cram/cram_io.h:
-
-../lib/htslib/cram/misc.h:
-
-../lib/htslib/cram/os.h:
-
-../lib/htslib/cram/../htslib/hts_endian.h:
-
-../lib/htslib/cram/cram_encode.h:
-
-../lib/htslib/cram/cram_decode.h:
-
-../lib/htslib/cram/cram_stats.h:
-
-../lib/htslib/cram/cram_codecs.h:
-
-../lib/htslib/cram/cram_index.h:
-
-../lib/htslib/cram/../htslib/cram.h:
-
-../lib/htslib/htslib/sam.h:
+/usr/local/include/htslib/hts_log.h:
 
 ../src/common.h:
 

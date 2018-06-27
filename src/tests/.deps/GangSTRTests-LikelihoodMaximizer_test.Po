@@ -157,28 +157,12 @@ tests/GangSTRTests-LikelihoodMaximizer_test.o: \
  /usr/local/include/c++/4.9.2/bits/stl_heap.h /usr/include/inttypes.h \
  /usr/local/lib/gcc/x86_64-unknown-linux-gnu/4.9.2/include/stdbool.h \
  /usr/include/assert.h /usr/include/sys/stat.h /usr/include/bits/stat.h \
- ../lib/htslib/htslib/bgzf.h /usr/include/zlib.h /usr/include/zconf.h \
- /usr/include/unistd.h /usr/include/bits/posix_opt.h \
+ /usr/local/include/htslib/bgzf.h /usr/include/zlib.h \
+ /usr/include/zconf.h /usr/include/unistd.h /usr/include/bits/posix_opt.h \
  /usr/include/bits/environments.h /usr/include/bits/confname.h \
- /usr/include/getopt.h ../lib/htslib/htslib/hts_defs.h \
- ../lib/htslib/cram/cram.h ../lib/htslib/cram/cram_samtools.h \
- ../lib/htslib/cram/../htslib/sam.h ../lib/htslib/cram/../htslib/hts.h \
- ../lib/htslib/cram/../htslib/hts_defs.h ../lib/htslib/cram/sam_header.h \
- ../lib/htslib/cram/string_alloc.h ../lib/htslib/cram/pooled_alloc.h \
- ../lib/htslib/cram/../htslib/khash.h /usr/include/string.h \
- /usr/local/lib/gcc/x86_64-unknown-linux-gnu/4.9.2/include-fixed/limits.h \
- /usr/local/lib/gcc/x86_64-unknown-linux-gnu/4.9.2/include-fixed/syslimits.h \
- /usr/include/limits.h /usr/include/bits/posix1_lim.h \
- /usr/include/bits/local_lim.h /usr/include/linux/limits.h \
- /usr/include/bits/posix2_lim.h /usr/include/bits/xopen_lim.h \
- ../lib/htslib/cram/../htslib/kstring.h ../lib/htslib/cram/cram_structs.h \
- ../lib/htslib/cram/../htslib/thread_pool.h ../lib/htslib/cram/mFILE.h \
- ../lib/htslib/cram/cram_io.h ../lib/htslib/cram/misc.h \
- ../lib/htslib/cram/os.h ../lib/htslib/cram/../htslib/hts_endian.h \
- ../lib/htslib/cram/cram_encode.h ../lib/htslib/cram/cram_decode.h \
- ../lib/htslib/cram/cram_stats.h ../lib/htslib/cram/cram_codecs.h \
- ../lib/htslib/cram/cram_index.h ../lib/htslib/cram/../htslib/cram.h \
- ../lib/htslib/htslib/sam.h ../src/common.h ../src/realignment.h \
+ /usr/include/getopt.h /usr/local/include/htslib/hts_defs.h \
+ /usr/local/include/htslib/sam.h /usr/local/include/htslib/hts.h \
+ /usr/local/include/htslib/hts_log.h ../src/common.h ../src/realignment.h \
  ../src/ssw_cpp.h /usr/local/include/gsl/gsl_vector.h \
  /usr/local/include/gsl/gsl_vector_complex_long_double.h \
  /usr/local/include/gsl/gsl_types.h /usr/local/include/gsl/gsl_errno.h \
@@ -236,7 +220,7 @@ tests/GangSTRTests-LikelihoodMaximizer_test.o: \
  /usr/include/bits/inf.h /usr/include/bits/nan.h \
  /usr/include/bits/mathdef.h /usr/include/bits/mathcalls.h \
  /usr/include/bits/mathinline.h ../src/ref_genome.h \
- ../lib/htslib/htslib/faidx.h ../src/genotyper.h
+ /usr/local/include/htslib/faidx.h ../src/genotyper.h
 
 /usr/include/stdc-predef.h:
 
@@ -638,7 +622,7 @@ tests/GangSTRTests-LikelihoodMaximizer_test.o: \
 
 /usr/include/bits/stat.h:
 
-../lib/htslib/htslib/bgzf.h:
+/usr/local/include/htslib/bgzf.h:
 
 /usr/include/zlib.h:
 
@@ -654,73 +638,13 @@ tests/GangSTRTests-LikelihoodMaximizer_test.o: \
 
 /usr/include/getopt.h:
 
-../lib/htslib/htslib/hts_defs.h:
+/usr/local/include/htslib/hts_defs.h:
 
-../lib/htslib/cram/cram.h:
+/usr/local/include/htslib/sam.h:
 
-../lib/htslib/cram/cram_samtools.h:
+/usr/local/include/htslib/hts.h:
 
-../lib/htslib/cram/../htslib/sam.h:
-
-../lib/htslib/cram/../htslib/hts.h:
-
-../lib/htslib/cram/../htslib/hts_defs.h:
-
-../lib/htslib/cram/sam_header.h:
-
-../lib/htslib/cram/string_alloc.h:
-
-../lib/htslib/cram/pooled_alloc.h:
-
-../lib/htslib/cram/../htslib/khash.h:
-
-/usr/include/string.h:
-
-/usr/local/lib/gcc/x86_64-unknown-linux-gnu/4.9.2/include-fixed/limits.h:
-
-/usr/local/lib/gcc/x86_64-unknown-linux-gnu/4.9.2/include-fixed/syslimits.h:
-
-/usr/include/limits.h:
-
-/usr/include/bits/posix1_lim.h:
-
-/usr/include/bits/local_lim.h:
-
-/usr/include/linux/limits.h:
-
-/usr/include/bits/posix2_lim.h:
-
-/usr/include/bits/xopen_lim.h:
-
-../lib/htslib/cram/../htslib/kstring.h:
-
-../lib/htslib/cram/cram_structs.h:
-
-../lib/htslib/cram/../htslib/thread_pool.h:
-
-../lib/htslib/cram/mFILE.h:
-
-../lib/htslib/cram/cram_io.h:
-
-../lib/htslib/cram/misc.h:
-
-../lib/htslib/cram/os.h:
-
-../lib/htslib/cram/../htslib/hts_endian.h:
-
-../lib/htslib/cram/cram_encode.h:
-
-../lib/htslib/cram/cram_decode.h:
-
-../lib/htslib/cram/cram_stats.h:
-
-../lib/htslib/cram/cram_codecs.h:
-
-../lib/htslib/cram/cram_index.h:
-
-../lib/htslib/cram/../htslib/cram.h:
-
-../lib/htslib/htslib/sam.h:
+/usr/local/include/htslib/hts_log.h:
 
 ../src/common.h:
 
@@ -866,6 +790,6 @@ tests/GangSTRTests-LikelihoodMaximizer_test.o: \
 
 ../src/ref_genome.h:
 
-../lib/htslib/htslib/faidx.h:
+/usr/local/include/htslib/faidx.h:
 
 ../src/genotyper.h:
