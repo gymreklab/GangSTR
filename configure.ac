@@ -35,7 +35,7 @@ AM_PROG_CC_C_O
 
 # Check for required packages
 PKG_CHECK_MODULES([GSL],[gsl])
-PKG_CHECK_MODULES([CPPUNIT],[cppunit])
+#PKG_CHECK_MODULES([CPPUNIT],[cppunit])
 PKG_CHECK_MODULES([HTSLIB],[htslib])
 PKG_CHECK_MODULES([NLOPT],[nlopt])
 
