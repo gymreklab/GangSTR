@@ -146,7 +146,7 @@ GangSTR requires a reference set of regions to genotype. This is a BED-like file
 
 Lines beginning with `*` in the reference are ignored.
 
-Below is an example file which contains 5 STR loci. Standard references for hg19 and GRCh38 can be obtained [below](#references).
+Below is an example file which contains 5 TR loci. Standard references for hg19 and GRCh38 can be obtained [below](#references).
 **NOTE: The table header is for descriptive purposes. The BED file should not have a header**
 
 | **CHROM** | **START** | **END** | **MOTIF_LEN** | **MOTIF** | **REFSEQ** |
@@ -162,7 +162,7 @@ For more information on VCF file format, see the [VCF spec](http://samtools.gith
 
 #### INFO fields
 
-INFO fields contain aggregated statistics about each STR. The following custom fields are added:
+INFO fields contain aggregated statistics about each TR. The following custom fields are added:
 
 | **FIELD** | **DESCRIPTION** |
 |-----------|------------------|
