@@ -14,14 +14,6 @@ For questions on installation or usage, please open an issue, submit a pull requ
 
 [File formats](#formats)
 
-GangSTR takes as input a BAM file of short read alignments and reference set of TRs and outputs genotypes in a VCF file. Each of these formats is described below.
-
-## BAM (input)
-
-## TR regions (input)
-
-## VCF (input)
-
 [References](#references)
 
 [Citation](#citation)
@@ -131,6 +123,38 @@ make install
 
 <a name="formats"></a>
 ## File formats
+
+GangSTR takes as input a BAM file of short read alignments, a reference set of TRs, and a reference genome, and outputs genotypes in a VCF file. Each of these formats is described below.
+
+### BAM (`--bam`)
+GangSTR requires a [BAM](https://samtools.github.io/hts-specs/SAMv1.pdf) file produced by an indel-sensitive aligner. The BAM file must be sorted and indexed e.g. by using `samtools sort` and `samtools index`. GangSTR currently only processes a single sample at a time.
+
+### FASTA Reference genome (`--ref`)
+You must input a reference genome in FASTA format. This must be the same reference build used to align the sequences in the BAM file.
+
+### TR regions (`--regions`)
+GangSTR requires a reference set of regions to genotype. This is a BED-like file with the following required columns:
+
+1. The name of the chromosome on which the STR is located
+2. The start position of the STR on its chromosome
+3. The end position of the STR on its chromosome
+4. The motif length
+5. The repeat motif
+6. The sequence of the repeat region in the reference genome
+
+Below is an example file which contains 5 STR loci.
+**NOTE: The table header is for descriptive purposes. The BED file should not have a header**
+
+| **CHROM** | **START** | **END** | **MOTIF_LEN** | **MOTIF** | **REFSEQ** |
+|-----------|-----------|---------|----------------|----------|------------|
+|chr1	|10689	|10700|	5	|CGCGC|	CGCGCCGCGCCG|
+| chr1  |  28589  | 28603  | 1 |      T    |   TTTTTTTTTTTTTTT|
+|chr4  |  11173|   11194  | 11   |   CGCCGGCGCGG |    CGCCGGCGCGGCGCCGGGGCGG|
+|chr4   | 150889 | 150909 | 2    |   TG      |TGTGTGTGTGTGTGTGTGTGT|
+|chr20  | 72993 |  73011|   5   |    TACTA  | TACTACAATATACTATACT|
+
+
+### VCF (input)
 
 <a name="references"></a>
 ## GangSTR reference files
