@@ -22,8 +22,30 @@ For questions on installation or usage, please open an issue, submit a pull requ
 <a name="download"></a>
 ## Download
 
+The latest GangSTR release is [GangSTR-1.2](https://github.com/gymreklab/GangSTR/releases/download/v1.2/GangSTR-1.2.tar.gz).
+
+For a list of previous releases and changelog see the [releases page](https://github.com/gymreklab/GangSTR/releases).
+
 <a name="install"></a>
 ## Install
+
+GangSTR requires third party packages [nlopt](https://nlopt.readthedocs.io/en/latest/), [gsl](https://www.gnu.org/software/gsl/doc/html/index.html), and [htslib](http://www.htslib.org//). Before proceeding these should be installed. See below for details on installing dependencies. Once the dependencies are installed, you can download and compile GangSTR using the following steps:
+
+```
+# 1. Download and unpack the tarball
+wget https://github.com/gymreklab/GangSTR/releases/download/v1.2/GangSTR-1.2.tar.gz
+tar -xzvf GangSTR-1.2.tar.gz
+cd GangSTR-1.2
+
+# 2. Compile
+./configure
+make
+make install
+```
+
+### Dependencies
+
+### Installing locally (e.g. without root access)
 
 <a name="usage"></a>
 ## Usage
