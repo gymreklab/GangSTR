@@ -144,7 +144,9 @@ GangSTR requires a reference set of regions to genotype. This is a BED-like file
 5. The repeat motif
 6. The sequence of the repeat region in the reference genome
 
-Below is an example file which contains 5 STR loci. Standard references for hg19 and hg38 can be obtained [below](#references).
+Lines beginning with `*` in the reference are ignored.
+
+Below is an example file which contains 5 STR loci. Standard references for hg19 and GRCh38 can be obtained [below](#references).
 **NOTE: The table header is for descriptive purposes. The BED file should not have a header**
 
 | **CHROM** | **START** | **END** | **MOTIF_LEN** | **MOTIF** | **REFSEQ** |
@@ -182,6 +184,14 @@ FORMAT fields contain information specific to each genotype call. The following 
 
 <a name="references"></a>
 ## GangSTR reference files
+
+The following lists available references created using Tandem Repeats Finder. We update the reference periodically with additional loci or annotation changes. Please see the Changelog file for details. Note references must be unzipped before using with GangSTR.
+
+| **Reference build** | **Version** | **Link** |
+| --------------------| ------------|----------|
+| hg19 | ver9 | [hg19_ver9.bed.gz](https://s3.amazonaws.com/gangstr/hg19_ver9.bed.gz) |
+| hs38 | ver8 | [hg37_ver8.bed.gz](https://s3.amazonaws.com/gangstr/hs37_ver8.bed.gz) |
+
 
 <a name="citation"></a>
 ## Citing GangSTR
