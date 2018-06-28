@@ -30,7 +30,7 @@ For a list of previous releases and changelog see the [releases page](https://gi
 ## Install
 
 ### Basic installation
-GangSTR requires third party packages [nlopt](https://nlopt.readthedocs.io/en/latest/), [gsl](https://www.gnu.org/software/gsl/doc/html/index.html), and [htslib](http://www.htslib.org//). See below for details on installing dependencies. Once the dependencies are installed, you can download and compile GangSTR using the following steps:
+GangSTR requires third party packages [nlopt](https://nlopt.readthedocs.io/en/latest/), [gsl](https://www.gnu.org/software/gsl/doc/html/index.html), and [htslib](http://www.htslib.org//). See below for details on [installing dependencies](#dependencies). Once the dependencies are installed, you can download and compile GangSTR using the following steps:
 
 ```
 # 1. Download and unpack the tarball
@@ -46,8 +46,8 @@ make install
 
 This will install the binary `GangSTR` to the default `PATH` location (e.g. `/usr/bin/GangSTR`).
 
+<a name="dependencies"></a>
 ### Dependencies
-
 GangSTR relies on three external libraries: [nlopt](https://nlopt.readthedocs.io/en/latest/), [gsl](https://www.gnu.org/software/gsl/doc/html/index.html), and [htslib](http://www.htslib.org//). These can be installed using the commands below. Additional detailed instructions for installing each package are available on the project sites. 
 
 ```
