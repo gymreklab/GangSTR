@@ -26,6 +26,8 @@ The latest GangSTR release is [GangSTR-1.2](https://github.com/gymreklab/GangSTR
 
 For a list of previous releases and changelog see the [releases page](https://github.com/gymreklab/GangSTR/releases).
 
+For a list of TR references available, see [references](#references) below. 
+
 <a name="install"></a>
 ## Install
 
@@ -142,7 +144,7 @@ GangSTR requires a reference set of regions to genotype. This is a BED-like file
 5. The repeat motif
 6. The sequence of the repeat region in the reference genome
 
-Below is an example file which contains 5 STR loci.
+Below is an example file which contains 5 STR loci. Standard references for hg19 and hg38 can be obtained [below](#references).
 **NOTE: The table header is for descriptive purposes. The BED file should not have a header**
 
 | **CHROM** | **START** | **END** | **MOTIF_LEN** | **MOTIF** | **REFSEQ** |
@@ -153,8 +155,30 @@ Below is an example file which contains 5 STR loci.
 |chr4   | 150889 | 150909 | 2    |   TG      |TGTGTGTGTGTGTGTGTGTGT|
 |chr20  | 72993 |  73011|   5   |    TACTA  | TACTACAATATACTATACT|
 
+### VCF (output)
+For more information on VCF file format, see the [VCF spec](http://samtools.github.io/hts-specs/VCFv4.2.pdf). In addition to standard VCF fields, GangSTR adds custom fields described below.
 
-### VCF (input)
+#### INFO fields
+
+INFO fields contain aggregated statistics about each STR. The following custom fields are added:
+
+| **FIELD** | **DESCRIPTION** |
+|-----------|------------------|
+| END | End position of the TR |
+| RU| Repeat motif | 
+| REF| Reference copy number (number of repeat units| 
+
+#### FORMAT fields
+FORMAT fields contain information specific to each genotype call. The following custom fields are added:
+
+| **FIELD** | **DESCRIPTION** |
+|-----------|------------------|
+| GB | Base pair length differences of genotype from reference for each allele |
+| CI| 95% confidence intervals for each allele | 
+| RC| Number of reads in each class (enclosing, spanning, FRR, flanking)| 
+| Q| Minimum negative likelihood| 
+| INS| Insert size mean and stddev at the locus| 
+
 
 <a name="references"></a>
 ## GangSTR reference files
