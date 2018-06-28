@@ -7,10 +7,15 @@ GangSTR takes aligned reads (BAM) and a set of repeats in the reference genome a
 For questions on installation or usage, please open an issue, submit a pull request, or contact Nima Mousavi (mousavi@ucsd.edu).
 
 [Download](#download)
+
 [Install](#install)
+
 [Usage](#usage)
+
 [File formats](#formats)
+
 [References](#references)
+
 [Citation](#citation)
 
 
