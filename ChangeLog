@@ -1,4 +1,15 @@
-gangstr_v1.1 (June 26, 2018):
+# GangSTR releases
+gangstr_v1.2 (June 27, 2018):
 	- Initial practice release
 	- Setting up version control
 	- Improving compile/install process
+	
+# Reference sets - hg19
+ver9 (June 27, 2018):
+	- Initial reference release
+	
+# Reference sets - hs38
+ver8 (June 27, 2018):
+	- Initial reference release
+	
+	
