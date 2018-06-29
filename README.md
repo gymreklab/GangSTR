@@ -6,23 +6,12 @@ GangSTR takes aligned reads (BAM) and a set of repeats in the reference genome a
 
 For questions on installation or usage, please open an issue, submit a pull request, or contact Nima Mousavi (mousavi@ucsd.edu).
 
-[Download](#download)
-
-[Install](#install)
-
-[Usage](#usage)
-
-[File formats](#formats)
-
-[References](#references)
-
-[Citation](#citation)
-
+[Download](#download) | [Install](#install) | [Usage](#usage) | [File formats](#formats) | [References](#references)
 
 <a name="download"></a>
 ## Download
 
-The latest GangSTR release is [GangSTR-1.2](https://github.com/gymreklab/GangSTR/releases/download/v1.2/GangSTR-1.2.tar.gz).
+The latest GangSTR release is GangSTR-1.3. Download [GangSTR-1.3.4-a49a.tar.gz](https://github.com/gymreklab/GangSTR/releases/download/test/GangSTR-1.3.4-a49a.tar.gz).
 
 For a list of previous releases and changelog see the [releases page](https://github.com/gymreklab/GangSTR/releases).
 
@@ -125,5 +114,3 @@ The following lists available references created using Tandem Repeats Finder. We
 | hs38 | ver8 | [hg37_ver8.bed.gz](https://s3.amazonaws.com/gangstr/hs37_ver8.bed.gz) |
 
 
-<a name="citation"></a>
-## Citing GangSTR
