@@ -32,7 +32,7 @@ For a list of TR references available, see [references](#references) below.
 
 ## Basic Install
 
-GangSTR requires third party packages [nlopt](https://nlopt.readthedocs.io/en/latest/), [gsl](https://www.gnu.org/software/gsl/doc/html/index.html), and [htslib](http://www.htslib.org//). The built-in script `install-gangstr.sh` installs these for you.
+GangSTR requires third party packages [nlopt](https://nlopt.readthedocs.io/en/latest/), [gsl](https://www.gnu.org/software/gsl/doc/html/index.html), and [htslib](http://www.htslib.org//). The built-in script `install-gangstr.sh` installs these for you before compiling and installing GangSTR.
 
 If you are running as root:
 ```
@@ -49,14 +49,6 @@ cd GangSTR-1.2
 ```
 
 where `PREFIX` is a place you have write permissions. In most cases this will be your home directory, e.g. `/home/<username>`.
-
-Alternatively, if you already have the dependencies installed you may simply do:
-```
-cd GangSTR-1.2
-./configure [--prefix=/home/<username>]
-make
-make install
-```
 
 Typing `GangSTR --help` should show a help message if GangSTR was successfully installed.
 
