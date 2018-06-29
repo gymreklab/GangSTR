@@ -32,31 +32,23 @@ For a list of TR references available, see [references](#references) below.
 
 ## Basic Install
 
-GangSTR requires third party packages [nlopt](https://nlopt.readthedocs.io/en/latest/), [gsl](https://www.gnu.org/software/gsl/doc/html/index.html), and [htslib](http://www.htslib.org//). The built-in script `install-gangstr.sh` installs these for you.
+GangSTR requires third party packages [nlopt](https://nlopt.readthedocs.io/en/latest/), [gsl](https://www.gnu.org/software/gsl/doc/html/index.html), and [htslib](http://www.htslib.org//). The built-in script `install-gangstr.sh` installs these for you before compiling and installing GangSTR.
 
 If you are running as root:
 ```
-tar -xzvf GangSTR-1.2.tar.gz
-cd GangSTR-1.2
+tar -xzvf GangSTR-X.X.tar.gz
+cd GangSTR-X.X
 sudo ./install-gangstr.sh
 ```
 
 If you are installing locally (e.g. on a cluster where you don't have root access):
 ```
-tar -xzvf GangSTR-1.2.tar.gz
-cd GangSTR-1.2
+tar -xzvf GangSTR-X.X.tar.gz
+cd GangSTR-X.X
 ./install-gangstr.sh PREFIX
 ```
 
-where `PREFIX` is a place you have write permissions. In most cases this will be your home directory, e.g. `/home/<username>`.
-
-Alternatively, if you already have the dependencies installed you may simply do:
-```
-cd GangSTR-1.2
-./configure [--prefix=/home/<username>]
-make
-make install
-```
+where `PREFIX` is a place you have write permissions. In most cases this will be your home directory, e.g. `$HOME`. If you install locally, make sure `$PREFIX/bin` is on your `PATH`.
 
 Typing `GangSTR --help` should show a help message if GangSTR was successfully installed.
 
