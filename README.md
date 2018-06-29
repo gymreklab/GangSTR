@@ -6,18 +6,7 @@ GangSTR takes aligned reads (BAM) and a set of repeats in the reference genome a
 
 For questions on installation or usage, please open an issue, submit a pull request, or contact Nima Mousavi (mousavi@ucsd.edu).
 
-[Download](#download)
-
-[Install](#install)
-
-[Usage](#usage)
-
-[File formats](#formats)
-
-[References](#references)
-
-[Citation](#citation)
-
+[Download](#download) | [Install](#install) | [Usage](#usage) | [File formats](#formats) | [References](#references)
 
 <a name="download"></a>
 ## Download
@@ -125,5 +114,3 @@ The following lists available references created using Tandem Repeats Finder. We
 | hs38 | ver8 | [hg37_ver8.bed.gz](https://s3.amazonaws.com/gangstr/hs37_ver8.bed.gz) |
 
 
-<a name="citation"></a>
-## Citing GangSTR
