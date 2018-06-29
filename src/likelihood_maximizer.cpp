@@ -631,10 +631,8 @@ bool nlopt_2D_optimize(const int32_t& read_len, const int32_t& motif_len,
   ub[1] = upper_bound;
   opt.set_upper_bounds(ub);
 
-
-  nlopt_data data[1] = nlopt_data(read_len, motif_len, ref_count, lm_ptr, 0, resampled);
-
-  opt.set_min_objective(nloptNegLikelihood, data);    // Change to max for maximization
+  nlopt_data data = nlopt_data(read_len, motif_len, ref_count, lm_ptr, 0, resampled);
+  opt.set_min_objective(nloptNegLikelihood, &data);    // Change to max for maximization
 
   opt.set_xtol_rel(.00005);   // TODO set something appropriate
 
@@ -682,9 +680,8 @@ bool nlopt_1D_optimize(const int32_t& read_len, const int32_t& motif_len,
   ub[0] = upper_bound;
   opt.set_upper_bounds(ub);
 
-  nlopt_data data[1] = nlopt_data(read_len, motif_len, ref_count, lm_ptr, fix_allele, resampled);
-  
-  opt.set_min_objective(nloptNegLikelihood, data);    // Change to max for maximization
+  nlopt_data data = nlopt_data(read_len, motif_len, ref_count, lm_ptr, fix_allele, resampled);
+  opt.set_min_objective(nloptNegLikelihood, &data);    // Change to max for maximization
 
   opt.set_xtol_rel(.0005);   // TODO set something appropriate
 

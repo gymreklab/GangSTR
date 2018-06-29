@@ -3,7 +3,7 @@
 #include <sstream>
 
 #include "bam_io.h"
-#include "error.h"
+//#include "error.h"
 #include "stringops.h"
 
 void BamAlignment::ExtractSequenceFields(){

@@ -38,7 +38,7 @@ A required program '$PROG' was not found.
 To run this script, the following programs are needed:
    wget
    A C++ compiler
-   -kg-config
+   pkg-config
 You additionally must have an internet connection
 ---
 "
