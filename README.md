@@ -29,50 +29,36 @@ For a list of previous releases and changelog see the [releases page](https://gi
 For a list of TR references available, see [references](#references) below. 
 
 <a name="install"></a>
-## Install
 
-The steps below walk through installing required dependencies and compiling and installing `GangSTR`. GangSTR requires third party packages [nlopt](https://nlopt.readthedocs.io/en/latest/), [gsl](https://www.gnu.org/software/gsl/doc/html/index.html), and [htslib](http://www.htslib.org//). 
+## Basic Install
 
-**Note, you need to set the `--prefix` argument if you are installing locally without root access. You may set the prefix to anywhere you have write permissions.** 
+GangSTR requires third party packages [nlopt](https://nlopt.readthedocs.io/en/latest/), [gsl](https://www.gnu.org/software/gsl/doc/html/index.html), and [htslib](http://www.htslib.org//). The built-in script `install-gangstr.sh` installs these for you.
 
+If you are running as root:
 ```
-# Install GSL 
-wget ftp://ftp.gnu.org/gnu/gsl/gsl-2.5.tar.gz
-tar -xzvf gsl-2.5.tar.gz
-cd gsl-2.5/
-./configure --prefix=/home/<username>
-make
-make install 
-
-# Install NLOPT 
-wget http://ab-initio.mit.edu/nlopt/nlopt-2.4.2.tar.gz
-tar -xzvf nlopt-2.4.2.tar.gz
-cd nlopt-2.4.2
-./configure --prefix=/home/<username>
-make
-make install 
-
-# Install HTSLIB 
-wget https://github.com/samtools/htslib/releases/download/1.8/htslib-1.8.tar.bz2
-tar -xjvf htslib-1.8.tar.bz2
-cd htslib-1.8/
-./configure --prefix=/home/<username>
-make
-make install 
-
-# May need to update PKG_CONFIG_PATH if you are installing locally
-export PKG_CONFIG_PATH=/home/<username>/lib/pkgconfig
-
-# Install GangSTR
-wget https://github.com/gymreklab/GangSTR/releases/download/v1.2/GangSTR-1.2.tar.gz
 tar -xzvf GangSTR-1.2.tar.gz
 cd GangSTR-1.2
-./configure --prefix=/home/<username>
-make
-make install 
+sudo ./install-gangstr.sh
 ```
 
-`GangSTR` will be installed to `$PREFIX/bin/GangSTR`. 
+If you are installing locally (e.g. on a cluster where you don't have root access):
+```
+tar -xzvf GangSTR-1.2.tar.gz
+cd GangSTR-1.2
+./install-gangstr.sh PREFIX
+```
+
+where `PREFIX` is a place you have write permissions. In most cases this will be your home directory, e.g. `/home/<username>`.
+
+Alternatively, if you already have the dependencies installed you may simply do:
+```
+cd GangSTR-1.2
+./configure [--prefix=/home/<username>]
+make
+make install
+```
+
+Typing `GangSTR --help` should show a help message if GangSTR was successfully installed.
 
 <a name="usage"></a>
 ## Usage
