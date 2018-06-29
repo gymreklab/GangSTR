@@ -83,6 +83,11 @@ else
     export PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig
 fi
 
+# Check that prefix exists
+if [ ! -d "$PREFIX" ]; then
+    die "Directory $PREFIX does not exist. Try running: ./install-gangstr.sh $HOME"
+fi
+
 echo "[install-deps.sh] Compiling GangSTR+dependencies with prefix=$PREFIX"
 
 mkdir -p dependences || die "Could not make dependencies directory"
