@@ -22,7 +22,7 @@ For questions on installation or usage, please open an issue, submit a pull requ
 <a name="download"></a>
 ## Download
 
-The latest GangSTR release is [GangSTR-1.2](https://github.com/gymreklab/GangSTR/releases/download/v1.2/GangSTR-1.2.tar.gz).
+The latest GangSTR release is GangSTR-1.3. Download [GangSTR-1.3.4-a49a.tar.gz](https://github.com/gymreklab/GangSTR/releases/download/test/GangSTR-1.3.4-a49a.tar.gz).
 
 For a list of previous releases and changelog see the [releases page](https://github.com/gymreklab/GangSTR/releases).
 
