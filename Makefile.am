@@ -18,6 +18,7 @@
 
 EXTRA_DIST = reconf configure \
 	config/git-version-gen \
+	install-gangstr.sh \
 	$(top_srcdir)/.version
 
 SUBDIRS = m4 src
