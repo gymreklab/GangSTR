@@ -127,6 +127,12 @@ cd ../../
 make || die "Error compiling GangSTR"
 make install || die "Error installing GangSTR"
 
-echo "[install-deps.sh] Success! Type GangSTR --help to make sure GangSTR is installed"
+echo ""
+echo ""
+echo ""
+echo ""
+echo "[install-deps.sh] Success! GangSTR installed in $PREFIX/bin/"
+echo "[install-deps.sh] Type GangSTR --help to make sure GangSTR is installed"
+echo "[install-deps.sh] Be sure to ensure $PREFIX/bin is on your PATH"
 
 exit 0
