@@ -36,19 +36,19 @@ GangSTR requires third party packages [nlopt](https://nlopt.readthedocs.io/en/la
 
 If you are running as root:
 ```
-tar -xzvf GangSTR-1.2.tar.gz
-cd GangSTR-1.2
+tar -xzvf GangSTR-X.X.tar.gz
+cd GangSTR-X.X
 sudo ./install-gangstr.sh
 ```
 
 If you are installing locally (e.g. on a cluster where you don't have root access):
 ```
-tar -xzvf GangSTR-1.2.tar.gz
-cd GangSTR-1.2
+tar -xzvf GangSTR-X.X.tar.gz
+cd GangSTR-X.X
 ./install-gangstr.sh PREFIX
 ```
 
-where `PREFIX` is a place you have write permissions. In most cases this will be your home directory, e.g. `/home/<username>`.
+where `PREFIX` is a place you have write permissions. In most cases this will be your home directory, e.g. `$HOME`.
 
 Typing `GangSTR --help` should show a help message if GangSTR was successfully installed.
 
