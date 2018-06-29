@@ -21,7 +21,7 @@ For a list of TR references available, see [references](#references) below.
 
 ## Basic Install
 
-GangSTR requires third party packages [nlopt](https://nlopt.readthedocs.io/en/latest/), [gsl](https://www.gnu.org/software/gsl/doc/html/index.html), and [htslib](http://www.htslib.org//). The built-in script `install-gangstr.sh` installs these for you before compiling and installing GangSTR.
+GangSTR requires third party packages [nlopt](https://nlopt.readthedocs.io/en/latest/), [gsl](https://www.gnu.org/software/gsl/doc/html/index.html), and [htslib](http://www.htslib.org//). The built-in script `install-gangstr.sh` installs these for you before compiling and installing GangSTR. Both UNIX and Mac OSX are supported.
 
 If you are running as root:
 ```
