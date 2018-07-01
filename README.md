@@ -1,3 +1,5 @@
+# **UNDER CONSTRUCTION** OFFICIAL GANGSTR RELEASE COMING SOON
+
 # GangSTR
 
 GangSTR is a tool for genome-wide profiling tandem repeats from short reads. A key advantage of GangSTR over existing tools (e.g. [lobSTR](https://github.com/mgymrek/lobstr-code) or [hipSTR](https://github.com/tfwillems/HipSTR)) is that it can handle repeats that are longer than the read length.
