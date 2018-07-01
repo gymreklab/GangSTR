@@ -428,7 +428,7 @@ bool LikelihoodMaximizer::OptimizeLikelihood(const int32_t& read_len,
   int32_t upper_bound = 600; // TODO Change 200 for number depending the parameters
   int32_t lower_bound_1d, lower_bound_2d;
   
-  
+  /*
   if (!resampled){
     double res;
     int fix = 40;
@@ -437,8 +437,7 @@ bool LikelihoodMaximizer::OptimizeLikelihood(const int32_t& read_len,
       cerr << ii << ", "<< fix <<" ->\t" << res << endl;
     } 
   }
-  //return false;
-  
+  */
 
   lower_bound_1d = 1;
   lower_bound_2d = 1;
