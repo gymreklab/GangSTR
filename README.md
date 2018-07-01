@@ -115,6 +115,5 @@ The following lists available references created using Tandem Repeats Finder. We
 | hg19* | ver9 | [hg19_ver9.bed.gz](https://s3.amazonaws.com/gangstr/hg19_ver9.bed.gz) |
 | hs38* | ver8 | [hg37_ver8.bed.gz](https://s3.amazonaws.com/gangstr/hs37_ver8.bed.gz) |
 | hg19 | ver8 | [hg19_ver8.bed.gz](https://s3.amazonaws.com/gangstr/hg19_ver8.bed.gz) |
-| hs37 | ver10 | [hg37_ver8.bed.gz](https://s3.amazonaws.com/gangstr/hs37_ver10.bed.gz) |
 
 
