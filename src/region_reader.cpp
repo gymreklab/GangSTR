@@ -42,14 +42,20 @@ RegionReader::RegionReader(const std::string& filename) {
  */
 bool RegionReader::GetNextRegion(Locus* locus) {
   std::string line;
-  std::vector<std::string> items;
+  std::vector<std::string> items, offtarget_regions;
+  std::string offtarget_str;
   bool stat;
   if (!std::getline(*freader, line)) {
     return false;
   }
   split_by_delim(line, '\t', items);
+  
   if (items.size() < 5) {
     PrintMessageDieOnError("Regions file not formatted correctly", M_ERROR);
+  }
+  else if (items.size() == 6){
+    offtarget_str = items[5];
+    split_by_delim(offtarget_str, ',', offtarget_regions);
   }
   locus->chrom = items[0];
   locus->start = atoi(items[1].c_str());
@@ -57,20 +63,22 @@ bool RegionReader::GetNextRegion(Locus* locus) {
   locus->period = atoi(items[3].c_str());
   locus->motif = items[4];
   std::transform(locus->motif.begin(), locus->motif.end(), locus->motif.begin(), ::tolower);
-  stat = std::getline(*freader, line);
-  while (stat && line != "**"){
-    items.clear();
-    split_by_delim(line, '\t', items);
-    if (items.size() < 3){
-      PrintMessageDieOnError("Off-target regions not formatted correctly", M_ERROR);
-    }
-    locus->offtarget_set = true;
-    GenomeRegion offtarget;
-    offtarget.chrom = items[0];
-    offtarget.start = atoi(items[1].c_str());
-    offtarget.end = atoi(items[2].c_str());
-    locus->offtarget_regions.push_back(offtarget);
-    stat = std::getline(*freader, line);
+  if (offtarget_regions.size() >= 1){
+    for (int off_idx = 0; off_idx < offtarget_regions.size(); off_idx++)
+      {
+	std::string region = offtarget_regions[off_idx];
+	int pos_col = region.find(':');
+	int pos_dash = region.find('-');
+	if (pos_col == -1 or pos_dash == -1)
+	  continue;
+	locus->offtarget_set = true;
+	GenomeRegion offtarget;
+	offtarget.chrom = region.substr(0, pos_col);
+	offtarget.start = atoi(region.substr(pos_col + 1,\
+					     pos_dash - pos_col - 1).c_str());
+	offtarget.end = atoi(region.substr(pos_dash + 1).c_str());
+	locus->offtarget_regions.push_back(offtarget);
+      }
   }
   return true;
 }

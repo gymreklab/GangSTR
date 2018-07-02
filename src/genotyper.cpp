@@ -134,9 +134,20 @@ bool Genotyper::ProcessLocus(BamCramMultiReader* bamreader, Locus* locus) {
 	locus->hib1 = hib1;
 	locus->hib2 = hib2;
 	
-	cerr<<">>Genotyper Results:\t"<<allele1<<", "<<allele2<<"\tlikelihood = "<<min_negLike<<"\n";
-	cerr<<"@@Small Allele Bound:\t["<<lob1<<", "<<hib1<<"]\n";
-	cerr<<"@@Large Allele Bound:\t["<<lob2<<", "<<hib2<<"]\n";
+
+	stringstream msg;
+	msg<<"\tGenotyper Results:  "<<allele1<<", "<<allele2<<"\tlikelihood = "<<min_negLike;
+	PrintMessageDieOnError(msg.str(), M_PROGRESS);
+	if (options->verbose) {
+	  msg.clear();
+	  msg.str(std::string());
+	  msg<<"\tSmall Allele Bound: ["<<lob1<<", "<<hib1<<"]";
+	  PrintMessageDieOnError(msg.str(), M_PROGRESS);
+	  msg.clear();
+	  msg.str(std::string());
+	  msg<<"\tLarge Allele Bound: ["<<lob2<<", "<<hib2<<"]";
+	  PrintMessageDieOnError(msg.str(), M_PROGRESS);
+	}
       }
       catch (std::exception &exc){
 	if (options->verbose) {
