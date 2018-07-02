@@ -58,21 +58,18 @@ GangSTR requires a [BAM](https://samtools.github.io/hts-specs/SAMv1.pdf) file pr
 You must input a reference genome in FASTA format. This must be the same reference build used to align the sequences in the BAM file.
 
 ### TR regions (`--regions`)
-GangSTR requires a reference set of regions to genotype. This is a BED-like file with the following required columns:
+GangSTR requires a reference set of regions to genotype. This is a BED-like file with the following columns:
 
 1. The name of the chromosome on which the STR is located
 2. The start position of the STR on its chromosome
 3. The end position of the STR on its chromosome
 4. The motif length
 5. The repeat motif
-6. The sequence of the repeat region in the reference genome
-
-Lines beginning with `*` in the reference are ignored.
 
 Below is an example file which contains 5 TR loci. Standard references for hg19 and GRCh38 can be obtained [below](#references).
 **NOTE: The table header is for descriptive purposes. The BED file should not have a header**
 
-| **CHROM** | **START** | **END** | **MOTIF_LEN** | **MOTIF** | **REFSEQ** |
+| **CHROM** | **START** | **END** | **MOTIF_LEN** | **MOTIF** | **OFFTARGET** |
 |-----------|-----------|---------|----------------|----------|------------|
 |chr1	|10689	|10700|	5	|CGCGC|	CGCGCCGCGCCG|
 | chr1  |  28589  | 28603  | 1 |      T    |   TTTTTTTTTTTTTTT|
