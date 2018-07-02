@@ -66,16 +66,18 @@ GangSTR requires a reference set of regions to genotype. This is a BED-like file
 4. The motif length
 5. The repeat motif
 
+An optional 6th column may contain a comma-separated list of off-target regions for each TR. These are regions where misaligned reads for a given TR may be incorrectly mapped.
+
 Below is an example file which contains 5 TR loci. Standard references for hg19 and GRCh38 can be obtained [below](#references).
 **NOTE: The table header is for descriptive purposes. The BED file should not have a header**
 
-| **CHROM** | **START** | **END** | **MOTIF_LEN** | **MOTIF** | **OFFTARGET** |
+| **CHROM** | **START** | **END** | **MOTIF_LEN** | **MOTIF** | **OFFTARGET (optional)** |
 |-----------|-----------|---------|----------------|----------|------------|
-|chr1	|10689	|10700|	5	|CGCGC|	CGCGCCGCGCCG|
-| chr1  |  28589  | 28603  | 1 |      T    |   TTTTTTTTTTTTTTT|
-|chr4  |  11173|   11194  | 11   |   CGCCGGCGCGG |    CGCCGGCGCGGCGCCGGGGCGG|
-|chr4   | 150889 | 150909 | 2    |   TG      |TGTGTGTGTGTGTGTGTGTGT|
-|chr20  | 72993 |  73011|   5   |    TACTA  | TACTACAATATACTATACT|
+|chr1	|10689	|10700|	5	|CGCGC|	|
+| chr1  |  28589  | 28603  | 1 |      T    |   |
+|chr4  |  11173|   11194  | 11   |   CGCCGGCGCGG |    |
+|chr4   | 150889 | 150909 | 2    |   TG      ||
+| chr19 | 45770205 | 45770264	| 3	| CAG	|chr2:163338502-163338506,chr3:197333949-197333955,chr6:16327632-16327646,chr6:170561926-170561931,chr7:122288209-122288215,chr8:133055822-133055827,chr11:28310883-28310888,chr17:4887671-4887677,chr18:55586148-55586165,chr19:13207866-13207871 |
 
 ### VCF (output)
 For more information on VCF file format, see the [VCF spec](http://samtools.github.io/hts-specs/VCFv4.2.pdf). In addition to standard VCF fields, GangSTR adds custom fields described below.
