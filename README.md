@@ -115,3 +115,19 @@ The following lists available references created using Tandem Repeats Finder. We
 | hs37 | ver8 | [hs37_ver8.bed.gz](https://s3.amazonaws.com/gangstr/hs37_ver8.bed.gz) |
 | hg38 | ver5 | [hg38_ver5.bed.gz](https://s3.amazonaws.com/gangstr/hg38_ver5.bed.gz) |
 
+The references below contain pre-defined off-target loci for target pathogenic loci (hg38 coordinates):
+
+| **Locus** | **Link** |
+| ------| ------|
+| SCA1 | [SCA1_hg38.bed](https://s3.amazonaws.com/gangstr/SCA1_hg38.bed) |
+| SCA2 | [SCA2_hg38.bed](https://s3.amazonaws.com/gangstr/SCA2_hg38.bed) |
+| SCA3 | [SCA3_hg38.bed](https://s3.amazonaws.com/gangstr/SCA3_hg38.bed) |
+| SCA6 | [SCA6_hg38.bed](https://s3.amazonaws.com/gangstr/SCA6_hg38.bed) |
+| SCA7 | [SCA7_hg38.bed](https://s3.amazonaws.com/gangstr/SCA7_hg38.bed) |
+| SCA8 | [SCA8_hg38.bed](https://s3.amazonaws.com/gangstr/SCA8_hg38.bed) |
+| SCA12 | [SCA12_hg38.bed](https://s3.amazonaws.com/gangstr/SCA12_hg38.bed) |
+| SCA17 | [SCA17_hg38.bed](https://s3.amazonaws.com/gangstr/SCA17_hg38.bed) |
+| HTT | [HTT_hg38.bed](https://s3.amazonaws.com/gangstr/HTT_hg38.bed) |
+| DM1 | [DM1_hg38.bed](https://s3.amazonaws.com/gangstr/DM1_hg38.bed) |
+
+
