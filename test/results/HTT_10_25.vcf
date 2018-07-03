@@ -1,0 +1,14 @@
+##fileformat=VCFv4.1
+##command=GangSTR-1.2.32-e13aa --bam alignment/nc30_15.sorted.bam --ref /storage/nmmsv/ref_genome/GRCh38_full_analysis_set_plus_decoy_hla.fa --regions HTT.bed --out results/HTT_10_25 --coverage 50 --useofftarget --output-readinfo --verbose
+##INFO=<ID=END,Number=1,Type=Integer,Description="End position of variant">
+##INFO=<ID=RU,Number=1,Type=String,Description="Repeat motif">
+##INFO=<ID=REF,Number=1,Type=Float,Description="Reference copy number">
+##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
+##FORMAT=<ID=DP,Number=1,Type=Integer,Description="Read Depth">
+##FORMAT=<ID=GB,Number=1,Type=String,Description="Genotype given in bp difference from reference">
+##FORMAT=<ID=CI,Number=1,Type=String,Description="Confidence intervals">
+##FORMAT=<ID=RC,Number=1,Type=String,Description="Number of reads in each class (enclosing, spanning, FRR, bounding">
+##FORMAT=<ID=Q,Number=1,Type=Float,Description="Min. negative likelihood">
+##FORMAT=<ID=INS,Number=1,Type=String,Description="Insert size mean and stddev">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	sample
+chr4	3074877	.	cagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcag	cagcagcagcagcagcagcagcagcagcagcagcagcagcagcag,cagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcag	.	.	END=3074933;RU=cag;REF=19	GT:DP:GB:CI:RC:Q:INS	1/2:145:15,29:15-15,25-30:11,97,0,36:8.15534:496.137,100.673
