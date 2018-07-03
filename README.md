@@ -11,9 +11,7 @@ For questions on installation or usage, please open an issue, submit a pull requ
 <a name="download"></a>
 ## Download
 
-The latest GangSTR release is GangSTR-1.3. Download [GangSTR-1.3.4-a49a.tar.gz](https://github.com/gymreklab/GangSTR/releases/download/test/GangSTR-1.3.4-a49a.tar.gz).
-
-For a list of previous releases and changelog see the [releases page](https://github.com/gymreklab/GangSTR/releases).
+The latest GangSTR release is available on the [releases page](https://github.com/gymreklab/GangSTR/releases).
 
 For a list of TR references available, see [references](#references) below. 
 
@@ -60,7 +58,7 @@ Additional general options:
 * **--genomewide** Run GangSTR in genome-wide mode. This mode has more stringent filtering steps to prevent false positive in genome-wide profiling.
 
 Options for different sequencing settings
-* **--readlength** \<int\>** Preset read length (default: extract from alignments if not provided)
+* **--readlength \<int\>** Preset read length (default: extract from alignments if not provided)
 * **--coverage \<float\>** Preset average coverage, should be set for targeted data (default: calculate if not provided)
 * **--nonuniform** Indicates non-uniform coverage in alignment file (i.e., used for exome sequencing). Using this flag removes the likelihood term corresponding to FRR count.
 
