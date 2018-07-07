@@ -4,6 +4,8 @@ GangSTR is a tool for genome-wide profiling tandem repeats from short reads. A k
 
 GangSTR takes aligned reads (BAM) and a set of repeats in the reference genome as input and outputs a VCF file containing genotypes for each locus.
 
+**bioRxiv preprint** manuscript: https://www.biorxiv.org/content/early/2018/07/03/361162
+
 For questions on installation or usage, please open an issue, submit a pull request, or contact Nima Mousavi (mousavi@ucsd.edu).
 
 [Download](#download) | [Install](#install) | [Usage](#usage) | [File formats](#formats) | [References](#references)
