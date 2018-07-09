@@ -35,7 +35,9 @@ cd GangSTR-X.X
 ./install-gangstr.sh PREFIX
 ```
 
+
 where `PREFIX` is a place you have write permissions. In most cases this will be your home directory, e.g. `$HOME`. If you install locally, make sure `$PREFIX/bin` is on your `PATH`.
+
 
 Typing `GangSTR --help` should show a help message if GangSTR was successfully installed.
 
