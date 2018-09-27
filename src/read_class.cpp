@@ -41,10 +41,22 @@ void ReadClass::SetOptions(const Options& options) {
   stutter_down = options.stutter_down;
   stutter_p = options.stutter_p;
   read_prob_mode = options.read_prob_mode;
+  dist_distribution_size = options.dist_distribution_size;
+  dist_pdf = options.dist_pdf;
+  dist_cdf = options.dist_cdf;
 }
 
 void ReadClass::AddData(const int32_t& data) {
   read_class_data_.push_back(data);
+}
+
+double ReadClass::InsertSizeCDF(int32_t x){
+  // Gaussian
+  return gsl_cdf_gaussian_P(x - dist_mean, dist_sdev);
+}
+double ReadClass::InsertSizePDF(int32_t x){
+  // Gaussian
+  return gsl_ran_gaussian_pdf(x - dist_mean, dist_sdev);
 }
 
 /*

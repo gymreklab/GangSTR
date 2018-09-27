@@ -26,6 +26,10 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 #include <stdint.h>
 
 #include <vector>
+#include <gsl/gsl_math.h>
+#include <gsl/gsl_rng.h>
+#include <gsl/gsl_randist.h>
+#include <gsl/gsl_cdf.h>
 
 /*
 
@@ -59,7 +63,9 @@ class ReadClass {
   void Reset();
   // Check how many data points
   std::size_t GetDataSize();
-
+  // Get PDF and CDF values of insert size distribution:
+  double InsertSizeCDF(int32_t x);
+  double InsertSizePDF(int32_t x);
  protected:
   // Calculate log probability P(datapoint | allele)
   bool GetAlleleLogLikelihood(const int32_t& allele, const int32_t& data,
@@ -75,6 +81,11 @@ class ReadClass {
   double stutter_down;
   double stutter_p;
   bool read_prob_mode;
+  // pdf and CDF of non-parametric model for insert size
+  int32_t dist_distribution_size;
+  double* dist_pdf;
+  double* dist_cdf;
+  
   // Store vector of data for this class
   std::vector<int32_t> read_class_data_;
   

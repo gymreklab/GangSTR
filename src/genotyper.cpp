@@ -75,6 +75,7 @@ bool Genotyper::ProcessLocus(BamCramMultiReader* bamreader, Locus* locus) {
   locus->spanning_reads = likelihood_maximizer->GetSpanningDataSize();
   locus->frr_reads = likelihood_maximizer->GetFRRDataSize();
   locus->flanking_reads = likelihood_maximizer->GetFlankingDataSize();
+  // Temporary: This filtering step is ignored for implementing new insert size distribution model
   // Set flags if only spanning reads available.
   if (locus->frr_reads + locus->flanking_reads + locus->enclosing_reads < 4){
     if (options->verbose) {
@@ -83,10 +84,10 @@ bool Genotyper::ProcessLocus(BamCramMultiReader* bamreader, Locus* locus) {
 	 <<", Spanning: "<<locus->spanning_reads
 	 <<", FRR: "<<locus->frr_reads
 	 <<", Flanking: "<<locus->flanking_reads
-	 <<". Skipping locus";
+	 <<". Skipping locus (Temporarily ignored, going forward with genotyping)";
       PrintMessageDieOnError(msg.str(), M_PROGRESS);
     }
-    return false;
+    //return false;
   }
 
   // Maximize the likelihood
