@@ -45,6 +45,13 @@ Options::Options() {
   outprefix = "";
   dist_mean = -1;
   dist_sdev = -1;
+  dist_distribution_size = 2000;
+  dist_pdf = new double[dist_distribution_size];
+  dist_cdf = new double[dist_distribution_size];
+  for (int i = 0; i < dist_distribution_size; i++){
+    dist_pdf[i] = 0;
+    dist_cdf[i] = 0;
+  }
   coverage = -1;
   read_len = -1;
   dist_max = -1;

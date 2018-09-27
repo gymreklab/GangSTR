@@ -73,10 +73,12 @@ bool BamInfoExtract::GetReadLen(int32_t* read_len){
 	return found_read_len;
 }
 
-bool BamInfoExtract::GetInsertSizeDistribution(double* mean, double* std_dev, double* coverage){
+bool BamInfoExtract::GetInsertSizeDistribution(double* mean, double* std_dev, double* coverage,
+					       double* dist_pdf, double* dist_cdf){
 	// TODO change 200000 flank size to something appropriate
 	int32_t flank_size = 400000;
 	int32_t exclusion_margin = 1000;
+	int32_t distrib_size = options->dist_distribution_size;
 	bool found_ins_distribution = false, found_coverage = false;
 	double mean_b, mean_a, std_b, std_a; // mean and std dev, before and after locus
 	int* valid_temp_len_arr;
@@ -137,8 +139,20 @@ bool BamInfoExtract::GetInsertSizeDistribution(double* mean, double* std_dev, do
 			  if(*temp_it < 4 * median and *temp_it > 0){
 					valid_temp_len_vec.push_back(*temp_it);
 					valid_size++;  
+					// Updating pdf
+					if (*temp_it < distrib_size and *temp_it > 0){
+					  dist_pdf[*temp_it]++;
+					}
 				}
 			}
+			double cumulative = 0.0;
+			for (int i = 0; i < distrib_size; i++){
+			  dist_pdf[i] = dist_pdf[i] / valid_size;
+			  cumulative += dist_pdf[i];
+			  dist_cdf[i] = cumulative;
+			}
+			dist_cdf[distrib_size - 1] = 1.0;
+		
 			valid_temp_len_arr = &valid_temp_len_vec[0];
 			*mean = gsl_stats_int_mean(valid_temp_len_arr, 1, valid_size - 1);
 			*std_dev = gsl_stats_int_sd_m (valid_temp_len_arr,  1, valid_size, *mean);			
