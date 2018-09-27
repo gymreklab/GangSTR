@@ -40,8 +40,9 @@ bool FRRClass::GetLogClassProb(const int32_t& allele,
 		return true;
 	}
 	// Compute normalization constant norm_const
-	double norm_const = gsl_cdf_gaussian_P(2 * flank_len + str_len - dist_mean, dist_sdev) -
-						gsl_cdf_gaussian_P(2 * read_len - dist_mean, dist_sdev); 
+	//	double norm_const = gsl_cdf_gaussian_P(2 * flank_len + str_len - dist_mean, dist_sdev) -
+	//						gsl_cdf_gaussian_P(2 * read_len - dist_mean, dist_sdev); 
+	double norm_const = InsertSizeCDF(2 * flank_len + str_len) - InsertSizeCDF(2 * read_len); 
 	if (norm_const == 0 or
 	    (2.0 * flank_len + str_len - 2.0 * read_len) == 0){
 	  cerr << "FRRClassProb::Divide by Zero prevented!" << endl;
@@ -50,14 +51,17 @@ bool FRRClass::GetLogClassProb(const int32_t& allele,
 	}
 	double coef0 = 1.0 / norm_const / (2.0 * flank_len + str_len - 2.0 * read_len);
 	double coef1 = - double(dist_sdev ^ 2);
-	double term1 = gsl_ran_gaussian_pdf(str_len - dist_mean, dist_sdev) -
-					gsl_ran_gaussian_pdf(2 * read_len - dist_mean, dist_sdev);
+	//	double term1 = gsl_ran_gaussian_pdf(str_len - dist_mean, dist_sdev) -
+	//					gsl_ran_gaussian_pdf(2 * read_len - dist_mean, dist_sdev);
+	double term1 = InsertSizePDF(str_len) -	InsertSizePDF(2 * read_len);
 	double coef2 = dist_mean - read_len;
-	double term2 = gsl_cdf_gaussian_P(str_len - dist_mean, dist_sdev) - 
-					gsl_cdf_gaussian_P(2 * read_len - dist_mean, dist_sdev);
+	//	double term2 = gsl_cdf_gaussian_P(str_len - dist_mean, dist_sdev) - 
+	//				gsl_cdf_gaussian_P(2 * read_len - dist_mean, dist_sdev);
+	double term2 = InsertSizeCDF(str_len) - InsertSizeCDF(2 * read_len);
 	double coef3 = str_len - read_len;
-	double term3 = gsl_cdf_gaussian_P(2 * flank_len + str_len - dist_mean, dist_sdev) - 
-					gsl_cdf_gaussian_P(str_len - dist_mean, dist_sdev);
+	//double term3 = gsl_cdf_gaussian_P(2 * flank_len + str_len - dist_mean, dist_sdev) - 
+	//				gsl_cdf_gaussian_P(str_len - dist_mean, dist_sdev);
+	double term3 = InsertSizeCDF(2 * flank_len + str_len) - InsertSizeCDF(str_len);
 	double class_prob;
 	if (str_len >= 2 * read_len)
 		class_prob = coef0 * (coef1 * term1 + coef2 * term2 + coef3 * term3);
@@ -90,11 +94,13 @@ bool FRRClass::GetLogReadProb(const int32_t& allele,
 	}
 
 	// Compute normalization constant norm_const
-	double norm_const = gsl_cdf_gaussian_P(2 * flank_len + str_len - dist_mean, dist_sdev) -
-						gsl_cdf_gaussian_P(2 * read_len - dist_mean, dist_sdev); 
+	//double norm_const = gsl_cdf_gaussian_P(2 * flank_len + str_len - dist_mean, dist_sdev) -
+	//					gsl_cdf_gaussian_P(2 * read_len - dist_mean, dist_sdev); 
+	double norm_const = InsertSizeCDF(2 * flank_len + str_len) - InsertSizeCDF(2 * read_len); 
 
-	double term1 = gsl_cdf_gaussian_P(read_len + data + str_len - dist_mean, dist_sdev) - 
-			gsl_cdf_gaussian_P(2 * read_len + data - dist_mean, dist_sdev);
+	//double term1 = gsl_cdf_gaussian_P(read_len + data + str_len - dist_mean, dist_sdev) - 
+	//		gsl_cdf_gaussian_P(2 * read_len + data - dist_mean, dist_sdev);
+	double term1 = InsertSizeCDF(read_len + data + str_len) - InsertSizeCDF(2 * read_len + data);
 	if (norm_const == 0){
 	  *log_allele_prob = NEG_INF;
 	  return true;
