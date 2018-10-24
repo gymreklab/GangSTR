@@ -46,7 +46,7 @@ class ReadClass {
   // friend class enclosing_class;
   // friend class FlankingClass;
  public:
-  const static double NEG_INF = -100; // TODO make smaller?
+  const static double NEG_INF = -25; // TODO make smaller?
   ReadClass();
   virtual ~ReadClass();
 

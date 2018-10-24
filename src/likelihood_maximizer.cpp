@@ -298,6 +298,187 @@ std::size_t LikelihoodMaximizer::GetReadPoolSize() {
   return read_pool.size();
 }
 
+bool LikelihoodMaximizer::Getd2dA2NegLikelihood(const int32_t& allele1,
+						const int32_t& allele2,
+						const int32_t& read_len,
+						const int32_t& motif_len,
+						const int32_t& ref_count,
+						const bool& resampled,
+						const int32_t& h,//step is int because alleles are int
+						double* d2dA2){
+  double f1 = 0.0, f2 = 0.0, f3 = 0.0;
+  bool b1 = this -> GetGenotypeNegLogLikelihood(allele1 + h,
+						  allele2,
+						  read_len,
+						  motif_len,
+						  ref_count,
+						  resampled,
+						  &f1);
+  bool b2 = this -> GetGenotypeNegLogLikelihood(allele1,
+						  allele2,
+						  read_len,
+						  motif_len,
+						  ref_count,
+						  resampled,
+						  &f2);
+  bool b3 = this -> GetGenotypeNegLogLikelihood(allele1 - h,
+						  allele2,
+						  read_len,
+						  motif_len,
+						  ref_count,
+						  resampled,
+						  &f3);
+  if (!b1 or !b2 or !b3){
+    *d2dA2 = 0;
+    return false;
+  }
+  else{
+    *d2dA2 = (f1 - 2.0 * f2 + f3) / double(h * h);
+    return true;
+  } 
+}
+bool LikelihoodMaximizer::Getd2dB2NegLikelihood(const int32_t& allele1,
+						const int32_t& allele2,
+						const int32_t& read_len,
+						const int32_t& motif_len,
+						const int32_t& ref_count,
+						const bool& resampled,
+						const int32_t& h,//step is int because alleles are int
+						double* d2dB2){
+  double f1 = 0.0, f2 = 0.0, f3 = 0.0;
+  bool b1 = this -> GetGenotypeNegLogLikelihood(allele1,
+						  allele2 + h,
+						  read_len,
+						  motif_len,
+						  ref_count,
+						  resampled,
+						  &f1);
+  bool b2 = this -> GetGenotypeNegLogLikelihood(allele1,
+						  allele2,
+						  read_len,
+						  motif_len,
+						  ref_count,
+						  resampled,
+						  &f2);
+  bool b3 = this -> GetGenotypeNegLogLikelihood(allele1,
+						  allele2 - h,
+						  read_len,
+						  motif_len,
+						  ref_count,
+						  resampled,
+						  &f3);
+  if (!b1 or !b2 or !b3){
+    *d2dB2 = 0;
+    return false;
+  }
+  else{
+    *d2dB2 = (f1 - 2.0 * f2 + f3) / double(h * h);
+    return true;
+  } 
+}
+bool LikelihoodMaximizer::Getd2dABNegLikelihood(const int32_t& allele1,
+						const int32_t& allele2,
+						const int32_t& read_len,
+						const int32_t& motif_len,
+						const int32_t& ref_count,
+						const bool& resampled,
+						const int32_t& h,//step is int because alleles are int
+						double* d2dAB){
+  double f1 = 0.0, f2 = 0.0, f3 = 0.0, f4 = 0.0;
+  bool b1 = this -> GetGenotypeNegLogLikelihood(allele1 + h,
+						  allele2 + h,
+						  read_len,
+						  motif_len,
+						  ref_count,
+						  resampled,
+						  &f1);
+  bool b2 = this -> GetGenotypeNegLogLikelihood(allele1 + h,
+						  allele2 - h,
+						  read_len,
+						  motif_len,
+						  ref_count,
+						  resampled,
+						  &f2);
+  bool b3 = this -> GetGenotypeNegLogLikelihood(allele1 - h,
+						  allele2 + h,
+						  read_len,
+						  motif_len,
+						  ref_count,
+						  resampled,
+						  &f3);
+  bool b4 = this -> GetGenotypeNegLogLikelihood(allele1 - h,
+						  allele2 - h,
+						  read_len,
+						  motif_len,
+						  ref_count,
+						  resampled,
+						  &f4);
+  if (!b1 or !b2 or !b3 or !b4){
+    *d2dAB = 0;
+    return false;
+  }
+  else{
+    *d2dAB = (f1 - f2 - f3 + f4) / double(4 * h * h);
+    return true;
+  } 
+}
+
+bool LikelihoodMaximizer::GetStandardError(const int32_t& allele1,
+					   const int32_t& allele2,
+					   const int32_t& read_len,
+					   const int32_t& motif_len,
+					   const int32_t& ref_count,
+					   const bool& resampled,
+					   const int32_t& h,//step is int because alleles are int
+					   double* sigmaA,
+					   double* sigmaB,
+					   double* sigmaAB){
+  // Consider Hessian H:
+  // H = |a  b|
+  //     |c  d|
+  // std error matrix = - I^(-1) -> model that with -H^(-1)
+  double a = 0.0, b = 0.0, c = 0.0, d = 0.0;
+  bool flg1 = Getd2dA2NegLikelihood(allele1,
+				    allele2, 
+				    options->read_len,
+				    options->motif_len,
+				    ref_count,
+				    resampled,
+				    h,
+				    &a);  
+  bool flg2 = Getd2dB2NegLikelihood(allele1,
+				    allele2, 
+				    options->read_len,
+				    options->motif_len,
+				    ref_count,
+				    resampled,
+				    h,
+				    &d);
+  bool flg3 = Getd2dABNegLikelihood(allele1,
+				    allele2, 
+				    options->read_len,
+				    options->motif_len,
+				    ref_count,
+				    resampled,
+				    h,
+				    &b);
+  c = b;
+  if (!flg1 or !flg2 or !flg3){
+    *sigmaA = 0.0;
+    *sigmaB = 0.0;
+    *sigmaAB = 0.0;
+    return false;
+  }
+  else{
+    double determinant = 1.0 / (a * d - b * c);
+    *sigmaA = -1.0 * d / determinant;
+    *sigmaB = -1.0 * a / determinant;
+    *sigmaAB = -1.0 * (-b) / determinant;
+    return true;
+  }
+}
+
+
 bool LikelihoodMaximizer::GetGenotypeNegLogLikelihood(const int32_t& allele1,
 						      const int32_t& allele2,
 						      const int32_t& read_len,
@@ -316,7 +497,7 @@ bool LikelihoodMaximizer::GetGenotypeNegLogLikelihood(const int32_t& allele1,
     *gt_ll = frr_class_.NEG_INF;
     return true;
   }
-
+  
   if (!resampled){
     frr_count = frr_class_.GetDataSize();
     read_count = frr_count + enclosing_class_.GetDataSize() +
@@ -351,6 +532,7 @@ bool LikelihoodMaximizer::GetGenotypeNegLogLikelihood(const int32_t& allele1,
 				       &frr_count_ll);
       //cerr << allele1 << ","<< allele2 << "\t"<< frr_count << " " << frr_count_ll << endl; 
     }
+    //    cerr << allele1 << ","<< allele2 << "\t" << flank_ll << endl; 
   }
   else {
     frr_count = resampled_frr_class_.GetDataSize();
@@ -429,10 +611,11 @@ bool LikelihoodMaximizer::OptimizeLikelihood(const int32_t& read_len,
   int32_t lower_bound_1d, lower_bound_2d;
   
   /*
+  // Debugging
   if (!resampled){
     double res;
-    int fix = 40;
-    for (int ii = 40; ii <500 ; ii+=50){
+    int fix = 10;
+    for (int ii = 12; ii <20 ; ii+=3){
       GetGenotypeNegLogLikelihood(ii, fix, read_len, motif_len, ref_count, resampled, &res);
       cerr << ii << ", "<< fix <<" ->\t" << res << endl;
     } 

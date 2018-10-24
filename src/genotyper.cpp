@@ -111,6 +111,7 @@ bool Genotyper::ProcessLocus(BamCramMultiReader* bamreader, Locus* locus) {
 						&min_negLike)) {
       return false;
     }
+
     locus->allele1 = allele1;
     locus->allele2 = allele2;
     locus->min_neg_lik = min_negLike;

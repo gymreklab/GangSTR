@@ -118,6 +118,10 @@ bool BamInfoExtract::GetInsertSizeDistribution(double* mean, double* std_dev, do
 			temp_len_vec.push_back(abs(alignment.TemplateLength()));
 			size++;
 		}
+		int32_t* dist_count = new int32_t[distrib_size];
+		for (int i = 0; i < distrib_size; i++){
+		  dist_count[i] = 0;
+		}
 		// if there's enough reads, compute and return TODO set 300 to a different number...
 		if (temp_len_vec.size() > 300) {
 			if (reads_before > reads_after){
@@ -139,18 +143,32 @@ bool BamInfoExtract::GetInsertSizeDistribution(double* mean, double* std_dev, do
 			  if(*temp_it < 4 * median and *temp_it > 0){
 					valid_temp_len_vec.push_back(*temp_it);
 					valid_size++;  
-					// Updating pdf
+					// Updating 
 					if (*temp_it < distrib_size and *temp_it > 0){
-					  dist_pdf[*temp_it]++;
+					  dist_count[*temp_it]++;
 					}
 				}
 			}
 			double cumulative = 0.0;
-			for (int i = 0; i < distrib_size; i++){
-			  dist_pdf[i] = dist_pdf[i] / valid_size;
+			dist_pdf[0] = double(dist_count[0] + dist_count[1] 
+				       + dist_count[2]) / 5.0 / double(valid_size);
+			cumulative += dist_pdf[0];
+			dist_cdf[0] = cumulative;
+			dist_pdf[1] = double(dist_count[0] + dist_count[1] 
+					     + dist_count[2] + dist_count[3]) / 5.0 / double(valid_size);
+			cumulative += dist_pdf[1];
+			dist_cdf[1] = cumulative;
+			for (int i = 2; i < distrib_size - 2; i++){
+			  dist_pdf[i] = double(dist_count[i - 2] +
+					       dist_count[i - 1] + 
+					       dist_count[i] + 
+					       dist_count[i + 1] + 
+					       dist_count[i + 2]) / 5.0/ double(valid_size);
 			  cumulative += dist_pdf[i];
 			  dist_cdf[i] = cumulative;
+			  //cerr << i << " " << dist_pdf[i] << " " << dist_cdf[i] << endl;
 			}
+			
 			dist_cdf[distrib_size - 1] = 1.0;
 		
 			valid_temp_len_arr = &valid_temp_len_vec[0];

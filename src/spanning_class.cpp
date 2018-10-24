@@ -80,7 +80,7 @@ bool SpanningClass::GetLogClassProb(const int32_t& allele,
 		*log_class_prob = log(class_prob);
 		return true;
 	}
-	else if (class_prob == 0){
+	else if (class_prob <= 0 and class_prob > -1){ // accounting for computational errors ~0
 		*log_class_prob = NEG_INF;
 		return true;
 	}
@@ -101,7 +101,7 @@ bool SpanningClass::GetLogReadProb(const int32_t& allele,
   double allele_prob = 0.0;
 
   // allele_prob = gsl_ran_gaussian_pdf(data - mean_A, dist_sdev);
-  allele_prob = InsertSizePDF(data);
+  allele_prob = InsertSizePDF(data - shift);
   /*
   if (gsl_cdf_gaussian_P(motif_len * allele - mean_A, dist_sdev) < 1.0){
     allele_prob = 1.0 / (1.0 - gsl_cdf_gaussian_P(motif_len * allele - mean_A, dist_sdev)) * gsl_ran_gaussian_pdf(data - mean_A, dist_sdev);
@@ -111,7 +111,7 @@ bool SpanningClass::GetLogReadProb(const int32_t& allele,
   }
   */
 
-  //  cerr << allele_prob << "\t" << gsl_cdf_gaussian_P(motif_len * allele - mean_A, dist_sdev) << endl;  
+  //cerr << allele << "\t" << allele_prob << "\t" << InsertSizeCDF(data - shift) << endl;  
   if (allele_prob > 0){
     *log_allele_prob = log(allele_prob);
     //cerr << allele << " " << data << " " << *log_allele_prob << endl;
@@ -119,6 +119,7 @@ bool SpanningClass::GetLogReadProb(const int32_t& allele,
   }
   else if (allele_prob == 0){
     *log_allele_prob = NEG_INF;
+    //cerr << allele << " " << data << " " << *log_allele_prob << endl;
     return true;
   }
   else

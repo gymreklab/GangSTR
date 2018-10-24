@@ -51,12 +51,34 @@ void ReadClass::AddData(const int32_t& data) {
 }
 
 double ReadClass::InsertSizeCDF(int32_t x){
+  int32_t shifted_x = x - dist_mean;
   // Gaussian
-  return gsl_cdf_gaussian_P(x - dist_mean, dist_sdev);
+  //return gsl_cdf_gaussian_P(shifted_x, dist_sdev);
+  // Non-paramteric
+  if (x < 0){
+    return 0.0;
+  }
+  else if (x > 0 and x < dist_distribution_size){
+    return dist_cdf[x];
+  }
+  else{
+    return 1.0;
+  }
 }
 double ReadClass::InsertSizePDF(int32_t x){
+  int32_t shifted_x = x - dist_mean;
   // Gaussian
-  return gsl_ran_gaussian_pdf(x - dist_mean, dist_sdev);
+  //return gsl_ran_gaussian_pdf(shifted_x, dist_sdev);
+  // Non-paramteric
+  if (x < 0){
+    return 0.0;
+  }
+  else if (x > 0 and x < dist_distribution_size){
+    return dist_pdf[x];
+  }
+  else{
+    return 0.0;
+  }
 }
 
 /*

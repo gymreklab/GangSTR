@@ -82,6 +82,42 @@ class LikelihoodMaximizer {
 				   const int32_t& read_len, const int32_t& motif_len,
 				   const int32_t& ref_count, const bool& resampled,
 				   double* gt_ll);
+  bool Getd2dA2NegLikelihood(const int32_t& allele1,
+			     const int32_t& allele2,
+			     const int32_t& read_len,
+			     const int32_t& motif_len,
+			     const int32_t& ref_count,
+			     const bool& resampled,
+			     const int32_t& h,//step is int because alleles are int
+			     double* d2dA2);
+  bool Getd2dB2NegLikelihood(const int32_t& allele1,
+			     const int32_t& allele2,
+			     const int32_t& read_len,
+			     const int32_t& motif_len,
+			     const int32_t& ref_count,
+			     const bool& resampled,
+			     const int32_t& h,//step is int because alleles are int
+			     double* d2dB2);
+  bool Getd2dABNegLikelihood(const int32_t& allele1,
+			     const int32_t& allele2,
+			     const int32_t& read_len,
+			     const int32_t& motif_len,
+			     const int32_t& ref_count,
+			     const bool& resampled,
+			     const int32_t& h,//step is int because alleles are int
+			     double* d2dAB);
+  
+  bool GetStandardError(const int32_t& allele1,
+			const int32_t& allele2,
+			const int32_t& read_len,
+			const int32_t& motif_len,
+			const int32_t& ref_count,
+			const bool& resampled,
+			const int32_t& h,//step is int because alleles are int
+			double* sigmaA,
+			double* sigmaB,
+			double* sigmaAB);
+
   // Main optimization function - TODO also return other data
   bool OptimizeLikelihood(const int32_t& read_len, 
 			  const int32_t& motif_len,
