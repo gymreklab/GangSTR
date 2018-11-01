@@ -102,7 +102,7 @@ bool expansion_aware_realign(const std::string& seq,
   int32_t prev_score = 0;
   int32_t prev_prev_score = -1;
   std::string template_sub, sequence_sub;
-  MARGIN = 1 * period - 1;
+  MARGIN = 1 * period;
   
   //cerr << min_nCopy << " ";
   for (current_nCopy=min_nCopy; current_nCopy<(int32_t)(read_len/period)+2; current_nCopy++) {
@@ -413,7 +413,6 @@ bool classify_realigned_read(const std::string& seq,
   // Get coords of the STR
   int32_t start_str = prefix_length;
   int32_t end_str = prefix_length + nCopy*(int32_t)motif.size();
-
 
   // Check if read starts in the STR
   bool start_in_str = false;

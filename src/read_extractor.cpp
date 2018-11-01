@@ -653,8 +653,6 @@ bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
 				      ReadType* read_type,
 				      SingleReadType* srt) {
   *srt = SR_UNKNOWN;
-  if (alignment.Name() == "CompMultiLoc_7_cov70_readLen_150_ref_hg38_390_altAllele_5437_5851_1:0:0_3:2:0_426")
-    cerr << ">>WE IN!" << endl;
   /* If mapped read in vicinity but not close to STR, save for later */
   if (!off_target_read &&
       alignment.IsMapped() && alignment.IsMateMapped() &&
@@ -712,6 +710,7 @@ bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
 			       fm_start, fm_end, srt)) {
     return false;
   }
+  
 
   if (*srt == SR_UNKNOWN){
     *nCopy_value = 0;
