@@ -80,6 +80,7 @@ class ReadExtractor {
 			 const int32_t& chrom_ref_id,
 			 const Locus& locus,
 			 const int32_t &min_match,
+			 const bool &off_target_read,
 			 int32_t* data_value,
 			 int32_t* nCopy_value,
 			 int32_t* score_value,

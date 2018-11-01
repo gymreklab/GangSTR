@@ -311,7 +311,7 @@ bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
         ReadType read_type;
         SingleReadType srt;
 
-        ProcessSingleRead(alignment, chrom_ref_id, locus, min_match,
+        ProcessSingleRead(alignment, chrom_ref_id, locus, min_match, false,
               &data_value, &nCopy_value, &score_value, &read_type, &srt);
 	
 
@@ -402,7 +402,7 @@ bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
     ReadType read_type;
     ReadPair read_pair;
     SingleReadType srt;
-    ProcessSingleRead(alignment, chrom_ref_id, locus, min_match,
+    ProcessSingleRead(alignment, chrom_ref_id, locus, min_match, false,
           &data_value, &nCopy_value, &score_value, &read_type, &srt);
 
     read_pair.read_type = read_type;
@@ -443,7 +443,7 @@ bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
     int32_t nCopy_value = 0;
     ReadType read_type;
     SingleReadType srt;
-    ProcessSingleRead(matepair, chrom_ref_id, locus, min_match,
+    ProcessSingleRead(matepair, chrom_ref_id, locus, min_match, false,
           &data_value, &nCopy_value, &score_value, &read_type, &srt);
 
     int32_t read_length = (int32_t)matepair.QueryBases().size();
@@ -534,9 +534,12 @@ bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
 	ReadType read_type;
 	ReadPair read_pair;
 	SingleReadType srt;
-	ProcessSingleRead(alignment, chrom_ref_id, locus, min_match,
+	ProcessSingleRead(alignment, chrom_ref_id, locus, min_match, true,
 			  &data_value, &nCopy_value, &score_value, &read_type, &srt);
-       
+	if (alignment.Name() == "CompMultiLoc_7_cov70_readLen_150_ref_hg38_390_altAllele_5437_5851_1:0:0_3:2:0_426")
+	  cerr << "OFF target baby!" << endl
+	       << alignment.QueryBases() << endl
+	       << srt << "\t" << nCopy_value << "\t" <<score_value << endl;
 	//  Check if read's mate already processed
 	std::map<std::string, ReadPair>::iterator rp_iter = read_pairs->find(aln_key);
 	if (rp_iter->second.found_pair){
@@ -640,18 +643,21 @@ bool ReadExtractor::FindSpanningRead(BamAlignment alignment,
   Return false if something goes wrong
  */
 bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
-              const int32_t& chrom_ref_id,
-              const Locus& locus,
-              const int32_t &min_match,
-              int32_t* data_value,
-              int32_t* nCopy_value,
-              int32_t* score_value,
-              ReadType* read_type,
-              SingleReadType* srt) {
+				      const int32_t& chrom_ref_id,
+				      const Locus& locus,
+				      const int32_t &min_match,
+				      const bool &off_target_read,
+				      int32_t* data_value,
+				      int32_t* nCopy_value,
+				      int32_t* score_value,
+				      ReadType* read_type,
+				      SingleReadType* srt) {
   *srt = SR_UNKNOWN;
-
+  if (alignment.Name() == "CompMultiLoc_7_cov70_readLen_150_ref_hg38_390_altAllele_5437_5851_1:0:0_3:2:0_426")
+    cerr << ">>WE IN!" << endl;
   /* If mapped read in vicinity but not close to STR, save for later */
-  if (alignment.IsMapped() && alignment.IsMateMapped() &&
+  if (!off_target_read &&
+      alignment.IsMapped() && alignment.IsMateMapped() &&
       alignment.RefID() == chrom_ref_id &&
       (alignment.Position() > locus.end || alignment.GetEndPosition() < locus.start) &&
       (alignment.MateRefID() == chrom_ref_id &&
@@ -662,7 +668,6 @@ bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
     return true;
   }
 
-	
   int32_t start_pos, start_pos_rev, pos_frr, end_frr, score_frr, mismatches_frr;
   int32_t end_pos, end_pos_rev;
   int32_t score, score_rev;
