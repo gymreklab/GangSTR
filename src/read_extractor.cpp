@@ -662,14 +662,6 @@ bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
     return true;
   }
 
-  if (alignment.Name() == "CompMultiLoc_7_cov70_readLen_150_ref_hg38_390_altAllele_5622_6308_2:1:0_1:1:0_163")
-    cerr << "In Process read pair:\nsrt:\t\t" << *srt 
-	 <<"\n\tQuery Bases\t\t" << alignment.QueryBases()
-	 <<"\n\tPOS\t\t"<< alignment.Position() 
-	 <<"\n\tlocus.start, locus.end\t" << locus.start << ", " << locus.end
-	 <<"\n\tread type\t\t"<< *read_type<< endl;
-
-
 	
   int32_t start_pos, start_pos_rev, pos_frr, end_frr, score_frr, mismatches_frr;
   int32_t end_pos, end_pos_rev;
@@ -706,6 +698,13 @@ bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
   }
   *nCopy_value = nCopy;
   *score_value = score;
+  if (alignment.Name() == "CompMultiLoc_7_cov70_readLen_150_ref_hg38_390_altAllele_4946_5457_0:0:0_2:0:0_30a")
+    cerr << "In Process read pair:\nsrt:\t\t" << *srt 
+	 <<"\n\tQuery Bases\t\t" << alignment.QueryBases()
+	 <<"\n\tIsMapped\t\t"<< alignment.IsMapped() 
+	 <<"\n\tnCopy, score\t" << nCopy << ", " << score
+	 <<"\n\tseq_rev\t" << seq_rev
+	 <<"\n\tread type\t\t"<< *read_type<< endl;
   
   if (!classify_realigned_read(seq, locus.motif, 
 			       start_pos, end_pos, nCopy, score,
@@ -715,7 +714,6 @@ bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
 			       fm_start, fm_end, srt)) {
     return false;
   }
-
 
   if (*srt == SR_UNKNOWN){
     *nCopy_value = 0;
