@@ -313,9 +313,6 @@ bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
 
         ProcessSingleRead(alignment, chrom_ref_id, locus, min_match,
               &data_value, &nCopy_value, &score_value, &read_type, &srt);
-
- 	if (alignment.Name() == "CompMultiLoc_7_cov70_readLen_150_ref_hg38_390_altAllele_4597_5214_1:0:0_0:0:0_158")
-	  cerr << " YOLO!!!!\n" << alignment.QueryBases() << endl << score_value << "\t" << nCopy_value << "\t" << read_type << endl;
 	
 
         if (debug) {
@@ -390,6 +387,7 @@ bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
       read_pairs->insert(std::pair<std::string, ReadPair>(aln_key, read_pair));
       continue;
     }
+    //firstpass
 
     /* If read is at all close to the STR,
        perform realignment to determine read type 
@@ -398,6 +396,7 @@ bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
     if (debug) {
       std::cerr << "Processing single read" << std::endl;
     }
+    
     int32_t data_value, score_value;
     int32_t nCopy_value = 0;
     ReadType read_type;
@@ -446,6 +445,7 @@ bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
     SingleReadType srt;
     ProcessSingleRead(matepair, chrom_ref_id, locus, min_match,
           &data_value, &nCopy_value, &score_value, &read_type, &srt);
+
     int32_t read_length = (int32_t)matepair.QueryBases().size();
     if (debug) {
       std::cerr << "Processed mate, found " << read_type << " " << data_value << std::endl;
@@ -650,15 +650,26 @@ bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
               SingleReadType* srt) {
   *srt = SR_UNKNOWN;
 
-
   /* If mapped read in vicinity but not close to STR, save for later */
   if (alignment.IsMapped() && alignment.IsMateMapped() &&
       alignment.RefID() == chrom_ref_id &&
-      (alignment.Position() > locus.end || alignment.GetEndPosition() < locus.start)) {
+      (alignment.Position() > locus.end || alignment.GetEndPosition() < locus.start) &&
+      (alignment.MateRefID() == chrom_ref_id &&
+      (alignment.MatePosition() > locus.end + 2 * options.dist_mean || 
+       alignment.MatePosition() < locus.start - 2 * options.dist_mean))) {
     *read_type = RC_UNKNOWN;
     *score_value = 0;
     return true;
   }
+
+  if (alignment.Name() == "CompMultiLoc_7_cov70_readLen_150_ref_hg38_390_altAllele_5622_6308_2:1:0_1:1:0_163")
+    cerr << "In Process read pair:\nsrt:\t\t" << *srt 
+	 <<"\n\tQuery Bases\t\t" << alignment.QueryBases()
+	 <<"\n\tPOS\t\t"<< alignment.Position() 
+	 <<"\n\tlocus.start, locus.end\t" << locus.start << ", " << locus.end
+	 <<"\n\tread type\t\t"<< *read_type<< endl;
+
+
 	
   int32_t start_pos, start_pos_rev, pos_frr, end_frr, score_frr, mismatches_frr;
   int32_t end_pos, end_pos_rev;
@@ -672,7 +683,7 @@ bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
   //cerr << alignment.RefID() << ":" << alignment.Position()
   //     <<"\tMapped:" << alignment.IsMapped()
   //     <<"\tRev: "<<alignment.IsReverseStrand() 
-  //     << "\n" << alignment.QueryBases() << "\n";
+  //     << "\n" << alignment.QueryBases() << "\n"
 
   /* Perform realignment and classification */
   if (!expansion_aware_realign(seq, qual, locus.pre_flank, locus.post_flank, locus.motif, min_match,
@@ -704,12 +715,6 @@ bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
 			       fm_start, fm_end, srt)) {
     return false;
   }
-
-  if (alignment.Name() == "CompMultiLoc_7_cov70_readLen_150_ref_hg38_390_altAllele_4597_5214_1:0:0_0:0:0_158")
-    cerr << "In Process read pair:\nsrt:\t\t" << *srt 
-	 <<"\n\tMate position\t\t" << alignment.MatePosition()
-	 <<"\n\tlocus.start, locus.end\t" << locus.start << ", " << locus.start
-	 <<"\n\tdist.mean\t\t"<< options.dist_mean<< endl;
 
 
   if (*srt == SR_UNKNOWN){
@@ -762,6 +767,7 @@ bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
     }
   }
   */
+
   // Set as UNKNOWN if doesn't pass the score threshold.
   if (score < options.min_score / 100.0 * double(SSW_MATCH_SCORE * options.read_len)){
     *nCopy_value = 0;
