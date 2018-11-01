@@ -423,7 +423,6 @@ bool classify_realigned_read(const std::string& seq,
   if ((end_pos >= start_str-MARGIN) && (end_pos <= end_str+MARGIN)) {
     end_in_str = true;
   }
-
   // Check if perfect flanks exist:
   if (fm_start == FM_COMPLETE && fm_end == FM_COMPLETE){
     *single_read_class = SR_ENCLOSING;
@@ -447,6 +446,8 @@ bool classify_realigned_read(const std::string& seq,
   // Set threshold for match
   int32_t score_threshold = (int32_t)(MATCH_PERC_THRESHOLD*seq.size()*SSW_MATCH_SCORE);
 
+  if (seq == "cagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcaccagcagcagcatcagcagcagcagcagcagcagcagcagcagcagcttcagcagcagcagcagcagcagcagcagcagcagcagcagcaccagcagcag")
+    cerr << score << " " << score_threshold << endl;
   if (isMapped && (score < score_threshold || nCopy == 0)) {
     *single_read_class = SR_UNKNOWN;
     return true;

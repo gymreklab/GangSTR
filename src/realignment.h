@@ -51,7 +51,7 @@ const static int32_t SSW_GAP_EXTEND = 2;
 // amount of slip we allow between alignment position and STR start and end
 static int32_t MARGIN = 5;		// This value is reset in expansion_aware_realign
 // Threshold to discard alignment as non-overlapping
-const static double MATCH_PERC_THRESHOLD = 0.9;
+const static double MATCH_PERC_THRESHOLD = 0.88;
 
 enum SingleReadType {
   SR_PREFLANK = 0,

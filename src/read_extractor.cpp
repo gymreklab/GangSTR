@@ -536,7 +536,7 @@ bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
 	SingleReadType srt;
 	ProcessSingleRead(alignment, chrom_ref_id, locus, min_match, true,
 			  &data_value, &nCopy_value, &score_value, &read_type, &srt);
-	if (alignment.Name() == "CompMultiLoc_7_cov70_readLen_150_ref_hg38_390_altAllele_5437_5851_1:0:0_3:2:0_426")
+	if (alignment.Name() == "CompMultiLoc_7_cov70_readLen_150_ref_hg38_390_altAllele_5656_6130_1:2:0_2:3:0_174")
 	  cerr << "OFF target baby!" << endl
 	       << alignment.QueryBases() << endl
 	       << srt << "\t" << nCopy_value << "\t" <<score_value << endl;
@@ -653,6 +653,7 @@ bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
 				      ReadType* read_type,
 				      SingleReadType* srt) {
   *srt = SR_UNKNOWN;
+
   /* If mapped read in vicinity but not close to STR, save for later */
   if (!off_target_read &&
       alignment.IsMapped() && alignment.IsMateMapped() &&
@@ -675,10 +676,6 @@ bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
   std::string seq_rev = reverse_complement(seq);
   std::string qual = alignment.Qualities();
   int32_t read_length = (int32_t)seq.size();
-  //cerr << alignment.RefID() << ":" << alignment.Position()
-  //     <<"\tMapped:" << alignment.IsMapped()
-  //     <<"\tRev: "<<alignment.IsReverseStrand() 
-  //     << "\n" << alignment.QueryBases() << "\n"
 
   /* Perform realignment and classification */
   if (!expansion_aware_realign(seq, qual, locus.pre_flank, locus.post_flank, locus.motif, min_match,
@@ -710,8 +707,11 @@ bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
 			       fm_start, fm_end, srt)) {
     return false;
   }
-  
 
+  if (alignment.Name() == "CompMultiLoc_7_cov70_readLen_150_ref_hg38_390_altAllele_5656_6130_1:2:0_2:3:0_174")
+    cerr << "INSIDE!\t"<<seq << endl;
+
+  
   if (*srt == SR_UNKNOWN){
     *nCopy_value = 0;
   }  
