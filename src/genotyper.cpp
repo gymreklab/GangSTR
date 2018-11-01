@@ -111,7 +111,7 @@ bool Genotyper::ProcessLocus(BamCramMultiReader* bamreader, Locus* locus) {
 						&min_negLike)) {
       return false;
     }
-
+    
     locus->allele1 = allele1;
     locus->allele2 = allele2;
     locus->min_neg_lik = min_negLike;
@@ -169,6 +169,23 @@ bool Genotyper::ProcessLocus(BamCramMultiReader* bamreader, Locus* locus) {
     }
     return false;
   }
+
+  /*
+  double surfll = 0.0;
+  if (!likelihood_maximizer->GetNegLikelihoodSurface(1,600,
+						     1,600,
+						     read_len,
+						     locus->motif.size(),
+						     ref_count,
+						     0,
+						     &surfll)){
+    cerr << "False Yo!" << endl;
+  }
+  cerr << surfll << endl;
+  cerr << exp(-min_negLike) / (exp(surfll) / 600 / 600) << endl;
+  // Overriding minimum neg likelihood with new score:
+  locus->min_neg_lik = exp(-min_negLike) / (exp(surfll) / 600 / 600);
+  */
   return true;
 }
 

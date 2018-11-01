@@ -310,9 +310,14 @@ bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
         int32_t nCopy_value = 0;
         ReadType read_type;
         SingleReadType srt;
+
         ProcessSingleRead(alignment, chrom_ref_id, locus, min_match,
               &data_value, &nCopy_value, &score_value, &read_type, &srt);
- 
+
+ 	if (alignment.Name() == "CompMultiLoc_7_cov70_readLen_150_ref_hg38_390_altAllele_4597_5214_1:0:0_0:0:0_158")
+	  cerr << " YOLO!!!!\n" << alignment.QueryBases() << endl << score_value << "\t" << nCopy_value << "\t" << read_type << endl;
+	
+
         if (debug) {
           std::cerr << "Mate found to be   " << read_type << std:: endl;
         }
@@ -654,7 +659,7 @@ bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
     *score_value = 0;
     return true;
   }
-  
+	
   int32_t start_pos, start_pos_rev, pos_frr, end_frr, score_frr, mismatches_frr;
   int32_t end_pos, end_pos_rev;
   int32_t score, score_rev;
@@ -690,7 +695,6 @@ bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
   }
   *nCopy_value = nCopy;
   *score_value = score;
-
   
   if (!classify_realigned_read(seq, locus.motif, 
 			       start_pos, end_pos, nCopy, score,
@@ -700,12 +704,14 @@ bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
 			       fm_start, fm_end, srt)) {
     return false;
   }
-  /*
-  if (alignment.Name() == "ERR194147.786796391"){
-    cerr << seq << endl;
-    cerr << *srt << endl;
-  }
-  */
+
+  if (alignment.Name() == "CompMultiLoc_7_cov70_readLen_150_ref_hg38_390_altAllele_4597_5214_1:0:0_0:0:0_158")
+    cerr << "In Process read pair:\nsrt:\t\t" << *srt 
+	 <<"\n\tMate position\t\t" << alignment.MatePosition()
+	 <<"\n\tlocus.start, locus.end\t" << locus.start << ", " << locus.start
+	 <<"\n\tdist.mean\t\t"<< options.dist_mean<< endl;
+
+
   if (*srt == SR_UNKNOWN){
     *nCopy_value = 0;
   }  
@@ -713,8 +719,8 @@ bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
   
   if ((*srt == SR_UNKNOWN || *srt == SR_UM_POT_IRR || *srt == SR_IRR) && 
       alignment.IsMateMapped() &&
-      alignment.MatePosition() < locus.end + (options.dist_mean - options.read_len) && 
-      alignment.MatePosition() > locus.start - (options.dist_mean - options.read_len)){
+      alignment.MatePosition() < locus.end + 2 * options.dist_mean && 
+      alignment.MatePosition() > locus.start - 2 * options.dist_mean){
     std::stringstream var_realign_frr;
     for (int i = 0; i<(seq.size() / locus.motif.size() + 1); i++) {
       var_realign_frr << locus.motif;

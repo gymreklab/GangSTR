@@ -82,6 +82,15 @@ class LikelihoodMaximizer {
 				   const int32_t& read_len, const int32_t& motif_len,
 				   const int32_t& ref_count, const bool& resampled,
 				   double* gt_ll);
+  bool GetNegLikelihoodSurface(const int32_t& a_lo,
+			       const int32_t& a_hi,
+			       const int32_t& b_lo,
+			       const int32_t& b_hi,
+			       const int32_t& read_len,
+			       const int32_t& motif_len,
+			       const int32_t& ref_count,
+			       const bool& resampled,
+			       double* surfaceLL);
   bool Getd2dA2NegLikelihood(const int32_t& allele1,
 			     const int32_t& allele2,
 			     const int32_t& read_len,

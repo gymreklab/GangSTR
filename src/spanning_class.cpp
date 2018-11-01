@@ -33,9 +33,14 @@ bool SpanningClass::GetLogClassProb(const int32_t& allele,
 				    const int32_t& read_len, const int32_t& motif_len,
 				double* log_class_prob) {
 	int str_len = allele * motif_len;					// (L)
-	//double norm_const = gsl_cdf_gaussian_P(2 * flank_len + str_len - dist_mean, dist_sdev) -
-	//					gsl_cdf_gaussian_P(2 * read_len - dist_mean, dist_sdev);  
-	double norm_const = InsertSizeCDF(2 * flank_len + str_len) - InsertSizeCDF(2 * read_len);  
+	double norm_const;
+	if (INS_NORMAL){
+	  norm_const = gsl_cdf_gaussian_P(2 * flank_len + str_len - dist_mean, dist_sdev) -
+	    gsl_cdf_gaussian_P(2 * read_len - dist_mean, dist_sdev);  
+	}
+	else{
+	  norm_const = InsertSizeCDF(2 * flank_len + str_len) - InsertSizeCDF(2 * read_len);  
+	}
 	
 	
 	if (norm_const == 0 or 
@@ -55,20 +60,28 @@ bool SpanningClass::GetLogClassProb(const int32_t& allele,
 
 	double term1, term2;
 	if (2 * read_len >= str_len){
-	  //		term1 = gsl_cdf_gaussian_P(2 * flank_len + str_len - dist_mean, dist_sdev) - 
-	  //					gsl_cdf_gaussian_P(2 * read_len - dist_mean, dist_sdev);
-	  //		term2 = gsl_ran_gaussian_pdf(2 * flank_len + str_len - dist_mean, dist_sdev) -
-	  //					gsl_ran_gaussian_pdf(2 * read_len - dist_mean, dist_sdev);
-		term1 = InsertSizeCDF(2 * flank_len + str_len) - InsertSizeCDF(2 * read_len);
-		term2 = InsertSizePDF(2 * flank_len + str_len) - InsertSizePDF(2 * read_len);
+	  if (INS_NORMAL){
+	    term1 = gsl_cdf_gaussian_P(2 * flank_len + str_len - dist_mean, dist_sdev) - 
+	      gsl_cdf_gaussian_P(2 * read_len - dist_mean, dist_sdev);
+	    term2 = gsl_ran_gaussian_pdf(2 * flank_len + str_len - dist_mean, dist_sdev) -
+	      gsl_ran_gaussian_pdf(2 * read_len - dist_mean, dist_sdev);
+	  }
+	  else{
+	    term1 = InsertSizeCDF(2 * flank_len + str_len) - InsertSizeCDF(2 * read_len);
+	    term2 = InsertSizePDF(2 * flank_len + str_len) - InsertSizePDF(2 * read_len);
+	  }
 	}
 	else{
-	  //		term1 = gsl_cdf_gaussian_P(2 * flank_len + str_len - dist_mean, dist_sdev) - 
-	  //				gsl_cdf_gaussian_P(str_len - dist_mean, dist_sdev);
-		//		term2 = gsl_ran_gaussian_pdf(2 * flank_len + str_len - dist_mean, dist_sdev) -
-		//					gsl_ran_gaussian_pdf(str_len - dist_mean, dist_sdev);
-		term1 = InsertSizeCDF(2 * flank_len + str_len) - InsertSizeCDF(str_len);
-		term2 = InsertSizePDF(2 * flank_len + str_len) - InsertSizePDF(str_len);
+	  if (INS_NORMAL){
+	    term1 = gsl_cdf_gaussian_P(2 * flank_len + str_len - dist_mean, dist_sdev) - 
+	      gsl_cdf_gaussian_P(str_len - dist_mean, dist_sdev);
+	    term2 = gsl_ran_gaussian_pdf(2 * flank_len + str_len - dist_mean, dist_sdev) -
+	      gsl_ran_gaussian_pdf(str_len - dist_mean, dist_sdev);
+	  }
+	  else{
+	    term1 = InsertSizeCDF(2 * flank_len + str_len) - InsertSizeCDF(str_len);
+	    term2 = InsertSizePDF(2 * flank_len + str_len) - InsertSizePDF(str_len);
+	  }
 	}
 
 	double class_prob = coef0 * (coef1 * term1 + coef2 * term2);
@@ -100,8 +113,12 @@ bool SpanningClass::GetLogReadProb(const int32_t& allele,
   int mean_A = dist_mean - shift;
   double allele_prob = 0.0;
 
-  // allele_prob = gsl_ran_gaussian_pdf(data - mean_A, dist_sdev);
-  allele_prob = InsertSizePDF(data - shift);
+  if (INS_NORMAL){
+    allele_prob = gsl_ran_gaussian_pdf(data - mean_A, dist_sdev);
+  }
+  else {
+    allele_prob = InsertSizePDF(data - shift);
+  }
   /*
   if (gsl_cdf_gaussian_P(motif_len * allele - mean_A, dist_sdev) < 1.0){
     allele_prob = 1.0 / (1.0 - gsl_cdf_gaussian_P(motif_len * allele - mean_A, dist_sdev)) * gsl_ran_gaussian_pdf(data - mean_A, dist_sdev);

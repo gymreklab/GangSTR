@@ -478,6 +478,50 @@ bool LikelihoodMaximizer::GetStandardError(const int32_t& allele1,
   }
 }
 
+bool LikelihoodMaximizer::GetNegLikelihoodSurface(const int32_t& a_lo,
+						  const int32_t& a_hi,
+						  const int32_t& b_lo,
+						  const int32_t& b_hi,
+						  const int32_t& read_len,
+						  const int32_t& motif_len,
+						  const int32_t& ref_count,
+						  const bool& resampled,
+						  double* surfaceLL){ 
+  double sum = 0.0;
+  double min = 1000.0;
+  int m_a, m_b;
+  double ret_val = 0.0;
+  if (!this->GetGenotypeNegLogLikelihood(a_hi, b_hi,
+					 read_len, motif_len,
+					 ref_count, resampled,
+					 &ret_val)){
+    *surfaceLL = 0;
+    return false;
+  }
+  sum = (-1.0) * ret_val - log(2); //compensating for adding a_hi,b_hi twice
+  for (int i = a_lo; i <= a_hi; i++){
+    for (int j = b_lo; j <= b_hi; j++){
+      if (!this->GetGenotypeNegLogLikelihood(i, j,
+					     read_len, motif_len,
+					     ref_count, resampled,
+					     &ret_val)){
+	*surfaceLL = 0;
+	return false;
+      }
+      //cerr << sum << " " << ret_val << endl;
+      sum = fast_log_sum_exp(sum, (-1.0) * ret_val);
+      if (ret_val < min){
+	min = ret_val;
+	m_a = i;
+	m_b = j;
+      }
+    }
+  }
+  *surfaceLL = sum;
+  cerr << "Min: "<< min << " at: " << m_a << ", " << m_b << endl;
+
+  return true;
+}
 
 bool LikelihoodMaximizer::GetGenotypeNegLogLikelihood(const int32_t& allele1,
 						      const int32_t& allele2,
@@ -487,7 +531,7 @@ bool LikelihoodMaximizer::GetGenotypeNegLogLikelihood(const int32_t& allele1,
 						      const bool& resampled,
 						      double* gt_ll) {
   double frr_count_ll = 0.0, frr_ll, span_ll, encl_ll, flank_ll = 0.0;
-  double count_weight = .01 * options->coverage;
+  double count_weight = options->coverage;
   double cov = options -> coverage;
   bool use_cov = options -> use_cov;
   int frr_count, offtarget_count = offtarget_class_.GetDataSize();
@@ -568,11 +612,12 @@ bool LikelihoodMaximizer::GetGenotypeNegLogLikelihood(const int32_t& allele1,
     
     }
   }
-  
-  *gt_ll = -1*(1.0 / read_count * (options->frr_weight * frr_ll +
-				options->spanning_weight * span_ll +
-				options->enclosing_weight * encl_ll + 
-				options->flanking_weight * flank_ll) + 
+  double factor = read_count;
+  factor = 1.0; // Factor is NOT applied to the count term 
+  *gt_ll = -1*(1.0 / factor * (options->frr_weight * frr_ll +
+			       options->spanning_weight * span_ll +
+			       options->enclosing_weight * encl_ll + 
+			       options->flanking_weight * flank_ll) + 
   	       count_weight * frr_count_ll);
   return true;
 }
@@ -615,7 +660,7 @@ bool LikelihoodMaximizer::OptimizeLikelihood(const int32_t& read_len,
   if (!resampled){
     double res;
     int fix = 10;
-    for (int ii = 12; ii <20 ; ii+=3){
+    for (int ii = 10; ii <30 ; ii+=5){
       GetGenotypeNegLogLikelihood(ii, fix, read_len, motif_len, ref_count, resampled, &res);
       cerr << ii << ", "<< fix <<" ->\t" << res << endl;
     } 
