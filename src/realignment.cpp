@@ -100,6 +100,7 @@ bool expansion_aware_realign(const std::string& seq,
   int32_t current_start_pos = 0, current_end_pos = 0;
   int32_t current_nCopy, current_num_mismatch;
   int32_t prev_score = 0;
+  int32_t prev_prev_score = -1;
   std::string template_sub, sequence_sub;
   MARGIN = 1 * period - 1;
   
@@ -166,13 +167,16 @@ bool expansion_aware_realign(const std::string& seq,
     // Stop if score is relatively high, but lower than max
     if (current_score > 0.7 * SSW_MATCH_SCORE * read_len and 
 	current_score <= max_score and
-	prev_score > current_score){
+	prev_score == current_score and
+	prev_prev_score == prev_score and
+	total_nCopy > max_nCopy){
       //max_nCopy--;
       break;
     }
     if (current_score == read_len*SSW_MATCH_SCORE) {
       break;
     }
+    prev_prev_score = prev_score;
     prev_score = current_score;
   //cerr << current_nCopy << endl;
   }
