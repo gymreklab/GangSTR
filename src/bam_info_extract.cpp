@@ -76,8 +76,9 @@ bool BamInfoExtract::GetReadLen(int32_t* read_len){
 bool BamInfoExtract::GetInsertSizeDistribution(double* mean, double* std_dev, double* coverage,
 					       double* dist_pdf, double* dist_cdf){
 	// TODO change 200000 flank size to something appropriate
-	int32_t flank_size = 400000;
+	int32_t flank_size = 40000;
 	int32_t exclusion_margin = 1000;
+	int32_t min_req_reads = 1000;
 	int32_t distrib_size = options->dist_distribution_size;
 	bool found_ins_distribution = false, found_coverage = false;
 	double mean_b, mean_a, std_b, std_a; // mean and std dev, before and after locus
@@ -122,8 +123,8 @@ bool BamInfoExtract::GetInsertSizeDistribution(double* mean, double* std_dev, do
 		for (int i = 0; i < distrib_size; i++){
 		  dist_count[i] = 0;
 		}
-		// if there's enough reads, compute and return TODO set 300 to a different number...
-		if (temp_len_vec.size() > 300) {
+		// if there's enough reads, compute and return TODO set threshold
+		if (temp_len_vec.size() > min_req_reads) {
 			if (reads_before > reads_after){
 				*coverage = float(reads_before * alignment.QueryBases().size()) / float(flank_size - exclusion_margin - alignment.QueryBases().size());
 				found_coverage = true;
@@ -160,21 +161,22 @@ bool BamInfoExtract::GetInsertSizeDistribution(double* mean, double* std_dev, do
 			dist_cdf[1] = cumulative;
 			for (int i = 2; i < distrib_size - 2; i++){
 			  dist_pdf[i] = double(dist_count[i - 2] +
-					       dist_count[i - 1] + 
+			  		       dist_count[i - 1] + 
 					       dist_count[i] + 
-					       dist_count[i + 1] + 
-					       dist_count[i + 2]) / 5.0/ double(valid_size);
+			  		       dist_count[i + 1] + 
+			  		       dist_count[i + 2]) / 5.0/ double(valid_size);
 			  cumulative += dist_pdf[i];
 			  dist_cdf[i] = cumulative;
 			  //cerr << i << " " << dist_pdf[i] << " " << dist_cdf[i] << endl;
 			}
 			
 			dist_cdf[distrib_size - 1] = 1.0;
-		
+			
 			valid_temp_len_arr = &valid_temp_len_vec[0];
 			*mean = gsl_stats_int_mean(valid_temp_len_arr, 1, valid_size - 1);
 			*std_dev = gsl_stats_int_sd_m (valid_temp_len_arr,  1, valid_size, *mean);			
 			found_ins_distribution = true;
+			
 		}
 	}
 	return found_ins_distribution;

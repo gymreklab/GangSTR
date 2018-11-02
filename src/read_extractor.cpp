@@ -710,10 +710,10 @@ bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
 			       fm_start, fm_end, srt)) {
     return false;
   }
-
-  if (alignment.Name() == "CompMultiLoc_7_cov70_readLen_150_ref_hg38_390_altAllele_5976_6321_0:0:0_1:0:0_23e")
+  /*
+  if (alignment.Name() == "CompMultiLoc_7_cov70_readLen_150_ref_hg38_150_altAllele_4650_5115_3:1:0_0:1:0_226")
     cerr << "INSIDE!\t"<<seq << endl<<nCopy<<"\t"<<score<<endl<<endl;
-
+  */
   
   if (*srt == SR_UNKNOWN){
     *nCopy_value = 0;

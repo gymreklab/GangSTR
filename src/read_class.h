@@ -47,7 +47,7 @@ class ReadClass {
   // friend class FlankingClass;
  public:
   const static double NEG_INF = -25; // TODO make smaller?
-  const static bool INS_NORMAL = false;
+  const static bool INS_NORMAL = true;
   ReadClass();
   virtual ~ReadClass();
 

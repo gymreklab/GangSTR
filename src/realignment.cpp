@@ -118,7 +118,11 @@ bool expansion_aware_realign(const std::string& seq,
     if (!striped_smith_waterman(var_realign_string, seq, qual, &current_start_pos, &current_end_pos, &current_score, &current_num_mismatch)) {
       return false;
     }
-    
+    /*
+    if (seq == "cacatggatgtgaactctgtcctgataggtccccctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgccgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgct")
+      cerr <<"\n>\n"<< current_score << " " << prev_score << " " << prev_prev_score << " "
+	   <<"\n>"<<var_realign_string<<endl<<seq<<"\n"<< endl;
+    */
 
     // Flank match check
     // Preflank
@@ -152,7 +156,7 @@ bool expansion_aware_realign(const std::string& seq,
     else{
       *fm_end = FM_NOMATCH;
     }
-    if (current_score >= max_score) {
+    if (current_score > max_score) {
       second_best_score = max_score;
       second_best_nCopy = max_nCopy;
       max_score = current_score;
@@ -168,8 +172,7 @@ bool expansion_aware_realign(const std::string& seq,
     if (current_score > 0.7 * SSW_MATCH_SCORE * read_len and 
 	current_score <= max_score and
 	prev_score == current_score and
-	prev_prev_score == prev_score and
-	total_nCopy > max_nCopy){
+	prev_prev_score == prev_score){
       //max_nCopy--;
       break;
     }
@@ -422,9 +425,7 @@ bool classify_realigned_read(const std::string& seq,
     end_in_str = true;
   }
 
-  /*    if (seq == "gctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgcagctgctgctgctgcg")
-      cerr <<"\n>\n"<< end_pos << " " << end_str <<"\n>\n"<< endl;
-  */
+  
   // Check if perfect flanks exist:
   if (fm_start == FM_COMPLETE && fm_end == FM_COMPLETE){
     *single_read_class = SR_ENCLOSING;
