@@ -422,9 +422,9 @@ bool classify_realigned_read(const std::string& seq,
     end_in_str = true;
   }
 
-    if (seq == "gctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgcagctgctgctgctgcg")
+  /*    if (seq == "gctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgcagctgctgctgctgcg")
       cerr <<"\n>\n"<< end_pos << " " << end_str <<"\n>\n"<< endl;
-
+  */
   // Check if perfect flanks exist:
   if (fm_start == FM_COMPLETE && fm_end == FM_COMPLETE){
     *single_read_class = SR_ENCLOSING;

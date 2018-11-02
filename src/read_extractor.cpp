@@ -432,10 +432,12 @@ bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
     if (!RescueMate(bamreader, iter->second.read1, &matepair)) {
       continue;
     }
+    if (matepair.IsSecondary() or matepair.IsSupplementary())
+	  continue;
     if (debug) {
       std::cerr << "Found mate for " << iter->first << std::endl;
     }
-
+    
     iter->second.read2 = matepair;
 
     iter->second.found_pair = true;
@@ -445,7 +447,8 @@ bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
     SingleReadType srt;
     ProcessSingleRead(matepair, chrom_ref_id, locus, min_match, false,
           &data_value, &nCopy_value, &score_value, &read_type, &srt);
-
+    if (matepair.Name() == "CompMultiLoc_7_cov70_readLen_150_ref_hg38_390_altAllele_5976_6321_0:0:0_1:0:0_23e")
+      cerr << "HAHAHA\n\n\n" << endl;
     int32_t read_length = (int32_t)matepair.QueryBases().size();
     if (debug) {
       std::cerr << "Processed mate, found " << read_type << " " << data_value << std::endl;
@@ -536,7 +539,7 @@ bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
 	SingleReadType srt;
 	ProcessSingleRead(alignment, chrom_ref_id, locus, min_match, true,
 			  &data_value, &nCopy_value, &score_value, &read_type, &srt);
-	if (alignment.Name() == "CompMultiLoc_7_cov70_readLen_150_ref_hg38_390_altAllele_5275_5780_1:1:0_1:1:0_52b")
+	if (alignment.Name() == "mpMultiLoc_7_cov70_readLen_150_ref_hg38_390_altAllele_5276_5788_2:1:0_0:1:0_152")
 	  cerr << "OFF target baby!" << endl
 	       << alignment.QueryBases() << endl
 	       << srt << "\t" << nCopy_value << "\t" <<score_value << endl;
@@ -708,7 +711,7 @@ bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
     return false;
   }
 
-  if (alignment.Name() == "CompMultiLoc_7_cov70_readLen_150_ref_hg38_390_altAllele_5275_5780_1:1:0_1:1:0_52b")
+  if (alignment.Name() == "CompMultiLoc_7_cov70_readLen_150_ref_hg38_390_altAllele_5976_6321_0:0:0_1:0:0_23e")
     cerr << "INSIDE!\t"<<seq << endl<<nCopy<<"\t"<<score<<endl<<endl;
 
   
