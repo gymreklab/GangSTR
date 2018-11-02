@@ -184,8 +184,11 @@ bool expansion_aware_realign(const std::string& seq,
       *fm_start == FM_NOMATCH and *fm_end == FM_NOMATCH){
     max_nCopy = 0;
   }
-  if (max_nCopy > read_len / period)
+  if (max_nCopy > read_len / period){ // did we overshoot?
+    int32_t overshoot = max_nCopy * period - read_len;
+    max_end_pos-=overshoot;
     max_nCopy = read_len / period;
+  }
   *nCopy = max_nCopy;
   *score = max_score;
   *start_pos = max_start_pos;
@@ -267,16 +270,11 @@ bool striped_smith_waterman(const std::string& ref,
   maskLen = 15;
   aligner->Align(seq.c_str(), ref.c_str(), (int32_t)ref.size(), *filter, alignment, maskLen);
 
-  // if (seq == "ggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggggcgcggcgcggccgccgcccgcggcggggcggcgggccgccg"){
-  //   cerr << ref.size() << endl;
-  //   ssw_PrintAlignment(*alignment);
-  // }
-  // ssw_PrintAlignment(*alignment);
   *pos = alignment->ref_begin;
   *end = alignment->ref_end;
   *score = alignment->sw_score;
   *mismatches = alignment->mismatches;
-  // cerr<<ref.substr(alignment->ref_begin, alignment->ref_end)<<endl;
+
   delete aligner;
   delete filter;
   delete alignment;
@@ -423,6 +421,10 @@ bool classify_realigned_read(const std::string& seq,
   if ((end_pos >= start_str-MARGIN) && (end_pos <= end_str+MARGIN)) {
     end_in_str = true;
   }
+
+    if (seq == "gctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgcagctgctgctgctgcg")
+      cerr <<"\n>\n"<< end_pos << " " << end_str <<"\n>\n"<< endl;
+
   // Check if perfect flanks exist:
   if (fm_start == FM_COMPLETE && fm_end == FM_COMPLETE){
     *single_read_class = SR_ENCLOSING;
@@ -445,6 +447,7 @@ bool classify_realigned_read(const std::string& seq,
 
   // Set threshold for match
   int32_t score_threshold = (int32_t)(MATCH_PERC_THRESHOLD*seq.size()*SSW_MATCH_SCORE);
+
   if (isMapped && (score < score_threshold || nCopy == 0)) {
     *single_read_class = SR_UNKNOWN;
     return true;
