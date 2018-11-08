@@ -71,7 +71,7 @@ Advanced parameters for likelihood model:
 * **--spanweight \<float\>** Reset weight for Spanning class in likelihood model (default 1.0)
 * **--enclweight \<float\>** Reset weight for Enclosing class in likelihood model (default 1.0)
 * **--flankweight \<float\>** Reset weight for Flanking class in likelihood model (default 1.0)
-* **--ploidy [0,1]** Haploid (1) or diploid (2) genotyping (default 2)
+* **--ploidy [1,2]** Haploid (1) or diploid (2) genotyping (default 2)
 * **--useofftarget** Extract off-target FRRs based on the off-target regions provided in the regions file.
 * **--insertmean \<float\>** Fragment length mean (default: calculate if not provided)
 * **--insertsdev \<float\>** Fragment length standard deviation (default: calculate if not provided)
