@@ -182,5 +182,5 @@ The references below contain pre-defined off-target loci for target pathogenic l
 | SCA17 | [SCA17_hg38.bed](https://s3.amazonaws.com/gangstr/SCA17_hg38.bed) | [SCA17_hg19.bed](https://s3.amazonaws.com/gangstr/hg19/SCA17_hg19.bed) |
 | HTT | [HTT_hg38.bed](https://s3.amazonaws.com/gangstr/HTT_hg38.bed) | [HTT_hg19.bed](https://s3.amazonaws.com/gangstr/hg19/HTT_hg19.bed) |
 | DM1 | [DM1_hg38.bed](https://s3.amazonaws.com/gangstr/DM1_hg38.bed) | [DM1_hg19.bed](https://s3.amazonaws.com/gangstr/hg19/DM1_hg19.bed) |
-
+| FMR1 | [FMR1_hg38.bed](https://s3.amazonaws.com/gangstr/hg38/FMR1_hg38.bed) | [FMR1_hg19.bed](https://s3.amazonaws.com/gangstr/hg19/FMR1_hg19.bed) |
 
