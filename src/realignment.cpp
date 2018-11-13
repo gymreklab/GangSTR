@@ -100,8 +100,9 @@ bool expansion_aware_realign(const std::string& seq,
   int32_t current_start_pos = 0, current_end_pos = 0;
   int32_t current_nCopy, current_num_mismatch;
   int32_t prev_score = 0;
+  int32_t prev_prev_score = -1;
   std::string template_sub, sequence_sub;
-  MARGIN = 1 * period - 1;
+  MARGIN = 1 * period;
   
   //cerr << min_nCopy << " ";
   for (current_nCopy=min_nCopy; current_nCopy<(int32_t)(read_len/period)+2; current_nCopy++) {
@@ -117,7 +118,11 @@ bool expansion_aware_realign(const std::string& seq,
     if (!striped_smith_waterman(var_realign_string, seq, qual, &current_start_pos, &current_end_pos, &current_score, &current_num_mismatch)) {
       return false;
     }
-    
+    /*
+    if (seq == "cacatggatgtgaactctgtcctgataggtccccctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgccgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgct")
+      cerr <<"\n>\n"<< current_score << " " << prev_score << " " << prev_prev_score << " "
+	   <<"\n>"<<var_realign_string<<endl<<seq<<"\n"<< endl;
+    */
 
     // Flank match check
     // Preflank
@@ -151,7 +156,7 @@ bool expansion_aware_realign(const std::string& seq,
     else{
       *fm_end = FM_NOMATCH;
     }
-    if (current_score >= max_score) {
+    if (current_score > max_score) {
       second_best_score = max_score;
       second_best_nCopy = max_nCopy;
       max_score = current_score;
@@ -159,32 +164,39 @@ bool expansion_aware_realign(const std::string& seq,
       max_start_pos = current_start_pos;
       max_end_pos = current_end_pos;
     }
-    
+  
     if (*fm_start == FM_COMPLETE && *fm_end == FM_COMPLETE){
       break;
     }
     // Stop if score is relatively high, but lower than max
     if (current_score > 0.7 * SSW_MATCH_SCORE * read_len and 
-          current_score <= max_score and
-          prev_score == current_score){
-      // max_nCopy--;
+	current_score <= max_score and
+	prev_score == current_score and
+	prev_prev_score == prev_score){
+      //max_nCopy--;
       break;
     }
     if (current_score == read_len*SSW_MATCH_SCORE) {
       break;
     }
+    prev_prev_score = prev_score;
     prev_score = current_score;
-  }
   //cerr << current_nCopy << endl;
+  }
   if (max_nCopy < 0.85 * read_len / period and 
       *fm_start == FM_NOMATCH and *fm_end == FM_NOMATCH){
     max_nCopy = 0;
+  }
+  if (max_nCopy > read_len / period){ // did we overshoot?
+    int32_t overshoot = max_nCopy * period - read_len;
+    max_end_pos-=overshoot;
+    max_nCopy = read_len / period;
   }
   *nCopy = max_nCopy;
   *score = max_score;
   *start_pos = max_start_pos;
   *end_pos = max_end_pos;
-  
+    
   return true;
 }
 
@@ -261,16 +273,11 @@ bool striped_smith_waterman(const std::string& ref,
   maskLen = 15;
   aligner->Align(seq.c_str(), ref.c_str(), (int32_t)ref.size(), *filter, alignment, maskLen);
 
-  // if (seq == "ggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggcggggcgcggcgcggccgccgcccgcggcggggcggcgggccgccg"){
-  //   cerr << ref.size() << endl;
-  //   ssw_PrintAlignment(*alignment);
-  // }
-  // ssw_PrintAlignment(*alignment);
   *pos = alignment->ref_begin;
   *end = alignment->ref_end;
   *score = alignment->sw_score;
   *mismatches = alignment->mismatches;
-  // cerr<<ref.substr(alignment->ref_begin, alignment->ref_end)<<endl;
+
   delete aligner;
   delete filter;
   delete alignment;
@@ -408,7 +415,6 @@ bool classify_realigned_read(const std::string& seq,
   int32_t start_str = prefix_length;
   int32_t end_str = prefix_length + nCopy*(int32_t)motif.size();
 
-
   // Check if read starts in the STR
   bool start_in_str = false;
   bool end_in_str = false;
@@ -419,6 +425,7 @@ bool classify_realigned_read(const std::string& seq,
     end_in_str = true;
   }
 
+  
   // Check if perfect flanks exist:
   if (fm_start == FM_COMPLETE && fm_end == FM_COMPLETE){
     *single_read_class = SR_ENCLOSING;

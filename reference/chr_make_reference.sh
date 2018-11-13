@@ -45,7 +45,7 @@ fi
 matchscore=2
 mismatchscore=5
 indelscore=17
-maxperiod=15 # Largest repeat unit
+maxperiod=20 # Largest repeat unit
 pm=80
 pi=10
 minscore=24 # Require at least 12 bp perfect matching
@@ -57,7 +57,7 @@ cd ${tmpdir}
 
 echo "Running in ${tmpdir}"
 
-for chrom in $(seq 1 22)
+for chrom in $(seq 1 22) X Y
 do
     echo "${TRF} \
 	${CHROMFA}/chr${chrom}.fa \
@@ -69,7 +69,7 @@ do
 done | xargs -P${NUMPROC} -I% -n 1 sh -c "%"
 
 # TODO implement here any other filters we would like to have on the reference
-for chrom in $(seq 1 22)
+for chrom in $(seq 1 22) X Y
 do
     cat ${tmpdir}/chr${chrom}.fa.${matchscore}.${mismatchscore}.${indelscore}.${pm}.${pi}.${minscore}.${maxperiod}.dat | \
 	awk -F' ' '(NF==15)' | \

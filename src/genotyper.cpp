@@ -75,6 +75,7 @@ bool Genotyper::ProcessLocus(BamCramMultiReader* bamreader, Locus* locus) {
   locus->spanning_reads = likelihood_maximizer->GetSpanningDataSize();
   locus->frr_reads = likelihood_maximizer->GetFRRDataSize();
   locus->flanking_reads = likelihood_maximizer->GetFlankingDataSize();
+  // Temporary: This filtering step is ignored for implementing new insert size distribution model
   // Set flags if only spanning reads available.
   if (locus->frr_reads + locus->flanking_reads + locus->enclosing_reads < 4){
     if (options->verbose) {
@@ -83,10 +84,10 @@ bool Genotyper::ProcessLocus(BamCramMultiReader* bamreader, Locus* locus) {
 	 <<", Spanning: "<<locus->spanning_reads
 	 <<", FRR: "<<locus->frr_reads
 	 <<", Flanking: "<<locus->flanking_reads
-	 <<". Skipping locus";
+	 <<". Skipping locus (Temporarily ignored, going forward with genotyping)";
       PrintMessageDieOnError(msg.str(), M_PROGRESS);
     }
-    return false;
+    //return false;
   }
 
   // Maximize the likelihood
@@ -110,6 +111,7 @@ bool Genotyper::ProcessLocus(BamCramMultiReader* bamreader, Locus* locus) {
 						&min_negLike)) {
       return false;
     }
+    
     locus->allele1 = allele1;
     locus->allele2 = allele2;
     locus->min_neg_lik = min_negLike;
@@ -167,6 +169,23 @@ bool Genotyper::ProcessLocus(BamCramMultiReader* bamreader, Locus* locus) {
     }
     return false;
   }
+
+  /*
+  double surfll = 0.0;
+  if (!likelihood_maximizer->GetNegLikelihoodSurface(1,600,
+						     1,600,
+						     read_len,
+						     locus->motif.size(),
+						     ref_count,
+						     0,
+						     &surfll)){
+    cerr << "False Yo!" << endl;
+  }
+  cerr << surfll << endl;
+  cerr << exp(-min_negLike) / (exp(surfll) / 600 / 600) << endl;
+  // Overriding minimum neg likelihood with new score:
+  locus->min_neg_lik = exp(-min_negLike) / (exp(surfll) / 600 / 600);
+  */
   return true;
 }
 

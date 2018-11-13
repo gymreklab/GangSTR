@@ -1,7 +1,8 @@
 #!/bin/bash
-#/storage/resources/dbase/human/hg19/chromFa/ \
+#hg19: /storage/resources/dbase/human/hg19/chromFa/ \
+#hg38: /storage/nmmsv/ref_genome/chromFa/
 ./chr_make_reference.sh \
-    /storage/nmmsv/ref_genome/chromFa/ \
-    /storage/nmmsv/reference_TRF/chr_ref_grch38_upto15bp.bed \
+    /storage/resources/dbase/human/hg19/chromFa/ \
+    /storage/nmmsv/reference_TRF/raw_ref_hg19_20bp_XY.bed \
     trf \
     4

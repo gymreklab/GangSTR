@@ -41,6 +41,9 @@ class Options {
   double dist_sdev;
   double coverage;
   int32_t dist_max;     // Maximum insert size for spanning reads to be considered.
+  int32_t dist_distribution_size;
+  double* dist_pdf;
+  double* dist_cdf;
   bool dist_man_set;   // whether insert size dist parameters manually set in command line
   // Stutter model - TODO later make per locus model
   double stutter_up;

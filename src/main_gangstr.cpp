@@ -338,7 +338,7 @@ int main(int argc, char* argv[]) {
     if (options.verbose) {
       PrintMessageDieOnError("\tComputing insert size distribution and/or coverage", M_PROGRESS);
     }
-    if(!bam_info.GetInsertSizeDistribution(&mean, &std_dev, &coverage)){
+    if(!bam_info.GetInsertSizeDistribution(&mean, &std_dev, &coverage, options.dist_pdf, options.dist_cdf)){
       PrintMessageDieOnError("No Locus contains enough reads to extract insert size mean and standard deviation. (Possible mismatch in chromosome names)", M_ERROR);
     }
     if (options.dist_mean == -1 or options.dist_sdev == -1){
