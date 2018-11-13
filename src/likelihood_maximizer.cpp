@@ -557,7 +557,7 @@ bool LikelihoodMaximizer::GetGenotypeNegLogLikelihood(const int32_t& allele1,
     					  read_len, motif_len, ref_count, 
     					  options->ploidy, &span_ll);
     enclosing_class_.GetClassLogLikelihood(allele1, allele2, 
-					   read_len, motif_len, ref_count, 
+					     read_len, motif_len, ref_count, 
 					   options->ploidy, &encl_ll);
     // flanking class overloads GetClassLogLikelihood function
     flanking_class_.FlankingClass::GetClassLogLikelihood(allele1, allele2, 

@@ -76,9 +76,9 @@ bool BamInfoExtract::GetReadLen(int32_t* read_len){
 bool BamInfoExtract::GetInsertSizeDistribution(double* mean, double* std_dev, double* coverage,
 					       double* dist_pdf, double* dist_cdf){
 	// TODO change 200000 flank size to something appropriate
-	int32_t flank_size = 40000;
+	int32_t flank_size = 400000;
 	int32_t exclusion_margin = 1000;
-	int32_t min_req_reads = 1000;
+	int32_t min_req_reads = 50000;
 	int32_t distrib_size = options->dist_distribution_size;
 	bool found_ins_distribution = false, found_coverage = false;
 	double mean_b, mean_a, std_b, std_a; // mean and std dev, before and after locus
@@ -159,6 +159,8 @@ bool BamInfoExtract::GetInsertSizeDistribution(double* mean, double* std_dev, do
 					     + dist_count[2] + dist_count[3]) / 5.0 / double(valid_size);
 			cumulative += dist_pdf[1];
 			dist_cdf[1] = cumulative;
+			ofstream ins_file;
+			ins_file.open((options->outprefix + ".insdata.tab").c_str());
 			for (int i = 2; i < distrib_size - 2; i++){
 			  dist_pdf[i] = double(dist_count[i - 2] +
 			  		       dist_count[i - 1] + 
@@ -167,7 +169,7 @@ bool BamInfoExtract::GetInsertSizeDistribution(double* mean, double* std_dev, do
 			  		       dist_count[i + 2]) / 5.0/ double(valid_size);
 			  cumulative += dist_pdf[i];
 			  dist_cdf[i] = cumulative;
-			  //cerr << i << " " << dist_pdf[i] << " " << dist_cdf[i] << endl;
+			  ins_file << i << "\t" << dist_pdf[i] << "\t" << dist_cdf[i] << endl;
 			}
 			
 			dist_cdf[distrib_size - 1] = 1.0;

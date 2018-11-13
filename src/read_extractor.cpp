@@ -539,7 +539,7 @@ bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
 	SingleReadType srt;
 	ProcessSingleRead(alignment, chrom_ref_id, locus, min_match, true,
 			  &data_value, &nCopy_value, &score_value, &read_type, &srt);
-	if (alignment.Name() == "mpMultiLoc_7_cov70_readLen_150_ref_hg38_390_altAllele_5276_5788_2:1:0_0:1:0_152")
+	if (alignment.Name() == "pMultiLoc_9_cov70_readLen_150_ref_hg38_390_altAllele_100182_100678_1:1:0_1:0:0_c82")
 	  cerr << "OFF target baby!" << endl
 	       << alignment.QueryBases() << endl
 	       << srt << "\t" << nCopy_value << "\t" <<score_value << endl;

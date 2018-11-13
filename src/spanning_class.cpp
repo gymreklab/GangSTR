@@ -83,9 +83,9 @@ bool SpanningClass::GetLogClassProb(const int32_t& allele,
 	    term2 = InsertSizePDF(2 * flank_len + str_len) - InsertSizePDF(str_len);
 	  }
 	}
-
+        
 	double class_prob = coef0 * (coef1 * term1 + coef2 * term2);
-
+	
 	// cout<<endl<<class_prob<<" "<<coef0<<" "<<coef1<<" "<<coef2;
 	// cout<<endl<<class_prob<<" "<<term1<<" "<<term2<<endl;
 
@@ -117,7 +117,7 @@ bool SpanningClass::GetLogReadProb(const int32_t& allele,
     allele_prob = gsl_ran_gaussian_pdf(data - mean_A, dist_sdev);
   }
   else {
-    allele_prob = InsertSizePDF(data - shift);
+    allele_prob = InsertSizePDF(data + shift);
   }
   /*
   if (gsl_cdf_gaussian_P(motif_len * allele - mean_A, dist_sdev) < 1.0){
