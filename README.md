@@ -160,13 +160,15 @@ FORMAT fields contain information specific to each genotype call. The following 
 <a name="references"></a>
 ## GangSTR reference files
 
-The following lists available references created using Tandem Repeats Finder. We update the reference periodically with additional loci or annotation changes. Please see the Changelog file for details. Note references must be unzipped before using with GangSTR. 
+The following lists available references created using Tandem Repeats Finder. We update the reference periodically with additional loci or annotation changes. Please see the Changelog file for details. Note references must be unzipped before using with GangSTR.
 
 | **Reference build** | **Version** | **Link** |
 | --------------------| ------------|----------|
 | hg19 | ver8 | [hg19_ver8.bed.gz](https://s3.amazonaws.com/gangstr/hg19_ver8.bed.gz) | 
+| hg19 | ver10 | [hg19_ver10.sorted.bed.gz](https://s3.amazonaws.com/gangstr/hg19_ver10.sorted.bed.gz) | 
 | hs37 | ver8 | [hs37_ver8.bed.gz](https://s3.amazonaws.com/gangstr/hs37_ver8.bed.gz) |
 | hg38 | ver5 | [hg38_ver5.bed.gz](https://s3.amazonaws.com/gangstr/hg38_ver5.bed.gz) |
+| hg38 | ver6 | [hg19_ver6.sorted.bed.gz](https://s3.amazonaws.com/gangstr/hg38_ver6.sorted.bed.gz) | 
 
 The references below contain pre-defined off-target loci for target pathogenic loci (hg38 coordinates):
 
