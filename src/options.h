@@ -62,6 +62,7 @@ class Options {
   double flanking_weight;
   // Genome wide exploration mode
   bool genome_wide;
+  std::string chrom;
   // Helpers
   bool verbose;
   bool very_verbose;

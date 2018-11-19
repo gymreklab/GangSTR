@@ -52,6 +52,7 @@ void show_help() {
 	   << "\t" << "--out         <outprefix>     " << "\t" << "Prefix to name output files" << "\n"
 	   << "\n Additional general options:\n"
 	   << "\t" << "--genomewide                  " << "\t" << "Genome-wide mode" << "\n"
+	   << "\t" << "--chrom                       " << "\t" << "Only genotype regions on this chromosome" << "\n"
 	   << "\n Options for different sequencing settings\n"
 	   << "\t" << "--readlength  <int>           " << "\t" << "Read length. Default: " << options.read_len << "\n"
 	   << "\t" << "--coverage    <float>         " << "\t" << "Average coverage. must be set for exome/targeted data. Default: " << options.coverage << "\n"
@@ -93,6 +94,7 @@ void show_help() {
 void parse_commandline_options(int argc, char* argv[], Options* options) {
   enum LONG_OPTIONS {
     OPT_BAMFILES,
+    OPT_CHROM,
     OPT_REFFA,
     OPT_REGIONS,
     OPT_OUT,
@@ -126,11 +128,12 @@ void parse_commandline_options(int argc, char* argv[], Options* options) {
   };
   static struct option long_options[] = {
     {"bam",         required_argument,  NULL, OPT_BAMFILES},
+    {"chrom",       required_argument,  NULL, OPT_CHROM},
     {"ref",         required_argument,  NULL, OPT_REFFA},
     {"regions",     required_argument,  NULL, OPT_REGIONS},
     {"out",         required_argument,  NULL, OPT_OUT},
     {"help",        no_argument,        NULL, OPT_HELP},
-    {"frrweight",   required_argument,  NULL, OPT_WFRR},      // TODO tried using optional_argument, but it causes segmentation faults
+    {"frrweight",   required_argument,  NULL, OPT_WFRR},
     {"enclweight",  required_argument,  NULL, OPT_WENCLOSE},
     {"spanweight",  required_argument,  NULL, OPT_WSPAN},
     {"flankweight", required_argument,  NULL, OPT_WFLANK},
@@ -167,6 +170,9 @@ void parse_commandline_options(int argc, char* argv[], Options* options) {
     case OPT_BAMFILES:
       options->bamfiles.clear();
       split_by_delim(optarg, ',', options->bamfiles);
+      break;
+    case OPT_CHROM:
+      options->chrom = optarg;
       break;
     case OPT_REFFA:
       options->reffa = optarg;
@@ -391,6 +397,7 @@ int main(int argc, char* argv[]) {
   Genotyper genotyper(refgenome, options);
   stringstream ss;
   while (region_reader.GetNextRegion(&locus)) {
+    if (!options.chrom.empty() && locus.chrom != options.chrom) {continue;}
     ss.str("");
     ss.clear();
     ss << "Processing " << locus.chrom << ":" << locus.start;

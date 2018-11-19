@@ -68,6 +68,7 @@ Options::Options() {
   spanning_weight = 1.0;
   flanking_weight = 1.0;
   genome_wide = false;
+  chrom = "";
   verbose = false;
   very_verbose = false;
   ploidy = 2;
