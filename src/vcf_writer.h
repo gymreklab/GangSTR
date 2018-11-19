@@ -30,7 +30,7 @@ using namespace std;
 
 class VCFWriter {
  public:
-  VCFWriter(const std::string& _vcffile, const std::string& full_command);
+  VCFWriter(const std::string& _vcffile, const std::string& full_command, const std::string& sample_name);
   void WriteRecord(const Locus& locus);
   virtual ~VCFWriter();
  private:

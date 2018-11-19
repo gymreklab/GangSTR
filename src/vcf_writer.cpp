@@ -26,7 +26,8 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 using namespace std;
 
 VCFWriter::VCFWriter(const std::string& _vcffile,
-		     const std::string& full_command) {
+		     const std::string& full_command,
+		     const std::string& sample_name) {
   writer_.open(_vcffile.c_str());
   // Write header
   writer_ << "##fileformat=VCFv4.1" << std::endl;
@@ -41,7 +42,7 @@ VCFWriter::VCFWriter(const std::string& _vcffile,
   writer_ << "##FORMAT=<ID=RC,Number=1,Type=String,Description=\"Number of reads in each class (enclosing, spanning, FRR, bounding\">" << endl;
   writer_ << "##FORMAT=<ID=Q,Number=1,Type=Float,Description=\"Min. negative likelihood\">" << endl;
   writer_ << "##FORMAT=<ID=INS,Number=1,Type=String,Description=\"Insert size mean and stddev\">" << endl;
-  writer_ << "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\tsample" << endl;
+  writer_ << "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\t" << sample_name << endl;
   writer_.flush();
 }
 

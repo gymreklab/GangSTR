@@ -310,10 +310,23 @@ int main(int argc, char* argv[]) {
   int merge_type = BamCramMultiReader::ORDER_ALNS_BY_FILE;
   BamCramMultiReader bamreader(options.bamfiles, options.reffa, merge_type);
 
-
   // Extract information from bam file (read length, insert size distribution, ..)
   int32_t read_len;
   double mean, std_dev, coverage;
+  std::string sample_name = "sample";
+  const std::vector<ReadGroup>& read_groups = bamreader.bam_header()->read_groups();
+  if (read_groups.empty()) {
+    PrintMessageDieOnError("\tNo read group specified. Using generic smaple ID", M_WARNING);
+    sample_name = "testsample";
+  } else {
+    for (std::vector<ReadGroup>::const_iterator rg_iter = read_groups.begin(); rg_iter != read_groups.end(); rg_iter++) {
+      if (rg_iter->HasSample()) {
+	sample_name = rg_iter->GetSample();
+	break; // For now, assume one sample present. TODO multi-sample
+      }
+    }
+  }
+
   BamInfoExtract bam_info(&options, &bamreader, &region_reader);
   if (options.genome_wide == true){
     PrintMessageDieOnError("\tRunning in whole genome mode", M_PROGRESS);
@@ -374,7 +387,7 @@ int main(int argc, char* argv[]) {
   // Process each region
   region_reader.Reset();
   RefGenome refgenome(options.reffa);
-  VCFWriter vcfwriter(options.outprefix + ".vcf", full_command);
+  VCFWriter vcfwriter(options.outprefix + ".vcf", full_command, sample_name);
   Genotyper genotyper(refgenome, options);
   stringstream ss;
   while (region_reader.GetNextRegion(&locus)) {
