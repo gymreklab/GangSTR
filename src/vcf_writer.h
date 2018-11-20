@@ -30,11 +30,12 @@ using namespace std;
 
 class VCFWriter {
  public:
-  VCFWriter(const std::string& _vcffile, const std::string& full_command, const vector<std::string>& sample_names);
-  void WriteRecord(const Locus& locus);
+  VCFWriter(const std::string& _vcffile, const std::string& full_command, const vector<std::string>& _sample_names);
+  void WriteRecord(Locus& locus);
   virtual ~VCFWriter();
  private:
   ofstream writer_;
+  vector<std::string> sample_names;
 };
 
 #endif  // SRC_VCF_WRITER_H__

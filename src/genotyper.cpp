@@ -26,11 +26,17 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 using namespace std;
 
 Genotyper::Genotyper(RefGenome& _refgenome,
-		    Options& _options) {
+		     Options& _options,
+		     std::vector<std::string> _sample_names,
+		     std::map<std::string,std::string> _rg_ids_to_sample) {
   refgenome = &_refgenome;
   options = &_options;
   read_extractor = new ReadExtractor(_options);
-  likelihood_maximizer = new LikelihoodMaximizer(_options);
+  sample_names = _sample_names;
+  rg_ids_to_sample = _rg_ids_to_sample;
+  for (size_t i=0; i<sample_names.size(); i++) {
+    sample_likelihood_maximizers[sample_names[i]] = new LikelihoodMaximizer(_options);
+  }
 }
 
 bool Genotyper::SetFlanks(Locus* locus) {
@@ -60,35 +66,19 @@ bool Genotyper::ProcessLocus(BamCramMultiReader* bamreader, Locus* locus) {
     return false;
   }
 
-  likelihood_maximizer->Reset();
+  for (size_t i=0; i<sample_names.size(); i++) {
+    sample_likelihood_maximizers[sample_names[i]]->Reset();
+  }
 
   // Load all read data
   if (options->verbose) {
     PrintMessageDieOnError("\tLoading read data", M_PROGRESS);
   }
-  if (!read_extractor->ExtractReads(bamreader, *locus, likelihood_maximizer->options->regionsize,
-				    likelihood_maximizer->options->min_match, likelihood_maximizer)) {
+  if (!read_extractor->ExtractReads(bamreader, *locus, options->regionsize,
+				    options->min_match, sample_likelihood_maximizers, rg_ids_to_sample)) {
     return false;
   }
 
-  locus->enclosing_reads = likelihood_maximizer->GetEnclosingDataSize();
-  locus->spanning_reads = likelihood_maximizer->GetSpanningDataSize();
-  locus->frr_reads = likelihood_maximizer->GetFRRDataSize();
-  locus->flanking_reads = likelihood_maximizer->GetFlankingDataSize();
-  // Temporary: This filtering step is ignored for implementing new insert size distribution model
-  // Set flags if only spanning reads available.
-  if (locus->frr_reads + locus->flanking_reads + locus->enclosing_reads < 4){
-    if (options->verbose) {
-      stringstream msg;
-      msg<<"\tNot enough reads extracted. Enclosing: "<<locus->enclosing_reads
-	 <<", Spanning: "<<locus->spanning_reads
-	 <<", FRR: "<<locus->frr_reads
-	 <<", Flanking: "<<locus->flanking_reads
-	 <<". Skipping locus (Temporarily ignored, going forward with genotyping)";
-      PrintMessageDieOnError(msg.str(), M_PROGRESS);
-    }
-    //return false;
-  }
 
   // Maximize the likelihood
   if (options->verbose) {
@@ -98,43 +88,46 @@ bool Genotyper::ProcessLocus(BamCramMultiReader* bamreader, Locus* locus) {
   int32_t ref_count = (int32_t)((locus->end-locus->start+1)/locus->motif.size());
   double min_negLike, lob1, lob2, hib1, hib2;
   bool resampled = false;
+  for (size_t i=0; i<sample_names.size(); i++) {
+    const std::string samp = sample_names[i];
+
   try {
-    if (!likelihood_maximizer->OptimizeLikelihood(read_len, 
+    if (!sample_likelihood_maximizers[samp]->OptimizeLikelihood(read_len, 
 						(int32_t)(locus->motif.size()),
-						ref_count, 
-						resampled, 
-						options->ploidy, 
-						0,
-						locus->offtarget_share,
-						&allele1, 
-						&allele2, 
-						&min_negLike)) {
-      return false;
+								ref_count, 
+								resampled, 
+								options->ploidy, 
+								0,
+								locus->offtarget_share,
+								&allele1, 
+								&allele2, 
+								&min_negLike)) {
+      locus->called[samp] = false;
     }
     
-    locus->allele1 = allele1;
-    locus->allele2 = allele2;
-    locus->min_neg_lik = min_negLike;
-    locus->enclosing_reads = likelihood_maximizer->GetEnclosingDataSize();
-    locus->spanning_reads = likelihood_maximizer->GetSpanningDataSize();
-    locus->frr_reads = likelihood_maximizer->GetFRRDataSize();
-    locus->flanking_reads = likelihood_maximizer->GetFlankingDataSize();
-    locus->depth = likelihood_maximizer->GetReadPoolSize();
+    locus->allele1[samp] = allele1;
+    locus->allele2[samp] = allele2;
+    locus->min_neg_lik[samp] = min_negLike;
+    locus->enclosing_reads[samp] = sample_likelihood_maximizers[samp]->GetEnclosingDataSize();
+    locus->spanning_reads[samp] = sample_likelihood_maximizers[samp]->GetSpanningDataSize();
+    locus->frr_reads[samp] = sample_likelihood_maximizers[samp]->GetFRRDataSize();
+    locus->flanking_reads[samp] = sample_likelihood_maximizers[samp]->GetFlankingDataSize();
+    locus->depth[samp] = sample_likelihood_maximizers[samp]->GetReadPoolSize();
     
     if (options->num_boot_samp > 0){
       if (options->verbose) {
 	PrintMessageDieOnError("\tGetting confidence intervals", M_PROGRESS);
       }
       try{
-	if (!likelihood_maximizer->GetConfidenceInterval(read_len, (int32_t)(locus->motif.size()),
-							 ref_count, allele1, allele2, *locus,
-							 &lob1, &hib1, &lob2, &hib2)) {
-	  return false;
+	if (!sample_likelihood_maximizers[samp]->GetConfidenceInterval(read_len, (int32_t)(locus->motif.size()),
+								       ref_count, allele1, allele2, *locus,
+								       &lob1, &hib1, &lob2, &hib2)) {
+	  locus->called[samp] = false;
 	}
-	locus->lob1 = lob1;
-	locus->lob2 = lob2;
-	locus->hib1 = hib1;
-	locus->hib2 = hib2;
+	locus->lob1[samp] = lob1;
+	locus->lob2[samp] = lob2;
+	locus->hib1[samp] = hib1;
+	locus->hib2[samp] = hib2;
 	
 
 	stringstream msg;
@@ -157,7 +150,7 @@ bool Genotyper::ProcessLocus(BamCramMultiReader* bamreader, Locus* locus) {
 	  msg<<"\tEncountered error("<< exc.what() <<") in likelihood maximization. Skipping locus";
 	  PrintMessageDieOnError(msg.str(), M_PROGRESS);
 	}
-	return false;
+	locus->called[samp] = false;
       }
     }
   }
@@ -167,25 +160,11 @@ bool Genotyper::ProcessLocus(BamCramMultiReader* bamreader, Locus* locus) {
       msg<<"\tEncountered error("<< exc.what() <<") in likelihood maximization. Skipping locus";
       PrintMessageDieOnError(msg.str(), M_PROGRESS);
     }
-    return false;
+    locus->called[samp] = false;
+    
   }
-
-  /*
-  double surfll = 0.0;
-  if (!likelihood_maximizer->GetNegLikelihoodSurface(1,600,
-						     1,600,
-						     read_len,
-						     locus->motif.size(),
-						     ref_count,
-						     0,
-						     &surfll)){
-    cerr << "False Yo!" << endl;
+  locus->called[samp] = true;
   }
-  cerr << surfll << endl;
-  cerr << exp(-min_negLike) / (exp(surfll) / 600 / 600) << endl;
-  // Overriding minimum neg likelihood with new score:
-  locus->min_neg_lik = exp(-min_negLike) / (exp(surfll) / 600 / 600);
-  */
   return true;
 }
 
@@ -211,5 +190,7 @@ void Genotyper::Debug(BamCramMultiReader* bamreader) {
 
 Genotyper::~Genotyper() {
   delete read_extractor;
-  delete likelihood_maximizer;
+  for (size_t i=0; i<sample_names.size(); i++) {
+    delete sample_likelihood_maximizers[sample_names[i]];
+  }
 }

@@ -38,19 +38,21 @@ ReadExtractor::ReadExtractor(const Options& options_) : options(options_) {
   populates data in the likelihood_maximizer
  */
 bool ReadExtractor::ExtractReads(BamCramMultiReader* bamreader,
-         const Locus& locus,
-         const int32_t& regionsize,
-         const int32_t& min_match, 
-         LikelihoodMaximizer* likelihood_maximizer) {
+				 const Locus& locus,
+				 const int32_t& regionsize,
+				 const int32_t& min_match, 
+				 std::map<std::string, LikelihoodMaximizer*> sample_likelihood_maximizers,
+				 std::map<std::string,std::string> rg_ids_to_sample) {
+
   // This will keep track of information for each read pair
   std::map<std::string, ReadPair> read_pairs;
-  
+
   if (!ProcessReadPairs(bamreader, locus, regionsize, min_match, &read_pairs)) {
     return false;
   }
+
   int32_t frr = 0, span = 0, encl = 0, flank = 0, offt = 0;
   if (read_pairs.size() == 0){
-    // TODO print error "Not enough extracted reads"
     PrintMessageDieOnError("\tNot enough reads extracted. Aborting..", M_PROGRESS);
     return false;
   }
@@ -65,14 +67,8 @@ bool ReadExtractor::ExtractReads(BamCramMultiReader* bamreader,
       if (iter->second.max_nCopy - 1 > 0){
 	bound_vals.push_back(iter->second.max_nCopy - 1);
       }
-	//if (iter->second.max_nCopy - 1 > max_bound){
-	//max_bound = iter->second.max_nCopy - 1;
-	//}
     } else if (iter->second.read_type == RC_BOUND){
       bound_vals.push_back(iter->second.data_value - 1);
-      //if (iter->second.data_value - 1 > max_bound){
-      //max_bound = iter->second.data_value -1;
-      //}
     } else if (iter->second.read_type == RC_ENCL){
       if (iter->second.data_value > max_enclose){
 	max_enclose = iter->second.data_value;
@@ -123,14 +119,10 @@ bool ReadExtractor::ExtractReads(BamCramMultiReader* bamreader,
     bound_thresh = read_cap + 5; // accept all bounding reads
   }
 
-  /*
-  cerr<<max_bound<<"\t"<<read_cap<<"\t"<<endl;
-  cerr << int(accept_FRR) << endl;
-  */
-
   /* Load data into likelihood maximizer */
   for (std::map<std::string, ReadPair>::const_iterator iter = read_pairs.begin();
        iter != read_pairs.end(); iter++) {
+    const std::string samp = rg_ids_to_sample[iter->second.rgid];
     /*
     if (iter->second.read_type != RC_DISCARD and iter->second.read_type != RC_UNKNOWN)
     {
@@ -150,7 +142,7 @@ bool ReadExtractor::ExtractReads(BamCramMultiReader* bamreader,
 		    << iter->second.data_value << "\t" 
 		    << iter->second.found_pair << std::endl;
         }
-        likelihood_maximizer->AddSpanningData(iter->second.data_value);
+	sample_likelihood_maximizers[samp]->AddSpanningData(iter->second.data_value);
         span++;
       }
       // In spanning case, we can also have flanking reads:
@@ -163,8 +155,8 @@ bool ReadExtractor::ExtractReads(BamCramMultiReader* bamreader,
 		    << "SPFLNK" << "\t" 
 		    << iter->second.max_nCopy - 1 << "\t" 
 		    << iter->second.found_pair << std::endl;
-  }
-        likelihood_maximizer->AddFlankingData(iter->second.max_nCopy-1); //-1 because flanking is always picked up +1
+	}
+	sample_likelihood_maximizers[samp]->AddFlankingData(iter->second.max_nCopy-1);
         flank++;
       }
     } else if (iter->second.read_type == RC_ENCL) {
@@ -177,7 +169,7 @@ bool ReadExtractor::ExtractReads(BamCramMultiReader* bamreader,
 		  << iter->second.data_value << "\t" 
 		  << iter->second.found_pair << std::endl;
       }
-      likelihood_maximizer->AddEnclosingData(iter->second.data_value);
+      sample_likelihood_maximizers[samp]->AddEnclosingData(iter->second.data_value);
       encl++;
     } else if (iter->second.read_type == RC_FRR) {
       if (accept_FRR && iter->second.data_value < options.dist_max - options.read_len){
@@ -190,7 +182,7 @@ bool ReadExtractor::ExtractReads(BamCramMultiReader* bamreader,
 		    << iter->second.data_value << "\t" 
 		    << iter->second.found_pair << std::endl;
 	}
-	likelihood_maximizer->AddFRRData(iter->second.data_value);
+        sample_likelihood_maximizers[samp]->AddFRRData(iter->second.data_value);
 	frr++;
       }
     } else if (iter->second.read_type == RC_BOUND and iter->second.data_value < bound_thresh) {
@@ -203,7 +195,7 @@ bool ReadExtractor::ExtractReads(BamCramMultiReader* bamreader,
 		  << iter->second.data_value - 1 << "\t" 
 		  << iter->second.found_pair << std::endl;
       }
-      likelihood_maximizer->AddFlankingData(iter->second.data_value - 1); // -1 because flanking is always picked up +1
+      sample_likelihood_maximizers[samp]->AddFlankingData(iter->second.data_value - 1); // -1 because flanking is always picked up +1
       flank++;
     } else if (iter->second.read_type == RC_OFFT){
       if (options.output_readinfo) {
@@ -215,14 +207,13 @@ bool ReadExtractor::ExtractReads(BamCramMultiReader* bamreader,
 		  << iter->second.data_value << "\t" 
 		  << iter->second.found_pair << std::endl;
       }
-      likelihood_maximizer->AddOffTargetData(iter->second.data_value);
+      sample_likelihood_maximizers[samp]->AddOffTargetData(iter->second.data_value);
       offt++;
     } else {
       continue;
     }
     
   }
-  //cerr << span << " " << encl << " " << frr << " " << flank << " " << offt << endl;
   return true;
 }
 
@@ -255,6 +246,8 @@ bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
   BamAlignment alignment;
 
   while (bamreader->GetNextAlignment(alignment)) {
+    std::string read_group;
+    std::string fname = alignment.file_;
     if (debug) {
       std::cerr << "Processing " << alignment.Name() << std::endl;
     }
@@ -263,7 +256,10 @@ bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
     if (alignment.IsSupplementary() || alignment.IsSecondary()) {
       continue;
     }
-
+    if (!alignment.GetStringTag("RG", read_group)) {
+      PrintMessageDieOnError("Could not find read group for " + alignment.Name(), M_WARNING);
+      continue;
+    }
 
     // Check if we've moved to a different file
     if (prev_file.compare(alignment.Filename()) != 0) {
@@ -366,6 +362,7 @@ bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
     
     if (FindDiscardedRead(alignment, chrom_ref_id, locus)) {
       ReadPair read_pair;
+      read_pair.rgid = fname + ":" + read_group;
       read_pair.read_type = RC_DISCARD;
       read_pair.read1 = alignment;
       read_pairs->insert(std::pair<std::string, ReadPair>(aln_key, read_pair));
@@ -381,6 +378,7 @@ bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
     int32_t insert_size;
     if (FindSpanningRead(alignment, chrom_ref_id, locus, &insert_size)) {
       ReadPair read_pair;
+      read_pair.rgid = fname + ":" + read_group;
       read_pair.read_type = RC_SPAN;
       read_pair.read1 = alignment;
       read_pair.data_value = insert_size;
@@ -404,7 +402,7 @@ bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
     SingleReadType srt;
     ProcessSingleRead(alignment, chrom_ref_id, locus, min_match, false,
           &data_value, &nCopy_value, &score_value, &read_type, &srt);
-
+    read_pair.rgid = fname + ":" + read_group;
     read_pair.read_type = read_type;
     read_pair.read1 = alignment;
     read_pair.data_value = data_value;
@@ -527,8 +525,10 @@ bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
 
       // Go through each alignment in the region
       while (bamreader->GetNextAlignment(alignment)) {
-	if (alignment.IsSecondary() or alignment.IsSupplementary())
-	  continue;
+	std::string read_group;
+	std::string fname = alignment.file_;
+	if (alignment.IsSecondary() or alignment.IsSupplementary()) {continue;}
+	if (!alignment.GetStringTag("RG", read_group)) {continue;}
 	// Set key to keep track of this mate pair
 	std::string aln_key = file_label + trim_alignment_name(alignment);
 	int32_t read_length = (int32_t)alignment.QueryBases().size();

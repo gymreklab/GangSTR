@@ -1,5 +1,5 @@
 ##fileformat=VCFv4.1
-##command=GangSTR-1.0 --bam tests/test.sorted.bam --ref /storage/resources/dbase/human/hg19/Homo_sapiens_assembly19.fasta --regions test.bed --out test
+##command=GangSTR-1.4 --bam /storage/resources/datasets/PlatinumGenomesDbGaP/sra/SRR4435260.bam,/storage/resources/datasets/PlatinumGenomesDbGaP/sra/SRR4435261.bam --ref /storage/resources/dbase/human/hg19/hg19.fa --regions test.bed --out test --verbose
 ##INFO=<ID=END,Number=1,Type=Integer,Description="End position of variant">
 ##INFO=<ID=RU,Number=1,Type=String,Description="Repeat motif">
 ##INFO=<ID=REF,Number=1,Type=Float,Description="Reference copy number">
@@ -7,8 +7,8 @@
 ##FORMAT=<ID=DP,Number=1,Type=Integer,Description="Read Depth">
 ##FORMAT=<ID=GB,Number=1,Type=String,Description="Genotype given in bp difference from reference">
 ##FORMAT=<ID=CI,Number=1,Type=String,Description="Confidence intervals">
-##FORMAT=<ID=RC,Number=1,Type=String,Description="Number of reads in each class (enclosing, spanning, FRR, bounding">
+##FORMAT=<ID=RC,Number=1,Type=String,Description="Number of reads in each class (enclosing, spanning, FRR, bounding)">
 ##FORMAT=<ID=Q,Number=1,Type=Float,Description="Min. negative likelihood">
 ##FORMAT=<ID=INS,Number=1,Type=String,Description="Insert size mean and stddev">
-#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	sample
-3	63898362	.	cagcagcagcagcagcagcagcagcagcag	cagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcag,cagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcag	.	.	END=63898391;RU=cag;REF=10	GT:DP:GB:CI:RC:Q:INS	1/2:189:20,74:20-20,69-81:14,72,40,63:928.626:502.433,48.6752
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	NA12887	NA12888
+chr3	63898362	.	cagcagcagcagcagcagcagcagcagcag	.	.	.	END=63898391;RU=cag;REF=10	GT:DP:GB:CI:RC:Q:INS	0,0:50:0,0:-3-0,-3-0:14,30,0,6:370.348:309.936,66.3921	0,0:46:0,0:0-0,0-0:9,31,0,6:349.616:309.936,66.3921

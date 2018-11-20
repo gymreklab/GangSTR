@@ -47,7 +47,8 @@ class ReadExtractor {
 		    const Locus& locus,
 		    const int32_t& regionsize,
 		    const int32_t& min_match, 
-		    LikelihoodMaximizer* likelihood_maximizer);
+		    std::map<std::string,LikelihoodMaximizer*> sample_likelihood_maximizers,
+		    std::map<std::string,std::string> rg_ids_to_sample);
 
  protected:
   // Trim alignment read names
@@ -91,8 +92,8 @@ class ReadExtractor {
 		  BamAlignment alignment, BamAlignment* matepair);
 
 private:
-const Options options;
-ofstream readfile_;
+  const Options options;
+  ofstream readfile_;
 };
 
 #endif  // SRC_READ_EXTRACTOR_H__

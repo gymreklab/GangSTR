@@ -35,7 +35,9 @@ class Genotyper {
   friend class GenotyperTest;
  public:
   Genotyper(RefGenome& _refgenome,
-	    Options& _options);
+	    Options& _options,
+	    std::vector<std::string> _sample_names,
+	    std::map<std::string, std::string> _rg_ids_to_sample);
   virtual ~Genotyper();
 
   bool ProcessLocus(BamCramMultiReader* bamreader, Locus* locus);
@@ -47,8 +49,10 @@ class Genotyper {
 
   RefGenome* refgenome;
   Options* options;
-  LikelihoodMaximizer* likelihood_maximizer;
+  std::map<std::string,LikelihoodMaximizer*> sample_likelihood_maximizers;
   ReadExtractor* read_extractor;
+  std::vector<std::string> sample_names;
+  std::map<std::string, std::string> rg_ids_to_sample;
 };
 
 #endif  // SRC_GENOTYPER_H__

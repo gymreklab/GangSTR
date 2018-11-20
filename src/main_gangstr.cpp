@@ -324,20 +324,21 @@ int main(int argc, char* argv[]) {
   BamCramMultiReader bamreader(options.bamfiles, options.reffa, merge_type);
 
   // Extract sample info
-  std::vector<std::string> rg_samples;
+  std::set<std::string> rg_samples;
   std::map<std::string, std::string> rg_ids_to_sample;
   if (!options.rg_sample_string.empty()) {
     std::vector<std::string> read_groups;
     split_by_delim(options.rg_sample_string, ',', read_groups);
     if (options.bamfiles.size() != read_groups.size()) {
-      PrintMessageDieOnError("Number of BAM files in --bams and samples in --bam-samps must match", M_ERROR);
+      PrintMessageDieOnError("Number of BAM files in --bam and samples in --bam-samps must match", M_ERROR);
       for (size_t i=0; i<options.bamfiles.size(); i++) {
 	rg_ids_to_sample[options.bamfiles[i]] = read_groups[i];
-	rg_samples.push_back(read_groups[i]);
+	rg_samples.insert(read_groups[i]);
       }
     }
   } else {
     for (size_t i=0; i<options.bamfiles.size(); i++) {
+      cerr << "Processing " << options.bamfiles[i] << endl;
       const std::vector<ReadGroup>& read_groups = bamreader.bam_header(i)->read_groups();
       if (read_groups.empty()) {
 	PrintMessageDieOnError("\tNo read group specified in BAM file", M_ERROR);
@@ -352,17 +353,20 @@ int main(int argc, char* argv[]) {
 	if (rg_ids_to_sample.find(rg_iter->GetID()) != rg_ids_to_sample.end()) {
 	  if (rg_ids_to_sample[rg_iter->GetID()].compare(rg_iter->GetSample()) != 0) {
 	    PrintMessageDieOnError("Read group id " + rg_iter->GetID() + " maps to more than one sample", M_ERROR);
+	  }
 	}
-	  rg_ids_to_sample[options.bamfiles[i]+rg_iter->GetID()] = rg_iter->GetSample();
-	  rg_samples.push_back(rg_iter->GetSample());
-	} 
-      }
+	PrintMessageDieOnError("Loading read group id " + rg_iter->GetID() + " for sample " + rg_iter->GetSample(), M_PROGRESS);
+	rg_ids_to_sample[options.bamfiles[i]+":"+rg_iter->GetID()] = rg_iter->GetSample();
+	rg_samples.insert(rg_iter->GetSample());
+      } 
     }
   }
-
+  // Put read groups in a vector
+  std::vector<std::string> rg_samples_v(rg_samples.begin(), rg_samples.end());
 
 
   // Extract information from bam file (read length, insert size distribution, ..)
+  // TODO change to do this separately per sample
   int32_t read_len;
   double mean, std_dev, coverage;
   BamInfoExtract bam_info(&options, &bamreader, &region_reader);
@@ -425,8 +429,8 @@ int main(int argc, char* argv[]) {
   // Process each region
   region_reader.Reset();
   RefGenome refgenome(options.reffa);
-  VCFWriter vcfwriter(options.outprefix + ".vcf", full_command, rg_samples);
-  Genotyper genotyper(refgenome, options);
+  VCFWriter vcfwriter(options.outprefix + ".vcf", full_command, rg_samples_v);
+  Genotyper genotyper(refgenome, options, rg_samples_v, rg_ids_to_sample);
   stringstream ss;
   while (region_reader.GetNextRegion(&locus)) {
     if (!options.chrom.empty() && locus.chrom != options.chrom) {continue;}
@@ -450,4 +454,4 @@ int main(int argc, char* argv[]) {
     }
     locus.Reset();
   };
-  }
+}
