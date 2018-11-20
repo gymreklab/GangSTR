@@ -37,7 +37,8 @@ class Genotyper {
   Genotyper(RefGenome& _refgenome,
 	    Options& _options,
 	    std::vector<std::string> _sample_names,
-	    std::map<std::string, std::string> _rg_ids_to_sample);
+	    std::map<std::string, std::string> _rg_ids_to_sample,
+	    bool _custom_read_groups);
   virtual ~Genotyper();
 
   bool ProcessLocus(BamCramMultiReader* bamreader, Locus* locus);
@@ -53,6 +54,7 @@ class Genotyper {
   ReadExtractor* read_extractor;
   std::vector<std::string> sample_names;
   std::map<std::string, std::string> rg_ids_to_sample;
+  bool custom_read_groups;
 };
 
 #endif  // SRC_GENOTYPER_H__

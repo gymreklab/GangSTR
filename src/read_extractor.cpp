@@ -42,12 +42,13 @@ bool ReadExtractor::ExtractReads(BamCramMultiReader* bamreader,
 				 const int32_t& regionsize,
 				 const int32_t& min_match, 
 				 std::map<std::string, LikelihoodMaximizer*> sample_likelihood_maximizers,
-				 std::map<std::string,std::string> rg_ids_to_sample) {
+				 std::map<std::string,std::string> rg_ids_to_sample,
+				 bool custom_read_groups) {
 
   // This will keep track of information for each read pair
   std::map<std::string, ReadPair> read_pairs;
 
-  if (!ProcessReadPairs(bamreader, locus, regionsize, min_match, &read_pairs)) {
+  if (!ProcessReadPairs(bamreader, locus, regionsize, min_match, &read_pairs, custom_read_groups)) {
     return false;
   }
 
@@ -221,8 +222,8 @@ bool ReadExtractor::ExtractReads(BamCramMultiReader* bamreader,
   Main function to decide what to do with each read pair
  */
 bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
-             const Locus& locus, const int32_t& regionsize, const int32_t& min_match,
-             std::map<std::string, ReadPair>* read_pairs) {
+				     const Locus& locus, const int32_t& regionsize, const int32_t& min_match,
+				     std::map<std::string, ReadPair>* read_pairs, bool custom_read_group) {
   if (locus.end < locus.start){
     // TODO print error "Not enough extracted reads"
     PrintMessageDieOnError("\tLocus end preceeds locus start. Aborting..", M_PROGRESS);
@@ -256,7 +257,7 @@ bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
     if (alignment.IsSupplementary() || alignment.IsSecondary()) {
       continue;
     }
-    if (!alignment.GetStringTag("RG", read_group)) {
+    if (!alignment.GetStringTag("RG", read_group) & !custom_read_group) {
       PrintMessageDieOnError("Could not find read group for " + alignment.Name(), M_WARNING);
       continue;
     }
@@ -362,7 +363,11 @@ bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
     
     if (FindDiscardedRead(alignment, chrom_ref_id, locus)) {
       ReadPair read_pair;
-      read_pair.rgid = fname + ":" + read_group;
+      if (custom_read_group) {
+	read_pair.rgid = fname;
+      } else {
+	read_pair.rgid = fname + ":" + read_group;
+      }
       read_pair.read_type = RC_DISCARD;
       read_pair.read1 = alignment;
       read_pairs->insert(std::pair<std::string, ReadPair>(aln_key, read_pair));
@@ -378,7 +383,11 @@ bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
     int32_t insert_size;
     if (FindSpanningRead(alignment, chrom_ref_id, locus, &insert_size)) {
       ReadPair read_pair;
-      read_pair.rgid = fname + ":" + read_group;
+      if (custom_read_group) {
+	read_pair.rgid = fname;
+      } else {
+	read_pair.rgid = fname + ":" + read_group;
+      }
       read_pair.read_type = RC_SPAN;
       read_pair.read1 = alignment;
       read_pair.data_value = insert_size;
@@ -402,7 +411,11 @@ bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
     SingleReadType srt;
     ProcessSingleRead(alignment, chrom_ref_id, locus, min_match, false,
           &data_value, &nCopy_value, &score_value, &read_type, &srt);
-    read_pair.rgid = fname + ":" + read_group;
+    if (custom_read_group) {
+      read_pair.rgid = fname;
+    } else {
+      read_pair.rgid = fname + ":" + read_group;
+    }
     read_pair.read_type = read_type;
     read_pair.read1 = alignment;
     read_pair.data_value = data_value;
@@ -528,7 +541,7 @@ bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
 	std::string read_group;
 	std::string fname = alignment.file_;
 	if (alignment.IsSecondary() or alignment.IsSupplementary()) {continue;}
-	if (!alignment.GetStringTag("RG", read_group)) {continue;}
+	if (!alignment.GetStringTag("RG", read_group) & !custom_read_group) {continue;}
 	// Set key to keep track of this mate pair
 	std::string aln_key = file_label + trim_alignment_name(alignment);
 	int32_t read_length = (int32_t)alignment.QueryBases().size();
@@ -536,6 +549,11 @@ bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
 	int32_t nCopy_value = 0;
 	ReadType read_type;
 	ReadPair read_pair;
+	if (custom_read_group) {
+	  read_pair.rgid = fname;
+	} else {
+	  read_pair.rgid = fname + ":" + read_group;
+	}
 	SingleReadType srt;
 	ProcessSingleRead(alignment, chrom_ref_id, locus, min_match, true,
 			  &data_value, &nCopy_value, &score_value, &read_type, &srt);

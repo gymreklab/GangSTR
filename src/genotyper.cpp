@@ -28,12 +28,14 @@ using namespace std;
 Genotyper::Genotyper(RefGenome& _refgenome,
 		     Options& _options,
 		     std::vector<std::string> _sample_names,
-		     std::map<std::string,std::string> _rg_ids_to_sample) {
+		     std::map<std::string,std::string> _rg_ids_to_sample,
+		     bool _custom_read_groups) {
   refgenome = &_refgenome;
   options = &_options;
   read_extractor = new ReadExtractor(_options);
   sample_names = _sample_names;
   rg_ids_to_sample = _rg_ids_to_sample;
+  custom_read_groups = _custom_read_groups;
   for (size_t i=0; i<sample_names.size(); i++) {
     sample_likelihood_maximizers[sample_names[i]] = new LikelihoodMaximizer(_options);
   }
@@ -75,7 +77,8 @@ bool Genotyper::ProcessLocus(BamCramMultiReader* bamreader, Locus* locus) {
     PrintMessageDieOnError("\tLoading read data", M_PROGRESS);
   }
   if (!read_extractor->ExtractReads(bamreader, *locus, options->regionsize,
-				    options->min_match, sample_likelihood_maximizers, rg_ids_to_sample)) {
+				    options->min_match, sample_likelihood_maximizers,
+				    rg_ids_to_sample, custom_read_groups)) {
     return false;
   }
 

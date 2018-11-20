@@ -324,17 +324,20 @@ int main(int argc, char* argv[]) {
   BamCramMultiReader bamreader(options.bamfiles, options.reffa, merge_type);
 
   // Extract sample info
+  bool custom_read_groups = false;
   std::set<std::string> rg_samples;
   std::map<std::string, std::string> rg_ids_to_sample;
   if (!options.rg_sample_string.empty()) {
+    custom_read_groups = true;
     std::vector<std::string> read_groups;
     split_by_delim(options.rg_sample_string, ',', read_groups);
     if (options.bamfiles.size() != read_groups.size()) {
       PrintMessageDieOnError("Number of BAM files in --bam and samples in --bam-samps must match", M_ERROR);
-      for (size_t i=0; i<options.bamfiles.size(); i++) {
-	rg_ids_to_sample[options.bamfiles[i]] = read_groups[i];
-	rg_samples.insert(read_groups[i]);
-      }
+    }
+    for (size_t i=0; i<options.bamfiles.size(); i++) {
+      PrintMessageDieOnError("Loading read group  " + read_groups[i] + " for file " + options.bamfiles[i], M_PROGRESS);
+      rg_ids_to_sample[options.bamfiles[i]] = read_groups[i];
+      rg_samples.insert(read_groups[i]);
     }
   } else {
     for (size_t i=0; i<options.bamfiles.size(); i++) {
@@ -430,7 +433,7 @@ int main(int argc, char* argv[]) {
   region_reader.Reset();
   RefGenome refgenome(options.reffa);
   VCFWriter vcfwriter(options.outprefix + ".vcf", full_command, rg_samples_v);
-  Genotyper genotyper(refgenome, options, rg_samples_v, rg_ids_to_sample);
+  Genotyper genotyper(refgenome, options, rg_samples_v, rg_ids_to_sample, custom_read_groups);
   stringstream ss;
   while (region_reader.GetNextRegion(&locus)) {
     if (!options.chrom.empty() && locus.chrom != options.chrom) {continue;}

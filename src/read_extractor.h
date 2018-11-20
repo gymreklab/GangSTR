@@ -48,7 +48,8 @@ class ReadExtractor {
 		    const int32_t& regionsize,
 		    const int32_t& min_match, 
 		    std::map<std::string,LikelihoodMaximizer*> sample_likelihood_maximizers,
-		    std::map<std::string,std::string> rg_ids_to_sample);
+		    std::map<std::string,std::string> rg_ids_to_sample,
+		    bool custom_read_groups);
 
  protected:
   // Trim alignment read names
@@ -59,7 +60,8 @@ class ReadExtractor {
 			const Locus& locus, 
 			const int32_t& regionsize,
 			const int32_t& min_match, 
-			std::map<std::string, ReadPair>* read_pairs);
+			std::map<std::string, ReadPair>* read_pairs,
+			bool custom_read_groups);
 
   // Implemented in BamInfoExtract. TODO delete
   // // Find insert size distribution
