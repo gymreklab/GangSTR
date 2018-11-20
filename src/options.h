@@ -33,6 +33,7 @@ class Options {
 
   // Input/output paths
   std::vector<std::string> bamfiles;
+  std::string rg_sample_string;
   std::string reffa;
   std::string regionsfile;
   std::string outprefix;

@@ -27,7 +27,7 @@ using namespace std;
 
 VCFWriter::VCFWriter(const std::string& _vcffile,
 		     const std::string& full_command,
-		     const std::string& sample_name) {
+		     const vector<std::string>& sample_names) {
   writer_.open(_vcffile.c_str());
   // Write header
   writer_ << "##fileformat=VCFv4.1" << std::endl;
@@ -42,7 +42,11 @@ VCFWriter::VCFWriter(const std::string& _vcffile,
   writer_ << "##FORMAT=<ID=RC,Number=1,Type=String,Description=\"Number of reads in each class (enclosing, spanning, FRR, bounding\">" << endl;
   writer_ << "##FORMAT=<ID=Q,Number=1,Type=Float,Description=\"Min. negative likelihood\">" << endl;
   writer_ << "##FORMAT=<ID=INS,Number=1,Type=String,Description=\"Insert size mean and stddev\">" << endl;
-  writer_ << "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\t" << sample_name << endl;
+  writer_ << "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT";
+  for (size_t i=0; i<sample_names.size(); i++) {
+    writer_ << "\t" << sample_names[i];
+  }
+  writer_ << endl;
   writer_.flush();
 }
 

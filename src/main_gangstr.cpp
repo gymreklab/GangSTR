@@ -22,6 +22,7 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 #include <stdlib.h>
 
 #include <iostream>
+#include <set>
 #include <sstream>
 
 //#include "src/bam_reader.h"
@@ -46,13 +47,14 @@ void show_help() {
 	   << "--regions <regions.bed> "
 	   << "--out <outprefix> "
 	   << "\n\n Required options:\n"
-	   << "\t" << "--bam         <file.bam>      " << "\t" << "BAM input file" << "\n"
+	   << "\t" << "--bam         <file.bam,[file2.bam]>" << "\t" << "Comma separated list of input BAM files" << "\n"
 	   << "\t" << "--ref         <genome.fa>     " << "\t" << "FASTA file for the reference genome" << "\n"
 	   << "\t" << "--regions     <regions.bed>   " << "\t" << "BED file containing TR coordinates" << "\n"
 	   << "\t" << "--out         <outprefix>     " << "\t" << "Prefix to name output files" << "\n"
 	   << "\n Additional general options:\n"
 	   << "\t" << "--genomewide                  " << "\t" << "Genome-wide mode" << "\n"
 	   << "\t" << "--chrom                       " << "\t" << "Only genotype regions on this chromosome" << "\n"
+           << "\t" << "--bam-samps   <string>        " << "\t" << "Comma separated list of sample IDs for --bam" << "\n"
 	   << "\n Options for different sequencing settings\n"
 	   << "\t" << "--readlength  <int>           " << "\t" << "Read length. Default: " << options.read_len << "\n"
 	   << "\t" << "--coverage    <float>         " << "\t" << "Average coverage. must be set for exome/targeted data. Default: " << options.coverage << "\n"
@@ -94,6 +96,7 @@ void show_help() {
 void parse_commandline_options(int argc, char* argv[], Options* options) {
   enum LONG_OPTIONS {
     OPT_BAMFILES,
+    OPT_BAMSAMP,
     OPT_CHROM,
     OPT_REFFA,
     OPT_REGIONS,
@@ -128,6 +131,7 @@ void parse_commandline_options(int argc, char* argv[], Options* options) {
   };
   static struct option long_options[] = {
     {"bam",         required_argument,  NULL, OPT_BAMFILES},
+    {"bam-samps",   required_argument,  NULL, OPT_BAMSAMP},
     {"chrom",       required_argument,  NULL, OPT_CHROM},
     {"ref",         required_argument,  NULL, OPT_REFFA},
     {"regions",     required_argument,  NULL, OPT_REGIONS},
@@ -170,6 +174,9 @@ void parse_commandline_options(int argc, char* argv[], Options* options) {
     case OPT_BAMFILES:
       options->bamfiles.clear();
       split_by_delim(optarg, ',', options->bamfiles);
+      break;
+    case OPT_BAMSAMP:
+      options->rg_sample_string = optarg;
       break;
     case OPT_CHROM:
       options->chrom = optarg;
@@ -316,23 +323,48 @@ int main(int argc, char* argv[]) {
   int merge_type = BamCramMultiReader::ORDER_ALNS_BY_FILE;
   BamCramMultiReader bamreader(options.bamfiles, options.reffa, merge_type);
 
-  // Extract information from bam file (read length, insert size distribution, ..)
-  int32_t read_len;
-  double mean, std_dev, coverage;
-  std::string sample_name = "sample";
-  const std::vector<ReadGroup>& read_groups = bamreader.bam_header()->read_groups();
-  if (read_groups.empty()) {
-    PrintMessageDieOnError("\tNo read group specified. Using generic smaple ID", M_WARNING);
-    sample_name = "testsample";
+  // Extract sample info
+  std::vector<std::string> rg_samples;
+  std::map<std::string, std::string> rg_ids_to_sample;
+  if (!options.rg_sample_string.empty()) {
+    std::vector<std::string> read_groups;
+    split_by_delim(options.rg_sample_string, ',', read_groups);
+    if (options.bamfiles.size() != read_groups.size()) {
+      PrintMessageDieOnError("Number of BAM files in --bams and samples in --bam-samps must match", M_ERROR);
+      for (size_t i=0; i<options.bamfiles.size(); i++) {
+	rg_ids_to_sample[options.bamfiles[i]] = read_groups[i];
+	rg_samples.push_back(read_groups[i]);
+      }
+    }
   } else {
-    for (std::vector<ReadGroup>::const_iterator rg_iter = read_groups.begin(); rg_iter != read_groups.end(); rg_iter++) {
-      if (rg_iter->HasSample()) {
-	sample_name = rg_iter->GetSample();
-	break; // For now, assume one sample present. TODO multi-sample
+    for (size_t i=0; i<options.bamfiles.size(); i++) {
+      const std::vector<ReadGroup>& read_groups = bamreader.bam_header(i)->read_groups();
+      if (read_groups.empty()) {
+	PrintMessageDieOnError("\tNo read group specified in BAM file", M_ERROR);
+      } 
+      for (std::vector<ReadGroup>::const_iterator rg_iter = read_groups.begin(); rg_iter != read_groups.end(); rg_iter++) {
+	if (!rg_iter->HasID()) {
+	  PrintMessageDieOnError("RG in BAM/CRAM header is lacking the ID tag", M_ERROR);
+	}
+	if (!rg_iter->HasSample()) {
+	  PrintMessageDieOnError("RG in BAM/CRAM header is lacking the SM tag",M_ERROR);
+	}
+	if (rg_ids_to_sample.find(rg_iter->GetID()) != rg_ids_to_sample.end()) {
+	  if (rg_ids_to_sample[rg_iter->GetID()].compare(rg_iter->GetSample()) != 0) {
+	    PrintMessageDieOnError("Read group id " + rg_iter->GetID() + " maps to more than one sample", M_ERROR);
+	}
+	  rg_ids_to_sample[options.bamfiles[i]+rg_iter->GetID()] = rg_iter->GetSample();
+	  rg_samples.push_back(rg_iter->GetSample());
+	} 
       }
     }
   }
 
+
+
+  // Extract information from bam file (read length, insert size distribution, ..)
+  int32_t read_len;
+  double mean, std_dev, coverage;
   BamInfoExtract bam_info(&options, &bamreader, &region_reader);
   if (options.genome_wide == true){
     PrintMessageDieOnError("\tRunning in whole genome mode", M_PROGRESS);
@@ -377,7 +409,7 @@ int main(int argc, char* argv[]) {
     }
     else{
       stringstream ss;
-      ss << "\tNonUniform mode selected. Not using coverage in compuations.";
+      ss << "\tNonUniform mode selected. Not using coverage in computations.";
       PrintMessageDieOnError(ss.str(), M_PROGRESS);
     }
     if (options.verbose) {
@@ -389,11 +421,11 @@ int main(int argc, char* argv[]) {
   if (options.dist_max == -1){
     options.dist_max = options.dist_mean + options.dist_sdev * 3;
   }
-
+  
   // Process each region
   region_reader.Reset();
   RefGenome refgenome(options.reffa);
-  VCFWriter vcfwriter(options.outprefix + ".vcf", full_command, sample_name);
+  VCFWriter vcfwriter(options.outprefix + ".vcf", full_command, rg_samples);
   Genotyper genotyper(refgenome, options);
   stringstream ss;
   while (region_reader.GetNextRegion(&locus)) {
@@ -401,20 +433,15 @@ int main(int argc, char* argv[]) {
     ss.str("");
     ss.clear();
     ss << "Processing " << locus.chrom << ":" << locus.start;
-    if (options.use_off == true){
+    PrintMessageDieOnError(ss.str(), M_PROGRESS);
+
+    if (options.use_off){
       locus.offtarget_share = 1.0;
     }
     else{
       locus.offtarget_share = 0.0;
     }
     
-    /*
-    for (std::vector<GenomeRegion>::iterator it = locus.offtarget_regions.begin();
-	 it != locus.offtarget_regions.end(); it++){
-      cerr << it->chrom << " " << it->start << " " << it->end << endl;
-    }
-    */
-    PrintMessageDieOnError(ss.str(), M_PROGRESS);
     locus.insert_size_mean = options.dist_mean;
     locus.insert_size_stddev = options.dist_sdev = std_dev;
 
@@ -423,4 +450,4 @@ int main(int argc, char* argv[]) {
     }
     locus.Reset();
   };
-}
+  }

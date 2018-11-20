@@ -40,6 +40,7 @@ Options::Options() {
   // verbose = false;
 
   // CACNA1A_47
+  rg_sample_string = "";
   reffa = "";
   regionsfile = "";
   outprefix = "";
