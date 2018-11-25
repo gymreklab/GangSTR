@@ -41,6 +41,7 @@ GangSTR_SOURCES = main_gangstr.cpp \
 	fastonebigheader.h \
 	read_extractor.h read_extractor.cpp \
 	bam_io.h bam_io.cpp \
+	sample_info.h sample_info.cpp \
 	stringops.h stringops.cpp \
 	read_pair.h read_pair.cpp \
 	realignment.h realignment.cpp \

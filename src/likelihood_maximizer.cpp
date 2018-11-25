@@ -30,17 +30,25 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 using namespace std;
 
 
-LikelihoodMaximizer::LikelihoodMaximizer(Options& _options) {
+LikelihoodMaximizer::LikelihoodMaximizer(const Options& _options, SampleInfo& _sample_info, std::string samp) {
   options = &_options;
 
-  enclosing_class_.SetOptions(*options);
-  frr_class_.SetOptions(*options);
-  spanning_class_.SetOptions(*options);
-  flanking_class_.SetOptions(*options);
-  resampled_enclosing_class_.SetOptions(*options);
-  resampled_frr_class_.SetOptions(*options);
-  resampled_spanning_class_.SetOptions(*options);
-  resampled_flanking_class_.SetOptions(*options);
+  Options lik_options; // new object specifically for this sample
+  lik_options.use_mean_dist = _sample_info.GetInsertMean(samp);
+  lik_options.use_mean_sdev = _sample_info.GetInsertSdev(samp);
+  lik_options.use_coverage = _sample_info.GetCoverage(samp);
+  lik_options.use_dist_pdf = _sample_info.GetDistPDF(samp);
+  lik_options.use_dist_cdf = _sample_info.GetDistCDF(samp);
+  lik_options.read_len = _sample_info.GetReadLength();
+
+  enclosing_class_.SetOptions(lik_options);
+  frr_class_.SetOptions(lik_options);
+  spanning_class_.SetOptions(lik_options);
+  flanking_class_.SetOptions(lik_options);
+  resampled_enclosing_class_.SetOptions(lik_options);
+  resampled_frr_class_.SetOptions(lik_options);
+  resampled_spanning_class_.SetOptions(lik_options);
+  resampled_flanking_class_.SetOptions(lik_options);
 
   // Set up output file
   if (options->output_bootstrap) {
@@ -59,21 +67,6 @@ LikelihoodMaximizer::LikelihoodMaximizer(Options& _options) {
   
   //offtarget_share = 0.0;
 }
-
-// // Not needed. since options are updated before creating likelihood maximizer object
-// TODO delete
-// void LikelihoodMaximizer::UpdateOptions(){
-  
-//   // std::cerr << options->dist_mean << ", " << options->dist_sdev << endl;
-//   enclosing_class_.SetOptions(*options);
-//   frr_class_.SetOptions(*options);
-//   spanning_class_.SetOptions(*options);
-//   flanking_class_.SetOptions(*options);
-//   resampled_enclosing_class_.SetOptions(*options);
-//   resampled_frr_class_.SetOptions(*options);
-//   resampled_spanning_class_.SetOptions(*options);
-//   resampled_flanking_class_.SetOptions(*options);
-// }
 
 void LikelihoodMaximizer::Reset() {
   enclosing_class_.Reset();
@@ -531,8 +524,8 @@ bool LikelihoodMaximizer::GetGenotypeNegLogLikelihood(const int32_t& allele1,
 						      const bool& resampled,
 						      double* gt_ll) {
   double frr_count_ll = 0.0, frr_ll, span_ll, encl_ll, flank_ll = 0.0;
-  double count_weight = options->coverage;
-  double cov = options -> coverage;
+  double count_weight = options->use_coverage;
+  double cov = options->use_coverage;
   bool use_cov = options -> use_cov;
   int frr_count, offtarget_count = offtarget_class_.GetDataSize();
 
@@ -570,7 +563,7 @@ bool LikelihoodMaximizer::GetGenotypeNegLogLikelihood(const int32_t& allele1,
 				       allele2,
 				       read_len, 
 				       motif_len, 
-				       options->coverage,
+				       options->use_coverage,
 				       options->ploidy, 
 				       2 * offtarget_count * offtarget_share, 
 				       &frr_count_ll);
@@ -605,7 +598,7 @@ bool LikelihoodMaximizer::GetGenotypeNegLogLikelihood(const int32_t& allele1,
 				       allele2,
 				       read_len, 
 				       motif_len, 
-				       options->coverage,
+				       options->use_coverage,
 				       options->ploidy, 
 				       2 * offtarget_count * offtarget_share, 
 				       &frr_count_ll);

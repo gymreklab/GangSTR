@@ -32,8 +32,6 @@ void Locus::Reset(){
   end = -1;
   period = -1;
 
-  insert_size_mean = -1.0;
-  insert_size_stddev = -1.0;
   allele1.clear();
   allele2.clear();
   lob1.clear();

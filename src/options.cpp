@@ -44,18 +44,14 @@ Options::Options() {
   reffa = "";
   regionsfile = "";
   outprefix = "";
-  dist_mean = -1;
-  dist_sdev = -1;
+  dist_mean.clear();
+  dist_sdev.clear();
   dist_distribution_size = 2000;
-  dist_pdf = new double[dist_distribution_size];
-  dist_cdf = new double[dist_distribution_size];
-  for (int i = 0; i < dist_distribution_size; i++){
-    dist_pdf[i] = 0;
-    dist_cdf[i] = 0;
-  }
-  coverage = -1;
+  coverage.clear();
+  use_mean_dist = 400;
+  use_mean_sdev = 100;
+  use_coverage = -1;
   read_len = -1;
-  dist_max = -1;
   min_score = 75;
   dist_man_set = false;
   stutter_up = 0.0364653;

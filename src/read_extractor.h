@@ -26,6 +26,7 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 #include "src/likelihood_maximizer.h"
 #include "src/options.h"
 #include "src/read_pair.h"
+#include "src/sample_info.h"
 
 #include <iostream>
 #include <fstream>
@@ -36,7 +37,7 @@ class ReadExtractor {
   friend class ReadExtractorTest;
   friend class Genotyper;
  public:
-  ReadExtractor(const Options& options_);
+  ReadExtractor(const Options& options_, SampleInfo sample_info_);
   virtual ~ReadExtractor();
     
   bool debug = false;
@@ -47,9 +48,7 @@ class ReadExtractor {
 		    const Locus& locus,
 		    const int32_t& regionsize,
 		    const int32_t& min_match, 
-		    std::map<std::string,LikelihoodMaximizer*> sample_likelihood_maximizers,
-		    std::map<std::string,std::string> rg_ids_to_sample,
-		    bool custom_read_groups);
+		    std::map<std::string,LikelihoodMaximizer*> sample_likelihood_maximizers);
 
  protected:
   // Trim alignment read names
@@ -95,6 +94,7 @@ class ReadExtractor {
 
 private:
   const Options options;
+  SampleInfo sample_info;
   ofstream readfile_;
 };
 

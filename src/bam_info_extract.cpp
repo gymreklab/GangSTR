@@ -21,9 +21,9 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 #include "src/bam_info_extract.h"
 #include <iostream>
 using namespace std;
-BamInfoExtract::BamInfoExtract(Options* options_,
-						BamCramMultiReader* bamreader_, 
-						RegionReader* region_reader_){
+BamInfoExtract::BamInfoExtract(const Options* options_,
+			       BamCramMultiReader* bamreader_, 
+			       RegionReader* region_reader_){
 	options = options_;
 	bamreader = bamreader_;
 	region_reader = region_reader_;	

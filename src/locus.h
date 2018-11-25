@@ -50,10 +50,6 @@ class Locus {
   std::vector<GenomeRegion> offtarget_regions;
   double offtarget_share;
 
-  // BAM info (TODO do this separately per sample)
-  double insert_size_mean;
-  double insert_size_stddev;
-
   // Fill in these fields - separate for each sample
   std::map<std::string,int> allele1;
   std::map<std::string,int> allele2;

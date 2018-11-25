@@ -23,21 +23,20 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 #include "src/genotyper.h"
 #include "src/mathops.h"
 
+#include <set>
 using namespace std;
 
 Genotyper::Genotyper(RefGenome& _refgenome,
 		     Options& _options,
-		     std::vector<std::string> _sample_names,
-		     std::map<std::string,std::string> _rg_ids_to_sample,
-		     bool _custom_read_groups) {
+		     SampleInfo& _sample_info) {
   refgenome = &_refgenome;
   options = &_options;
-  read_extractor = new ReadExtractor(_options);
-  sample_names = _sample_names;
-  rg_ids_to_sample = _rg_ids_to_sample;
-  custom_read_groups = _custom_read_groups;
-  for (size_t i=0; i<sample_names.size(); i++) {
-    sample_likelihood_maximizers[sample_names[i]] = new LikelihoodMaximizer(_options);
+  sample_info = &_sample_info;
+  read_extractor = new ReadExtractor(_options, *sample_info);
+  std::set<std::string> rg_samples = sample_info->GetSamples();
+  for (std::set<std::string>::iterator it=rg_samples.begin();
+       it != rg_samples.end(); it++) {
+    sample_likelihood_maximizers[*it] = new LikelihoodMaximizer(_options, *sample_info, *it);
   }
 }
 
@@ -58,7 +57,7 @@ bool Genotyper::SetFlanks(Locus* locus) {
 }
 
 bool Genotyper::ProcessLocus(BamCramMultiReader* bamreader, Locus* locus) {
-  int32_t read_len = options->read_len;
+  int32_t read_len = sample_info->GetReadLength();
 
   // Load preflank and postflank to locus
   if (options->verbose) {
@@ -68,8 +67,9 @@ bool Genotyper::ProcessLocus(BamCramMultiReader* bamreader, Locus* locus) {
     return false;
   }
 
-  for (size_t i=0; i<sample_names.size(); i++) {
-    sample_likelihood_maximizers[sample_names[i]]->Reset();
+  for (std::map<std::string, LikelihoodMaximizer*>::iterator it = sample_likelihood_maximizers.begin();
+       it != sample_likelihood_maximizers.end(); it++) {
+    it->second->Reset();
   }
 
   // Load all read data
@@ -77,8 +77,7 @@ bool Genotyper::ProcessLocus(BamCramMultiReader* bamreader, Locus* locus) {
     PrintMessageDieOnError("\tLoading read data", M_PROGRESS);
   }
   if (!read_extractor->ExtractReads(bamreader, *locus, options->regionsize,
-				    options->min_match, sample_likelihood_maximizers,
-				    rg_ids_to_sample, custom_read_groups)) {
+				    options->min_match, sample_likelihood_maximizers)) {
     return false;
   }
 
@@ -91,9 +90,10 @@ bool Genotyper::ProcessLocus(BamCramMultiReader* bamreader, Locus* locus) {
   int32_t ref_count = (int32_t)((locus->end-locus->start+1)/locus->motif.size());
   double min_negLike, lob1, lob2, hib1, hib2;
   bool resampled = false;
-  for (size_t i=0; i<sample_names.size(); i++) {
-    const std::string samp = sample_names[i];
-
+  std::set<std::string> rg_samples = sample_info->GetSamples();
+  for (std::set<std::string>::iterator it = rg_samples.begin();
+       it != rg_samples.end(); it++) {
+    const std::string samp = *it;
   try {
     if (!sample_likelihood_maximizers[samp]->OptimizeLikelihood(read_len, 
 						(int32_t)(locus->motif.size()),
@@ -193,7 +193,8 @@ void Genotyper::Debug(BamCramMultiReader* bamreader) {
 
 Genotyper::~Genotyper() {
   delete read_extractor;
-  for (size_t i=0; i<sample_names.size(); i++) {
-    delete sample_likelihood_maximizers[sample_names[i]];
+  for (std::map<std::string, LikelihoodMaximizer*>::iterator it = sample_likelihood_maximizers.begin();
+       it != sample_likelihood_maximizers.end(); it++) {
+    delete it->second;
   }
 }

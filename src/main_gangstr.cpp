@@ -33,6 +33,7 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 #include "src/options.h"
 #include "src/ref_genome.h"
 #include "src/region_reader.h"
+#include "src/sample_info.h"
 #include "src/stringops.h"
 #include "src/vcf_writer.h"
 
@@ -57,7 +58,7 @@ void show_help() {
            << "\t" << "--bam-samps   <string>        " << "\t" << "Comma separated list of sample IDs for --bam" << "\n"
 	   << "\n Options for different sequencing settings\n"
 	   << "\t" << "--readlength  <int>           " << "\t" << "Read length. Default: " << options.read_len << "\n"
-	   << "\t" << "--coverage    <float>         " << "\t" << "Average coverage. must be set for exome/targeted data. Default: " << options.coverage << "\n"
+	   << "\t" << "--coverage    <float>         " << "\t" << "Average coverage. must be set for exome/targeted data. Comma separated list to specify for each BAM" << "\n"
 	   << "\t" << "--nonuniform                  " << "\t" << "Indicate whether data has non-uniform coverage (i.e., exome)" << "\n"
 	   << "\n Advanced paramters for likelihood model:\n"
 	   << "\t" << "--frrweight   <float>         " << "\t" << "Weight for FRR reads. Default: " << options.frr_weight << "\n"
@@ -66,9 +67,8 @@ void show_help() {
 	   << "\t" << "--flankweight <float>         " << "\t" << "Weight for flanking reads. Default: " << options.flanking_weight << "\n"
 	   << "\t" << "--ploidy      <int>           " << "\t" << "Indicate whether data is haploid (1) or diploid (2). Default: " << options.ploidy << "\n"
 	   << "\t" << "--useofftarget               " << "\t" << "Use off target regions included in the BAM file." << "\n"
-	   << "\t" << "--insertmean  <float>         " << "\t" << "Fragment length mean. Default: " << options.dist_mean << "\n"
-	   << "\t" << "--insertsdev  <float>         " << "\t" << "Fragment length standard deviation. Default: " << options.dist_sdev << "\n"
-	   << "\t" << "--insertmax   <float>         " << "\t" << "Maximum insert size. Default " << options.dist_max << "\n"
+	   << "\t" << "--insertmean  <float>         " << "\t" << "Fragment length mean. Comma separated list to specify for each BAM separately." << "\n" 
+	   << "\t" << "--insertsdev  <float>         " << "\t" << "Fragment length standard deviation. Comma separated list to specify for each BAM separately. " << "\n"
 	   << "\t" << "--read-prob-mode              " << "\t" << "Use only read probability (ignore class probability)" << "\n"
 	   << "\t" << "--numbstrap   <int>           " << "\t" << "Number of bootstrap samples. Default: " << options.num_boot_samp << "\n"
 	   << "\n Parameters for local realignment:\n"
@@ -114,7 +114,6 @@ void parse_commandline_options(int argc, char* argv[], Options* options) {
     OPT_NONUNIF,
     OPT_INSMEAN,
     OPT_INSSDEV,
-    OPT_INSMAX,
     OPT_MINSCORE,
     OPT_MINMATCH,
     OPT_STUTUP,
@@ -149,7 +148,6 @@ void parse_commandline_options(int argc, char* argv[], Options* options) {
     {"useofftarget",no_argument,  NULL, OPT_USEOFF},
     {"insertmean",  required_argument,  NULL, OPT_INSMEAN},
     {"insertsdev",  required_argument,  NULL, OPT_INSSDEV},
-    {"insertmax",   required_argument,  NULL, OPT_INSMAX},
     {"minscore",    required_argument,  NULL, OPT_MINSCORE},
     {"minmatch",    required_argument,  NULL, OPT_MINMATCH},
     {"stutterup",   required_argument,  NULL, OPT_STUTUP},
@@ -165,6 +163,7 @@ void parse_commandline_options(int argc, char* argv[], Options* options) {
     {"version",     no_argument,        NULL, OPT_VERSION},
     {NULL,          no_argument,        NULL, 0},
   };
+  std::vector<std::string> dist_means_str, dist_sdev_str, coverage_str;
   int ch;
   int option_index = 0;
   ch = getopt_long(argc, argv, "hv?",
@@ -215,7 +214,11 @@ void parse_commandline_options(int argc, char* argv[], Options* options) {
       options->read_len = atoi(optarg);
       break;
     case OPT_COVERAGE:
-      options->coverage = atof(optarg);
+      split_by_delim(optarg, ',', coverage_str);
+      options->coverage.clear();
+      for (size_t i=0; i<coverage_str.size(); i++) {
+	options->coverage.push_back(atoi(coverage_str[i].c_str()));
+      }
       break;
     case OPT_NONUNIF:
       options->use_cov = false;
@@ -224,15 +227,20 @@ void parse_commandline_options(int argc, char* argv[], Options* options) {
       options->use_off = true;
       break;
     case OPT_INSMEAN:
-      options->dist_mean = atoi(optarg);
+      split_by_delim(optarg, ',', dist_means_str);
+      options->dist_mean.clear();
+      for (size_t i=0; i<dist_means_str.size(); i++) {
+	options->dist_mean.push_back(strtof(dist_means_str[i].c_str(), NULL));
+      }
       options->dist_man_set = true;
       break;
     case OPT_INSSDEV:
-      options->dist_sdev = atoi(optarg);
+      split_by_delim(optarg, ',', dist_sdev_str);
+      options->dist_sdev.clear();
+      for (size_t i=0; i<dist_sdev_str.size(); i++) {
+	options->dist_sdev.push_back(strtof(dist_sdev_str[i].c_str(), NULL));
+      }
       options->dist_man_set = true;
-      break;
-    case OPT_INSMAX:
-      options->dist_max = atoi(optarg);
       break;
     case OPT_MINSCORE:
       options->min_score = atoi(optarg);
@@ -324,116 +332,31 @@ int main(int argc, char* argv[]) {
   BamCramMultiReader bamreader(options.bamfiles, options.reffa, merge_type);
 
   // Extract sample info
-  bool custom_read_groups = false;
-  std::set<std::string> rg_samples;
-  std::map<std::string, std::string> rg_ids_to_sample;
+  SampleInfo sample_info;
   if (!options.rg_sample_string.empty()) {
-    custom_read_groups = true;
-    std::vector<std::string> read_groups;
-    split_by_delim(options.rg_sample_string, ',', read_groups);
-    if (options.bamfiles.size() != read_groups.size()) {
-      PrintMessageDieOnError("Number of BAM files in --bam and samples in --bam-samps must match", M_ERROR);
-    }
-    for (size_t i=0; i<options.bamfiles.size(); i++) {
-      PrintMessageDieOnError("Loading read group  " + read_groups[i] + " for file " + options.bamfiles[i], M_PROGRESS);
-      rg_ids_to_sample[options.bamfiles[i]] = read_groups[i];
-      rg_samples.insert(read_groups[i]);
+    if (!sample_info.SetCustomReadGroups(options)) {
+      PrintMessageDieOnError("Error setting custom read groups", M_ERROR);
     }
   } else {
-    for (size_t i=0; i<options.bamfiles.size(); i++) {
-      cerr << "Processing " << options.bamfiles[i] << endl;
-      const std::vector<ReadGroup>& read_groups = bamreader.bam_header(i)->read_groups();
-      if (read_groups.empty()) {
-	PrintMessageDieOnError("\tNo read group specified in BAM file", M_ERROR);
-      } 
-      for (std::vector<ReadGroup>::const_iterator rg_iter = read_groups.begin(); rg_iter != read_groups.end(); rg_iter++) {
-	if (!rg_iter->HasID()) {
-	  PrintMessageDieOnError("RG in BAM/CRAM header is lacking the ID tag", M_ERROR);
-	}
-	if (!rg_iter->HasSample()) {
-	  PrintMessageDieOnError("RG in BAM/CRAM header is lacking the SM tag",M_ERROR);
-	}
-	if (rg_ids_to_sample.find(rg_iter->GetID()) != rg_ids_to_sample.end()) {
-	  if (rg_ids_to_sample[rg_iter->GetID()].compare(rg_iter->GetSample()) != 0) {
-	    PrintMessageDieOnError("Read group id " + rg_iter->GetID() + " maps to more than one sample", M_ERROR);
-	  }
-	}
-	PrintMessageDieOnError("Loading read group id " + rg_iter->GetID() + " for sample " + rg_iter->GetSample(), M_PROGRESS);
-	rg_ids_to_sample[options.bamfiles[i]+":"+rg_iter->GetID()] = rg_iter->GetSample();
-	rg_samples.insert(rg_iter->GetSample());
-      } 
+    if (!sample_info.LoadReadGroups(options, bamreader)) {
+      PrintMessageDieOnError("Error loading read groups", M_ERROR);
     }
   }
-  // Put read groups in a vector
-  std::vector<std::string> rg_samples_v(rg_samples.begin(), rg_samples.end());
-
 
   // Extract information from bam file (read length, insert size distribution, ..)
-  // TODO change to do this separately per sample
-  int32_t read_len;
-  double mean, std_dev, coverage;
-  BamInfoExtract bam_info(&options, &bamreader, &region_reader);
-  if (options.genome_wide == true){
-    PrintMessageDieOnError("\tRunning in whole genome mode", M_PROGRESS);
+  if (!sample_info.ExtractBamInfo(options, bamreader, region_reader)) {
+    PrintMessageDieOnError("Error extracting info from BAM file", M_ERROR);
+    options.realignment_flanklen = sample_info.GetReadLength();
   }
-  if(options.read_len == -1){  // if read_len wasn't set, we need to extract from bam.
-    if (options.verbose) {
-      PrintMessageDieOnError("\tExtracting read length", M_PROGRESS);
-    }
-    if(!bam_info.GetReadLen(&read_len)){
-      PrintMessageDieOnError("No Locus contains enough reads to extract read length. (Possible mismatch in chromosome names)", M_ERROR);
-    }
-    options.read_len = read_len;
-    options.realignment_flanklen = read_len;
-    if (options.verbose) {
-      stringstream ss;
-      ss << "\tRead_Length=" << read_len;
-      PrintMessageDieOnError(ss.str(), M_PROGRESS);
-    }
-  }
-  region_reader.Reset();
-  if(options.dist_mean == -1 or options.dist_sdev == -1 or options.coverage == -1){
-    if (options.verbose) {
-      PrintMessageDieOnError("\tComputing insert size distribution and/or coverage", M_PROGRESS);
-    }
-    if(!bam_info.GetInsertSizeDistribution(&mean, &std_dev, &coverage, options.dist_pdf, options.dist_cdf)){
-      PrintMessageDieOnError("No Locus contains enough reads to extract insert size mean and standard deviation. (Possible mismatch in chromosome names)", M_ERROR);
-    }
-    if (options.dist_mean == -1 or options.dist_sdev == -1){
-      options.dist_mean = mean;
-      options.dist_sdev = std_dev;
-    }
-    if (options.use_cov){
-      if (options.coverage == -1){
-	if (coverage < 10){
-	  PrintMessageDieOnError("Low coverage or targeted data. Please set coverage manually.", M_ERROR);
-	}
-	options.coverage = coverage;
-      }
-      else{
-	coverage = options.coverage;
-      }
-    }
-    else{
-      stringstream ss;
-      ss << "\tNonUniform mode selected. Not using coverage in computations.";
-      PrintMessageDieOnError(ss.str(), M_PROGRESS);
-    }
-    if (options.verbose) {
-      stringstream ss;
-      ss << "\tMean=" << mean << " SD=" << std_dev<<" Cov="<<coverage;
-      PrintMessageDieOnError(ss.str(), M_PROGRESS);
-    }
-  }
-  if (options.dist_max == -1){
-    options.dist_max = options.dist_mean + options.dist_sdev * 3;
-  }
+  // Write out values found for each sample
+  sample_info.PrintSampleInfo();
   
   // Process each region
   region_reader.Reset();
   RefGenome refgenome(options.reffa);
-  VCFWriter vcfwriter(options.outprefix + ".vcf", full_command, rg_samples_v);
-  Genotyper genotyper(refgenome, options, rg_samples_v, rg_ids_to_sample, custom_read_groups);
+  VCFWriter vcfwriter(options.outprefix + ".vcf", full_command, sample_info);
+  Genotyper genotyper(refgenome, options, sample_info);
+
   stringstream ss;
   while (region_reader.GetNextRegion(&locus)) {
     if (!options.chrom.empty() && locus.chrom != options.chrom) {continue;}
@@ -448,9 +371,6 @@ int main(int argc, char* argv[]) {
     else{
       locus.offtarget_share = 0.0;
     }
-    
-    locus.insert_size_mean = options.dist_mean;
-    locus.insert_size_stddev = options.dist_sdev = std_dev;
 
     if (genotyper.ProcessLocus(&bamreader, &locus)) {
       vcfwriter.WriteRecord(locus);

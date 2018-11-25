@@ -28,8 +28,8 @@ using namespace std;
 
 VCFWriter::VCFWriter(const std::string& _vcffile,
 		     const std::string& full_command,
-		     const vector<std::string>& _sample_names) {
-  sample_names = _sample_names;
+		     SampleInfo& _sample_info) {
+  sample_info = &_sample_info;
   writer_.open(_vcffile.c_str());
   // Write header
   writer_ << "##fileformat=VCFv4.1" << std::endl;
@@ -45,8 +45,12 @@ VCFWriter::VCFWriter(const std::string& _vcffile,
   writer_ << "##FORMAT=<ID=Q,Number=1,Type=Float,Description=\"Min. negative likelihood\">" << endl;
   writer_ << "##FORMAT=<ID=INS,Number=1,Type=String,Description=\"Insert size mean and stddev\">" << endl;
   writer_ << "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT";
-  for (size_t i=0; i<sample_names.size(); i++) {
-    writer_ << "\t" << sample_names[i];
+  const std::set<std::string> rg_samples = sample_info->GetSamples();
+  sample_names.clear();
+  for (std::set<std::string>::iterator it=rg_samples.begin();
+       it != rg_samples.end(); it++) {
+    writer_ << "\t" << *it;
+    sample_names.push_back(*it);
   }
   writer_ << endl;
   writer_.flush();
@@ -123,9 +127,8 @@ void VCFWriter::WriteRecord(Locus& locus) {
 	    << (locus.lob2[samp]-refsize)*period << "-" 
 	    << (locus.hib2[samp]-refsize)*period << ":"
       	    << locus.enclosing_reads[samp] << "," << locus.spanning_reads[samp] << "," << locus.frr_reads[samp] << "," << locus.flanking_reads[samp] << ":"
-          << locus.min_neg_lik[samp] << ":"
-          << locus.insert_size_mean << "," << locus.insert_size_stddev;
-
+	    << locus.min_neg_lik[samp] << ":"
+	    << sample_info->GetInsertMean(samp) << "<" << sample_info->GetInsertSdev(samp);
   }
   writer_ << endl;
   writer_.flush();

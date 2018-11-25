@@ -29,18 +29,19 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 
 class BamInfoExtract{
 public:
-	BamInfoExtract(Options* options_,
-						BamCramMultiReader* bamreader_, 
-						RegionReader* region_reader_);
+	BamInfoExtract(const Options* options_,
+		       BamCramMultiReader* bamreader_, 
+		       RegionReader* region_reader_);
 	~BamInfoExtract();
 	bool GetReadLen(int32_t* read_len);
+	// TODO change to deal with per sample
 	bool GetInsertSizeDistribution(double* mean, double* std_dev, double *coverage,
 				       double* dist_pdf, double* dist_cdf);
 private:
-	Options* options;
+	const Options* options;
+	BamCramMultiReader* bamreader;
 	RegionReader* region_reader;
 	Locus locus;
-	BamCramMultiReader* bamreader;
 };
 
 
