@@ -1,5 +1,5 @@
 ##fileformat=VCFv4.1
-##command=GangSTR-1.4 --bam /storage/resources/datasets/PlatinumGenomesDbGaP/sra/SRR4435260.bam,/storage/resources/datasets/PlatinumGenomesDbGaP/sra/SRR4435261.bam --ref /storage/resources/dbase/human/hg19/hg19.fa --bam-samps SRR4435260,SRR4435261 --regions test.bed --out test --verbose
+##command=GangSTR-1.4.38-cc12-dirty --bam /storage/resources/datasets/PlatinumGenomesDbGaP/sra/SRR4435260.bam,/storage/resources/datasets/PlatinumGenomesDbGaP/sra/SRR4435261.bam --ref /storage/resources/dbase/human/hg19/hg19.fa --bam-samps SRR4435260,SRR4435261 --regions test.bed --out test --verbose
 ##INFO=<ID=END,Number=1,Type=Integer,Description="End position of variant">
 ##INFO=<ID=RU,Number=1,Type=String,Description="Repeat motif">
 ##INFO=<ID=REF,Number=1,Type=Float,Description="Reference copy number">
@@ -11,4 +11,4 @@
 ##FORMAT=<ID=Q,Number=1,Type=Float,Description="Min. negative likelihood">
 ##FORMAT=<ID=INS,Number=1,Type=String,Description="Insert size mean and stddev">
 #CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	SRR4435260	SRR4435261
-chr3	63898362	.	cagcagcagcagcagcagcagcagcagcag	.	.	.	END=63898391;RU=cag;REF=10	GT:DP:GB:CI:RC:Q:INS	0,0:50:0,0:-3-0,-3-0:14,30,0,6:370.348:309.936,66.3921	0,0:46:0,0:0-0,0-0:9,31,0,6:349.616:309.936,66.3921
+chr3	63898362	.	cagcagcagcagcagcagcagcagcagcag	.	.	.	END=63898391;RU=cag;REF=10	GT:DP:GB:CI:RC:Q:INS	0,0:50:0,0:-3-0,-3-0:14,30,0,6:370.348:309.936<66.3921	0,0:46:0,0:0-0,0-0:9,31,0,6:349.616:309.936<66.3921
