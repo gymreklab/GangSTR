@@ -34,16 +34,16 @@ ReadClass::ReadClass() {
 }
 
 void ReadClass::SetOptions(const Options& options) {
-  dist_mean = options.dist_mean;
-  dist_sdev = options.dist_sdev;
+  dist_mean = options.use_mean_dist;
+  dist_sdev = options.use_mean_sdev;
   flank_len = options.flanklen;
   stutter_up = options.stutter_up;
   stutter_down = options.stutter_down;
   stutter_p = options.stutter_p;
   read_prob_mode = options.read_prob_mode;
   dist_distribution_size = options.dist_distribution_size;
-  dist_pdf = options.dist_pdf;
-  dist_cdf = options.dist_cdf;
+  dist_pdf = options.use_dist_pdf;
+  dist_cdf = options.use_dist_cdf;
 }
 
 void ReadClass::AddData(const int32_t& data) {

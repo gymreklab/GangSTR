@@ -21,6 +21,7 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef SRC_LOCUS_H__
 #define SRC_LOCUS_H__
 
+#include <map>
 #include <string>
 #include <vector>
 
@@ -44,26 +45,25 @@ class Locus {
   std::string pre_flank;
   std::string post_flank;
 
-  // Fill in these fields
-  double insert_size_mean;
-  double insert_size_stddev;
-  int allele1;
-  int allele2;
-  int lob1;
-  int hib1;
-  int lob2;
-  int hib2;
-  double min_neg_lik;
-  size_t enclosing_reads;
-  size_t spanning_reads;
-  size_t frr_reads;
-  size_t flanking_reads;
-  size_t depth;
-
   // Off target loci
   bool offtarget_set;
   std::vector<GenomeRegion> offtarget_regions;
   double offtarget_share;
+
+  // Fill in these fields - separate for each sample
+  std::map<std::string,int> allele1;
+  std::map<std::string,int> allele2;
+  std::map<std::string,int> lob1;
+  std::map<std::string,int> hib1;
+  std::map<std::string,int> lob2;
+  std::map<std::string,int> hib2;
+  std::map<std::string,double> min_neg_lik;
+  std::map<std::string,size_t> enclosing_reads;
+  std::map<std::string,size_t> spanning_reads;
+  std::map<std::string,size_t> frr_reads;
+  std::map<std::string,size_t> flanking_reads;
+  std::map<std::string,size_t> depth;
+  std::map<std::string,bool> called;
 };
 
 #endif  // SRC_LOCUS_H__

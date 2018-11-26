@@ -26,6 +26,7 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 #include "src/likelihood_maximizer.h"
 #include "src/options.h"
 #include "src/read_pair.h"
+#include "src/sample_info.h"
 
 #include <iostream>
 #include <fstream>
@@ -36,7 +37,7 @@ class ReadExtractor {
   friend class ReadExtractorTest;
   friend class Genotyper;
  public:
-  ReadExtractor(const Options& options_);
+  ReadExtractor(const Options& options_, SampleInfo sample_info_);
   virtual ~ReadExtractor();
     
   bool debug = false;
@@ -47,7 +48,7 @@ class ReadExtractor {
 		    const Locus& locus,
 		    const int32_t& regionsize,
 		    const int32_t& min_match, 
-		    LikelihoodMaximizer* likelihood_maximizer);
+		    std::map<std::string,LikelihoodMaximizer*> sample_likelihood_maximizers);
 
  protected:
   // Trim alignment read names
@@ -58,7 +59,8 @@ class ReadExtractor {
 			const Locus& locus, 
 			const int32_t& regionsize,
 			const int32_t& min_match, 
-			std::map<std::string, ReadPair>* read_pairs);
+			std::map<std::string, ReadPair>* read_pairs,
+			bool custom_read_groups);
 
   // Implemented in BamInfoExtract. TODO delete
   // // Find insert size distribution
@@ -91,8 +93,9 @@ class ReadExtractor {
 		  BamAlignment alignment, BamAlignment* matepair);
 
 private:
-const Options options;
-ofstream readfile_;
+  const Options options;
+  SampleInfo sample_info;
+  ofstream readfile_;
 };
 
 #endif  // SRC_READ_EXTRACTOR_H__

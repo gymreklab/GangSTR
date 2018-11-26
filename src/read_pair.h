@@ -40,6 +40,7 @@ class ReadPair {
   ReadPair();
   virtual ~ReadPair();
 
+  std::string rgid;
   BamAlignment read1;
   BamAlignment read2;
   ReadType read_type;

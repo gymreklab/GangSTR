@@ -25,16 +25,20 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 #include <fstream>
 
 #include "src/locus.h"
+#include "src/sample_info.h"
 
 using namespace std;
 
 class VCFWriter {
  public:
-  VCFWriter(const std::string& _vcffile, const std::string& full_command, const std::string& sample_name);
-  void WriteRecord(const Locus& locus);
+  VCFWriter(const std::string& _vcffile, const std::string& full_command,
+	    SampleInfo& _sample_info);
+  void WriteRecord(Locus& locus);
   virtual ~VCFWriter();
  private:
   ofstream writer_;
+  std::vector<std::string> sample_names;
+  SampleInfo* sample_info;
 };
 
 #endif  // SRC_VCF_WRITER_H__

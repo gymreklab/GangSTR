@@ -18,6 +18,8 @@ You should have received a copy of the GNU General Public License
 along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <set>
+
 #include "src/options.h"
 #include "src/region_reader.h"
 #include "src/locus.h"
@@ -29,18 +31,24 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 
 class BamInfoExtract{
 public:
-	BamInfoExtract(Options* options_,
-						BamCramMultiReader* bamreader_, 
-						RegionReader* region_reader_);
+	BamInfoExtract(const Options* options_,
+		       BamCramMultiReader* bamreader_, 
+		       RegionReader* region_reader_);
 	~BamInfoExtract();
 	bool GetReadLen(int32_t* read_len);
-	bool GetInsertSizeDistribution(double* mean, double* std_dev, double *coverage,
-				       double* dist_pdf, double* dist_cdf);
-private:
-	Options* options;
+	// TODO change to deal with per sample
+	bool GetInsertSizeDistribution(std::map<std::string, double>* sample_to_meandist,
+				       std::map<std::string, double>* sample_to_sdev,
+				       std::map<std::string, double>* sample_to_coverage,
+				       std::map<std::string, double*>* sample_to_pdf,
+				       std::map<std::string, double*>* sample_to_cdf,
+				       const std::set<std::string> samples,
+				       const std::map<std::string, std::string> rg_ids_to_sample);
+ private:
+	const Options* options;
+	BamCramMultiReader* bamreader;
 	RegionReader* region_reader;
 	Locus locus;
-	BamCramMultiReader* bamreader;
 };
 
 

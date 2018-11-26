@@ -29,6 +29,7 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 #include "src/spanning_class.h"
 #include "src/read_pair.h"
 #include "src/locus.h"
+#include "src/sample_info.h"
 #include "gsl/gsl_vector.h"
 #include "gsl/gsl_rng.h"
 #include "gsl/gsl_randist.h"
@@ -48,7 +49,7 @@ struct ReadRecord{
 class LikelihoodMaximizer {
  friend class Genotyper;
  public:
-  LikelihoodMaximizer(Options& _options);
+ LikelihoodMaximizer(const Options& _options, SampleInfo& _sample_info, std::string samp);
   // LikelihoodMaximizer(const LikelihoodMaximizer& lm_obj); // copy constructor
   virtual ~LikelihoodMaximizer();
 
@@ -151,11 +152,6 @@ class LikelihoodMaximizer {
 			     const Locus& locus,
 			     double* lob1, double* hib1, double* lob2, double* hib2);
 
-  // // Not needed. since options are updated before creating likelihood maximizer object
-  // // TODO delete
-  // //Update read class options
-  // void UpdateOptions();
-
   // Print read pool
   void PrintReadPool();
 
@@ -164,7 +160,7 @@ class LikelihoodMaximizer {
 
  protected:
   // Other params -> Made public for gslNegLikelihood to have access
-  Options* options;
+  const Options* options;
 
  private:
   EnclosingClass enclosing_class_;
