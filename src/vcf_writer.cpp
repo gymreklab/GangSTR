@@ -39,8 +39,8 @@ VCFWriter::VCFWriter(const std::string& _vcffile,
   writer_ << "##INFO=<ID=REF,Number=1,Type=Float,Description=\"Reference copy number\">" << endl;
   writer_ << "##FORMAT=<ID=GT,Number=1,Type=String,Description=\"Genotype\">" << endl;
   writer_ << "##FORMAT=<ID=DP,Number=1,Type=Integer,Description=\"Read Depth\">" << endl;
-  writer_ << "##FORMAT=<ID=GB,Number=1,Type=String,Description=\"Genotype given in bp difference from reference\">" << endl;
-  writer_ << "##FORMAT=<ID=CI,Number=1,Type=String,Description=\"Confidence intervals\">" << endl;
+  writer_ << "##FORMAT=<ID=REPCN,Number=1,Type=String,Description=\"Genotype given in number of copies of the repeat motif\">" << endl;
+  writer_ << "##FORMAT=<ID=REPCI,Number=1,Type=String,Description=\"Confidence intervals\">" << endl;
   writer_ << "##FORMAT=<ID=RC,Number=1,Type=String,Description=\"Number of reads in each class (enclosing, spanning, FRR, bounding)\">" << endl;
   writer_ << "##FORMAT=<ID=Q,Number=1,Type=Float,Description=\"Min. negative likelihood\">" << endl;
   writer_ << "##FORMAT=<ID=INS,Number=1,Type=String,Description=\"Insert size mean and stddev\">" << endl;
@@ -105,7 +105,7 @@ void VCFWriter::WriteRecord(Locus& locus) {
 	  << "END=" << locus.end << ";"
 	  << "RU=" << locus.motif << ";"
 	  << "REF=" << refsize << "\t"
-	  << "GT:DP:GB:CI:RC:Q:INS";
+	  << "GT:DP:REPCN:REPCI:RC:Q:INS";
   
   // Write info for each sample
   stringstream gt_str;
@@ -117,15 +117,20 @@ void VCFWriter::WriteRecord(Locus& locus) {
       continue;
     }
     gt_str.str("");
-    gt_str << alt_length_to_ind[locus.allele1[samp]] << "," << alt_length_to_ind[locus.allele2[samp]];
+    gt_str << alt_length_to_ind[locus.allele1[samp]] << "/" << alt_length_to_ind[locus.allele2[samp]];
     writer_ << "\t"
 	    << gt_str.str() << ":"
 	    << locus.depth[samp] << ":"
-	    << (locus.allele1[samp]-refsize)*period << "," <<  (locus.allele2[samp]-refsize)*period << ":"
-	    << (locus.lob1[samp]-refsize)*period << "-" 
-	    << (locus.hib1[samp]-refsize)*period << "," 
-	    << (locus.lob2[samp]-refsize)*period << "-" 
-	    << (locus.hib2[samp]-refsize)*period << ":"
+      //	    << (locus.allele1[samp]-refsize)*period << "," <<  (locus.allele2[samp]-refsize)*period << ":"
+      //	    << (locus.lob1[samp]-refsize)*period << "-" 
+      //	    << (locus.hib1[samp]-refsize)*period << "," 
+      //	    << (locus.lob2[samp]-refsize)*period << "-" 
+      //	    << (locus.hib2[samp]-refsize)*period << ":"
+	    << locus.allele1[samp] << "," <<  locus.allele2[samp] << ":"
+      	    << locus.lob1[samp] << "-" 
+	    << locus.hib1[samp] << "," 
+	    << locus.lob2[samp] << "-" 
+	    << locus.hib2[samp] << ":"
       	    << locus.enclosing_reads[samp] << "," << locus.spanning_reads[samp] << "," << locus.frr_reads[samp] << "," << locus.flanking_reads[samp] << ":"
 	    << locus.min_neg_lik[samp] << ":"
 	    << sample_info->GetInsertMean(samp) << "<" << sample_info->GetInsertSdev(samp);

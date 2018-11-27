@@ -118,11 +118,7 @@ bool expansion_aware_realign(const std::string& seq,
     if (!striped_smith_waterman(var_realign_string, seq, qual, &current_start_pos, &current_end_pos, &current_score, &current_num_mismatch)) {
       return false;
     }
-    /*
-    if (seq == "cacatggatgtgaactctgtcctgataggtccccctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgccgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgctgct")
-      cerr <<"\n>\n"<< current_score << " " << prev_score << " " << prev_prev_score << " "
-	   <<"\n>"<<var_realign_string<<endl<<seq<<"\n"<< endl;
-    */
+    
 
     // Flank match check
     // Preflank
@@ -424,7 +420,7 @@ bool classify_realigned_read(const std::string& seq,
   if ((end_pos >= start_str-MARGIN) && (end_pos <= end_str+MARGIN)) {
     end_in_str = true;
   }
-
+    
   
   // Check if perfect flanks exist:
   if (fm_start == FM_COMPLETE && fm_end == FM_COMPLETE){

@@ -141,7 +141,8 @@ void SampleInfo::PrintSampleInfo() {
     ss << *it << "\n"
        << "\tCoverage=" << sample_to_coverage[*it] << "\n"
        << "\tInsMean=" << sample_to_meandist[*it] << "\n"
-       << "\tInsSdev=" << sample_to_sdev[*it] << "\n";
+       << "\tInsSdev=" << sample_to_sdev[*it] << "\n"
+       <<"\tReadLen="<< read_len << "\n";
   }
   PrintMessageDieOnError(ss.str(), M_PROGRESS);
 }

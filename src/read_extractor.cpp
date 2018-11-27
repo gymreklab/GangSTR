@@ -297,7 +297,7 @@ bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
         int32_t nCopy_value = 0;
         ReadType read_type;
         SingleReadType srt;
-
+	
         ProcessSingleRead(alignment, chrom_ref_id, locus, min_match, false,
               &data_value, &nCopy_value, &score_value, &read_type, &srt);
 	
@@ -401,6 +401,7 @@ bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
     SingleReadType srt;
     ProcessSingleRead(alignment, chrom_ref_id, locus, min_match, false,
           &data_value, &nCopy_value, &score_value, &read_type, &srt);
+
     if (custom_read_group) {
       read_pair.rgid = fname;
     } else {
@@ -448,8 +449,7 @@ bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
     SingleReadType srt;
     ProcessSingleRead(matepair, chrom_ref_id, locus, min_match, false,
           &data_value, &nCopy_value, &score_value, &read_type, &srt);
-    if (matepair.Name() == "CompMultiLoc_7_cov70_readLen_150_ref_hg38_390_altAllele_5976_6321_0:0:0_1:0:0_23e")
-      cerr << "HAHAHA\n\n\n" << endl;
+
     int32_t read_length = (int32_t)matepair.QueryBases().size();
     if (debug) {
       std::cerr << "Processed mate, found " << read_type << " " << data_value << std::endl;
@@ -730,10 +730,7 @@ bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
 			       fm_start, fm_end, srt)) {
     return false;
   }
-  /*
-  if (alignment.Name() == "CompMultiLoc_7_cov70_readLen_150_ref_hg38_150_altAllele_4650_5115_3:1:0_0:1:0_226")
-    cerr << "INSIDE!\t"<<seq << endl<<nCopy<<"\t"<<score<<endl<<endl;
-  */
+
   
   if (*srt == SR_UNKNOWN){
     *nCopy_value = 0;
