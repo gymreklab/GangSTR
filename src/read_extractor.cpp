@@ -454,7 +454,6 @@ bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
     if (debug) {
       std::cerr << "Processed mate, found " << read_type << " " << data_value << std::endl;
     }
-     
     // We need to check srt, because rescued reads will be classified as RC_UNKNOWN
     // ^^reason: They originate from a different chrom that ProcessSingleRead cannot deal with
      if ((read_type == RC_FRR || srt == SR_IRR || srt == SR_UM_POT_IRR)          // if new guess is FRR
@@ -665,14 +664,16 @@ bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
 				      SingleReadType* srt) {
 
   /* Pull out sample ID so can get mean/sdev */
-  std::string sample, rgid;
-  if (!alignment.GetStringTag("RG", rgid)) {
+  std::string sample, rgid, rgtag;
+  if (!alignment.GetStringTag("RG", rgtag)) {
     if (sample_info.GetIsCustomRG()) {
       rgid = alignment.file_;
     } else {
       PrintMessageDieOnError("Could not find read ID " + alignment.Name(), M_ERROR);
     }
   } 
+  if(!sample_info.GetIsCustomRG())
+    rgid = alignment.file_ + ':' + rgtag;
   sample = sample_info.GetSampleFromID(rgid);
 
   *srt = SR_UNKNOWN;
@@ -731,7 +732,6 @@ bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
     return false;
   }
 
-  
   if (*srt == SR_UNKNOWN){
     *nCopy_value = 0;
   }  

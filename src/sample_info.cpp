@@ -33,6 +33,7 @@ bool SampleInfo::SetCustomReadGroups(const Options& options) {
   custom_read_groups = true;
   std::vector<std::string> read_groups;
   split_by_delim(options.rg_sample_string, ',', read_groups);
+
   if (options.bamfiles.size() != read_groups.size()) {
     PrintMessageDieOnError("Number of BAM files in --bam and samples in --bam-samps must match", M_ERROR);
   }
@@ -86,6 +87,7 @@ bool SampleInfo::ExtractBamInfo(const Options& options, BamCramMultiReader& bamr
       PrintMessageDieOnError("Error extracting insert size and coverage info", M_ERROR);
     }
   }
+
   // Deal with setting custom ins/coverages per BAM file
   if (!options.dist_mean.empty() & !options.dist_sdev.empty()) {
     if (options.dist_mean.size() != options.dist_sdev.size()) {
@@ -156,6 +158,10 @@ const std::set<std::string> SampleInfo::GetSamples() {
 }
 
 const double SampleInfo::GetInsertMean(std::string sample) {
+  for (map<std::string,double>::iterator it = sample_to_meandist.begin(); 
+       it != sample_to_meandist.end(); ++it){
+    //cerr << it->first << endl;
+  } 
   return sample_to_meandist[sample];
 }
 
@@ -180,6 +186,10 @@ const bool SampleInfo::GetIsCustomRG() {
 }
 
 const std::string SampleInfo::GetSampleFromID(const std::string& rgid) {
+  for (map<std::string,std::string>::iterator it = rg_ids_to_sample.begin(); 
+       it != rg_ids_to_sample.end(); ++it){
+    //cerr << it->first << " " << it->second<< endl;
+  } 
   return rg_ids_to_sample[rgid];
 }
 
