@@ -161,8 +161,8 @@ class LikelihoodMaximizer {
  protected:
   // Other params -> Made public for gslNegLikelihood to have access
   const Options* options;
-
  private:
+  double obj_cov; // TODO: This is a placeholder, until we figure out how to pass coverage through sample info
   EnclosingClass enclosing_class_;
   FRRClass frr_class_;
   SpanningClass spanning_class_;

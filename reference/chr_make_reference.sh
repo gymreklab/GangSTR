@@ -43,8 +43,11 @@ if ! type ${TRF} > /dev/null 2>&1; then
 fi
 
 matchscore=2
-mismatchscore=5
-indelscore=17
+#mismatchscore=5
+#indelscore=17
+mismatchscore=3
+indelscore=5
+
 maxperiod=20 # Largest repeat unit
 pm=80
 pi=10

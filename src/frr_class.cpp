@@ -156,6 +156,7 @@ bool FRRClass::GetCountLogLikelihood(const int32_t& allele1,
   
   int32_t frr_count = GetDataSize() + offtarget_count;
   double frr_thresh = double(read_len) / double(motif_len);
+
   if (read_len == 0){
     cerr<< allele1 * motif_len << endl;
     cerr << "FRRCountProb::Divide by Zero prevented!" << endl;

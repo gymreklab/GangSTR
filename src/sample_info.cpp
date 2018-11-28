@@ -170,6 +170,7 @@ const double SampleInfo::GetInsertSdev(std::string sample) {
 }
 
 const double SampleInfo::GetCoverage(std::string sample) {
+  cerr << sample_to_coverage[sample] << endl;
   return sample_to_coverage[sample];
 }
 

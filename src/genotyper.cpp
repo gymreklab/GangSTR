@@ -96,7 +96,7 @@ bool Genotyper::ProcessLocus(BamCramMultiReader* bamreader, Locus* locus) {
     const std::string samp = *it;
   try {
     if (!sample_likelihood_maximizers[samp]->OptimizeLikelihood(read_len, 
-						(int32_t)(locus->motif.size()),
+								(int32_t)(locus->motif.size()),
 								ref_count, 
 								resampled, 
 								options->ploidy, 
