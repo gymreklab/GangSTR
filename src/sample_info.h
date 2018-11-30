@@ -35,6 +35,7 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
   template length distributions, and coverage
  */
 class SampleInfo {
+  const static int dist_size = 2000;
  public:
   SampleInfo();
   virtual ~SampleInfo();
@@ -52,8 +53,8 @@ class SampleInfo {
   const double GetInsertSdev(std::string sample);
   const double GetCoverage(std::string sample);
   const bool GetIsCustomRG();
-  double* GetDistPDF(std::string sample);
-  double* GetDistCDF(std::string sample);
+  std::vector<double> GetDistPDF(std::string sample);
+  std::vector<double> GetDistCDF(std::string sample);
   const std::string GetSampleFromID(const std::string& rgid);
 
   /* Other utils */
@@ -67,8 +68,8 @@ class SampleInfo {
   std::map<std::string, double> sample_to_meandist;
   std::map<std::string, double> sample_to_sdev;
   std::map<std::string, double> sample_to_coverage;
-  std::map<std::string, double*> sample_to_pdf;
-  std::map<std::string, double*> sample_to_cdf;
+  std::map<std::string, std::vector<double> > sample_to_pdf;
+  std::map<std::string, std::vector<double> > sample_to_cdf;
   int32_t read_len;
 };
 

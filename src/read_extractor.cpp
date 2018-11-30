@@ -27,7 +27,7 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 
 using namespace std;
 
-ReadExtractor::ReadExtractor(const Options& options_, SampleInfo sample_info_) : options(options_), sample_info(sample_info_) {
+ReadExtractor::ReadExtractor(const Options& options_, SampleInfo& sample_info_) : options(options_), sample_info(sample_info_) {
   if (options.output_readinfo) {
     readfile_.open((options.outprefix + ".readinfo.tab").c_str());
   }
@@ -552,7 +552,7 @@ bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
 	       << srt << "\t" << nCopy_value << "\t" <<score_value << endl;
 	//  Check if read's mate already processed
 	std::map<std::string, ReadPair>::iterator rp_iter = read_pairs->find(aln_key);
-	if (rp_iter->second.found_pair){
+	if (rp_iter != read_pairs->end() and rp_iter->second.found_pair){
 	  continue;
 	}
 	if (rp_iter != read_pairs->end()) {
@@ -966,5 +966,6 @@ ReadExtractor::~ReadExtractor() {
   if (options.output_readinfo) {
     readfile_.close();
   }
+  
 }
 

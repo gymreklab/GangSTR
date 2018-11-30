@@ -37,6 +37,7 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <numeric>
 
 using namespace std;
 
@@ -150,7 +151,8 @@ class LikelihoodMaximizer {
 			     const int32_t& allele1,
 			     const int32_t& allele2,
 			     const Locus& locus,
-			     double* lob1, double* hib1, double* lob2, double* hib2);
+			     double* lob1, double* hib1, double* lob2, double* hib2,
+			     double* a1_se, double* a2_se);
 
   // Print read pool
   void PrintReadPool();

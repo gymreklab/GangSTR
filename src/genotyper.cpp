@@ -89,6 +89,7 @@ bool Genotyper::ProcessLocus(BamCramMultiReader* bamreader, Locus* locus) {
   int32_t allele1, allele2;
   int32_t ref_count = (int32_t)((locus->end-locus->start+1)/locus->motif.size());
   double min_negLike, lob1, lob2, hib1, hib2;
+  double a1_se, a2_se;
   bool resampled = false;
   std::set<std::string> rg_samples = sample_info->GetSamples();
   for (std::set<std::string>::iterator it = rg_samples.begin();
@@ -124,14 +125,15 @@ bool Genotyper::ProcessLocus(BamCramMultiReader* bamreader, Locus* locus) {
       try{
 	if (!sample_likelihood_maximizers[samp]->GetConfidenceInterval(read_len, (int32_t)(locus->motif.size()),
 								       ref_count, allele1, allele2, *locus,
-								       &lob1, &hib1, &lob2, &hib2)) {
+								       &lob1, &hib1, &lob2, &hib2, &a1_se, &a2_se)) {
 	  locus->called[samp] = false;
 	}
 	locus->lob1[samp] = lob1;
 	locus->lob2[samp] = lob2;
 	locus->hib1[samp] = hib1;
 	locus->hib2[samp] = hib2;
-	
+	locus->a1_se[samp] = a1_se;
+	locus->a2_se[samp] = a2_se;
 
 	stringstream msg;
 	msg<<"\tGenotyper Results:  "<<allele1<<", "<<allele2<<"\tlikelihood = "<<min_negLike;

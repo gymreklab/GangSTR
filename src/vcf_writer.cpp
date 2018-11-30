@@ -88,7 +88,7 @@ void VCFWriter::WriteRecord(Locus& locus) {
     alt_length_to_ind[alt_allele_lengths_v[0]] = 1;
     for (size_t i=1; i<alt_allele_lengths_v.size(); i++) {
       alt_length_to_ind[alt_allele_lengths_v[i]] = i+1;
-      for (int i=0; i<alt_allele_lengths_v[i]; i++) {
+      for (int j=0; j<alt_allele_lengths_v[i]; j++) {
 	alt_alleles << locus.motif;
       }
     }

@@ -78,15 +78,15 @@ bool BamInfoExtract::GetReadLen(int32_t* read_len){
 bool BamInfoExtract::GetInsertSizeDistribution(std::map<std::string, double>* sample_to_meandist,
 					       std::map<std::string, double>* sample_to_sdev,
 					       std::map<std::string, double>* sample_to_coverage,
-					       std::map<std::string, double*>* sample_to_pdf,
-					       std::map<std::string, double*>* sample_to_cdf,
+					       std::map<std::string, std::vector<double> >* sample_to_pdf,
+					       std::map<std::string, std::vector<double> >* sample_to_cdf,
 					       const std::set<std::string> samples,
 					       const std::map<std::string, std::string> rg_ids_to_sample) {
   double mean, std_dev, coverage;
-  int dist_distribution_size = 2000;
-  double* dist_pdf = new double[dist_distribution_size];
-  double* dist_cdf = new double[dist_distribution_size];
-  for (int i = 0; i < dist_distribution_size; i++){
+  int32_t dist_size = options->dist_distribution_size;
+  std::vector<double> dist_pdf(dist_size);
+  std::vector<double> dist_cdf(dist_size);
+  for (int i = 0; i < dist_size; i++){
     dist_pdf[i] = 0;
     dist_cdf[i] = 0;
   }
@@ -94,7 +94,6 @@ bool BamInfoExtract::GetInsertSizeDistribution(std::map<std::string, double>* sa
   int32_t flank_size = 400000;
   int32_t exclusion_margin = 1000;
   int32_t min_req_reads = 50000;
-  int32_t distrib_size = options->dist_distribution_size;
   bool found_ins_distribution = false, found_coverage = false;
   double mean_b, mean_a, std_b, std_a; // mean and std dev, before and after locus
   int* valid_temp_len_arr;
@@ -134,8 +133,8 @@ bool BamInfoExtract::GetInsertSizeDistribution(std::map<std::string, double>* sa
       temp_len_vec.push_back(abs(alignment.TemplateLength()));
       size++;
     }
-    int32_t* dist_count = new int32_t[distrib_size];
-    for (int i = 0; i < distrib_size; i++){
+    std::vector<int32_t> dist_count(dist_size);
+    for (int i = 0; i < dist_size; i++){
       dist_count[i] = 0;
     }
     // if there's enough reads, compute and return TODO set threshold
@@ -160,7 +159,7 @@ bool BamInfoExtract::GetInsertSizeDistribution(std::map<std::string, double>* sa
 	  valid_temp_len_vec.push_back(*temp_it);
 	  valid_size++;  
 	  // Updating 
-	  if (*temp_it < distrib_size and *temp_it > 0){
+	  if (*temp_it < dist_size and *temp_it > 0){
 	    dist_count[*temp_it]++;
 	  }
 	}
@@ -176,7 +175,7 @@ bool BamInfoExtract::GetInsertSizeDistribution(std::map<std::string, double>* sa
       dist_cdf[1] = cumulative;
       ofstream ins_file;
       ins_file.open((options->outprefix + ".insdata.tab").c_str());
-      for (int i = 2; i < distrib_size - 2; i++){
+      for (int i = 2; i < dist_size - 2; i++){
 	dist_pdf[i] = double(dist_count[i - 2] +
 			     dist_count[i - 1] + 
 			     dist_count[i] + 
@@ -187,13 +186,12 @@ bool BamInfoExtract::GetInsertSizeDistribution(std::map<std::string, double>* sa
 	ins_file << i << "\t" << dist_pdf[i] << "\t" << dist_cdf[i] << endl;
       }
       
-      dist_cdf[distrib_size - 1] = 1.0;
+      dist_cdf[dist_size - 1] = 1.0;
       
       valid_temp_len_arr = &valid_temp_len_vec[0];
       mean = gsl_stats_int_mean(valid_temp_len_arr, 1, valid_size - 1);
       std_dev = gsl_stats_int_sd_m (valid_temp_len_arr,  1, valid_size, mean);
       found_ins_distribution = true;
-      
     }
   }
 
@@ -206,7 +204,6 @@ bool BamInfoExtract::GetInsertSizeDistribution(std::map<std::string, double>* sa
     (*sample_to_pdf)[*it] = dist_pdf;
     (*sample_to_cdf)[*it] = dist_cdf;
   }
-
   return found_ins_distribution;
 }
 

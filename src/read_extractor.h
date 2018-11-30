@@ -37,7 +37,7 @@ class ReadExtractor {
   friend class ReadExtractorTest;
   friend class Genotyper;
  public:
-  ReadExtractor(const Options& options_, SampleInfo sample_info_);
+  ReadExtractor(const Options& options_, SampleInfo& sample_info_);
   virtual ~ReadExtractor();
     
   bool debug = false;

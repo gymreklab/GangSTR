@@ -27,8 +27,19 @@ SampleInfo::SampleInfo() {
   custom_read_groups = false;
   rg_samples.clear();
   rg_ids_to_sample.clear();
+  
 }
-
+/*
+SampleInfo::SampleInfo(SampleInfo samp) {
+  custom_read_groups = samp.custom_read_groups;
+  rg_samples = samp.rg_samples;
+  rg_ids_to_sample = samp.rg_ids_to_sample;
+  sample_to_meandist = samp.sample_to_meandist;
+  sample_to_sdev = samp.sample_to_sdev;
+  sample_to_coverage = samp.sample_to_coverage;
+  sample_to_pdf = new
+}
+*/
 bool SampleInfo::SetCustomReadGroups(const Options& options) {
   custom_read_groups = true;
   std::vector<std::string> read_groups;
@@ -170,15 +181,14 @@ const double SampleInfo::GetInsertSdev(std::string sample) {
 }
 
 const double SampleInfo::GetCoverage(std::string sample) {
-  cerr << sample_to_coverage[sample] << endl;
   return sample_to_coverage[sample];
 }
 
-double* SampleInfo::GetDistPDF(std::string sample) {
+std::vector<double> SampleInfo::GetDistPDF(std::string sample) {
   return sample_to_pdf[sample];
 }
 
-double* SampleInfo::GetDistCDF(std::string sample) {
+std::vector<double> SampleInfo::GetDistCDF(std::string sample) {
   return sample_to_cdf[sample];
 }
 
@@ -201,4 +211,5 @@ double SampleInfo::GetDistMax(const std::string& sample) {
   return dist_mean+3*dist_sdev;
 }
 
-SampleInfo::~SampleInfo() {}
+SampleInfo::~SampleInfo() {
+}

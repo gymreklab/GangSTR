@@ -45,8 +45,8 @@ class Options {
   double use_mean_dist;
   double use_mean_sdev;
   double use_coverage;
-  double* use_dist_pdf;
-  double* use_dist_cdf;
+  std::vector<double> use_dist_pdf;
+  std::vector<double> use_dist_cdf;
 
   int32_t dist_distribution_size;
   bool dist_man_set;   // whether insert size dist parameters manually set in command line

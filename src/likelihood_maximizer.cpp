@@ -188,7 +188,8 @@ bool LikelihoodMaximizer::GetConfidenceInterval(const int32_t& read_len,
 						const int32_t& all1,
 						const int32_t& all2,
 						const Locus& locus,
-						double* lob1, double* hib1, double* lob2, double* hib2){
+						double* lob1, double* hib1, double* lob2, double* hib2,
+						double* a1_se, double* a2_se){
   int32_t allele1, allele2;
   // TODO allow change of alpha
   double alpha = 0.05;   // Tail error on each end
@@ -263,7 +264,24 @@ bool LikelihoodMaximizer::GetConfidenceInterval(const int32_t& read_len,
   *hib1 = small_alleles.at(int((1.0 - alpha / 2.0) * (num_boot_samp + 1)));
   *lob2 = large_alleles.at(int((alpha / 2.0) * (num_boot_samp + 1)));
   *hib2 = large_alleles.at(int((1.0 - alpha / 2.0) * (num_boot_samp + 1)));
-
+  
+  
+  double mean_sm_alleles = std::accumulate(small_alleles.begin(), 
+					   small_alleles.end(), 0.0) / (num_boot_samp + 1);
+  double mean_lg_alleles = std::accumulate(large_alleles.begin(), 
+					   large_alleles.end(), 0.0) / (num_boot_samp + 1);
+ 
+  double acum = 0;
+  for (int i =0; i <= num_boot_samp; i++)
+    acum += double(small_alleles[i] - mean_sm_alleles) * double(small_alleles[i] - mean_sm_alleles);
+  double a1_se1 = std::sqrt(acum / double(num_boot_samp + 1));
+  
+  acum = 0;
+  for (int i =0; i <= num_boot_samp; i++)
+    acum += double(large_alleles[i] - mean_lg_alleles) * double(large_alleles[i] - mean_lg_alleles);
+  double a2_se1 = std::sqrt(acum / double(num_boot_samp + 1));
+  
+  
   // TODO 0.9 or 0.1? allele1 -/+ lob1?
   // TODO allow change of 0.9 and 0.1
 
@@ -873,8 +891,8 @@ bool nlopt_2D_optimize(const int32_t& read_len, const int32_t& motif_len,
       result = opt.optimize(xx, f);
 
       if (f < minf){
-	*allele1 = int32_t(xx[0]);
-	*allele2 = int32_t(xx[1]);
+	*allele1 = int32_t(round(xx[0]));
+	*allele2 = int32_t(round(xx[1]));
 	*ret_result = result;
 	
 	minf = f;
@@ -913,7 +931,7 @@ bool nlopt_1D_optimize(const int32_t& read_len, const int32_t& motif_len,
   xx[0] = int32_t(1.1 * (read_len / motif_len));
   double minf;
   nlopt::result result = opt.optimize(xx, minf);
-  *allele1 = int32_t(xx[0]);
+  *allele1 = int32_t(round(xx[0]));
   *ret_result = result;
   *minf_ret = minf;
 return true;  // TODO add false

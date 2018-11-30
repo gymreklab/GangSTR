@@ -38,6 +38,8 @@ void Locus::Reset(){
   lob2.clear();
   hib1.clear();
   hib2.clear();
+  a1_se.clear();
+  a2_se.clear();
   min_neg_lik.clear();
   enclosing_reads.clear();
   spanning_reads.clear();
