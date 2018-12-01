@@ -30,6 +30,7 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 #include "src/options.h"
 #include "src/region_reader.h"
 
+
 /*
   Keep track of per-sample info on read groups,
   template length distributions, and coverage
@@ -65,11 +66,13 @@ class SampleInfo {
   bool custom_read_groups;
   std::set<std::string> rg_samples;
   std::map<std::string, std::string> rg_ids_to_sample;
-  std::map<std::string, double> sample_to_meandist;
-  std::map<std::string, double> sample_to_sdev;
-  std::map<std::string, double> sample_to_coverage;
-  std::map<std::string, std::vector<double> > sample_to_pdf;
-  std::map<std::string, std::vector<double> > sample_to_cdf;
+  std::map<std::string, SampleProfile> profile;
+  //std::map<std::string, double> sample_to_meandist;
+  //std::map<std::string, double> sample_to_sdev;
+  //std::map<std::string, double> sample_to_coverage;
+  //std::map<std::string, std::vector<double> > sample_to_pdf;
+  //std::map<std::string, std::vector<double> > sample_to_cdf;
+  
   int32_t read_len;
 };
 

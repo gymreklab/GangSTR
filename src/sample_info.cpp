@@ -90,17 +90,19 @@ bool SampleInfo::ExtractBamInfo(const Options& options, BamCramMultiReader& bamr
       PrintMessageDieOnError("Error extracting read length", M_ERROR);
     }
   }
+  else{
+    read_len = options.read_len;
+  }
   region_reader.Reset();
   // Insert size distribution + coverage inferred per sample
   if(options.dist_mean.empty() or options.dist_sdev.empty() or options.coverage.empty()){
-    if(!bam_info.GetInsertSizeDistribution(&sample_to_meandist, &sample_to_sdev, &sample_to_coverage,
-					   &sample_to_pdf, &sample_to_cdf, rg_samples, rg_ids_to_sample)) {
+    if(!bam_info.GetInsertSizeDistribution(&profile, rg_samples, rg_ids_to_sample)) {
       PrintMessageDieOnError("Error extracting insert size and coverage info", M_ERROR);
     }
   }
 
   // Deal with setting custom ins/coverages per BAM file
-  if (!options.dist_mean.empty() & !options.dist_sdev.empty()) {
+  if (!options.dist_mean.empty() or !options.dist_sdev.empty()) {
     if (options.dist_mean.size() != options.dist_sdev.size()) {
       PrintMessageDieOnError("Different number of dist means and dist sdevs input", M_ERROR);
     }
@@ -108,8 +110,8 @@ bool SampleInfo::ExtractBamInfo(const Options& options, BamCramMultiReader& bamr
       size_t i = 0;
       for (std::set<std::string>::iterator it = rg_samples.begin();
 	   it != rg_samples.end(); it++) {
-	sample_to_meandist[*it] = options.dist_mean[i];
-	sample_to_sdev[*it] = options.dist_sdev[i];
+	profile[*it].dist_mean = options.dist_mean[i];
+	profile[*it].dist_sdev = options.dist_sdev[i];
       }
     } else {
       if (options.dist_mean.size() != options.bamfiles.size()) {
@@ -119,8 +121,8 @@ bool SampleInfo::ExtractBamInfo(const Options& options, BamCramMultiReader& bamr
 	PrintMessageDieOnError("Can only set per-BAM dists if using custom read groups", M_ERROR);
       }
       for (size_t i=0; i<options.bamfiles.size(); i++) {
-	sample_to_meandist[options.bamfiles[i]] = options.dist_mean[i];
-	sample_to_sdev[options.bamfiles[i]] = options.dist_sdev[i];
+	profile[options.bamfiles[i]].dist_mean = options.dist_mean[i];
+	profile[options.bamfiles[i]].dist_sdev = options.dist_sdev[i];
       }
     }
   }
@@ -129,7 +131,7 @@ bool SampleInfo::ExtractBamInfo(const Options& options, BamCramMultiReader& bamr
       size_t i = 0;
       for (std::set<std::string>::iterator it = rg_samples.begin();
 	   it != rg_samples.end(); it++) {
-	sample_to_coverage[*it] = options.coverage[i];
+	profile[*it].coverage = options.coverage[i];
       }
     } else {
       if (options.coverage.size() != options.bamfiles.size()) {
@@ -139,7 +141,7 @@ bool SampleInfo::ExtractBamInfo(const Options& options, BamCramMultiReader& bamr
 	PrintMessageDieOnError("Can only set per-BAM coverages if using custom read groups", M_ERROR);
       }
       for (size_t i=0; i<options.bamfiles.size(); i++) {
-	sample_to_coverage[options.bamfiles[i]] = options.coverage[i];
+	profile[options.bamfiles[i]].coverage = options.coverage[i];
       }
     }
   }
@@ -152,9 +154,9 @@ void SampleInfo::PrintSampleInfo() {
   for (std::set<std::string>::iterator it = rg_samples.begin();
        it != rg_samples.end(); it++) {
     ss << *it << "\n"
-       << "\tCoverage=" << sample_to_coverage[*it] << "\n"
-       << "\tInsMean=" << sample_to_meandist[*it] << "\n"
-       << "\tInsSdev=" << sample_to_sdev[*it] << "\n"
+       << "\tCoverage=" << profile[*it].coverage << "\n"
+       << "\tInsMean=" << profile[*it].dist_mean << "\n"
+       << "\tInsSdev=" << profile[*it].dist_sdev << "\n"
        <<"\tReadLen="<< read_len << "\n";
   }
   PrintMessageDieOnError(ss.str(), M_PROGRESS);
@@ -169,27 +171,23 @@ const std::set<std::string> SampleInfo::GetSamples() {
 }
 
 const double SampleInfo::GetInsertMean(std::string sample) {
-  for (map<std::string,double>::iterator it = sample_to_meandist.begin(); 
-       it != sample_to_meandist.end(); ++it){
-    //cerr << it->first << endl;
-  } 
-  return sample_to_meandist[sample];
+  return profile[sample].dist_mean;
 }
 
 const double SampleInfo::GetInsertSdev(std::string sample) {
-  return sample_to_sdev[sample];
+  return profile[sample].dist_sdev;
 }
 
 const double SampleInfo::GetCoverage(std::string sample) {
-  return sample_to_coverage[sample];
+  return profile[sample].coverage;
 }
 
 std::vector<double> SampleInfo::GetDistPDF(std::string sample) {
-  return sample_to_pdf[sample];
+  return profile[sample].dist_pdf;
 }
 
 std::vector<double> SampleInfo::GetDistCDF(std::string sample) {
-  return sample_to_cdf[sample];
+  return profile[sample].dist_cdf;
 }
 
 const bool SampleInfo::GetIsCustomRG() {
@@ -206,8 +204,8 @@ const std::string SampleInfo::GetSampleFromID(const std::string& rgid) {
 
 double SampleInfo::GetDistMax(const std::string& sample) {
   double dist_mean, dist_sdev;
-  dist_mean = sample_to_meandist[sample];
-  dist_sdev = sample_to_sdev[sample];
+  dist_mean = profile[sample].dist_mean;
+  dist_sdev = profile[sample].dist_sdev;
   return dist_mean+3*dist_sdev;
 }
 

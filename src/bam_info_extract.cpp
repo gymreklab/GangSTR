@@ -75,11 +75,7 @@ bool BamInfoExtract::GetReadLen(int32_t* read_len){
 
 // TODO REWRITE THIS TO DEAL WITH PER-SAMPLE
 // TODO Split to separate function to learn coverage, mean/sdev, and pdf/cdf
-bool BamInfoExtract::GetInsertSizeDistribution(std::map<std::string, double>* sample_to_meandist,
-					       std::map<std::string, double>* sample_to_sdev,
-					       std::map<std::string, double>* sample_to_coverage,
-					       std::map<std::string, std::vector<double> >* sample_to_pdf,
-					       std::map<std::string, std::vector<double> >* sample_to_cdf,
+bool BamInfoExtract::GetInsertSizeDistribution(std::map<std::string, SampleProfile>* profile,
 					       const std::set<std::string> samples,
 					       const std::map<std::string, std::string> rg_ids_to_sample) {
   double mean, std_dev, coverage;
@@ -198,11 +194,11 @@ bool BamInfoExtract::GetInsertSizeDistribution(std::map<std::string, double>* sa
   // TODO remove. Placeholder to set same value for all samples
   for (std::set<std::string>::const_iterator it=samples.begin();
        it != samples.end(); it++) {
-    (*sample_to_meandist)[*it] = mean;
-    (*sample_to_sdev)[*it] = std_dev;
-    (*sample_to_coverage)[*it] = coverage;
-    (*sample_to_pdf)[*it] = dist_pdf;
-    (*sample_to_cdf)[*it] = dist_cdf;
+    (*profile)[*it].dist_mean = mean;
+    (*profile)[*it].dist_sdev = std_dev;
+    (*profile)[*it].coverage = coverage;
+    (*profile)[*it].dist_pdf = dist_pdf;
+    (*profile)[*it].dist_cdf = dist_cdf;
   }
   return found_ins_distribution;
 }
