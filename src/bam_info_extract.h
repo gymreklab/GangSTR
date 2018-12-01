@@ -37,6 +37,7 @@ struct SampleProfile {
   double coverage;
   std::vector<double> dist_pdf;
   std::vector<double> dist_cdf;
+  std::vector<double> dist_integral;
 };
 
 class BamInfoExtract{

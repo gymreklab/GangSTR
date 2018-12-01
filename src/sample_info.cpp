@@ -190,6 +190,10 @@ std::vector<double> SampleInfo::GetDistCDF(std::string sample) {
   return profile[sample].dist_cdf;
 }
 
+std::vector<double> SampleInfo::GetDistIntegral(std::string sample) {
+  return profile[sample].dist_integral;
+}
+
 const bool SampleInfo::GetIsCustomRG() {
   return custom_read_groups;
 }
