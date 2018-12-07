@@ -346,8 +346,8 @@ int main(int argc, char* argv[]) {
   // Extract information from bam file (read length, insert size distribution, ..)
   if (!sample_info.ExtractBamInfo(options, bamreader, region_reader)) {
     PrintMessageDieOnError("Error extracting info from BAM file", M_ERROR);
-    options.realignment_flanklen = sample_info.GetReadLength();
   }
+  options.realignment_flanklen = sample_info.GetReadLength();
   // Write out values found for each sample
   sample_info.PrintSampleInfo();
   

@@ -84,8 +84,8 @@ class ReadClass {
   bool read_prob_mode;
   // pdf and CDF of non-parametric model for insert size
   int32_t dist_distribution_size;
-  double* dist_pdf;
-  double* dist_cdf;
+  std::vector<double> dist_pdf;
+  std::vector<double> dist_cdf;
   
   // Store vector of data for this class
   std::vector<int32_t> read_class_data_;

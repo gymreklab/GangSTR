@@ -57,6 +57,8 @@ class Locus {
   std::map<std::string,int> hib1;
   std::map<std::string,int> lob2;
   std::map<std::string,int> hib2;
+  std::map<std::string, double> a1_se;
+  std::map<std::string,double> a2_se;
   std::map<std::string,double> min_neg_lik;
   std::map<std::string,size_t> enclosing_reads;
   std::map<std::string,size_t> spanning_reads;

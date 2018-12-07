@@ -29,6 +29,16 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef BAM_INFO_H_
 #define BAM_INFO_H_
 
+struct SampleProfile {
+  std::string rg_sample;
+  std::string rg_id;
+  double dist_mean;
+  double dist_sdev;
+  double coverage;
+  std::vector<double> dist_pdf;
+  std::vector<double> dist_cdf;
+};
+
 class BamInfoExtract{
 public:
 	BamInfoExtract(const Options* options_,
@@ -37,11 +47,7 @@ public:
 	~BamInfoExtract();
 	bool GetReadLen(int32_t* read_len);
 	// TODO change to deal with per sample
-	bool GetInsertSizeDistribution(std::map<std::string, double>* sample_to_meandist,
-				       std::map<std::string, double>* sample_to_sdev,
-				       std::map<std::string, double>* sample_to_coverage,
-				       std::map<std::string, double*>* sample_to_pdf,
-				       std::map<std::string, double*>* sample_to_cdf,
+	bool GetInsertSizeDistribution(std::map<std::string, SampleProfile>* profile,
 				       const std::set<std::string> samples,
 				       const std::map<std::string, std::string> rg_ids_to_sample);
  private:

@@ -32,6 +32,8 @@ using namespace std;
 
 LikelihoodMaximizer::LikelihoodMaximizer(const Options& _options, SampleInfo& _sample_info, std::string samp) {
   options = &_options;
+  
+  obj_cov = _sample_info.GetCoverage(samp);
 
   Options lik_options; // new object specifically for this sample
   lik_options.use_mean_dist = _sample_info.GetInsertMean(samp);
@@ -40,7 +42,8 @@ LikelihoodMaximizer::LikelihoodMaximizer(const Options& _options, SampleInfo& _s
   lik_options.use_dist_pdf = _sample_info.GetDistPDF(samp);
   lik_options.use_dist_cdf = _sample_info.GetDistCDF(samp);
   lik_options.read_len = _sample_info.GetReadLength();
-
+  
+  
   enclosing_class_.SetOptions(lik_options);
   frr_class_.SetOptions(lik_options);
   spanning_class_.SetOptions(lik_options);
@@ -185,7 +188,8 @@ bool LikelihoodMaximizer::GetConfidenceInterval(const int32_t& read_len,
 						const int32_t& all1,
 						const int32_t& all2,
 						const Locus& locus,
-						double* lob1, double* hib1, double* lob2, double* hib2){
+						double* lob1, double* hib1, double* lob2, double* hib2,
+						double* a1_se, double* a2_se){
   int32_t allele1, allele2;
   // TODO allow change of alpha
   double alpha = 0.05;   // Tail error on each end
@@ -260,7 +264,24 @@ bool LikelihoodMaximizer::GetConfidenceInterval(const int32_t& read_len,
   *hib1 = small_alleles.at(int((1.0 - alpha / 2.0) * (num_boot_samp + 1)));
   *lob2 = large_alleles.at(int((alpha / 2.0) * (num_boot_samp + 1)));
   *hib2 = large_alleles.at(int((1.0 - alpha / 2.0) * (num_boot_samp + 1)));
-
+  
+  
+  double mean_sm_alleles = std::accumulate(small_alleles.begin(), 
+					   small_alleles.end(), 0.0) / (num_boot_samp + 1);
+  double mean_lg_alleles = std::accumulate(large_alleles.begin(), 
+					   large_alleles.end(), 0.0) / (num_boot_samp + 1);
+ 
+  double acum = 0;
+  for (int i =0; i <= num_boot_samp; i++)
+    acum += double(small_alleles[i] - mean_sm_alleles) * double(small_alleles[i] - mean_sm_alleles);
+  double a1_se1 = std::sqrt(acum / double(num_boot_samp + 1));
+  
+  acum = 0;
+  for (int i =0; i <= num_boot_samp; i++)
+    acum += double(large_alleles[i] - mean_lg_alleles) * double(large_alleles[i] - mean_lg_alleles);
+  double a2_se1 = std::sqrt(acum / double(num_boot_samp + 1));
+  
+  
   // TODO 0.9 or 0.1? allele1 -/+ lob1?
   // TODO allow change of 0.9 and 0.1
 
@@ -524,8 +545,7 @@ bool LikelihoodMaximizer::GetGenotypeNegLogLikelihood(const int32_t& allele1,
 						      const bool& resampled,
 						      double* gt_ll) {
   double frr_count_ll = 0.0, frr_ll, span_ll, encl_ll, flank_ll = 0.0;
-  double count_weight = options->use_coverage;
-  double cov = options->use_coverage;
+  double count_weight = obj_cov;
   bool use_cov = options -> use_cov;
   int frr_count, offtarget_count = offtarget_class_.GetDataSize();
 
@@ -539,6 +559,7 @@ bool LikelihoodMaximizer::GetGenotypeNegLogLikelihood(const int32_t& allele1,
     frr_count = frr_class_.GetDataSize();
     read_count = frr_count + enclosing_class_.GetDataSize() +
       spanning_class_.GetDataSize() + flanking_class_.GetDataSize() + 2 *  offtarget_count;
+
     if (read_count == 0){
       *gt_ll = frr_class_.NEG_INF;
       return true;
@@ -558,12 +579,13 @@ bool LikelihoodMaximizer::GetGenotypeNegLogLikelihood(const int32_t& allele1,
     							 options->ploidy, &flank_ll);
     // TODO Substituting these lines changes optimization result. Find out why?!
     //if ((options->coverage > 0) && (frr_class_.GetDataSize() > 0)){
-    if (use_cov && cov > 0 && frr_count > 0){
+
+    if (use_cov && obj_cov > 0 && frr_count > 0){
       frr_class_.GetCountLogLikelihood(allele1, 
 				       allele2,
 				       read_len, 
 				       motif_len, 
-				       options->use_coverage,
+				       obj_cov,
 				       options->ploidy, 
 				       2 * offtarget_count * offtarget_share, 
 				       &frr_count_ll);
@@ -593,12 +615,12 @@ bool LikelihoodMaximizer::GetGenotypeNegLogLikelihood(const int32_t& allele1,
 								   read_len, motif_len, ref_count, 
 								   options->ploidy, &flank_ll); 
     
-    if (use_cov && cov > 0 && frr_count > 0){
+    if (use_cov && obj_cov > 0 && frr_count > 0){
       resampled_frr_class_.GetCountLogLikelihood(allele1, 
 				       allele2,
 				       read_len, 
 				       motif_len, 
-				       options->use_coverage,
+				       obj_cov,
 				       options->ploidy, 
 				       2 * offtarget_count * offtarget_share, 
 				       &frr_count_ll);
@@ -869,8 +891,8 @@ bool nlopt_2D_optimize(const int32_t& read_len, const int32_t& motif_len,
       result = opt.optimize(xx, f);
 
       if (f < minf){
-	*allele1 = int32_t(xx[0]);
-	*allele2 = int32_t(xx[1]);
+	*allele1 = int32_t(round(xx[0]));
+	*allele2 = int32_t(round(xx[1]));
 	*ret_result = result;
 	
 	minf = f;
@@ -909,7 +931,7 @@ bool nlopt_1D_optimize(const int32_t& read_len, const int32_t& motif_len,
   xx[0] = int32_t(1.1 * (read_len / motif_len));
   double minf;
   nlopt::result result = opt.optimize(xx, minf);
-  *allele1 = int32_t(xx[0]);
+  *allele1 = int32_t(round(xx[0]));
   *ret_result = result;
   *minf_ret = minf;
 return true;  // TODO add false
