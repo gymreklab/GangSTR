@@ -82,9 +82,11 @@ bool BamInfoExtract::GetInsertSizeDistribution(std::map<std::string, SampleProfi
   int32_t dist_size = options->dist_distribution_size;
   std::vector<double> dist_pdf(dist_size);
   std::vector<double> dist_cdf(dist_size);
+  std::vector<double> dist_integral(dist_size);
   for (int i = 0; i < dist_size; i++){
     dist_pdf[i] = 0;
     dist_cdf[i] = 0;
+    dist_integral[i] = 0;
   }
   // TODO change 200000 flank size to something appropriate
   int32_t flank_size = 400000;
@@ -161,14 +163,18 @@ bool BamInfoExtract::GetInsertSizeDistribution(std::map<std::string, SampleProfi
 	}
       }
       double cumulative = 0.0;
+      double integral = 0.0;
       dist_pdf[0] = double(dist_count[0] + dist_count[1] 
 			   + dist_count[2]) / 5.0 / double(valid_size);
       cumulative += dist_pdf[0];
       dist_cdf[0] = cumulative;
+      dist_integral[0] = integral;
       dist_pdf[1] = double(dist_count[0] + dist_count[1] 
 			   + dist_count[2] + dist_count[3]) / 5.0 / double(valid_size);
       cumulative += dist_pdf[1];
+      integral += 1 * dist_pdf[1];
       dist_cdf[1] = cumulative;
+      dist_integral[0] = integral;
       ofstream ins_file;
       ins_file.open((options->outprefix + ".insdata.tab").c_str());
       for (int i = 2; i < dist_size - 2; i++){
@@ -178,7 +184,9 @@ bool BamInfoExtract::GetInsertSizeDistribution(std::map<std::string, SampleProfi
 			     dist_count[i + 1] + 
 			     dist_count[i + 2]) / 5.0/ double(valid_size);
 	cumulative += dist_pdf[i];
+	integral += i * dist_pdf[i];
 	dist_cdf[i] = cumulative;
+	dist_integral[i] = integral;
 	ins_file << i << "\t" << dist_pdf[i] << "\t" << dist_cdf[i] << endl;
       }
       
@@ -199,6 +207,7 @@ bool BamInfoExtract::GetInsertSizeDistribution(std::map<std::string, SampleProfi
     (*profile)[*it].coverage = coverage;
     (*profile)[*it].dist_pdf = dist_pdf;
     (*profile)[*it].dist_cdf = dist_cdf;
+    (*profile)[*it].dist_integral = dist_integral;
   }
   return found_ins_distribution;
 }

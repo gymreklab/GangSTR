@@ -44,6 +44,7 @@ VCFWriter::VCFWriter(const std::string& _vcffile,
   writer_ << "##FORMAT=<ID=RC,Number=1,Type=String,Description=\"Number of reads in each class (enclosing, spanning, FRR, bounding)\">" << endl;
   writer_ << "##FORMAT=<ID=Q,Number=1,Type=Float,Description=\"Min. negative likelihood\">" << endl;
   writer_ << "##FORMAT=<ID=INS,Number=1,Type=String,Description=\"Insert size mean and stddev\">" << endl;
+  writer_ << "##FORMAT=<ID=STDERR,Number=1,Type=String,Description=\"Bootstrap standard error of each allele\">" << endl;
   writer_ << "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT";
   const std::set<std::string> rg_samples = sample_info->GetSamples();
   sample_names.clear();
@@ -105,7 +106,7 @@ void VCFWriter::WriteRecord(Locus& locus) {
 	  << "END=" << locus.end << ";"
 	  << "RU=" << locus.motif << ";"
 	  << "REF=" << refsize << "\t"
-	  << "GT:DP:REPCN:REPCI:RC:Q:INS";
+	  << "GT:DP:REPCN:REPCI:RC:Q:INS:STDERR";
   
   // Write info for each sample
   stringstream gt_str;
@@ -133,7 +134,8 @@ void VCFWriter::WriteRecord(Locus& locus) {
 	    << locus.hib2[samp] << ":"
       	    << locus.enclosing_reads[samp] << "," << locus.spanning_reads[samp] << "," << locus.frr_reads[samp] << "," << locus.flanking_reads[samp] << ":"
 	    << locus.min_neg_lik[samp] << ":"
-	    << sample_info->GetInsertMean(samp) << "<" << sample_info->GetInsertSdev(samp);
+	    << sample_info->GetInsertMean(samp) << "," << sample_info->GetInsertSdev(samp) << ":"
+	    << locus.a1_se[samp]<<","<<locus.a2_se[samp];
   }
   writer_ << endl;
   writer_.flush();

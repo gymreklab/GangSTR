@@ -274,12 +274,12 @@ bool LikelihoodMaximizer::GetConfidenceInterval(const int32_t& read_len,
   double acum = 0;
   for (int i =0; i <= num_boot_samp; i++)
     acum += double(small_alleles[i] - mean_sm_alleles) * double(small_alleles[i] - mean_sm_alleles);
-  double a1_se1 = std::sqrt(acum / double(num_boot_samp + 1));
+  *a1_se = std::sqrt(acum / double(num_boot_samp + 1));
   
   acum = 0;
   for (int i =0; i <= num_boot_samp; i++)
     acum += double(large_alleles[i] - mean_lg_alleles) * double(large_alleles[i] - mean_lg_alleles);
-  double a2_se1 = std::sqrt(acum / double(num_boot_samp + 1));
+  *a2_se = std::sqrt(acum / double(num_boot_samp + 1));
   
   
   // TODO 0.9 or 0.1? allele1 -/+ lob1?

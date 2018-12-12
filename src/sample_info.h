@@ -56,6 +56,7 @@ class SampleInfo {
   const bool GetIsCustomRG();
   std::vector<double> GetDistPDF(std::string sample);
   std::vector<double> GetDistCDF(std::string sample);
+  std::vector<double> GetDistIntegral(std::string sample);
   const std::string GetSampleFromID(const std::string& rgid);
 
   /* Other utils */
