@@ -73,11 +73,65 @@ bool BamInfoExtract::GetReadLen(int32_t* read_len){
 	return found_read_len;
 }
 
-// TODO write this
+// TODO - change to GC use content
 bool BamInfoExtract::GetCoverage(std::map<std::string, SampleProfile>* profile,
 				 const std::set<std::string> samples,
 				 std::map<std::string, std::string> rg_ids_to_sample,
 				 bool custom_read_groups) {
+  // How many regions etc. to use
+  int num_regions_to_use = 10000;
+  int num_regions_so_far = 0;
+  int region_offset = 10000; // Look this far away from STR
+  int region_length = 5000; // Use this length of region to look at
+  int total_region_length = 0;
+  // Keep track of coverage for each sample
+  std::map<std::string, int> sample_to_bases;
+  for (std::set<std::string>::const_iterator it = samples.begin();
+       it != samples.end(); it++) {
+    sample_to_bases[*it] = 0;
+  }
+  // Set up
+  std::string read_group, rgid, sample, fname;
+  bool found_sample;
+  Locus locus;
+  region_reader->Reset();
+  BamAlignment alignment;
+  while ((num_regions_so_far < num_regions_to_use) &&
+	 region_reader->GetNextRegion(&locus)) {
+    bamreader->SetRegion(locus.chrom, locus.start+region_offset, locus.start+region_offset+region_length);
+    while (bamreader->GetNextAlignment(alignment)) {
+      // Is this read worth looking at?
+      if (alignment.IsSupplementary() || alignment.IsSecondary() || 
+	  !alignment.IsProperPair()) {
+	continue;
+      }
+      // What sample did this read come from?
+      fname = alignment.file_;
+      if (custom_read_groups) {
+	rgid = fname;
+	found_sample = true;
+      } else {
+	if (!alignment.GetStringTag("RG", read_group)) {
+	  PrintMessageDieOnError("Could not find read group for " + alignment.Name(), M_WARNING);
+	  found_sample = false;
+	}
+	rgid = fname + ":" + read_group;
+	found_sample = true;
+      }
+      if (!found_sample) continue;
+      if (rg_ids_to_sample.find(rgid) == rg_ids_to_sample.end()) continue;
+      sample = rg_ids_to_sample[rgid];
+      // Get template length and assign to that sample
+      sample_to_bases[sample] += alignment.QueryBases().size();
+    }
+    num_regions_so_far++;
+    total_region_length += region_length;
+  }
+  for (std::set<std::string>::const_iterator it = samples.begin();
+       it != samples.end(); it++) {
+    (*profile)[*it].coverage = float(sample_to_bases[*it])/float(total_region_length);
+  }
+
   return true;
 }
 
@@ -138,7 +192,7 @@ bool BamInfoExtract::GetInsertSizeDistribution(std::map<std::string, SampleProfi
     num_regions_so_far++;
   }
 
-  // Summarize distributions - TODO
+  // Summarize distributions
   for (std::set<std::string>::const_iterator it=samples.begin();
        it != samples.end(); it++) {
     std::vector<int32_t> tlen_vec = sample_to_tlens[*it];
@@ -215,145 +269,6 @@ bool BamInfoExtract::GetInsertSizeDistribution(std::map<std::string, SampleProfi
   }
   return true;
 }
-// TODO REWRITE THIS TO DEAL WITH PER-SAMPLE
-// TODO Split to separate function to learn coverage, mean/sdev, and pdf/cdf
-/*
-bool BamInfoExtract::GetInsertSizeDistribution(std::map<std::string, SampleProfile>* profile,
-					       const std::set<std::string> samples,
-					       const std::map<std::string, std::string> rg_ids_to_sample) {
-  double mean, std_dev, coverage;
-  int32_t dist_size = options->dist_distribution_size;
-  std::vector<double> dist_pdf(dist_size);
-  std::vector<double> dist_cdf(dist_size);
-  std::vector<double> dist_integral(dist_size);
-  for (int i = 0; i < dist_size; i++){
-    dist_pdf[i] = 0;
-    dist_cdf[i] = 0;
-    dist_integral[i] = 0;
-  }
-  // TODO change 200000 flank size to something appropriate
-  int32_t flank_size = 400000;
-  int32_t exclusion_margin = 1000;
-  int32_t min_req_reads = 50000;
-  bool found_ins_distribution = false, found_coverage = false;
-  double mean_b, mean_a, std_b, std_a; // mean and std dev, before and after locus
-  int* valid_temp_len_arr;
-  std::vector<int32_t> temp_len_vec, valid_temp_len_vec;
-  
-  int reads_before = 0, reads_after = 0;
-  // Header has info about chromosome names
-  const BamHeader* bam_header = bamreader->bam_header();
-  while(region_reader->GetNextRegion(&locus) and !found_ins_distribution and !found_coverage){
-    const int32_t chrom_ref_id = bam_header->ref_id(locus.chrom);
-    
-    int32_t median, size = 0, sum = 0, valid_size = 0, sum_std = 0;
-    BamAlignment alignment;
-    
-    // collecting reads mapped before locus
-    bamreader->SetRegion(locus.chrom, 
-			 locus.start - flank_size > 0 ? locus.start - flank_size : 0, 
-			 locus.start - exclusion_margin > 0 ? locus.start - exclusion_margin : 0);
-    
-    // Go through each alignment in the region
-    reads_before = 0;
-    while (bamreader->GetNextAlignment(alignment)) {
-      reads_before++;
-      // Set template length
-      temp_len_vec.push_back(abs(alignment.TemplateLength()));
-      size++;
-    }
-    // collecting reads mapped after locus
-    bamreader->SetRegion(locus.chrom, 
-			 locus.start + exclusion_margin, 
-			 locus.start + flank_size);
-    // Go through each alignment in the region
-    reads_after = 0;
-    while (bamreader->GetNextAlignment(alignment)) {
-      reads_after++;
-      // Set template length
-      temp_len_vec.push_back(abs(alignment.TemplateLength()));
-      size++;
-    }
-    std::vector<int32_t> dist_count(dist_size);
-    for (int i = 0; i < dist_size; i++){
-      dist_count[i] = 0;
-    }
-    // if there's enough reads, compute and return TODO set threshold
-    if (temp_len_vec.size() > min_req_reads) {
-      if (reads_before > reads_after){
-	coverage = float(reads_before * alignment.QueryBases().size()) / float(flank_size - exclusion_margin - alignment.QueryBases().size());
-	found_coverage = true;
-      }
-      else {
-	coverage = float(reads_after * alignment.QueryBases().size()) / float(flank_size - exclusion_margin - alignment.QueryBases().size());
-	found_coverage = true;
-      }
-      
-      sort(temp_len_vec.begin(), temp_len_vec.end());
-      median = temp_len_vec.at(int32_t(size / 2));
-      
-      for (std::vector<int32_t>::iterator temp_it = temp_len_vec.begin();
-	   temp_it != temp_len_vec.end();
-	   ++temp_it) {
-	// Todo change 3
-	if(*temp_it < 4 * median and *temp_it > 0){
-	  valid_temp_len_vec.push_back(*temp_it);
-	  valid_size++;  
-	  // Updating 
-	  if (*temp_it < dist_size and *temp_it > 0){
-	    dist_count[*temp_it]++;
-	  }
-	}
-      }
-      double cumulative = 0.0;
-      double integral = 0.0;
-      dist_pdf[0] = double(dist_count[0] + dist_count[1] 
-			   + dist_count[2]) / 5.0 / double(valid_size);
-      cumulative += dist_pdf[0];
-      dist_cdf[0] = cumulative;
-      dist_integral[0] = integral;
-      dist_pdf[1] = double(dist_count[0] + dist_count[1] 
-			   + dist_count[2] + dist_count[3]) / 5.0 / double(valid_size);
-      cumulative += dist_pdf[1];
-      integral += 1 * dist_pdf[1];
-      dist_cdf[1] = cumulative;
-      dist_integral[0] = integral;
-      ofstream ins_file;
-      ins_file.open((options->outprefix + ".insdata.tab").c_str());
-      for (int i = 2; i < dist_size - 2; i++){
-	dist_pdf[i] = double(dist_count[i - 2] +
-			     dist_count[i - 1] + 
-			     dist_count[i] + 
-			     dist_count[i + 1] + 
-			     dist_count[i + 2]) / 5.0/ double(valid_size);
-	cumulative += dist_pdf[i];
-	integral += i * dist_pdf[i];
-	dist_cdf[i] = cumulative;
-	dist_integral[i] = integral;
-	ins_file << i << "\t" << dist_pdf[i] << "\t" << dist_cdf[i] << endl;
-      }
-      
-      dist_cdf[dist_size - 1] = 1.0;
-      
-      valid_temp_len_arr = &valid_temp_len_vec[0];
-      mean = gsl_stats_int_mean(valid_temp_len_arr, 1, valid_size - 1);
-      std_dev = gsl_stats_int_sd_m (valid_temp_len_arr,  1, valid_size, mean);
-      found_ins_distribution = true;
-    }
-  }
-
-  // TODO remove. Placeholder to set same value for all samples
-  for (std::set<std::string>::const_iterator it=samples.begin();
-       it != samples.end(); it++) {
-    (*profile)[*it].dist_mean = mean;
-    (*profile)[*it].dist_sdev = std_dev;
-    (*profile)[*it].coverage = coverage;
-    (*profile)[*it].dist_pdf = dist_pdf;
-    (*profile)[*it].dist_cdf = dist_cdf;
-    (*profile)[*it].dist_integral = dist_integral;
-  }
-  return found_ins_distribution;
-  } */
 
 BamInfoExtract::~BamInfoExtract(){
 }
