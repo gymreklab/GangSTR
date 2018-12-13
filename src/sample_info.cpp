@@ -29,17 +29,7 @@ SampleInfo::SampleInfo() {
   rg_ids_to_sample.clear();
   
 }
-/*
-SampleInfo::SampleInfo(SampleInfo samp) {
-  custom_read_groups = samp.custom_read_groups;
-  rg_samples = samp.rg_samples;
-  rg_ids_to_sample = samp.rg_ids_to_sample;
-  sample_to_meandist = samp.sample_to_meandist;
-  sample_to_sdev = samp.sample_to_sdev;
-  sample_to_coverage = samp.sample_to_coverage;
-  sample_to_pdf = new
-}
-*/
+
 bool SampleInfo::SetCustomReadGroups(const Options& options) {
   custom_read_groups = true;
   std::vector<std::string> read_groups;
@@ -94,15 +84,13 @@ bool SampleInfo::ExtractBamInfo(const Options& options, BamCramMultiReader& bamr
     read_len = options.read_len;
   }
   region_reader.Reset();
-  // Insert size distribution + coverage inferred per sample
-  if(options.dist_mean.empty() or options.dist_sdev.empty() or options.coverage.empty()){
-    if(!bam_info.GetInsertSizeDistribution(&profile, rg_samples, rg_ids_to_sample)) {
-      PrintMessageDieOnError("Error extracting insert size and coverage info", M_ERROR);
+  
+  // Set insert size distribution
+  if (options.dist_mean.empty() or options.dist_sdev.empty()) {
+    if (!bam_info.GetInsertSizeDistribution(&profile, rg_samples, rg_ids_to_sample, custom_read_groups)) {
+      PrintMessageDieOnError("Error extracting insert size info", M_ERROR);
     }
-  }
-
-  // Deal with setting custom ins/coverages per BAM file
-  if (!options.dist_mean.empty() or !options.dist_sdev.empty()) {
+  } else {
     if (options.dist_mean.size() != options.dist_sdev.size()) {
       PrintMessageDieOnError("Different number of dist means and dist sdevs input", M_ERROR);
     }
@@ -126,7 +114,13 @@ bool SampleInfo::ExtractBamInfo(const Options& options, BamCramMultiReader& bamr
       }
     }
   }
-  if (options.use_cov & !options.coverage.empty()) {
+
+  // Set coverage
+  if (options.coverage.empty()) {
+    if (!bam_info.GetCoverage(&profile, rg_samples, rg_ids_to_sample, custom_read_groups)) {
+      PrintMessageDieOnError("Error extracting coverage info", M_ERROR);
+    }
+  } else {
     if (options.coverage.size() == 1) {
       size_t i = 0;
       for (std::set<std::string>::iterator it = rg_samples.begin();

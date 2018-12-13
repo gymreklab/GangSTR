@@ -73,8 +73,151 @@ bool BamInfoExtract::GetReadLen(int32_t* read_len){
 	return found_read_len;
 }
 
+// TODO write this
+bool BamInfoExtract::GetCoverage(std::map<std::string, SampleProfile>* profile,
+				 const std::set<std::string> samples,
+				 std::map<std::string, std::string> rg_ids_to_sample,
+				 bool custom_read_groups) {
+  return true;
+}
+
+bool BamInfoExtract::GetInsertSizeDistribution(std::map<std::string, SampleProfile>* profile,
+					       const std::set<std::string> samples,
+					       std::map<std::string, std::string> rg_ids_to_sample,
+					       bool custom_read_groups) {
+  // Keep track of template lengths for each sample
+  std::map<std::string, std::vector<int32_t> > sample_to_tlens;
+  for (std::set<std::string>::const_iterator it = samples.begin();
+       it != samples.end(); it++) {
+    std::vector<int32_t> vec;
+    vec.clear();
+    sample_to_tlens[*it] = vec;
+  }
+
+  // How many regions etc. to use
+  int num_regions_to_use = 10000;
+  int num_regions_so_far = 0;
+  int region_offset = 10000; // Look this far away from STR
+  int region_length = 5000; // Use this length of region to look at
+  // Requirements to continue with each sample
+  size_t min_reads_per_sample = 1000;
+  // Set up
+  std::string read_group, rgid, sample, fname;
+  bool found_sample;
+  Locus locus;
+  region_reader->Reset();
+  BamAlignment alignment;
+  while ((num_regions_so_far < num_regions_to_use) &&
+	 region_reader->GetNextRegion(&locus)) {
+    bamreader->SetRegion(locus.chrom, locus.start+region_offset, locus.start+region_offset+region_length);
+    while (bamreader->GetNextAlignment(alignment)) {
+      // Is this read worth looking at?
+      if (alignment.IsSupplementary() || alignment.IsSecondary() || 
+	  !alignment.IsProperPair()) {
+	continue;
+      }
+      // What sample did this read come from?
+      fname = alignment.file_;
+      if (custom_read_groups) {
+	rgid = fname;
+	found_sample = true;
+      } else {
+	if (!alignment.GetStringTag("RG", read_group)) {
+	  PrintMessageDieOnError("Could not find read group for " + alignment.Name(), M_WARNING);
+	  found_sample = false;
+	}
+	rgid = fname + ":" + read_group;
+	found_sample = true;
+      }
+      if (!found_sample) continue;
+      if (rg_ids_to_sample.find(rgid) == rg_ids_to_sample.end()) continue;
+      sample = rg_ids_to_sample[rgid];
+      // Get template length and assign to that sample
+      sample_to_tlens[sample].push_back(abs(alignment.TemplateLength()));
+    }
+    num_regions_so_far++;
+  }
+
+  // Summarize distributions - TODO
+  for (std::set<std::string>::const_iterator it=samples.begin();
+       it != samples.end(); it++) {
+    std::vector<int32_t> tlen_vec = sample_to_tlens[*it];
+    // Set up to get values
+    int32_t dist_size = options->dist_distribution_size;
+    std::vector<int32_t> dist_count(dist_size);
+    std::vector<double> dist_pdf(dist_size);
+    std::vector<double> dist_cdf(dist_size);
+    std::vector<double> dist_integral(dist_size);
+    for (int i = 0; i < dist_size; i++){
+      dist_count[i] = 0;
+      dist_pdf[i] = 0;
+      dist_cdf[i] = 0;
+      dist_integral[i] = 0;
+    }
+    // Filter out extremes
+    sort(tlen_vec.begin(), tlen_vec.end());
+    int32_t median = tlen_vec.at(int32_t(tlen_vec.size()/2));
+    std::vector<int32_t> tlen_vec_filt;
+    for (size_t i=0; i<tlen_vec.size(); i++) {
+      if (tlen_vec[i]>0 && tlen_vec[i]<4*median) {
+	tlen_vec_filt.push_back(tlen_vec[i]);
+	if (tlen_vec[i]<dist_size) {
+	  dist_count[tlen_vec[i]]++;
+	}
+      }
+    }
+    if (tlen_vec_filt.size() < min_reads_per_sample) {
+      std::stringstream ss;
+      ss << "Not enough reads for " << *it << " " << tlen_vec_filt.size();
+      PrintMessageDieOnError(ss.str(), M_ERROR);
+      return false;
+    }
+    // Set pdf/cdf
+    double cumulative = 0.0;
+    double integral = 0.0;
+    double smoother = 5.0; // Smooth together this many bins
+    double total_reads = double(tlen_vec_filt.size());
+    dist_pdf[0] = double(dist_count[0] + dist_count[1] 
+			 + dist_count[2]) / smoother / total_reads;
+    cumulative += dist_pdf[0];
+    dist_cdf[0] = cumulative;
+    dist_integral[0] = integral;
+    dist_pdf[1] = double(dist_count[0] + dist_count[1] 
+			 + dist_count[2] + dist_count[3]) / smoother / total_reads;
+    cumulative += dist_pdf[1];
+    integral += 1 * dist_pdf[1];
+    dist_cdf[1] = cumulative;
+    dist_integral[0] = integral;
+    ofstream ins_file;
+    ins_file.open((options->outprefix + ".insdata.tab").c_str());
+    for (int i = 2; i < dist_size - 2; i++){
+      dist_pdf[i] = double(dist_count[i - 2] +
+			   dist_count[i - 1] + 
+			   dist_count[i] + 
+			   dist_count[i + 1] + 
+			   dist_count[i + 2]) / smoother / total_reads;
+      cumulative += dist_pdf[i];
+      integral += i * dist_pdf[i];
+      dist_cdf[i] = cumulative;
+      dist_integral[i] = integral;
+      ins_file << *it << " " << i << "\t" << dist_pdf[i] << "\t" << dist_cdf[i] << endl;
+    }
+      
+    dist_cdf[dist_size - 1] = 1.0;
+      
+    // Set values in profile
+    (*profile)[*it].dist_mean = gsl_stats_int_mean(&tlen_vec_filt[0], 1, tlen_vec_filt.size());
+    (*profile)[*it].dist_sdev = gsl_stats_int_sd_m(&tlen_vec_filt[0], 1, tlen_vec_filt.size(),
+						   (*profile)[*it].dist_mean);
+    (*profile)[*it].dist_pdf = dist_pdf;
+    (*profile)[*it].dist_cdf = dist_cdf;
+    (*profile)[*it].dist_integral = dist_integral;
+  }
+  return true;
+}
 // TODO REWRITE THIS TO DEAL WITH PER-SAMPLE
 // TODO Split to separate function to learn coverage, mean/sdev, and pdf/cdf
+/*
 bool BamInfoExtract::GetInsertSizeDistribution(std::map<std::string, SampleProfile>* profile,
 					       const std::set<std::string> samples,
 					       const std::map<std::string, std::string> rg_ids_to_sample) {
@@ -210,7 +353,7 @@ bool BamInfoExtract::GetInsertSizeDistribution(std::map<std::string, SampleProfi
     (*profile)[*it].dist_integral = dist_integral;
   }
   return found_ins_distribution;
-}
+  } */
 
 BamInfoExtract::~BamInfoExtract(){
 }

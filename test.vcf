@@ -5,10 +5,11 @@
 ##INFO=<ID=REF,Number=1,Type=Float,Description="Reference copy number">
 ##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
 ##FORMAT=<ID=DP,Number=1,Type=Integer,Description="Read Depth">
-##FORMAT=<ID=GB,Number=1,Type=String,Description="Genotype given in bp difference from reference">
-##FORMAT=<ID=CI,Number=1,Type=String,Description="Confidence intervals">
+##FORMAT=<ID=REPCN,Number=1,Type=String,Description="Genotype given in number of copies of the repeat motif">
+##FORMAT=<ID=REPCI,Number=1,Type=String,Description="Confidence intervals">
 ##FORMAT=<ID=RC,Number=1,Type=String,Description="Number of reads in each class (enclosing, spanning, FRR, bounding)">
 ##FORMAT=<ID=Q,Number=1,Type=Float,Description="Min. negative likelihood">
 ##FORMAT=<ID=INS,Number=1,Type=String,Description="Insert size mean and stddev">
+##FORMAT=<ID=STDERR,Number=1,Type=String,Description="Bootstrap standard error of each allele">
 #CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	SRR4435260	SRR4435261
-chr3	63898362	.	cagcagcagcagcagcagcagcagcagcag	.	.	.	END=63898391;RU=cag;REF=10	GT:DP:GB:CI:RC:Q:INS	0,0:50:0,0:-3-0,-3-0:14,30,0,6:370.348:309.936<66.3921	0,0:46:0,0:0-0,0-0:9,31,0,6:349.616:309.936<66.3921
+chr3	63898362	.	cagcagcagcagcagcagcagcagcagcag	cagcagcagcagcagcagcagcagcag	.	.	END=63898391;RU=cag;REF=10	GT:DP:REPCN:REPCI:RC:Q:INS:STDERR	1/0:50:9,10:1-10,10-10:14,30,0,6:372.268:309.409,66.5212:1.8617,0	0/0:46:10,10:10-10,10-10:9,31,0,6:347.214:312.732,65.5742:0,0

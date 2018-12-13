@@ -47,10 +47,17 @@ public:
 		       RegionReader* region_reader_);
 	~BamInfoExtract();
 	bool GetReadLen(int32_t* read_len);
-	// TODO change to deal with per sample
+
 	bool GetInsertSizeDistribution(std::map<std::string, SampleProfile>* profile,
 				       const std::set<std::string> samples,
-				       const std::map<std::string, std::string> rg_ids_to_sample);
+				       std::map<std::string, std::string> rg_ids_to_sample,
+				       bool custom_read_groups);
+
+	bool GetCoverage(std::map<std::string, SampleProfile>* profile,
+			 const std::set<std::string> samples,
+			 std::map<std::string, std::string> rg_ids_to_sample,
+			 bool custom_read_groups);
+
  private:
 	const Options* options;
 	BamCramMultiReader* bamreader;
