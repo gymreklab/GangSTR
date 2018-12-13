@@ -45,6 +45,10 @@ class Options {
   double use_mean_dist;
   double use_mean_sdev;
   double use_coverage;
+  bool model_gc_cov;
+  float gc_bin_size;
+  int gc_region_len;
+  int max_gc_regions;
   std::vector<double> use_dist_pdf;
   std::vector<double> use_dist_cdf;
 

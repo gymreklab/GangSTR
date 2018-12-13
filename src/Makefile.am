@@ -29,6 +29,7 @@ GangSTR_SOURCES = main_gangstr.cpp \
 	options.h options.cpp \
 	locus.h locus.cpp \
 	region_reader.h region_reader.cpp \
+	gc_region_reader.h gc_region_reader.cpp \
 	ref_genome.h ref_genome.cpp \
 	genotyper.h genotyper.cpp \
 	read_class.h read_class.cpp \

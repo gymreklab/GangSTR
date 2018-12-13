@@ -18,35 +18,34 @@ You should have received a copy of the GNU General Public License
 along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef SRC_REF_GENOME_H__
-#define SRC_REF_GENOME_H__
+#ifndef SRC_GC_REGION_READER_H__
+#define SRC_GC_REGION_READER_H__
 
-#include "htslib/faidx.h"
-
-#include <stdint.h>
-#include <unistd.h>
-
+#include <fstream>
 #include <string>
+#include <map>
+#include <vector>
 
-class RefGenome {
+#include "src/locus.h"
+#include "src/ref_genome.h"
+
+class GCRegionReader {
  public:
-  RefGenome(const std::string& _reffa);
-  virtual ~RefGenome();
+  GCRegionReader(const RefGenome& refgenome,
+		 const float& bin_size_, const int& region_len_,
+		 const int& max_regions);
+  virtual ~GCRegionReader();
 
-  bool GetSequence(const std::string& _chrom,
-		   const int32_t& _start,
-		   const int32_t& _end,
-		   std::string* seq) const;
-
-  const std::vector<std::string> GetChroms() const;
-  const int32_t GetChromSize(const std::string& chrom) const;
-
+  bool GetGCBinLoci(std::vector<Locus>* loci,
+		    const float& lb, const float& ub,
+		    const int& regions_per_bin);
  private:
-  bool file_exists(std::string path) const {
-    return (access(path.c_str(), F_OK) != -1);
-  }
-
-  faidx_t* refindex;
+  float GetGC(const std::string& seq);
+  
+  std::vector<std::vector<Locus> > gc_bin_loci;
+  float bin_size;
+  int region_len;
+  int max_regions;
 };
 
-#endif  // SRC_REF_GENOME_H__
+#endif  // SRC_GC_REGION_READER_H__

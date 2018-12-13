@@ -5,4 +5,5 @@
     --ref /storage/resources/dbase/human/hg19/hg19.fa \
     --bam-samps SRR4435260,SRR4435261 \
     --regions test.bed \
-    --out test --verbose
+    --out test --verbose \
+    --model-gc-cov

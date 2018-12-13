@@ -45,7 +45,7 @@ class SampleInfo {
   bool SetCustomReadGroups(const Options& options);
   bool LoadReadGroups(const Options& options, const BamCramMultiReader& bamreader);
   bool ExtractBamInfo(const Options& options, BamCramMultiReader& bamreader,
-		      RegionReader& region_reader);
+		      RegionReader& region_reader, const RefGenome& ref_genome);
 
   /* Getters */
   const int32_t GetReadLength();
@@ -60,8 +60,8 @@ class SampleInfo {
   const std::string GetSampleFromID(const std::string& rgid);
 
   /* Other utils */
-  void PrintSampleInfo();
-  double GetDistMax(const std::string &sample);
+  void PrintSampleInfo(const std::string& logfilename);
+  double GetDistMax(const std::string& sample);
 
  private:
   bool custom_read_groups;

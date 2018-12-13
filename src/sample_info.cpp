@@ -21,6 +21,8 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 #include "src/sample_info.h"
 #include "src/stringops.h"
 
+#include <iostream>
+
 using namespace std;
 
 SampleInfo::SampleInfo() {
@@ -73,8 +75,8 @@ bool SampleInfo::LoadReadGroups(const Options& options, const BamCramMultiReader
 }
 
 bool SampleInfo::ExtractBamInfo(const Options& options, BamCramMultiReader& bamreader,
-				RegionReader& region_reader) {
-  BamInfoExtract bam_info(&options, &bamreader, &region_reader);
+				RegionReader& region_reader, const RefGenome& ref_genome) {
+  BamInfoExtract bam_info(&options, &bamreader, &region_reader, &ref_genome);
   if (options.read_len == -1) {
     if (!bam_info.GetReadLen(&read_len)) {
       PrintMessageDieOnError("Error extracting read length", M_ERROR);
@@ -142,8 +144,9 @@ bool SampleInfo::ExtractBamInfo(const Options& options, BamCramMultiReader& bamr
   return true;
 }
 
-void SampleInfo::PrintSampleInfo() {
+void SampleInfo::PrintSampleInfo(const std::string& logfilename) {
   stringstream ss;
+  int numgc;
   ss << "Sample stats:\n";
   for (std::set<std::string>::iterator it = rg_samples.begin();
        it != rg_samples.end(); it++) {
@@ -152,8 +155,33 @@ void SampleInfo::PrintSampleInfo() {
        << "\tInsMean=" << profile[*it].dist_mean << "\n"
        << "\tInsSdev=" << profile[*it].dist_sdev << "\n"
        <<"\tReadLen="<< read_len << "\n";
+    ss << "\tGC Coverage" << "\n";
+    for (size_t i=0; i<profile[*it].gc_coverage.size();i++) {
+      ss << "\t\t Bin " << i << " " << profile[*it].gc_coverage[i] << "\n";
+    }
+    numgc = profile[*it].gc_coverage.size();
   }
   PrintMessageDieOnError(ss.str(), M_PROGRESS);
+  // now print to log file
+  ofstream sample_log_file;
+  sample_log_file.open(logfilename.c_str());
+  sample_log_file << "Sample\tMeanCoverage\tInsMean\tInsSdev\tReadLen";
+  for (int i=0; i<numgc; i++) {
+    sample_log_file << "\tCoverage-GCBin-"<< i;
+  }
+  sample_log_file << "\n";
+  for (std::set<std::string>::iterator it=rg_samples.begin();
+       it != rg_samples.end(); it++) {
+    sample_log_file << *it << "\t"
+	     << profile[*it].coverage << "\t"
+	     << profile[*it].dist_mean << "\t"
+	     << profile[*it].dist_sdev << "\t"
+	     << read_len;
+    for (int i=0; i<numgc; i++) {
+      sample_log_file << "\t" << profile[*it].gc_coverage[i];
+    }
+    sample_log_file << "\n";
+  }
 }
 
 const int32_t SampleInfo::GetReadLength() {

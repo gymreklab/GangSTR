@@ -19,65 +19,143 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include "src/bam_info_extract.h"
+#include "src/gc_region_reader.h"
 #include <iostream>
 using namespace std;
 BamInfoExtract::BamInfoExtract(const Options* options_,
 			       BamCramMultiReader* bamreader_, 
-			       RegionReader* region_reader_){
+			       RegionReader* region_reader_,
+			       const RefGenome* ref_genome_){
 	options = options_;
 	bamreader = bamreader_;
-	region_reader = region_reader_;	
+	region_reader = region_reader_;
+	ref_genome = ref_genome_;
 }
 
 bool BamInfoExtract::GetReadLen(int32_t* read_len){
-	*read_len = -1;
-	int32_t flank_size = 20000;
-	int32_t req_streak = 10;
-	bool found_read_len = false, has_reads = false;
-	// Header has info about chromosome names
-	const BamHeader* bam_header = bamreader->bam_header();
-	int32_t chrom_ref_id, num_reads;
-	BamAlignment alignment;
-
-	int32_t curr_len = 0, curr_streak = 0;
-
-	while(region_reader->GetNextRegion(&locus) and !found_read_len){
-		chrom_ref_id = bam_header->ref_id(locus.chrom);
-		// if (chrom_ref_id == -1){
-		// 	chrom_ref_id = bam_header->ref_id(locus.chrom.substr(3));
-		// }
-
-		// collecting reads mapped around locus
-		bamreader->SetRegion(locus.chrom, 
-			locus.start - flank_size > 0 ? locus.start - flank_size : 0, 
-			locus.start + flank_size);
-		num_reads = 0;
-		curr_streak = 0;
-		// Go through each alignment in the region until you have enough reads
-		while (bamreader->GetNextAlignment(alignment) and curr_streak < req_streak) {
-			has_reads = true;
-			if(alignment.QueryBases().size() == curr_len){
-				curr_streak++;
-			}
-			else{
-				curr_len = alignment.QueryBases().size();
-				curr_streak = 0;
-			}
-		}
-
-		if (curr_streak >= req_streak){
-			*read_len = curr_len;
-			found_read_len = true;
-		}
-	}
-	return found_read_len;
+  *read_len = -1;
+  int32_t flank_size = 20000;
+  int32_t req_streak = 10;
+  bool found_read_len = false, has_reads = false;
+  // Header has info about chromosome names
+  const BamHeader* bam_header = bamreader->bam_header();
+  int32_t chrom_ref_id, num_reads;
+  BamAlignment alignment;
+  
+  int32_t curr_len = 0, curr_streak = 0;
+  
+  while(region_reader->GetNextRegion(&locus) and !found_read_len){
+    chrom_ref_id = bam_header->ref_id(locus.chrom);
+    // if (chrom_ref_id == -1){
+    // 	chrom_ref_id = bam_header->ref_id(locus.chrom.substr(3));
+    // }
+    
+    // collecting reads mapped around locus
+    bamreader->SetRegion(locus.chrom, 
+			 locus.start - flank_size > 0 ? locus.start - flank_size : 0, 
+			 locus.start + flank_size);
+    num_reads = 0;
+    curr_streak = 0;
+    // Go through each alignment in the region until you have enough reads
+    while (bamreader->GetNextAlignment(alignment) and curr_streak < req_streak) {
+      has_reads = true;
+      if(alignment.QueryBases().size() == curr_len){
+	curr_streak++;
+      }
+      else{
+	curr_len = alignment.QueryBases().size();
+	curr_streak = 0;
+      }
+    }
+    
+    if (curr_streak >= req_streak){
+      *read_len = curr_len;
+      found_read_len = true;
+    }
+  }
+  return found_read_len;
 }
 
-// TODO - change to GC use content
+bool BamInfoExtract::GetCoverageGC(std::map<std::string, SampleProfile>* profile,
+				   const std::set<std::string> samples,
+				   std::map<std::string, std::string> rg_ids_to_sample,
+				   bool custom_read_groups) {
+  int regions_per_bin = 1000;
+  float lb, ub;
+  std::vector<int32_t> total_bases;
+  std::map<std::string, std::vector<int32_t> > sample_gc_bases;
+  GCRegionReader gc_reader(*ref_genome, options->gc_bin_size, options->gc_region_len,
+			   options->max_gc_regions);
+  std::string read_group, rgid, sample, fname;
+  BamAlignment alignment;
+  bool found_sample;
+  for (int i=0; i<(1.0/options->gc_bin_size); i++) {
+    // Init each sample for this bin
+    total_bases.push_back(0);
+    for (std::set<std::string>::const_iterator sampleit=samples.begin(); sampleit != samples.end(); sampleit++) {
+      sample_gc_bases[*sampleit].push_back(0);
+    }
+    // Get regions
+    lb = options->gc_bin_size*i;
+    ub = options->gc_bin_size*(i+1);
+    std::vector<Locus> gc_bin_loci;
+    if (!gc_reader.GetGCBinLoci(&gc_bin_loci, lb, ub,
+				regions_per_bin)) {
+      stringstream ss;
+      ss << "Could not find GC regions " << lb << "-" << ub;
+      PrintMessageDieOnError(ss.str(), M_WARNING);
+    }
+    // For each locus get num total bases and coverage per sample
+    for (std::vector<Locus>::iterator it = gc_bin_loci.begin(); it != gc_bin_loci.end(); it++) {
+      const Locus locus = *it;
+      bamreader->SetRegion(locus.chrom, locus.start, locus.end);
+      //      std::cerr << "Locus " << locus.chrom << ":" << locus.start << " " << lb <<"-" << ub << std::endl;
+      while (bamreader->GetNextAlignment(alignment)) {
+	// Is this read worth looking at?
+	if (alignment.IsSupplementary() || alignment.IsSecondary() || 
+	    !alignment.IsProperPair()) {
+	  continue;
+	}
+	// What sample did this read come from?
+	fname = alignment.file_;
+	if (custom_read_groups) {
+	  rgid = fname;
+	  found_sample = true;
+	} else {
+	  if (!alignment.GetStringTag("RG", read_group)) {
+	    PrintMessageDieOnError("Could not find read group for " + alignment.Name(), M_WARNING);
+	    found_sample = false;
+	  }
+	  rgid = fname + ":" + read_group;
+	  found_sample = true;
+	}
+	if (!found_sample) continue;
+	if (rg_ids_to_sample.find(rgid) == rg_ids_to_sample.end()) continue;
+	sample = rg_ids_to_sample[rgid];
+	// Get template length and assign to that sample
+	sample_gc_bases[sample][i] += alignment.QueryBases().size();
+      }
+      total_bases[i] += options->gc_region_len;
+    }
+  }
+
+  for (std::set<std::string>::const_iterator it = samples.begin();
+       it != samples.end(); it++) {
+    std::vector<double> sample_gc_covs;
+    for (int i = 0; i<total_bases.size(); i++) {
+      sample_gc_covs.push_back(float(sample_gc_bases[*it][i])/float(total_bases[i]));
+    }
+    (*profile)[*it].gc_coverage = sample_gc_covs;
+  }
+}
+
 bool BamInfoExtract::GetCoverage(std::map<std::string, SampleProfile>* profile,
 				 const std::set<std::string> samples,
 				 std::map<std::string, std::string> rg_ids_to_sample,
 				 bool custom_read_groups) {
+  if (options->model_gc_cov) {
+    GetCoverageGC(profile, samples, rg_ids_to_sample, custom_read_groups);
+  }
   // How many regions etc. to use
   int num_regions_to_use = 10000;
   int num_regions_so_far = 0;

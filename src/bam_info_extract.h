@@ -24,6 +24,7 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 #include "src/region_reader.h"
 #include "src/locus.h"
 #include "src/bam_io.h"
+#include "src/ref_genome.h"
 #include "gsl/gsl_statistics_int.h"
 
 #ifndef BAM_INFO_H_
@@ -35,6 +36,7 @@ struct SampleProfile {
   double dist_mean;
   double dist_sdev;
   double coverage;
+  std::vector<double> gc_coverage;
   std::vector<double> dist_pdf;
   std::vector<double> dist_cdf;
   std::vector<double> dist_integral;
@@ -44,7 +46,8 @@ class BamInfoExtract{
 public:
 	BamInfoExtract(const Options* options_,
 		       BamCramMultiReader* bamreader_, 
-		       RegionReader* region_reader_);
+		       RegionReader* region_reader_,
+		       const RefGenome* ref_genome_);
 	~BamInfoExtract();
 	bool GetReadLen(int32_t* read_len);
 
@@ -58,10 +61,15 @@ public:
 			 std::map<std::string, std::string> rg_ids_to_sample,
 			 bool custom_read_groups);
 
+	bool GetCoverageGC(std::map<std::string, SampleProfile>* profile,
+			   const std::set<std::string> samples,
+			   std::map<std::string, std::string> rg_ids_to_sample,
+			   bool custom_read_groups);
  private:
 	const Options* options;
 	BamCramMultiReader* bamreader;
 	RegionReader* region_reader;
+	const RefGenome* ref_genome;
 	Locus locus;
 };
 

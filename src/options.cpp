@@ -51,6 +51,10 @@ Options::Options() {
   use_mean_dist = 400;
   use_mean_sdev = 100;
   use_coverage = -1;
+  model_gc_cov = false;
+  gc_bin_size = 0.1;
+  gc_region_len = 1000;
+  max_gc_regions = 100000;
   read_len = -1;
   min_score = 75;
   dist_man_set = false;
