@@ -1,5 +1,5 @@
 ##fileformat=VCFv4.1
-##command=GangSTR-1.4.38-cc12-dirty --bam /storage/resources/datasets/PlatinumGenomesDbGaP/sra/SRR4435260.bam,/storage/resources/datasets/PlatinumGenomesDbGaP/sra/SRR4435261.bam --ref /storage/resources/dbase/human/hg19/hg19.fa --bam-samps SRR4435260,SRR4435261 --regions test.bed --out test --verbose
+##command=GangSTR-1.4.38-cc12-dirty --bam /storage/resources/datasets/PlatinumGenomesDbGaP/sra/SRR4435260.bam,/storage/resources/datasets/PlatinumGenomesDbGaP/sra/SRR4435261.bam --ref /storage/resources/dbase/human/hg19/hg19.fa --bam-samps SRR4435260,SRR4435261 --regions test.bed --out test --verbose --model-gc-cov
 ##INFO=<ID=END,Number=1,Type=Integer,Description="End position of variant">
 ##INFO=<ID=RU,Number=1,Type=String,Description="Repeat motif">
 ##INFO=<ID=REF,Number=1,Type=Float,Description="Reference copy number">

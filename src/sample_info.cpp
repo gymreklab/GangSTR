@@ -204,6 +204,10 @@ const double SampleInfo::GetCoverage(std::string sample) {
   return profile[sample].coverage;
 }
 
+const std::vector<double> SampleInfo::GetGCCoverage(std::string sample) {
+  return profile[sample].gc_coverage;
+}
+
 std::vector<double> SampleInfo::GetDistPDF(std::string sample) {
   return profile[sample].dist_pdf;
 }

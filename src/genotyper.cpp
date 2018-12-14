@@ -72,6 +72,18 @@ bool Genotyper::ProcessLocus(BamCramMultiReader* bamreader, Locus* locus) {
     it->second->Reset();
   }
 
+  // Infer GC bin
+  int gcbin = -1;
+  if (options->model_gc_cov) {
+    std::string seq;
+    if (refgenome->GetSequence(locus->chrom,
+			       int((locus->start+locus->end)/2-options->gc_region_len/2),
+			       int((locus->start+locus->end)/2+options->gc_region_len/2),
+			       &seq)) {
+      float gc = GetGC(seq);
+      gcbin = int(floor(gc/options->gc_bin_size));
+    }
+  }
   // Load all read data
   if (options->verbose) {
     PrintMessageDieOnError("\tLoading read data", M_PROGRESS);
@@ -95,6 +107,9 @@ bool Genotyper::ProcessLocus(BamCramMultiReader* bamreader, Locus* locus) {
   for (std::set<std::string>::iterator it = rg_samples.begin();
        it != rg_samples.end(); it++) {
     const std::string samp = *it;
+    if (gcbin != -1) {
+      sample_likelihood_maximizers[samp]->SetCoverage(sample_info->GetGCCoverage(samp)[gcbin]);
+    }
   try {
     if (!sample_likelihood_maximizers[samp]->OptimizeLikelihood(read_len, 
 								(int32_t)(locus->motif.size()),

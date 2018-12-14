@@ -131,6 +131,10 @@ void LikelihoodMaximizer::PlotLikelihood(int32_t fix_allele,
   }
 }
 
+void LikelihoodMaximizer::SetCoverage(const double& cov) {
+  obj_cov = cov;
+}
+
 void LikelihoodMaximizer::PrintReadPool(){
   if (resampled_pool.size() == read_pool.size()){
     vector<ReadRecord>::iterator resamp_rec = resampled_pool.begin();

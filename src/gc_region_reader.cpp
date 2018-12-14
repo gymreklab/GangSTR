@@ -65,24 +65,6 @@ GCRegionReader::GCRegionReader(const RefGenome& refgenome,
   }
 }
 
-float GCRegionReader::GetGC(const std::string& seq) {
-  int total_bases = 0;
-  int gc = 0;
-  for (int i=0; i<seq.size(); i++) {
-    if (seq[i] != 'c' && seq[i] != 'C' &&
-	seq[i] != 'g' && seq[i] != 'G' &&
-	seq[i] != 't' && seq[i] != 'T' &&
-	seq[i] != 'a' && seq[i] != 'A') {
-      return -1;
-    }
-    total_bases += 1;
-    if (seq[i] == 'c' || seq[i] =='C' ||
-	seq[i] == 'g' || seq[i] == 'G') {
-      gc += 1;
-    }
-  }
-  return float(gc)/float(total_bases);
-}
 
 bool GCRegionReader::GetGCBinLoci(std::vector<Locus>* loci,
 				  const float& lb, const float& ub,

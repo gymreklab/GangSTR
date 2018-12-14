@@ -40,7 +40,6 @@ class GCRegionReader {
 		    const float& lb, const float& ub,
 		    const int& regions_per_bin);
  private:
-  float GetGC(const std::string& seq);
   
   std::vector<std::vector<Locus> > gc_bin_loci;
   float bin_size;

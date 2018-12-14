@@ -34,4 +34,6 @@ enum MSGTYPE {
 void PrintMessageDieOnError(const std::string& msg,
                             MSGTYPE msgtype);
 
+float GetGC(const std::string& seq);
+
 #endif  // SRC_COMMON_H__
