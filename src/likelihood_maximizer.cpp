@@ -35,6 +35,7 @@ LikelihoodMaximizer::LikelihoodMaximizer(const Options& _options, SampleInfo& _s
   
   obj_cov = _sample_info.GetCoverage(samp);
 
+  // TODO don't use options for this, instead pass sample_info
   Options lik_options; // new object specifically for this sample
   lik_options.use_mean_dist = _sample_info.GetInsertMean(samp);
   lik_options.use_mean_sdev = _sample_info.GetInsertSdev(samp);
@@ -649,6 +650,10 @@ bool LikelihoodMaximizer::OptimizeLikelihood(const int32_t& read_len,
 					     const int32_t& fix_allele,
 					     const double& off_share,
 					     int32_t* allele1, int32_t* allele2, double* min_negLike) {
+  if (obj_cov == -1) {
+    PrintMessageDieOnError("Skipping locus with likely extreme GC content", M_PROGRESS);
+    return false;
+  }
   if (options->very_verbose) {
     if (!resampled) {
       PrintMessageDieOnError("\t\tOptimizing Likelihood" , M_PROGRESS);

@@ -143,7 +143,11 @@ bool BamInfoExtract::GetCoverageGC(std::map<std::string, SampleProfile>* profile
        it != samples.end(); it++) {
     std::vector<double> sample_gc_covs;
     for (int i = 0; i<total_bases.size(); i++) {
-      sample_gc_covs.push_back(float(sample_gc_bases[*it][i])/float(total_bases[i]));
+      if (total_bases[i]>0) {
+	sample_gc_covs.push_back(float(sample_gc_bases[*it][i])/float(total_bases[i]));
+      } else {
+	sample_gc_covs.push_back(-1);
+      }
     }
     (*profile)[*it].gc_coverage = sample_gc_covs;
   }
@@ -227,7 +231,7 @@ bool BamInfoExtract::GetInsertSizeDistribution(std::map<std::string, SampleProfi
   }
 
   // How many regions etc. to use
-  int num_regions_to_use = 10000;
+  int num_regions_to_use = 100000;
   int num_regions_so_far = 0;
   int region_offset = 10000; // Look this far away from STR
   int region_length = 5000; // Use this length of region to look at
@@ -271,6 +275,8 @@ bool BamInfoExtract::GetInsertSizeDistribution(std::map<std::string, SampleProfi
   }
 
   // Summarize distributions
+  ofstream ins_file;
+  ins_file.open((options->outprefix + ".insdata.tab").c_str());  
   for (std::set<std::string>::const_iterator it=samples.begin();
        it != samples.end(); it++) {
     std::vector<int32_t> tlen_vec = sample_to_tlens[*it];
@@ -320,8 +326,6 @@ bool BamInfoExtract::GetInsertSizeDistribution(std::map<std::string, SampleProfi
     integral += 1 * dist_pdf[1];
     dist_cdf[1] = cumulative;
     dist_integral[0] = integral;
-    ofstream ins_file;
-    ins_file.open((options->outprefix + ".insdata.tab").c_str());
     for (int i = 2; i < dist_size - 2; i++){
       dist_pdf[i] = double(dist_count[i - 2] +
 			   dist_count[i - 1] + 
