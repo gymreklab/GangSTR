@@ -161,7 +161,7 @@ bool BamInfoExtract::GetCoverage(std::map<std::string, SampleProfile>* profile,
     GetCoverageGC(profile, samples, rg_ids_to_sample, custom_read_groups);
   }
   // How many regions etc. to use
-  int num_regions_to_use = 10000;
+  int num_regions_to_use = 100;
   int num_regions_so_far = 0;
   int region_offset = 10000; // Look this far away from STR
   int region_length = 5000; // Use this length of region to look at
@@ -231,7 +231,7 @@ bool BamInfoExtract::GetInsertSizeDistribution(std::map<std::string, SampleProfi
   }
 
   // How many regions etc. to use
-  int num_regions_to_use = 100000;
+  int num_regions_to_use = 100;
   int num_regions_so_far = 0;
   int region_offset = 10000; // Look this far away from STR
   int region_length = 5000; // Use this length of region to look at

@@ -215,7 +215,6 @@ bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
 				     const Locus& locus, const int32_t& regionsize, const int32_t& min_match,
 				     std::map<std::string, ReadPair>* read_pairs, bool custom_read_group) {
   if (locus.end < locus.start){
-    // TODO print error "Not enough extracted reads"
     PrintMessageDieOnError("\tLocus end preceeds locus start. Aborting..", M_PROGRESS);
     return false;
   }
@@ -510,7 +509,6 @@ bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
 
   }
 
-  
   // Get bam alignments from off target region
   if (locus.offtarget_set){
     for (std::vector<GenomeRegion>::const_iterator reg_it = locus.offtarget_regions.begin();
@@ -888,79 +886,6 @@ std::string ReadExtractor::trim_alignment_name(const BamAlignment& aln) const {
   }
   return aln_name;
 }
-
-// Implemented in BamInfoExtract. TODO delete
-// /*
-//   Computing the insert size distribution
-//  */
-// bool ReadExtractor::ComputeInsertSizeDistribution(BamCramMultiReader* bamreader,
-//              const Locus& locus,
-//              double* mean, double* std_dev, int32_t* read_len) {
-//   // TODO change 200000 flank size to something appropriate
-//   int32_t flank_size = 200000;
-//   int32_t exclusion_margin = 1000;
-
-//   double mean_b, mean_a, std_b, std_a; // mean and std dev, before and after locus
-  
-//   // Get bam alignments from the relevant region
-//   // bamreader->SetRegion(locus.chrom, locus.start-flank_size>0?locus.start-flank_size:0, locus.end+flank_size);
-
-
-//   // Header has info about chromosome names
-//   const BamHeader* bam_header = bamreader->bam_header();
-//   const int32_t chrom_ref_id = bam_header->ref_id(locus.chrom);
-
-//   int32_t median, size = 0, sum = 0, valid_size = 0, sum_std = 0;
-//   std::vector<int32_t> temp_len_vec, valid_temp_len_vec;
-//   BamAlignment alignment;
-
-//   // collecting reads mapped before locus
-//   bamreader->SetRegion(locus.chrom, 
-//       locus.start - flank_size > 0 ? locus.start - flank_size : 0, 
-//       locus.start - exclusion_margin > 0 ? locus.start - exclusion_margin : 0);
-
-//   // Go through each alignment in the region
-//   while (bamreader->GetNextAlignment(alignment)) {
-//     // Set template length
-//     temp_len_vec.push_back(abs(alignment.TemplateLength()));
-//     size++;
-//   }
-//   *read_len = (int32_t)(alignment.QueryBases().size());
-//   // collecting reads mapped after locus
-//   bamreader->SetRegion(locus.chrom, 
-//       locus.start + exclusion_margin, 
-//       locus.start + flank_size);
-//   // Go through each alignment in the region
-//   while (bamreader->GetNextAlignment(alignment)) {
-//     // Set template length
-//     temp_len_vec.push_back(abs(alignment.TemplateLength()));
-//     size++;
-//   }
-
-//   // Give up if we don't have enough reads TODO probably need more than 0...
-//   if (temp_len_vec.size() == 0) {
-//     return false;
-//   }
-
-//   sort(temp_len_vec.begin(), temp_len_vec.end());
-//   median = temp_len_vec.at(int32_t(size / 2));
-  
-//   for (std::vector<int32_t>::iterator temp_it = temp_len_vec.begin();
-//        temp_it != temp_len_vec.end();
-//        ++temp_it) {
-//     // Todo change 3
-//     if(*temp_it < 3 * median){
-//       valid_temp_len_vec.push_back(*temp_it);
-//       valid_size++;  
-//     }
-//   }
-//   int* valid_temp_len_arr = &valid_temp_len_vec[0];
-//   *mean = gsl_stats_int_mean(valid_temp_len_arr, 1, valid_size - 1);
-//   *std_dev = gsl_stats_int_sd_m (valid_temp_len_arr,  1, valid_size, *mean);
-//   dist_mean = *mean;
-//   dist_sdev = *std_dev;
-//   return true;  //TODO add false case
-// }
 
 ReadExtractor::~ReadExtractor() {
   if (options.output_readinfo) {

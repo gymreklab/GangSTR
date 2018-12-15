@@ -155,11 +155,13 @@ void SampleInfo::PrintSampleInfo(const std::string& logfilename) {
        << "\tInsMean=" << profile[*it].dist_mean << "\n"
        << "\tInsSdev=" << profile[*it].dist_sdev << "\n"
        <<"\tReadLen="<< read_len << "\n";
-    ss << "\tGC Coverage" << "\n";
-    for (size_t i=0; i<profile[*it].gc_coverage.size();i++) {
-      ss << "\t\t Bin " << i << " " << profile[*it].gc_coverage[i] << "\n";
-    }
     numgc = profile[*it].gc_coverage.size();
+    if (numgc > 0) {
+      ss << "\tGC Coverage" << "\n";
+      for (size_t i=0; i<profile[*it].gc_coverage.size();i++) {
+	ss << "\t\t Bin " << i << " " << profile[*it].gc_coverage[i] << "\n";
+      }
+    }
   }
   PrintMessageDieOnError(ss.str(), M_PROGRESS);
   // now print to log file
