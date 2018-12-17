@@ -45,7 +45,7 @@ class SampleInfo {
   bool SetCustomReadGroups(const Options& options);
   bool LoadReadGroups(const Options& options, const BamCramMultiReader& bamreader);
   bool ExtractBamInfo(const Options& options, BamCramMultiReader& bamreader,
-		      RegionReader& region_reader);
+		      RegionReader& region_reader, const RefGenome& ref_genome);
 
   /* Getters */
   const int32_t GetReadLength();
@@ -53,6 +53,7 @@ class SampleInfo {
   const double GetInsertMean(std::string sample);
   const double GetInsertSdev(std::string sample);
   const double GetCoverage(std::string sample);
+  const std::vector<double> GetGCCoverage(std::string sample);
   const bool GetIsCustomRG();
   std::vector<double> GetDistPDF(std::string sample);
   std::vector<double> GetDistCDF(std::string sample);
@@ -60,19 +61,14 @@ class SampleInfo {
   const std::string GetSampleFromID(const std::string& rgid);
 
   /* Other utils */
-  void PrintSampleInfo();
-  double GetDistMax(const std::string &sample);
+  void PrintSampleInfo(const std::string& logfilename);
+  double GetDistMax(const std::string& sample);
 
  private:
   bool custom_read_groups;
   std::set<std::string> rg_samples;
   std::map<std::string, std::string> rg_ids_to_sample;
   std::map<std::string, SampleProfile> profile;
-  //std::map<std::string, double> sample_to_meandist;
-  //std::map<std::string, double> sample_to_sdev;
-  //std::map<std::string, double> sample_to_coverage;
-  //std::map<std::string, std::vector<double> > sample_to_pdf;
-  //std::map<std::string, std::vector<double> > sample_to_cdf;
   
   int32_t read_len;
 };

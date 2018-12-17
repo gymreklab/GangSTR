@@ -95,7 +95,7 @@ mkdir -p dependences || die "Could not make dependencies directory"
 # Install GSL 
 echo "[install-deps.sh] Compiling GSL..."
 cd dependences
-wget ftp://ftp.gnu.org/gnu/gsl/gsl-2.5.tar.gz || die "Error downloading GSL"
+wget -O gsl-2.5.tar.gz ftp://ftp.gnu.org/gnu/gsl/gsl-2.5.tar.gz || die "Error downloading GSL"
 tar -xzvf gsl-2.5.tar.gz || die "Error unzipping GSL"
 cd gsl-2.5/ || die "Error navigating to GSL directory"
 ./configure --prefix=$PREFIX || die "Error configuring GSL"
@@ -105,7 +105,7 @@ make install || die "Error installing GSL"
 # Install NLOPT 
 echo "[install-deps.sh] Compiling GSL..."
 cd ../ || die "Error navigating to dependencies"
-wget http://ab-initio.mit.edu/nlopt/nlopt-2.4.2.tar.gz || die "Error downloading NLOPT"
+wget -O nlopt-2.4.2.tar.gz http://ab-initio.mit.edu/nlopt/nlopt-2.4.2.tar.gz || die "Error downloading NLOPT"
 tar -xzvf nlopt-2.4.2.tar.gz || die "Error unzipping NLOPT"
 cd nlopt-2.4.2 || die "Error navigating to NLOPT directory"
 ./configure --prefix=$PREFIX || die "Error configuring NLOPT"
@@ -114,7 +114,7 @@ make install || die "Error installing NLOPT"
 
 # Install HTSLIB 
 cd ../ || die "Error navigating to dependencies"
-wget https://github.com/samtools/htslib/releases/download/1.8/htslib-1.8.tar.bz2 || die "Error downloading HTSLIB"
+wget -O htslib-1.8.tar.bz2 https://github.com/samtools/htslib/releases/download/1.8/htslib-1.8.tar.bz2 || die "Error downloading HTSLIB"
 tar -xjvf htslib-1.8.tar.bz2 || die "Error unzipping HTSLIB"
 cd htslib-1.8/ || die "Error navigating to HTSLIB"
 ./configure --disable-lzma --disable-bz2 --prefix=$PREFIX || die "Error configuring HTSLIB"

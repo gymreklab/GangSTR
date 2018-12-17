@@ -154,6 +154,9 @@ class LikelihoodMaximizer {
 			     double* lob1, double* hib1, double* lob2, double* hib2,
 			     double* a1_se, double* a2_se);
 
+  // Reset coverage
+  void SetCoverage(const double& cov);
+
   // Print read pool
   void PrintReadPool();
 

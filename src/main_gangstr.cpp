@@ -59,6 +59,9 @@ void show_help() {
 	   << "\n Options for different sequencing settings\n"
 	   << "\t" << "--readlength  <int>           " << "\t" << "Read length. Default: " << options.read_len << "\n"
 	   << "\t" << "--coverage    <float>         " << "\t" << "Average coverage. must be set for exome/targeted data. Comma separated list to specify for each BAM" << "\n"
+	   << "\t" << "--model-gc-coverage           " << "\t" << "Model coverage as a function of GC content. Requires genome-wide data" << "\n"
+	   << "\t" << "--insertmean  <float>         " << "\t" << "Fragment length mean. Comma separated list to specify for each BAM separately." << "\n" 
+	   << "\t" << "--insertsdev  <float>         " << "\t" << "Fragment length standard deviation. Comma separated list to specify for each BAM separately. " << "\n"
 	   << "\t" << "--nonuniform                  " << "\t" << "Indicate whether data has non-uniform coverage (i.e., exome)" << "\n"
 	   << "\n Advanced paramters for likelihood model:\n"
 	   << "\t" << "--frrweight   <float>         " << "\t" << "Weight for FRR reads. Default: " << options.frr_weight << "\n"
@@ -67,8 +70,6 @@ void show_help() {
 	   << "\t" << "--flankweight <float>         " << "\t" << "Weight for flanking reads. Default: " << options.flanking_weight << "\n"
 	   << "\t" << "--ploidy      <int>           " << "\t" << "Indicate whether data is haploid (1) or diploid (2). Default: " << options.ploidy << "\n"
 	   << "\t" << "--useofftarget               " << "\t" << "Use off target regions included in the BAM file." << "\n"
-	   << "\t" << "--insertmean  <float>         " << "\t" << "Fragment length mean. Comma separated list to specify for each BAM separately." << "\n" 
-	   << "\t" << "--insertsdev  <float>         " << "\t" << "Fragment length standard deviation. Comma separated list to specify for each BAM separately. " << "\n"
 	   << "\t" << "--read-prob-mode              " << "\t" << "Use only read probability (ignore class probability)" << "\n"
 	   << "\t" << "--numbstrap   <int>           " << "\t" << "Number of bootstrap samples. Default: " << options.num_boot_samp << "\n"
 	   << "\n Parameters for local realignment:\n"
@@ -110,6 +111,7 @@ void parse_commandline_options(int argc, char* argv[], Options* options) {
     OPT_PLOIDY,
     OPT_READLEN,
     OPT_COVERAGE,
+    OPT_GCCOV,
     OPT_USEOFF,
     OPT_NONUNIF,
     OPT_INSMEAN,
@@ -144,6 +146,7 @@ void parse_commandline_options(int argc, char* argv[], Options* options) {
     {"ploidy",      required_argument,  NULL, OPT_PLOIDY},
     {"readlength",  required_argument,  NULL, OPT_READLEN},
     {"coverage",    required_argument,  NULL, OPT_COVERAGE},
+    {"model-gc-coverage", no_argument, NULL, OPT_GCCOV},
     {"nonuniform",  no_argument,  NULL, OPT_NONUNIF},
     {"useofftarget",no_argument,  NULL, OPT_USEOFF},
     {"insertmean",  required_argument,  NULL, OPT_INSMEAN},
@@ -219,6 +222,9 @@ void parse_commandline_options(int argc, char* argv[], Options* options) {
       for (size_t i=0; i<coverage_str.size(); i++) {
 	options->coverage.push_back(atoi(coverage_str[i].c_str()));
       }
+      break;
+    case OPT_GCCOV:
+      options->model_gc_cov = true;
       break;
     case OPT_NONUNIF:
       options->use_cov = false;
@@ -344,16 +350,16 @@ int main(int argc, char* argv[]) {
   }
 
   // Extract information from bam file (read length, insert size distribution, ..)
-  if (!sample_info.ExtractBamInfo(options, bamreader, region_reader)) {
+  RefGenome refgenome(options.reffa);
+  if (!sample_info.ExtractBamInfo(options, bamreader, region_reader, refgenome)) {
     PrintMessageDieOnError("Error extracting info from BAM file", M_ERROR);
   }
   options.realignment_flanklen = sample_info.GetReadLength();
   // Write out values found for each sample
-  sample_info.PrintSampleInfo();
+  sample_info.PrintSampleInfo(options.outprefix + ".samplestats.tab");
   
   // Process each region
   region_reader.Reset();
-  RefGenome refgenome(options.reffa);
   VCFWriter vcfwriter(options.outprefix + ".vcf", full_command, sample_info);
   Genotyper genotyper(refgenome, options, sample_info);
 

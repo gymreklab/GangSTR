@@ -18,22 +18,33 @@ You should have received a copy of the GNU General Public License
 along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef SRC_COMMON_H__
-#define SRC_COMMON_H__
+#ifndef SRC_GC_REGION_READER_H__
+#define SRC_GC_REGION_READER_H__
 
+#include <fstream>
 #include <string>
+#include <map>
 #include <vector>
 
-// Print msg, exit if error
-enum MSGTYPE {
-  M_ERROR = 0,
-  M_WARNING = 1,
-  M_DEBUG = 2,
-  M_PROGRESS = 3
+#include "src/locus.h"
+#include "src/ref_genome.h"
+
+class GCRegionReader {
+ public:
+  GCRegionReader(const RefGenome& refgenome,
+		 const float& bin_size_, const int& region_len_,
+		 const int& max_regions);
+  virtual ~GCRegionReader();
+
+  bool GetGCBinLoci(std::vector<Locus>* loci,
+		    const float& lb, const float& ub,
+		    const int& regions_per_bin);
+ private:
+  
+  std::vector<std::vector<Locus> > gc_bin_loci;
+  float bin_size;
+  int region_len;
+  int max_regions;
 };
-void PrintMessageDieOnError(const std::string& msg,
-                            MSGTYPE msgtype);
 
-float GetGC(const std::string& seq);
-
-#endif  // SRC_COMMON_H__
+#endif  // SRC_GC_REGION_READER_H__

@@ -21,6 +21,8 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 #include "src/sample_info.h"
 #include "src/stringops.h"
 
+#include <iostream>
+
 using namespace std;
 
 SampleInfo::SampleInfo() {
@@ -29,17 +31,7 @@ SampleInfo::SampleInfo() {
   rg_ids_to_sample.clear();
   
 }
-/*
-SampleInfo::SampleInfo(SampleInfo samp) {
-  custom_read_groups = samp.custom_read_groups;
-  rg_samples = samp.rg_samples;
-  rg_ids_to_sample = samp.rg_ids_to_sample;
-  sample_to_meandist = samp.sample_to_meandist;
-  sample_to_sdev = samp.sample_to_sdev;
-  sample_to_coverage = samp.sample_to_coverage;
-  sample_to_pdf = new
-}
-*/
+
 bool SampleInfo::SetCustomReadGroups(const Options& options) {
   custom_read_groups = true;
   std::vector<std::string> read_groups;
@@ -83,8 +75,8 @@ bool SampleInfo::LoadReadGroups(const Options& options, const BamCramMultiReader
 }
 
 bool SampleInfo::ExtractBamInfo(const Options& options, BamCramMultiReader& bamreader,
-				RegionReader& region_reader) {
-  BamInfoExtract bam_info(&options, &bamreader, &region_reader);
+				RegionReader& region_reader, const RefGenome& ref_genome) {
+  BamInfoExtract bam_info(&options, &bamreader, &region_reader, &ref_genome);
   if (options.read_len == -1) {
     if (!bam_info.GetReadLen(&read_len)) {
       PrintMessageDieOnError("Error extracting read length", M_ERROR);
@@ -94,15 +86,13 @@ bool SampleInfo::ExtractBamInfo(const Options& options, BamCramMultiReader& bamr
     read_len = options.read_len;
   }
   region_reader.Reset();
-  // Insert size distribution + coverage inferred per sample
-  if(options.dist_mean.empty() or options.dist_sdev.empty() or options.coverage.empty()){
-    if(!bam_info.GetInsertSizeDistribution(&profile, rg_samples, rg_ids_to_sample)) {
-      PrintMessageDieOnError("Error extracting insert size and coverage info", M_ERROR);
+  
+  // Set insert size distribution
+  if (options.dist_mean.empty() or options.dist_sdev.empty()) {
+    if (!bam_info.GetInsertSizeDistribution(&profile, rg_samples, rg_ids_to_sample, custom_read_groups)) {
+      PrintMessageDieOnError("Error extracting insert size info", M_ERROR);
     }
-  }
-
-  // Deal with setting custom ins/coverages per BAM file
-  if (!options.dist_mean.empty() or !options.dist_sdev.empty()) {
+  } else {
     if (options.dist_mean.size() != options.dist_sdev.size()) {
       PrintMessageDieOnError("Different number of dist means and dist sdevs input", M_ERROR);
     }
@@ -126,7 +116,13 @@ bool SampleInfo::ExtractBamInfo(const Options& options, BamCramMultiReader& bamr
       }
     }
   }
-  if (options.use_cov & !options.coverage.empty()) {
+
+  // Set coverage
+  if (options.coverage.empty()) {
+    if (!bam_info.GetCoverage(&profile, rg_samples, rg_ids_to_sample, custom_read_groups)) {
+      PrintMessageDieOnError("Error extracting coverage info", M_ERROR);
+    }
+  } else {
     if (options.coverage.size() == 1) {
       size_t i = 0;
       for (std::set<std::string>::iterator it = rg_samples.begin();
@@ -148,8 +144,9 @@ bool SampleInfo::ExtractBamInfo(const Options& options, BamCramMultiReader& bamr
   return true;
 }
 
-void SampleInfo::PrintSampleInfo() {
+void SampleInfo::PrintSampleInfo(const std::string& logfilename) {
   stringstream ss;
+  int numgc;
   ss << "Sample stats:\n";
   for (std::set<std::string>::iterator it = rg_samples.begin();
        it != rg_samples.end(); it++) {
@@ -158,8 +155,35 @@ void SampleInfo::PrintSampleInfo() {
        << "\tInsMean=" << profile[*it].dist_mean << "\n"
        << "\tInsSdev=" << profile[*it].dist_sdev << "\n"
        <<"\tReadLen="<< read_len << "\n";
+    numgc = profile[*it].gc_coverage.size();
+    if (numgc > 0) {
+      ss << "\tGC Coverage" << "\n";
+      for (size_t i=0; i<profile[*it].gc_coverage.size();i++) {
+	ss << "\t\t Bin " << i << " " << profile[*it].gc_coverage[i] << "\n";
+      }
+    }
   }
   PrintMessageDieOnError(ss.str(), M_PROGRESS);
+  // now print to log file
+  ofstream sample_log_file;
+  sample_log_file.open(logfilename.c_str());
+  sample_log_file << "Sample\tMeanCoverage\tInsMean\tInsSdev\tReadLen";
+  for (int i=0; i<numgc; i++) {
+    sample_log_file << "\tCoverage-GCBin-"<< i;
+  }
+  sample_log_file << "\n";
+  for (std::set<std::string>::iterator it=rg_samples.begin();
+       it != rg_samples.end(); it++) {
+    sample_log_file << *it << "\t"
+	     << profile[*it].coverage << "\t"
+	     << profile[*it].dist_mean << "\t"
+	     << profile[*it].dist_sdev << "\t"
+	     << read_len;
+    for (int i=0; i<numgc; i++) {
+      sample_log_file << "\t" << profile[*it].gc_coverage[i];
+    }
+    sample_log_file << "\n";
+  }
 }
 
 const int32_t SampleInfo::GetReadLength() {
@@ -180,6 +204,10 @@ const double SampleInfo::GetInsertSdev(std::string sample) {
 
 const double SampleInfo::GetCoverage(std::string sample) {
   return profile[sample].coverage;
+}
+
+const std::vector<double> SampleInfo::GetGCCoverage(std::string sample) {
+  return profile[sample].gc_coverage;
 }
 
 std::vector<double> SampleInfo::GetDistPDF(std::string sample) {

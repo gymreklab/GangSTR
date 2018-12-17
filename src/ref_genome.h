@@ -36,7 +36,11 @@ class RefGenome {
   bool GetSequence(const std::string& _chrom,
 		   const int32_t& _start,
 		   const int32_t& _end,
-		   std::string* seq);
+		   std::string* seq) const;
+
+  const std::vector<std::string> GetChroms() const;
+  const int32_t GetChromSize(const std::string& chrom) const;
+
  private:
   bool file_exists(std::string path) const {
     return (access(path.c_str(), F_OK) != -1);

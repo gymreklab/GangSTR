@@ -50,7 +50,7 @@ RefGenome::RefGenome(const std::string& _reffa) {
 bool RefGenome::GetSequence(const std::string& _chrom,
 			    const int32_t& _start,
 			    const int32_t& _end,
-			    std::string* seq) {
+			    std::string* seq) const {
   int length;
   char* result = faidx_fetch_seq(refindex, _chrom.c_str(), _start, _end, &length);
   if (result == NULL) {
@@ -62,6 +62,26 @@ bool RefGenome::GetSequence(const std::string& _chrom,
   std::transform(seq->begin(), seq->end(), seq->begin(), ::tolower);
   free((void *)result);
   return true;
+}
+
+const std::vector<std::string> RefGenome::GetChroms() const {
+  std::vector<std::string> vec;
+  int numseqs = faidx_nseq(refindex);
+  for (int i=0; i<numseqs; i++) {
+    vec.push_back(std::string(faidx_iseq(refindex, i)));
+  }
+  return vec;
+}
+
+const int32_t RefGenome::GetChromSize(const std::string& chrom) const {
+  int numseqs = faidx_nseq(refindex);
+  for (int i=0; i<numseqs; i++) {
+    std::string seq = std::string(faidx_iseq(refindex, i));
+    if (chrom==seq) {
+      return faidx_seq_len(refindex, seq.c_str());
+    }
+  }
+  return -1;
 }
 
 RefGenome::~RefGenome() {
