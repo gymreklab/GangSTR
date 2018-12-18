@@ -44,7 +44,6 @@ LikelihoodMaximizer::LikelihoodMaximizer(const Options& _options, SampleInfo& _s
   lik_options.use_dist_cdf = _sample_info.GetDistCDF(samp);
   lik_options.read_len = _sample_info.GetReadLength();
   
-  
   enclosing_class_.SetOptions(lik_options);
   frr_class_.SetOptions(lik_options);
   spanning_class_.SetOptions(lik_options);
@@ -70,6 +69,13 @@ LikelihoodMaximizer::LikelihoodMaximizer(const Options& _options, SampleInfo& _s
   gsl_rng_set(r, options->seed);
   
   //offtarget_share = 0.0;
+
+  // Set up default grid size
+  lower_bound = 1;
+  upper_bound = 600;
+  grid_set = false;
+  grid_buffer = 3;
+  grid_opt_threshold = 20;
 }
 
 void LikelihoodMaximizer::Reset() {
@@ -215,10 +221,12 @@ bool LikelihoodMaximizer::GetConfidenceInterval(const int32_t& read_len,
     ResampleReadPool();
     if (options->ploidy == 2){
       OptimizeLikelihood(read_len, motif_len, ref_count, 
-			 true, 1, allele1, offtarget_share, 
+			 true, 1, allele1,
+			 offtarget_share, 
 			 &boot_al2_1, &boot_al2_2, &min_negLike);
       OptimizeLikelihood(read_len, motif_len, ref_count, 
-			 true, 1, allele2, offtarget_share, 
+			 true, 1, allele2,
+			 offtarget_share, 
 			 &boot_al1_1, &boot_al1_2, &min_negLike);
       
       //cerr << allele1 << ":\t" << boot_al2_1 << "\t" << boot_al2_2 << "\n"
@@ -247,7 +255,8 @@ bool LikelihoodMaximizer::GetConfidenceInterval(const int32_t& read_len,
     }
     else{ // haploid
       OptimizeLikelihood(read_len, motif_len, ref_count, 
-			 true, 1, 0, offtarget_share, 
+			 true, 1, 0,
+			 offtarget_share, 
 			 &boot_al1, &boot_al2, &min_negLike);
     }
     // cerr<<min(boot_al1, boot_al2)<<"\t"<<max(boot_al1, boot_al2)<<endl;
@@ -642,6 +651,98 @@ bool LikelihoodMaximizer::GetGenotypeNegLogLikelihood(const int32_t& allele1,
   return true;
 }
 
+bool LikelihoodMaximizer::InferGridSize(const int32_t& read_len, const int32_t& motif_len) {
+  grid_set = false;
+  int32_t min_allele = 1000000;
+  int32_t max_allele = 0;
+  if (enclosing_class_.GetGridBoundaries(&min_allele, &max_allele)) {
+    lower_bound = min_allele;
+    upper_bound = max_allele;
+    grid_set = true;
+  }
+  if (spanning_class_.GetGridBoundaries(&min_allele, &max_allele)) {
+    lower_bound = min_allele;
+    upper_bound = max_allele;
+    grid_set = true;
+  }
+  int32_t offtarget_count = offtarget_class_.GetDataSize();
+  if (frr_class_.GetGridBoundaries(&min_allele, &max_allele,
+				   read_len, motif_len,
+				   obj_cov, offtarget_count)) {
+    lower_bound = min_allele;
+    upper_bound = max_allele;
+    grid_set = true;
+  }
+  if (flanking_class_.GetGridBoundaries(&min_allele, &max_allele)) {
+    lower_bound = min_allele;
+    upper_bound = max_allele;
+    grid_set = true;
+  }
+  if (min_allele > max_allele) {
+    grid_set = false;
+  }
+  // Add buffer to the grid
+  lower_bound -= grid_buffer;
+  upper_bound += grid_buffer;
+  return grid_set;
+}
+
+void LikelihoodMaximizer::SetGridSize(const int32_t& min_allele, const int32_t max_allele) {
+  lower_bound = min_allele;
+  upper_bound = max_allele;
+}
+
+void LikelihoodMaximizer::GetGridSize(int32_t* min_allele, int32_t* max_allele) {
+  *min_allele = lower_bound;
+  *max_allele = upper_bound;
+}
+
+void LikelihoodMaximizer::InferAlleleList(std::vector<int32_t>* allele_list,
+					  const int32_t& read_len, const int32_t& motif_len,
+					  const int32_t& ploidy, const int32_t& ref_count,
+					  const bool& resampled, const int32_t& fix_allele) {
+  allele_list->clear();
+  if (upper_bound-lower_bound <= grid_opt_threshold) {
+    for (int32_t i=lower_bound; i<=upper_bound; i++) {
+      allele_list->push_back(i);
+    }
+  } else {
+    std::vector<int32_t> sublist;
+    int32_t a1, a2, result;
+    double minf;
+    enclosing_class_.ExtractEnclosingAlleles(allele_list);
+    if (ploidy == 2) {
+      for (std::vector<int32_t>::iterator allele_it = allele_list->begin();
+	   allele_it != allele_list->end();
+	   allele_it++) {	
+	// 1-D optimization fixing each enclosing allele
+	nlopt_1D_optimize(read_len, motif_len, ref_count, 
+			  lower_bound, upper_bound, resampled, 
+			  options->seed, this, *allele_it, &a1, &result, &minf);
+	sublist.push_back(a1);
+      }
+      // 2D opt
+      nlopt_2D_optimize(read_len, motif_len, ref_count, 
+			lower_bound, upper_bound, resampled, 
+			options->seed, this, &a1, &a2, &result, &minf);
+      sublist.push_back(a1);
+      sublist.push_back(a2);
+      for (std::vector<int32_t>::iterator subl_it = sublist.begin();
+	   subl_it != sublist.end();
+	   subl_it++) {
+	if(std::find(allele_list->begin(), allele_list->end(), *subl_it) == allele_list->end()) {
+          allele_list->push_back(*subl_it);
+	}
+      }
+    } else if (ploidy == 1) {
+      nlopt_1D_optimize(read_len, motif_len, ref_count, 
+			lower_bound, upper_bound, resampled, 
+			options->seed, this, fix_allele, &a1, &result, &minf);
+      allele_list->push_back(a1);
+    }
+  }
+}
+
 bool LikelihoodMaximizer::OptimizeLikelihood(const int32_t& read_len, 
 					     const int32_t& motif_len,
 					     const int32_t& ref_count, 
@@ -654,126 +755,24 @@ bool LikelihoodMaximizer::OptimizeLikelihood(const int32_t& read_len,
     PrintMessageDieOnError("Skipping locus with likely extreme GC content", M_PROGRESS);
     return false;
   }
-  if (options->very_verbose) {
-    if (!resampled) {
-      PrintMessageDieOnError("\t\tOptimizing Likelihood" , M_PROGRESS);
-    }
-    else {
-      PrintMessageDieOnError("\t\tOptimizing Likelihood (bootstrap)" , M_PROGRESS);
-    }
-   }
 
-  offtarget_share = off_share;
-  int32_t a1, a2, result, temp;
-  double minf;
+  offtarget_share = off_share; // perc. of offtarget reads.
+
+  // Get list of potential alleles to try
   std::vector<int32_t> allele_list;
-  std::vector<int32_t> sublist;
-  if (options->very_verbose) {
-    PrintMessageDieOnError("\t\tExtracting enclosing alleles", M_PROGRESS);
-  }
-  this->enclosing_class_.ExtractEnclosingAlleles(&allele_list);
-  if (options->very_verbose) {
-    PrintMessageDieOnError("\t\tResample read pool", M_PROGRESS);
-  }
-  //ResampleReadPool();
-  int32_t upper_bound = 600; // TODO Change 200 for number depending the parameters
-  int32_t lower_bound_1d, lower_bound_2d;
-  
-  /*
-  // Debugging
-  if (!resampled){
-    double res;
-    int fix = 150;
-    for (int ii = 10; ii <80 ; ii+=10){
-      GetGenotypeNegLogLikelihood(ii, fix, read_len, motif_len, ref_count, resampled, &res);
-      cerr << ii << ", "<< fix <<" ->\t" << res << endl;
-    } 
-  }
-  */
+  InferAlleleList(&allele_list, read_len, motif_len, ploidy,
+		  ref_count, resampled, fix_allele);
 
-  lower_bound_1d = 1;
-  lower_bound_2d = 1;
-
-  if (ploidy == 2){
-    for (std::vector<int32_t>::iterator allele_it = allele_list.begin();
-         allele_it != allele_list.end();
-         allele_it++) {
-        if (options->very_verbose) {
-	  stringstream msg;
-	  msg<<"\t\t\t1D optimization for enclosing allele  "<<*allele_it;
-	  PrintMessageDieOnError(msg.str(), M_PROGRESS);
-	}
-	
-	nlopt_1D_optimize(read_len, motif_len, ref_count, 
-			  lower_bound_1d, upper_bound, resampled, 
-			  options->seed, this, *allele_it, &a1, &result, &minf);
-      if (options->very_verbose) {
-	stringstream msg;
-	msg<<"\t\t\tResult: "<<*allele_it<<", "<<a1;
-	PrintMessageDieOnError(msg.str(), M_PROGRESS);
-      }
-      sublist.push_back(a1);
-      // cerr<<"ER:\t"<<*allele_it<<endl;
-      // cerr<<"1D:\t"<<a1<<endl;
-    }
-    if (options->very_verbose) {
-      PrintMessageDieOnError("\t\t2D optimization", M_PROGRESS);
-    }
-    nlopt_2D_optimize(read_len, motif_len, ref_count, 
-		      lower_bound_2d, upper_bound, resampled, 
-		      options->seed, this, &a1, &a2, &result, &minf);
-    if (options->very_verbose) {
-      stringstream msg;
-      msg<<"\t\t\tResult: "<<a1<<", "<<a2;
-      PrintMessageDieOnError(msg.str(), M_PROGRESS);
-    }
-    sublist.push_back(a1);
-    sublist.push_back(a2);
-
-    // cerr<<"2D:\t"<<a1<<endl;
-    // cerr<<"2D:\t"<<a2<<endl;
-    for (std::vector<int32_t>::iterator subl_it = sublist.begin();
-         subl_it != sublist.end();
-         subl_it++) {
-      if(std::find(allele_list.begin(), allele_list.end(), *subl_it) == allele_list.end()) {
-          /* allele_list does not contain this sublist item */
-          allele_list.push_back(*subl_it);
-      }
-    }
-    if (options->very_verbose) {
-      PrintMessageDieOnError("\t\tFinding best allele tuple", M_PROGRESS);
-    }
-    findBestAlleleListTuple(allele_list, read_len, motif_len, ref_count, resampled, ploidy, 0,
-                            allele1, allele2, min_negLike);
+  if (ploidy == 2) {
+    findBestAlleleListTuple(allele_list, read_len, motif_len, ref_count,
+			    resampled, ploidy, 0, 
+			    allele1, allele2, min_negLike);
+  } else if (ploidy == 1) {
+    findBestAlleleListTuple(allele_list, read_len, motif_len, ref_count,
+			    resampled, ploidy, fix_allele, 
+			    allele1, allele2, min_negLike);    
   }
-  else if (ploidy == 1){
-    if (options->very_verbose) {
-      stringstream msg;
-      msg<<"\t\t1D optimization for allele "<<fix_allele;
-      PrintMessageDieOnError(msg.str(), M_PROGRESS);
-    }
-    nlopt_1D_optimize(read_len, motif_len, ref_count, 
-		      lower_bound_1d, upper_bound, resampled, 
-		      options->seed, this, fix_allele, &a1, &result, &minf);
-    if (options->very_verbose) {
-      stringstream msg;
-      msg<<"\t\t\tResutlt:  "<<fix_allele<<","<<a1;
-      PrintMessageDieOnError(msg.str(), M_PROGRESS);
-    }
-    allele_list.push_back(a1);
-    if (options->very_verbose) {
-      PrintMessageDieOnError("\t\tFinding best allele tuple", M_PROGRESS);
-    }
-    findBestAlleleListTuple(allele_list, read_len, motif_len, ref_count, resampled, ploidy, fix_allele,
-                            allele1, allele2, min_negLike);
-
-  }
-  if (*allele1 > *allele2){
-    temp = *allele1;
-    *allele1 = *allele2;
-    *allele2 = temp;
-  }
-  return true;    // TODO add false
+  return true;
 }
 
 
@@ -793,6 +792,7 @@ bool LikelihoodMaximizer::findBestAlleleListTuple(std::vector<int32_t> allele_li
       for (std::vector<int32_t>::iterator a2_it = allele_list.begin();
             a2_it != allele_list.end();
             a2_it++){
+	if (*a2_it < *a1_it) continue; // want a1 the smaller allele
         GetGenotypeNegLogLikelihood(*a1_it, *a2_it, read_len, motif_len, ref_count, resampled, &gt_ll);
         // if (!resampled)
         //   cerr<<endl<<*a1_it<<"\t"<<*a2_it<<"\t"<<gt_ll<<endl;

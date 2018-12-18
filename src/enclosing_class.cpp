@@ -81,6 +81,19 @@ bool EnclosingClass::GetLogReadProb(const int32_t& allele,
 		return false;
 }
 
+bool EnclosingClass::GetGridBoundaries(int32_t* min_allele, int32_t* max_allele) {
+  if (read_class_data_.empty()) return false;
+  std::vector<int32_t>::iterator itmin = std::min_element(read_class_data_.begin(), read_class_data_.end());
+  if (*itmin < *min_allele) {
+    *min_allele = *itmin;
+  }
+  std::vector<int32_t>::iterator itmax = std::max_element(read_class_data_.begin(), read_class_data_.end());
+  if (*itmax > *max_allele) {
+    *max_allele = *itmax;
+  }
+  return true;
+}
+
 bool EnclosingClass::ExtractEnclosingAlleles(std::vector<int> *alleles){
     std::map<int32_t, int32_t> allele_repeats;
 

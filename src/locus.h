@@ -24,6 +24,7 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 #include <map>
 #include <string>
 #include <vector>
+#include <stdint.h>
 
 struct GenomeRegion{
   std::string chrom;
@@ -66,6 +67,10 @@ class Locus {
   std::map<std::string,size_t> flanking_reads;
   std::map<std::string,size_t> depth;
   std::map<std::string,bool> called;
+
+  // Likelihood grid
+  int32_t grid_min_allele;
+  int32_t grid_max_allele;
 };
 
 #endif  // SRC_LOCUS_H__

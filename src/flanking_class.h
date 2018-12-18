@@ -43,5 +43,6 @@ class FlankingClass: public ReadClass {
 				      const int32_t& read_len, const int32_t& motif_len,
 				      const int32_t& ref_count, const int32_t& ploidy,
 				      double* class_ll);
+  bool GetGridBoundaries(int32_t* min_allele, int32_t* max_allele);
 };
 #endif  // SRC_FLANKING_CLASS_H__

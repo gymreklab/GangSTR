@@ -20,6 +20,7 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "src/mathops.h"
 #include "src/flanking_class.h"
+#include <algorithm>
 #include <iostream>
 #include <iomanip>
 #include <math.h>
@@ -104,3 +105,14 @@ bool FlankingClass::GetClassLogLikelihood(const int32_t& allele1,
   }
   return true;
 }
+
+bool FlankingClass::GetGridBoundaries(int32_t* min_allele, int32_t* max_allele) {
+  if (read_class_data_.empty()) return false;
+  // For flanking, only care about pushing the max allele size
+  std::vector<int32_t>::iterator itmax = std::max_element(read_class_data_.begin(), read_class_data_.end());
+  if (*itmax > *max_allele) {
+    *max_allele = *itmax;
+  }
+  return true;
+}
+

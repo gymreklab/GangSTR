@@ -104,86 +104,104 @@ bool Genotyper::ProcessLocus(BamCramMultiReader* bamreader, Locus* locus) {
   double a1_se, a2_se;
   bool resampled = false;
   std::set<std::string> rg_samples = sample_info->GetSamples();
+  // First set grid size
+  int32_t sample_min_allele, sample_max_allele;
+  int32_t min_allele = 100000;
+  int32_t max_allele = 0;
   for (std::set<std::string>::iterator it = rg_samples.begin();
        it != rg_samples.end(); it++) {
     const std::string samp = *it;
+    if (!sample_likelihood_maximizers[samp]->InferGridSize(read_len, (int32_t)(locus->motif.size()))) {
+      PrintMessageDieOnError("Error inferring grid size", M_PROGRESS);
+      return false;
+    }
+    sample_likelihood_maximizers[samp]->GetGridSize(&sample_min_allele, &sample_max_allele);
+    if (sample_max_allele > max_allele) max_allele = sample_max_allele;
+    if (sample_min_allele < min_allele) min_allele = sample_min_allele;
+  }
+  locus->grid_min_allele = min_allele;
+  locus->grid_max_allele = max_allele;
+  // Then max likelihood for each sample
+  for (std::set<std::string>::iterator it = rg_samples.begin();
+       it != rg_samples.end(); it++) {
+    const std::string samp = *it;
+    sample_likelihood_maximizers[samp]->SetGridSize(min_allele, max_allele);
     if (gcbin != -1) {
       sample_likelihood_maximizers[samp]->SetCoverage(sample_info->GetGCCoverage(samp)[gcbin]);
     }
-  try {
-    if (!sample_likelihood_maximizers[samp]->OptimizeLikelihood(read_len, 
-								(int32_t)(locus->motif.size()),
-								ref_count, 
-								resampled, 
-								options->ploidy, 
-								0,
-								locus->offtarget_share,
-								&allele1, 
-								&allele2, 
-								&min_negLike)) {
-      locus->called[samp] = false;
-    }
-    
-    locus->allele1[samp] = allele1;
-    locus->allele2[samp] = allele2;
-    locus->min_neg_lik[samp] = min_negLike;
-    locus->enclosing_reads[samp] = sample_likelihood_maximizers[samp]->GetEnclosingDataSize();
-    locus->spanning_reads[samp] = sample_likelihood_maximizers[samp]->GetSpanningDataSize();
-    locus->frr_reads[samp] = sample_likelihood_maximizers[samp]->GetFRRDataSize();
-    locus->flanking_reads[samp] = sample_likelihood_maximizers[samp]->GetFlankingDataSize();
-    locus->depth[samp] = sample_likelihood_maximizers[samp]->GetReadPoolSize();
-    
-    if (options->num_boot_samp > 0){
-      if (options->verbose) {
-	PrintMessageDieOnError("\tGetting confidence intervals", M_PROGRESS);
-      }
-      try{
-	if (!sample_likelihood_maximizers[samp]->GetConfidenceInterval(read_len, (int32_t)(locus->motif.size()),
-								       ref_count, allele1, allele2, *locus,
-								       &lob1, &hib1, &lob2, &hib2, &a1_se, &a2_se)) {
-	  locus->called[samp] = false;
-	}
-	locus->lob1[samp] = lob1;
-	locus->lob2[samp] = lob2;
-	locus->hib1[samp] = hib1;
-	locus->hib2[samp] = hib2;
-	locus->a1_se[samp] = a1_se;
-	locus->a2_se[samp] = a2_se;
-
-	stringstream msg;
-	msg<<"\tGenotyper Results:  "<<allele1<<", "<<allele2<<"\tlikelihood = "<<min_negLike;
-	PrintMessageDieOnError(msg.str(), M_PROGRESS);
-	if (options->verbose) {
-	  msg.clear();
-	  msg.str(std::string());
-	  msg<<"\tSmall Allele Bound: ["<<lob1<<", "<<hib1<<"]";
-	  PrintMessageDieOnError(msg.str(), M_PROGRESS);
-	  msg.clear();
-	  msg.str(std::string());
-	  msg<<"\tLarge Allele Bound: ["<<lob2<<", "<<hib2<<"]";
-	  PrintMessageDieOnError(msg.str(), M_PROGRESS);
-	}
-      }
-      catch (std::exception &exc){
-	if (options->verbose) {
-	  stringstream msg;
-	  msg<<"\tEncountered error("<< exc.what() <<") in likelihood maximization. Skipping locus";
-	  PrintMessageDieOnError(msg.str(), M_PROGRESS);
-	}
+    try {
+      if (!sample_likelihood_maximizers[samp]->OptimizeLikelihood(read_len, 
+								  (int32_t)(locus->motif.size()),
+								  ref_count, 
+								  resampled, 
+								  options->ploidy, 
+								  0,
+								  locus->offtarget_share,
+								  &allele1, 
+								  &allele2, 
+								  &min_negLike)) {
 	locus->called[samp] = false;
       }
+      locus->allele1[samp] = allele1;
+      locus->allele2[samp] = allele2;
+      locus->min_neg_lik[samp] = min_negLike;
+      locus->enclosing_reads[samp] = sample_likelihood_maximizers[samp]->GetEnclosingDataSize();
+      locus->spanning_reads[samp] = sample_likelihood_maximizers[samp]->GetSpanningDataSize();
+      locus->frr_reads[samp] = sample_likelihood_maximizers[samp]->GetFRRDataSize();
+      locus->flanking_reads[samp] = sample_likelihood_maximizers[samp]->GetFlankingDataSize();
+      locus->depth[samp] = sample_likelihood_maximizers[samp]->GetReadPoolSize();
+      
+      if (options->num_boot_samp > 0){
+	if (options->verbose) {
+	  PrintMessageDieOnError("\tGetting confidence intervals", M_PROGRESS);
+	}
+	try{
+	  if (!sample_likelihood_maximizers[samp]->GetConfidenceInterval(read_len, (int32_t)(locus->motif.size()),
+									 ref_count, allele1, allele2, *locus,
+									 &lob1, &hib1, &lob2, &hib2, &a1_se, &a2_se)) {
+	    locus->called[samp] = false;
+	  }
+	  locus->lob1[samp] = lob1;
+	  locus->lob2[samp] = lob2;
+	  locus->hib1[samp] = hib1;
+	  locus->hib2[samp] = hib2;
+	  locus->a1_se[samp] = a1_se;
+	  locus->a2_se[samp] = a2_se;
+	  
+	  stringstream msg;
+	  msg<<"\tGenotyper Results:  "<<allele1<<", "<<allele2<<"\tlikelihood = "<<min_negLike;
+	  PrintMessageDieOnError(msg.str(), M_PROGRESS);
+	  if (options->verbose) {
+	    msg.clear();
+	    msg.str(std::string());
+	    msg<<"\tSmall Allele Bound: ["<<lob1<<", "<<hib1<<"]";
+	    PrintMessageDieOnError(msg.str(), M_PROGRESS);
+	    msg.clear();
+	    msg.str(std::string());
+	    msg<<"\tLarge Allele Bound: ["<<lob2<<", "<<hib2<<"]";
+	    PrintMessageDieOnError(msg.str(), M_PROGRESS);
+	  }
+	}
+	catch (std::exception &exc){
+	  if (options->verbose) {
+	    stringstream msg;
+	    msg<<"\tEncountered error("<< exc.what() <<") in likelihood maximization. Skipping locus";
+	    PrintMessageDieOnError(msg.str(), M_PROGRESS);
+	  }
+	  locus->called[samp] = false;
+	}
+      }
     }
-  }
-  catch (std::exception &exc){
-    if (options->verbose) {
-      stringstream msg;
-      msg<<"\tEncountered error("<< exc.what() <<") in likelihood maximization. Skipping locus";
-      PrintMessageDieOnError(msg.str(), M_PROGRESS);
+    catch (std::exception &exc){
+      if (options->verbose) {
+	stringstream msg;
+	msg<<"\tEncountered error("<< exc.what() <<") in likelihood maximization. Skipping locus";
+	PrintMessageDieOnError(msg.str(), M_PROGRESS);
+      }
+      locus->called[samp] = false;
+      
     }
-    locus->called[samp] = false;
-    
-  }
-  locus->called[samp] = true;
+    locus->called[samp] = true;
   }
   return true;
 }

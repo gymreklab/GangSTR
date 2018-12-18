@@ -46,7 +46,9 @@ class FRRClass: public ReadClass {
 			     const int32_t& ploidy,
 			     const int32_t& offtarget_count,
 			     double* count_ll);
-
+  bool GetGridBoundaries(int32_t* min_allele, int32_t* max_allele,
+			 const int32_t& read_len, const int32_t& motif_len,
+			 const double& coverage, const int32_t& offtarget_count);
 };
 
 #endif  // SRC_FRR_CLASS_H__

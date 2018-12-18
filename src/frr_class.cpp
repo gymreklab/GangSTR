@@ -199,3 +199,20 @@ bool FRRClass::GetCountLogLikelihood(const int32_t& allele1,
   
   return true;
 }
+
+bool FRRClass::GetGridBoundaries(int32_t* min_allele, int32_t* max_allele,
+				 const int32_t& read_len, const int32_t& motif_len,
+				 const double& coverage, const int32_t& offtarget_count) {
+  // Only deal with pushing the max here
+  int32_t frr_count = GetDataSize() + offtarget_count;
+  // Get repeat number consistent with 5x that many FRRs as a rough guestimate
+  double guess = 0; // If no FRRs, don't use this to modify our guess
+  if (frr_count > 0) {
+    guess = (5.0*double(frr_count)*double(read_len))/(double(motif_len)*coverage) + 
+      double(read_len)/double(motif_len);
+  }
+  if (guess > *max_allele) {
+    *max_allele = guess;
+  }
+  return true;
+}

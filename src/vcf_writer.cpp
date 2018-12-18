@@ -37,6 +37,7 @@ VCFWriter::VCFWriter(const std::string& _vcffile,
   writer_ << "##INFO=<ID=END,Number=1,Type=Integer,Description=\"End position of variant\">" << endl;
   writer_ << "##INFO=<ID=RU,Number=1,Type=String,Description=\"Repeat motif\">" << endl;
   writer_ << "##INFO=<ID=REF,Number=1,Type=Float,Description=\"Reference copy number\">" << endl;
+  writer_ << "##INFO=<ID=GRID,Number=2,Type=Integer,Description=\"Range of optimization grid\">" << endl;
   writer_ << "##FORMAT=<ID=GT,Number=1,Type=String,Description=\"Genotype\">" << endl;
   writer_ << "##FORMAT=<ID=DP,Number=1,Type=Integer,Description=\"Read Depth\">" << endl;
   writer_ << "##FORMAT=<ID=REPCN,Number=1,Type=String,Description=\"Genotype given in number of copies of the repeat motif\">" << endl;
@@ -105,7 +106,8 @@ void VCFWriter::WriteRecord(Locus& locus) {
 	  << "." << "\t"
 	  << "END=" << locus.end << ";"
 	  << "RU=" << locus.motif << ";"
-	  << "REF=" << refsize << "\t"
+	  << "REF=" << refsize << ";"
+	  << "GRID=" << locus.grid_min_allele << "," << locus.grid_max_allele << "\t"
 	  << "GT:DP:REPCN:REPCI:RC:Q:INS:STDERR";
   
   // Write info for each sample

@@ -60,6 +60,8 @@ class ReadClass {
 			     const int32_t& read_len, const int32_t& motif_len,
 			     const int32_t& ref_count, const int32_t& ploidy,
 			     double* class_ll);
+  // Get min and max alleles supported - implemented in children classes
+  virtual bool GetGridBoundaries(int32_t* min_allele, int32_t* max_allele);
   // Clear all data from the class
   void Reset();
   // Check how many data points
@@ -67,6 +69,7 @@ class ReadClass {
   // Get PDF and CDF values of insert size distribution:
   double InsertSizeCDF(int32_t x);
   double InsertSizePDF(int32_t x);
+
  protected:
   // Calculate log probability P(datapoint | allele)
   bool GetAlleleLogLikelihood(const int32_t& allele, const int32_t& data,
@@ -105,8 +108,6 @@ class ReadClass {
 			      const int32_t& read_len, const int32_t& motif_len,
 			      const int32_t& ref_count,
 			      double* log_allele_prob);
-
-
 };
 
 #endif  // SRC_READ_CLASS_H__

@@ -51,5 +51,8 @@ void Locus::Reset(){
   offtarget_set = false;
   offtarget_regions.clear();
   offtarget_share = 0.0;
+
+  grid_min_allele = 0;
+  grid_min_allele = 600;
 }
 Locus::~Locus() {}

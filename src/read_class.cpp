@@ -159,6 +159,9 @@ bool ReadClass::GetLogReadProb(const int32_t& allele,
   return false; // Implement in child classes
 }
 
+bool ReadClass::GetGridBoundaries(int32_t* min_allele, int32_t* max_allele) {
+  return false; // Implemented in child classes
+}
 void ReadClass::Reset() {
   read_class_data_.clear();
 }

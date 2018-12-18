@@ -51,7 +51,7 @@ class LikelihoodMaximizer {
  friend class Genotyper;
  public:
  LikelihoodMaximizer(const Options& _options, SampleInfo& _sample_info, std::string samp);
-  // LikelihoodMaximizer(const LikelihoodMaximizer& lm_obj); // copy constructor
+ // LikelihoodMaximizer(const LikelihoodMaximizer& lm_obj); // copy constructor
   virtual ~LikelihoodMaximizer();
 
   // Clear data of all classes
@@ -84,6 +84,13 @@ class LikelihoodMaximizer {
 				   const int32_t& read_len, const int32_t& motif_len,
 				   const int32_t& ref_count, const bool& resampled,
 				   double* gt_ll);
+  bool InferGridSize(const int32_t& read_len, const int32_t& motif_len);
+  void SetGridSize(const int32_t& min_allele, const int32_t max_allele);
+  void GetGridSize(int32_t* min_allele, int32_t* max_allele);
+  void InferAlleleList(std::vector<int32_t>* allele_list,
+		       const int32_t& read_len, const int32_t& motif_len,
+		       const int32_t& ploidy, const int32_t& ref_count,
+		       const bool& resampled, const int32_t& fix_allele);
   bool GetNegLikelihoodSurface(const int32_t& a_lo,
 			       const int32_t& a_hi,
 			       const int32_t& b_lo,
@@ -187,6 +194,13 @@ class LikelihoodMaximizer {
   gsl_rng * r;
   // percentage of off-target reads
   double offtarget_share;
+
+  // Grid size
+  int32_t lower_bound;
+  int32_t upper_bound;
+  bool grid_set;
+  int32_t grid_buffer;
+  int32_t grid_opt_threshold; // Above this, use nlopt rather than brute force grid search
 };
 
 // Helper struct for NLOPT gradient optimizer

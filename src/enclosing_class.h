@@ -38,6 +38,7 @@ class EnclosingClass: public ReadClass {
 		      const int32_t& read_len, const int32_t& motif_len,
 		      const int32_t& ref_count,
 		      double* log_allele_prob);
+  bool GetGridBoundaries(int32_t* min_allele, int32_t* max_allele);
   // Function to extract all enclosing alleles present
   bool ExtractEnclosingAlleles(std::vector<int> *alleles);
 };
