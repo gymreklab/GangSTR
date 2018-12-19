@@ -688,8 +688,11 @@ bool LikelihoodMaximizer::InferGridSize(const int32_t& read_len, const int32_t& 
     upper_bound = max_allele;
     grid_set = true;
   }
-  if (min_allele > max_allele) {
+  if (min_allele > max_allele and max_allele == 0) {
     grid_set = false;
+  }
+  else{
+    lower_bound = upper_bound;
   }
   // Add buffer to the grid
   lower_bound -= grid_buffer;
@@ -929,17 +932,19 @@ bool nlopt_2D_optimize(const int32_t& read_len, const int32_t& motif_len,
   opt.set_min_objective(nloptNegLikelihood, &data);    // Change to max for maximization
 
   opt.set_xtol_rel(.00005);   // TODO set something appropriate
-
   std::vector<double> xx(2);
   double minf=100000.0, f;
   nlopt::result result;
-  for (double j = 0.6; j <= 1.4; j+=0.4) {
-    for (double k = 1; k <= 4; k+=2){
+  for (double j = 0.1; j <= 0.3; j+=0.1) {
+    for (double k = 0.25; k <= 0.75; k+=0.25){
       nlopt::srand(seed);
-      xx[0] = int32_t(j * (read_len / motif_len));
-      xx[1] = int32_t((j + k + .1) * (read_len / motif_len));
+      xx[0] = int32_t(lower_bound + j * float(upper_bound - lower_bound));
+      xx[1] = int32_t(lower_bound + k * float(upper_bound - lower_bound));
       if (xx[0] > upper_bound) { xx[0] = upper_bound;}
       if (xx[1] > upper_bound) { xx[1] = upper_bound;}
+      if (xx[0] < lower_bound) { xx[0] = lower_bound;}
+      if (xx[1] < lower_bound) { xx[1] = lower_bound;}
+
       result = opt.optimize(xx, f);
 
       if (f < minf){
@@ -951,6 +956,7 @@ bool nlopt_2D_optimize(const int32_t& read_len, const int32_t& motif_len,
       }
     }
   }
+  
   
   *minf_ret = minf;
   return true;  // TODO add false
@@ -980,7 +986,9 @@ bool nlopt_1D_optimize(const int32_t& read_len, const int32_t& motif_len,
   opt.set_xtol_rel(.0005);   // TODO set something appropriate
 
   std::vector<double> xx(1);
-  xx[0] = int32_t(1.1 * (read_len / motif_len));
+  xx[0] = int32_t(lower_bound + 0.5 * float(upper_bound - lower_bound));
+  if (xx[0] > upper_bound) { xx[0] = upper_bound;}
+  if (xx[0] < lower_bound) { xx[0] = lower_bound;}
   double minf;
   nlopt::result result = opt.optimize(xx, minf);
   *allele1 = int32_t(round(xx[0]));
