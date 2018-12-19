@@ -506,6 +506,10 @@ bool LikelihoodMaximizer::GetStandardError(const int32_t& allele1,
   }
 }
 
+// TODO + questions
+// 1. Are (a,b) and (b,a) double counted?
+// 2. Fail gracefully if boundaries don't make sense (e.g. hi<lo)
+// 3. this returns log value right?
 bool LikelihoodMaximizer::GetNegLikelihoodSurface(const int32_t& a_lo,
 						  const int32_t& a_hi,
 						  const int32_t& b_lo,
@@ -514,7 +518,13 @@ bool LikelihoodMaximizer::GetNegLikelihoodSurface(const int32_t& a_lo,
 						  const int32_t& motif_len,
 						  const int32_t& ref_count,
 						  const bool& resampled,
-						  double* surfaceLL){ 
+						  double* surfaceLL) {
+  // Checks on imputs
+  if (a_hi<a_lo || b_hi<b_lo) {
+    *surfaceLL = -100000000; // neg inf
+    return true;
+  }
+
   double sum = 0.0;
   double min = 1000.0;
   int m_a, m_b;
@@ -546,7 +556,7 @@ bool LikelihoodMaximizer::GetNegLikelihoodSurface(const int32_t& a_lo,
     }
   }
   *surfaceLL = sum;
-  cerr << "Min: "<< min << " at: " << m_a << ", " << m_b << endl;
+  //  cerr << "Min: "<< min << " at: " << m_a << ", " << m_b << endl;
 
   return true;
 }
@@ -744,6 +754,39 @@ void LikelihoodMaximizer::InferAlleleList(std::vector<int32_t>* allele_list,
       allele_list->push_back(a1);
     }
   }
+}
+
+bool LikelihoodMaximizer::GetExpansionProb(std::vector<double>* prob_vec, const int32_t& exp_threshold,
+					   const int32_t& read_len, const int32_t& motif_len,
+					   const int32_t& ref_count) {
+  double shortshort, shortlong, longlong;
+  if (!GetNegLikelihoodSurface(lower_bound, exp_threshold-1,
+			       lower_bound, exp_threshold-1,
+			       read_len, motif_len, ref_count, false,
+			       &shortshort)) {
+    return false;
+  }
+  if (!GetNegLikelihoodSurface(exp_threshold, upper_bound,
+			       exp_threshold, upper_bound,
+			       read_len, motif_len, ref_count, false,
+			       &longlong)) {
+    return false;
+  }
+  if (!GetNegLikelihoodSurface(lower_bound, exp_threshold-1,
+			       exp_threshold, upper_bound,
+			       read_len, motif_len, ref_count, false,
+			       &shortlong)) {
+    return false;
+  }
+  shortshort -= log(2); // double counted TODO check?
+  longlong -= log(2); // double counted TODO check?
+  std::cerr << shortshort << " " << shortlong << " " << longlong << std::endl;
+  double total = exp(shortshort)+exp(longlong)+exp(shortlong);
+  prob_vec->clear();
+  prob_vec->push_back(exp(shortshort)/total);
+  prob_vec->push_back(exp(shortlong)/total);
+  prob_vec->push_back(exp(longlong/total));
+  return true;
 }
 
 bool LikelihoodMaximizer::OptimizeLikelihood(const int32_t& read_len, 
