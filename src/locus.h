@@ -58,7 +58,7 @@ class Locus {
   std::map<std::string,int> hib1;
   std::map<std::string,int> lob2;
   std::map<std::string,int> hib2;
-  std::map<std::string, double> a1_se;
+  std::map<std::string,double> a1_se;
   std::map<std::string,double> a2_se;
   std::map<std::string,double> min_neg_lik;
   std::map<std::string,size_t> enclosing_reads;
@@ -67,10 +67,14 @@ class Locus {
   std::map<std::string,size_t> flanking_reads;
   std::map<std::string,size_t> depth;
   std::map<std::string,bool> called;
+  std::map<std::string,std::vector<double> > expansion_probs;
 
   // Likelihood grid
   int32_t grid_min_allele;
   int32_t grid_max_allele;
+
+  // Threshold for calling expansions
+  int32_t expansion_threshold;
 };
 
 #endif  // SRC_LOCUS_H__

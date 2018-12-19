@@ -84,6 +84,7 @@ class LikelihoodMaximizer {
 				   const int32_t& read_len, const int32_t& motif_len,
 				   const int32_t& ref_count, const bool& resampled,
 				   double* gt_ll);
+  // Functions for dynamically setting grid size
   bool InferGridSize(const int32_t& read_len, const int32_t& motif_len);
   void SetGridSize(const int32_t& min_allele, const int32_t max_allele);
   void GetGridSize(int32_t* min_allele, int32_t* max_allele);
@@ -91,6 +92,10 @@ class LikelihoodMaximizer {
 		       const int32_t& read_len, const int32_t& motif_len,
 		       const int32_t& ploidy, const int32_t& ref_count,
 		       const bool& resampled, const int32_t& fix_allele);
+  // Functions for computing expansion probability
+  bool GetExpansionProb(std::vector<double>* prob_vec, const int32_t& exp_threshold,
+			const int32_t& read_len, const int32_t& motif_len,
+			const int32_t& ref_count);
   bool GetNegLikelihoodSurface(const int32_t& a_lo,
 			       const int32_t& a_hi,
 			       const int32_t& b_lo,

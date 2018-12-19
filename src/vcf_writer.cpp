@@ -38,14 +38,16 @@ VCFWriter::VCFWriter(const std::string& _vcffile,
   writer_ << "##INFO=<ID=RU,Number=1,Type=String,Description=\"Repeat motif\">" << endl;
   writer_ << "##INFO=<ID=REF,Number=1,Type=Float,Description=\"Reference copy number\">" << endl;
   writer_ << "##INFO=<ID=GRID,Number=2,Type=Integer,Description=\"Range of optimization grid\">" << endl;
-  writer_ << "##FORMAT=<ID=GT,Number=1,Type=String,Description=\"Genotype\">" << endl;
+  writer_ << "##INFO=<ID=EXPTHRESH,Number=1,Type=Integer,Description=\"Threshold for caling expansions\">" << endl;
+  writer_ << "##FORMAT=<ID=GT,Number=2,Type=Integer,Description=\"Genotype\">" << endl;
   writer_ << "##FORMAT=<ID=DP,Number=1,Type=Integer,Description=\"Read Depth\">" << endl;
-  writer_ << "##FORMAT=<ID=REPCN,Number=1,Type=String,Description=\"Genotype given in number of copies of the repeat motif\">" << endl;
+  writer_ << "##FORMAT=<ID=REPCN,Number=2,Type=Integer,Description=\"Genotype given in number of copies of the repeat motif\">" << endl;
   writer_ << "##FORMAT=<ID=REPCI,Number=1,Type=String,Description=\"Confidence intervals\">" << endl;
   writer_ << "##FORMAT=<ID=RC,Number=1,Type=String,Description=\"Number of reads in each class (enclosing, spanning, FRR, bounding)\">" << endl;
   writer_ << "##FORMAT=<ID=Q,Number=1,Type=Float,Description=\"Min. negative likelihood\">" << endl;
-  writer_ << "##FORMAT=<ID=INS,Number=1,Type=String,Description=\"Insert size mean and stddev\">" << endl;
-  writer_ << "##FORMAT=<ID=STDERR,Number=1,Type=String,Description=\"Bootstrap standard error of each allele\">" << endl;
+  writer_ << "##FORMAT=<ID=INS,Number=2,Type=Float,Description=\"Insert size mean and stddev\">" << endl;
+  writer_ << "##FORMAT=<ID=STDERR,Number=2,Type=Float,Description=\"Bootstrap standard error of each allele\">" << endl;
+  writer_ << "##FORMAT=<ID=QEXP,Number=3,Type=Float,Description=\"Prob. of no expansion, 1 expanded allele, both expanded alleles\">" << endl;
   writer_ << "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT";
   const std::set<std::string> rg_samples = sample_info->GetSamples();
   sample_names.clear();
@@ -107,8 +109,9 @@ void VCFWriter::WriteRecord(Locus& locus) {
 	  << "END=" << locus.end << ";"
 	  << "RU=" << locus.motif << ";"
 	  << "REF=" << refsize << ";"
-	  << "GRID=" << locus.grid_min_allele << "," << locus.grid_max_allele << "\t"
-	  << "GT:DP:REPCN:REPCI:RC:Q:INS:STDERR";
+	  << "GRID=" << locus.grid_min_allele << "," << locus.grid_max_allele << ";"
+	  << "EXPTHRESH=" << locus.expansion_threshold << "\t"
+	  << "GT:DP:REPCN:REPCI:RC:Q:INS:STDERR:QEXP";
   
   // Write info for each sample
   stringstream gt_str;
@@ -124,11 +127,6 @@ void VCFWriter::WriteRecord(Locus& locus) {
     writer_ << "\t"
 	    << gt_str.str() << ":"
 	    << locus.depth[samp] << ":"
-      //	    << (locus.allele1[samp]-refsize)*period << "," <<  (locus.allele2[samp]-refsize)*period << ":"
-      //	    << (locus.lob1[samp]-refsize)*period << "-" 
-      //	    << (locus.hib1[samp]-refsize)*period << "," 
-      //	    << (locus.lob2[samp]-refsize)*period << "-" 
-      //	    << (locus.hib2[samp]-refsize)*period << ":"
 	    << locus.allele1[samp] << "," <<  locus.allele2[samp] << ":"
       	    << locus.lob1[samp] << "-" 
 	    << locus.hib1[samp] << "," 
@@ -137,7 +135,9 @@ void VCFWriter::WriteRecord(Locus& locus) {
       	    << locus.enclosing_reads[samp] << "," << locus.spanning_reads[samp] << "," << locus.frr_reads[samp] << "," << locus.flanking_reads[samp] << ":"
 	    << locus.min_neg_lik[samp] << ":"
 	    << sample_info->GetInsertMean(samp) << "," << sample_info->GetInsertSdev(samp) << ":"
-	    << locus.a1_se[samp]<<","<<locus.a2_se[samp];
+	    << locus.a1_se[samp]<<","<<locus.a2_se[samp] << ":"
+	    << locus.expansion_probs[samp][0] << "," << locus.expansion_probs[samp][1]
+	    << "," << locus.expansion_probs[samp][2];
   }
   writer_ << endl;
   writer_.flush();
