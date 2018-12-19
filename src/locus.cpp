@@ -55,6 +55,6 @@ void Locus::Reset(){
 
   grid_min_allele = 0;
   grid_min_allele = 600;
-  expansion_threshold = 40;
+  expansion_threshold = 44;
 }
 Locus::~Locus() {}
