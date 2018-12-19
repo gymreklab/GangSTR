@@ -37,6 +37,7 @@ class Options {
   std::string reffa;
   std::string regionsfile;
   std::string outprefix;
+  std::string str_info_file;
   // Insert sizes
   std::vector<double> dist_mean;
   std::vector<double> dist_sdev;
@@ -54,7 +55,7 @@ class Options {
 
   int32_t dist_distribution_size;
   bool dist_man_set;   // whether insert size dist parameters manually set in command line
-  // Stutter model - TODO later make per locus model
+  // Stutter model
   double stutter_up;
   double stutter_down;
   double stutter_p;

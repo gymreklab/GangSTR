@@ -44,6 +44,7 @@ Options::Options() {
   reffa = "";
   regionsfile = "";
   outprefix = "";
+  str_info_file = "";
   dist_mean.clear();
   dist_sdev.clear();
   dist_distribution_size = 2000;
