@@ -681,6 +681,9 @@ bool LikelihoodMaximizer::InferGridSize(const int32_t& read_len, const int32_t& 
   if (min_allele > max_allele) {
     grid_set = false;
   }
+  
+  cerr << min_allele << " " << max_allele << endl;
+  cerr << lower_bound << " " << upper_bound << endl;
   // Add buffer to the grid
   lower_bound -= grid_buffer;
   upper_bound += grid_buffer;
