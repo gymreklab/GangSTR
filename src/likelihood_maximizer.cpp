@@ -519,31 +519,35 @@ bool LikelihoodMaximizer::GetNegLikelihoodSurface(const int32_t& a_lo,
 						  const int32_t& ref_count,
 						  const bool& resampled,
 						  double* surfaceLL) {
+  double neg_inf = -100000000;
+
   // Checks on imputs
   if (a_hi<a_lo || b_hi<b_lo) {
-    *surfaceLL = -100000000; // neg inf
+    *surfaceLL = neg_inf; 
     return true;
   }
 
   double sum = 0.0;
-  double min = 1000.0;
+  double min = 10000.0;
   int m_a, m_b;
   double ret_val = 0.0;
+  /*
   if (!this->GetGenotypeNegLogLikelihood(a_hi, b_hi,
 					 read_len, motif_len,
 					 ref_count, resampled,
 					 &ret_val)){
-    *surfaceLL = 0;
+    *surfaceLL = neg_inf;
     return false;
-  }
-  sum = (-1.0) * ret_val - log(2); //compensating for adding a_hi,b_hi twice
+    }*/
+  //sum = (-1.0) * ret_val - log(2); //compensating for adding a_hi,b_hi twice
+  sum = neg_inf;
   for (int i = a_lo; i <= a_hi; i++){
     for (int j = b_lo; j <= b_hi; j++){
       if (!this->GetGenotypeNegLogLikelihood(i, j,
 					     read_len, motif_len,
 					     ref_count, resampled,
 					     &ret_val)){
-	*surfaceLL = 0;
+	*surfaceLL = neg_inf;
 	return false;
       }
       //cerr << sum << " " << ret_val << endl;
@@ -688,10 +692,11 @@ bool LikelihoodMaximizer::InferGridSize(const int32_t& read_len, const int32_t& 
     upper_bound = max_allele;
     grid_set = true;
   }
+  
   if (min_allele > max_allele and max_allele == 0) {
     grid_set = false;
   }
-  else{
+  else if (min_allele > max_allele and max_allele != 0){
     lower_bound = upper_bound;
   }
   // Add buffer to the grid
@@ -778,10 +783,10 @@ bool LikelihoodMaximizer::GetExpansionProb(std::vector<double>* prob_vec, const 
 			       &shortlong)) {
     return false;
   }
-  shortshort -= log(2); // double counted TODO check?
-  longlong -= log(2); // double counted TODO check?
-  std::cerr << shortshort << " " << shortlong << " " << longlong << std::endl;
-  double total = log(exp(shortshort)+exp(longlong)+exp(shortlong));
+  shortshort -= log(2); 
+  longlong -= log(2); 
+  //double total = log(exp(shortshort)+exp(longlong)+exp(shortlong));
+  double total = fast_log_sum_exp(shortshort, fast_log_sum_exp(longlong,shortlong));
   prob_vec->clear();
   prob_vec->push_back(exp(shortshort-total));
   prob_vec->push_back(exp(shortlong-total));
