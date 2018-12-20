@@ -75,7 +75,7 @@ LikelihoodMaximizer::LikelihoodMaximizer(const Options& _options, SampleInfo& _s
   upper_bound = 600;
   grid_set = false;
   grid_buffer = 3;
-  grid_opt_threshold = 10000; // TODO lower if we want to do nlopt
+  grid_opt_threshold = 1; // TODO lower if we want to do nlopt
 }
 
 void LikelihoodMaximizer::Reset() {
@@ -770,6 +770,7 @@ bool LikelihoodMaximizer::GetExpansionProb(std::vector<double>* prob_vec, const 
 					   const int32_t& read_len, const int32_t& motif_len,
 					   const int32_t& ref_count) {
   double shortshort, shortlong, longlong;
+  return false;
   if (!GetNegLikelihoodSurface(lower_bound, exp_threshold-1,
 			       lower_bound, exp_threshold-1,
 			       read_len, motif_len, ref_count, false,

@@ -102,6 +102,7 @@ bool expansion_aware_realign(const std::string& seq,
   int32_t prev_score = 0;
   int32_t prev_prev_score = -1;
   std::string template_sub, sequence_sub;
+  int32_t current_score_run = 0;
   MARGIN = 1 * period;
   
   //cerr << min_nCopy << " ";
@@ -164,11 +165,15 @@ bool expansion_aware_realign(const std::string& seq,
     if (*fm_start == FM_COMPLETE && *fm_end == FM_COMPLETE){
       break;
     }
+    if (current_score == prev_score)
+      current_score_run++;
+    else
+      current_score_run=0;
+
     // Stop if score is relatively high, but lower than max
-    if (current_score > 0.7 * SSW_MATCH_SCORE * read_len and 
+    if (current_score > 0.74 * SSW_MATCH_SCORE * read_len and 
 	current_score <= max_score and
-	prev_score == current_score and
-	prev_prev_score == prev_score){
+	current_score_run > 2){
       //max_nCopy--;
       break;
     }
