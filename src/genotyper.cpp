@@ -28,10 +28,12 @@ using namespace std;
 
 Genotyper::Genotyper(RefGenome& _refgenome,
 		     Options& _options,
-		     SampleInfo& _sample_info) {
+		     SampleInfo& _sample_info,
+		     STRInfo& _str_info) {
   refgenome = &_refgenome;
   options = &_options;
   sample_info = &_sample_info;
+  str_info = &_str_info;
   read_extractor = new ReadExtractor(_options, *sample_info);
   std::set<std::string> rg_samples = sample_info->GetSamples();
   for (std::set<std::string>::iterator it=rg_samples.begin();
@@ -112,6 +114,8 @@ bool Genotyper::ProcessLocus(BamCramMultiReader* bamreader, Locus* locus) {
   }
   locus->grid_min_allele = min_allele;
   locus->grid_max_allele = max_allele;
+  // Set locus info
+  locus->expansion_threshold = str_info->GetExpansionThreshold(locus->chrom, locus->start);
   // Maximize the likelihood
   if (options->verbose) {
     PrintMessageDieOnError("\tMaximizing likelihood", M_PROGRESS);

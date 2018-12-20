@@ -1,5 +1,5 @@
 ##fileformat=VCFv4.1
-##command=GangSTR-1.4.38-cc12-dirty --bam /storage/resources/datasets/IlluminaRepeatExpansions/_EGAR00001587344_repeat_expansions_NA13509.bam --ref /storage/resources/dbase/human/hg19/hg19.fa --regions HTT_hg19.bed --out test --verbose
+##command=GangSTR-1.4.67-50cf-dirty --bam /storage/resources/datasets/IlluminaRepeatExpansions/_EGAR00001587344_repeat_expansions_NA13509.bam --ref /storage/resources/dbase/human/hg19/hg19.fa --regions HTT_hg19.bed --str-info test_strinfo.bed --out test --verbose
 ##INFO=<ID=END,Number=1,Type=Integer,Description="End position of variant">
 ##INFO=<ID=RU,Number=1,Type=String,Description="Repeat motif">
 ##INFO=<ID=REF,Number=1,Type=Float,Description="Reference copy number">
@@ -15,4 +15,4 @@
 ##FORMAT=<ID=STDERR,Number=2,Type=Float,Description="Bootstrap standard error of each allele">
 ##FORMAT=<ID=QEXP,Number=3,Type=Float,Description="Prob. of no expansion, 1 expanded allele, both expanded alleles">
 #CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	NA13509
-chr4	3076604	.	cagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcag	cagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcag	.	.	END=3076660;RU=cag;REF=19;GRID=12,108;EXPTHRESH=44	GT:DP:REPCN:REPCI:RC:Q:INS:STDERR:QEXP	1/2:52:15,72:15-15,63-87:6,19,11,16:478.608:488.442,119.464:0,6.10709:0,1,1.25499e-142
+chr4	3076604	.	cagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcag	cagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcag	.	.	END=3076660;RU=cag;REF=19;GRID=12,108;EXPTHRESH=40	GT:DP:REPCN:REPCI:RC:Q:INS:STDERR:QEXP	1/2:52:15,71:15-15,62-87:6,19,11,16:483.287:493.623,117.3:0,6.2228:0,1,2.81663e-118

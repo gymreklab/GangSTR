@@ -34,6 +34,7 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 #include "src/ref_genome.h"
 #include "src/region_reader.h"
 #include "src/sample_info.h"
+#include "src/str_info.h"
 #include "src/stringops.h"
 #include "src/vcf_writer.h"
 
@@ -56,6 +57,7 @@ void show_help() {
 	   << "\t" << "--genomewide                  " << "\t" << "Genome-wide mode" << "\n"
 	   << "\t" << "--chrom                       " << "\t" << "Only genotype regions on this chromosome" << "\n"
            << "\t" << "--bam-samps   <string>        " << "\t" << "Comma separated list of sample IDs for --bam" << "\n"
+	   << "\t" << "--str-info    <string>        " << "\t" << "Tab file with additional per-STR info (see docs)" << "\n"
 	   << "\n Options for different sequencing settings\n"
 	   << "\t" << "--readlength  <int>           " << "\t" << "Read length. Default: " << options.read_len << "\n"
 	   << "\t" << "--coverage    <float>         " << "\t" << "Average coverage. must be set for exome/targeted data. Comma separated list to specify for each BAM" << "\n"
@@ -98,6 +100,7 @@ void parse_commandline_options(int argc, char* argv[], Options* options) {
   enum LONG_OPTIONS {
     OPT_BAMFILES,
     OPT_BAMSAMP,
+    OPT_STRINFO,
     OPT_CHROM,
     OPT_REFFA,
     OPT_REGIONS,
@@ -133,6 +136,7 @@ void parse_commandline_options(int argc, char* argv[], Options* options) {
   static struct option long_options[] = {
     {"bam",         required_argument,  NULL, OPT_BAMFILES},
     {"bam-samps",   required_argument,  NULL, OPT_BAMSAMP},
+    {"str-info",    required_argument,  NULL, OPT_STRINFO},
     {"chrom",       required_argument,  NULL, OPT_CHROM},
     {"ref",         required_argument,  NULL, OPT_REFFA},
     {"regions",     required_argument,  NULL, OPT_REGIONS},
@@ -179,6 +183,9 @@ void parse_commandline_options(int argc, char* argv[], Options* options) {
       break;
     case OPT_BAMSAMP:
       options->rg_sample_string = optarg;
+      break;
+    case OPT_STRINFO:
+      options->str_info_file = optarg;
       break;
     case OPT_CHROM:
       options->chrom = optarg;
@@ -360,8 +367,9 @@ int main(int argc, char* argv[]) {
   
   // Process each region
   region_reader.Reset();
+  STRInfo str_info(options);
   VCFWriter vcfwriter(options.outprefix + ".vcf", full_command, sample_info);
-  Genotyper genotyper(refgenome, options, sample_info);
+  Genotyper genotyper(refgenome, options, sample_info, str_info);
 
   stringstream ss;
   while (region_reader.GetNextRegion(&locus)) {

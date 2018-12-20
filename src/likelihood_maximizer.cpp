@@ -665,10 +665,13 @@ bool LikelihoodMaximizer::GetGenotypeNegLogLikelihood(const int32_t& allele1,
   return true;
 }
 
+const int32_t STARTMIN = 1000000;
+const int32_t STARTMAX = 0;
+const int32_t DEFAULTMAX = 100;
 bool LikelihoodMaximizer::InferGridSize(const int32_t& read_len, const int32_t& motif_len) {
   grid_set = false;
-  int32_t min_allele = 1000000;
-  int32_t max_allele = 0;
+  int32_t min_allele = STARTMIN;
+  int32_t max_allele = STARTMAX;
   if (enclosing_class_.GetGridBoundaries(&min_allele, &max_allele)) {
     lower_bound = min_allele;
     upper_bound = max_allele;
@@ -692,12 +695,14 @@ bool LikelihoodMaximizer::InferGridSize(const int32_t& read_len, const int32_t& 
     upper_bound = max_allele;
     grid_set = true;
   }
-  
-  if (min_allele > max_allele and max_allele == 0) {
-    grid_set = false;
+  // Check boundaries make sense
+  if (lower_bound == STARTMIN) {
+    // min wasn't set. happens if no enclosing found
+    lower_bound = 1;
   }
-  else if (min_allele > max_allele and max_allele != 0){
-    lower_bound = upper_bound;
+  if (upper_bound == STARTMAX) {
+    // max wasn't set. happens if only spanning found
+    upper_bound = DEFAULTMAX;
   }
   // Add buffer to the grid
   lower_bound -= grid_buffer;
@@ -783,10 +788,12 @@ bool LikelihoodMaximizer::GetExpansionProb(std::vector<double>* prob_vec, const 
 			       &shortlong)) {
     return false;
   }
+  // Divide these by two since double counting (a,b) and (b,a)
   shortshort -= log(2); 
   longlong -= log(2); 
   //double total = log(exp(shortshort)+exp(longlong)+exp(shortlong));
   double total = fast_log_sum_exp(shortshort, fast_log_sum_exp(longlong,shortlong));
+
   prob_vec->clear();
   prob_vec->push_back(exp(shortshort-total));
   prob_vec->push_back(exp(shortlong-total));
