@@ -162,7 +162,7 @@ bool ReadExtractor::ExtractReads(BamCramMultiReader* bamreader,
       }
       sample_likelihood_maximizers[samp]->AddEnclosingData(iter->second.data_value);
       encl++;
-    } else if (iter->second.read_type == RC_FRR) {
+    } else if (iter->second.read_type == RC_FRR or iter->second.read_type == RC_POT_OFFT) {
       if (accept_FRR && iter->second.data_value < sample_info.GetDistMax(samp)-sample_info.GetReadLength()) {
 	if (options.output_readinfo) {
 	  readfile_ << locus.chrom << "\t" 
@@ -544,10 +544,7 @@ bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
 	SingleReadType srt;
 	ProcessSingleRead(alignment, chrom_ref_id, locus, min_match, true,
 			  &data_value, &nCopy_value, &score_value, &read_type, &srt);
-	if (alignment.Name() == "pMultiLoc_9_cov70_readLen_150_ref_hg38_390_altAllele_100182_100678_1:1:0_1:0:0_c82")
-	  cerr << "OFF target baby!" << endl
-	       << alignment.QueryBases() << endl
-	       << srt << "\t" << nCopy_value << "\t" <<score_value << endl;
+
 	//  Check if read's mate already processed
 	std::map<std::string, ReadPair>::iterator rp_iter = read_pairs->find(aln_key);
 	if (rp_iter != read_pairs->end() and rp_iter->second.found_pair){
@@ -556,7 +553,11 @@ bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
 	if (rp_iter != read_pairs->end()) {
 	  // do another round of rescue maybe?! Currently, naive rescue:
 	  rp_iter->second.read2 = alignment;
-	  if (read_type == RC_FRR or srt == SR_UM_POT_IRR or srt == SR_IRR){
+	  if (read_type == RC_FRR or 
+	      srt == SR_UM_POT_IRR or 
+	      srt == SR_IRR //or
+	      //	      ((srt == SR_PREFLANK or srt == SR_POSTFLANK) and nCopy_value >= 0.94 * read_length /(int32_t)locus.motif.size())){
+	      ){
 	    if (rp_iter->second.read_type == RC_POT_OFFT){
 	      //cerr << "2\t" << locus.chrom << " " << alignment.QueryBases() << endl;
 	      rp_iter->second.read_type = RC_OFFT;
@@ -575,7 +576,10 @@ bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
 	  }
 	}
 	else{
-	  if (read_type == RC_FRR or srt == SR_UM_POT_IRR){
+	  if (read_type == RC_FRR 
+	      or srt == SR_UM_POT_IRR
+	      //or ((srt == SR_PREFLANK or srt == SR_POSTFLANK) and nCopy_value >= 0.94 * read_length /(int32_t)locus.motif.size())){
+	      ){
 	    //cerr << "1\t" << locus.chrom << " " << alignment.Name() << endl;
 	    read_pair.read_type = RC_POT_OFFT;
 	    read_pair.read1 = alignment;
@@ -730,9 +734,6 @@ bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
     return false;
   }
   
-  if (alignment.Name() == "CompMultiLoc_11_cov70_readLen_150_ref_hg38_350_altAllele_10835_11279_2:0:0_3:1:0_7dc"){
-    cerr << seq << endl << *read_type << " " << *srt << " " << *nCopy_value << endl << endl;
-  }
 
   if (*srt == SR_UNKNOWN){
     *nCopy_value = 0;

@@ -171,7 +171,7 @@ bool expansion_aware_realign(const std::string& seq,
       current_score_run=0;
 
     // Stop if score is relatively high, but lower than max
-    if (current_score > 0.74 * SSW_MATCH_SCORE * read_len and 
+    if (current_score > 0.7 * SSW_MATCH_SCORE * read_len and 
 	current_score <= max_score and
 	current_score_run > 2){
       //max_nCopy--;
