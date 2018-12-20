@@ -705,7 +705,7 @@ bool LikelihoodMaximizer::InferGridSize(const int32_t& read_len, const int32_t& 
     upper_bound = DEFAULTMAX;
   }
   // Add buffer to the grid
-  lower_bound -= grid_buffer;
+  lower_bound = max(1, lower_bound - grid_buffer);
   upper_bound += grid_buffer;
   return grid_set;
 }
@@ -793,7 +793,6 @@ bool LikelihoodMaximizer::GetExpansionProb(std::vector<double>* prob_vec, const 
   longlong -= log(2); 
   //double total = log(exp(shortshort)+exp(longlong)+exp(shortlong));
   double total = fast_log_sum_exp(shortshort, fast_log_sum_exp(longlong,shortlong));
-
   prob_vec->clear();
   prob_vec->push_back(exp(shortshort-total));
   prob_vec->push_back(exp(shortlong-total));
