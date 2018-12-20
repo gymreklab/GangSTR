@@ -59,7 +59,7 @@ class SampleInfo {
   std::vector<double> GetDistCDF(std::string sample);
   std::vector<double> GetDistIntegral(std::string sample);
   const std::string GetSampleFromID(const std::string& rgid);
-
+  bool GetSampleProfile(const std::string& sample, SampleProfile* sp);
   /* Other utils */
   void PrintSampleInfo(const std::string& logfilename);
   double GetDistMax(const std::string& sample);

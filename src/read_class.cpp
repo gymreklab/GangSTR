@@ -33,6 +33,20 @@ ReadClass::ReadClass() {
   SetOptions(default_options);
 }
 
+void ReadClass::SetOptions2(const SampleProfile& _sample_profile, const STRLocusInfo& sli,
+			    const int32_t& _flank_len, const bool& _read_prob_mode) {
+  dist_mean = _sample_profile.dist_mean;
+  dist_sdev = _sample_profile.dist_sdev;
+  dist_pdf = _sample_profile.dist_pdf;
+  dist_cdf = _sample_profile.dist_cdf;
+  stutter_up = sli.stutter_up;
+  stutter_down = sli.stutter_down;
+  stutter_p = sli.stutter_p;
+  dist_distribution_size = dist_pdf.size();
+  flank_len = _flank_len;
+  read_prob_mode = _read_prob_mode;
+}
+
 void ReadClass::SetOptions(const Options& options) {
   dist_mean = options.use_mean_dist;
   dist_sdev = options.use_mean_sdev;
