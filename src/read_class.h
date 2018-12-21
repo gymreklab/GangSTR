@@ -22,6 +22,8 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 #define SRC_READ_CLASS_H__
 
 #include "src/options.h"
+#include "src/bam_info_extract.h"
+#include "src/str_info.h"
 
 #include <stdint.h>
 
@@ -55,6 +57,8 @@ class ReadClass {
   void AddData(const int32_t& data);
   // Set options (e.g. insert sizes, stutter params)
   void SetOptions(const Options& options);
+  void SetOptions2(const SampleProfile& _sample_profile, const STRLocusInfo& sli,
+		   const int32_t& _flank_len, const bool& _read_prob_mode);
   // Calculate class log likelihood for diploid genotype P(data|<A,B>)
   bool GetClassLogLikelihood(const int32_t& allele1, const int32_t& allele2,
 			     const int32_t& read_len, const int32_t& motif_len,

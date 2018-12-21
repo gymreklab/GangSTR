@@ -38,7 +38,12 @@ Genotyper::Genotyper(RefGenome& _refgenome,
   std::set<std::string> rg_samples = sample_info->GetSamples();
   for (std::set<std::string>::iterator it=rg_samples.begin();
        it != rg_samples.end(); it++) {
-    sample_likelihood_maximizers[*it] = new LikelihoodMaximizer(_options, *sample_info, *it);
+    SampleProfile sp;
+    if (sample_info->GetSampleProfile(*it, &sp)) {
+      sample_likelihood_maximizers[*it] = new LikelihoodMaximizer(_options, sp, sample_info->GetReadLength());
+    } else {
+      PrintMessageDieOnError("Could not find sample profile for " + *it, M_ERROR);
+    }
   }
 }
 
@@ -101,10 +106,13 @@ bool Genotyper::ProcessLocus(BamCramMultiReader* bamreader, Locus* locus) {
   int32_t sample_min_allele, sample_max_allele;
   int32_t min_allele = 100000;
   int32_t max_allele = 0;
+  int32_t ref_count = (int32_t)((locus->end-locus->start+1)/locus->motif.size());
   for (std::set<std::string>::iterator it = rg_samples.begin();
        it != rg_samples.end(); it++) {
     const std::string samp = *it;
-    if (!sample_likelihood_maximizers[samp]->InferGridSize(read_len, (int32_t)(locus->motif.size()))) {
+    sample_likelihood_maximizers[samp]->SetLocusParams(read_len, (int32_t)(locus->motif.size()),
+						       ref_count);
+    if (!sample_likelihood_maximizers[samp]->InferGridSize() ) {
       PrintMessageDieOnError("Error inferring grid size", M_PROGRESS);
       return false;
     }
@@ -121,7 +129,6 @@ bool Genotyper::ProcessLocus(BamCramMultiReader* bamreader, Locus* locus) {
     PrintMessageDieOnError("\tMaximizing likelihood", M_PROGRESS);
   }
   int32_t allele1, allele2;
-  int32_t ref_count = (int32_t)((locus->end-locus->start+1)/locus->motif.size());
   double min_negLike, lob1, lob2, hib1, hib2;
   double a1_se, a2_se;
   bool resampled = false;
@@ -134,11 +141,7 @@ bool Genotyper::ProcessLocus(BamCramMultiReader* bamreader, Locus* locus) {
       sample_likelihood_maximizers[samp]->SetCoverage(sample_info->GetGCCoverage(samp)[gcbin]);
     }
     try {
-      if (!sample_likelihood_maximizers[samp]->OptimizeLikelihood(read_len, 
-								  (int32_t)(locus->motif.size()),
-								  ref_count, 
-								  resampled, 
-								  options->ploidy, 
+      if (!sample_likelihood_maximizers[samp]->OptimizeLikelihood(resampled, options->ploidy,
 								  0,
 								  locus->offtarget_share,
 								  &allele1, 
@@ -147,8 +150,7 @@ bool Genotyper::ProcessLocus(BamCramMultiReader* bamreader, Locus* locus) {
 	continue;
       }
       std::vector<double> sample_prob_vec;
-      if (!sample_likelihood_maximizers[samp]->GetExpansionProb(&sample_prob_vec, locus->expansion_threshold,
-								read_len, (int32_t)(locus->motif.size()), ref_count)) {
+      if (!sample_likelihood_maximizers[samp]->GetExpansionProb(&sample_prob_vec, locus->expansion_threshold)) {
 	sample_prob_vec.clear();
 	sample_prob_vec.push_back(-1.0);
 	sample_prob_vec.push_back(-1.0);
@@ -169,8 +171,7 @@ bool Genotyper::ProcessLocus(BamCramMultiReader* bamreader, Locus* locus) {
 	  PrintMessageDieOnError("\tGetting confidence intervals", M_PROGRESS);
 	}
 	try{
-	  if (!sample_likelihood_maximizers[samp]->GetConfidenceInterval(read_len, (int32_t)(locus->motif.size()),
-									 ref_count, allele1, allele2, *locus,
+	  if (!sample_likelihood_maximizers[samp]->GetConfidenceInterval(allele1, allele2, *locus,
 									 &lob1, &hib1, &lob2, &hib2, &a1_se, &a2_se)) {
 	    locus->called[samp] = false;
 	    continue;

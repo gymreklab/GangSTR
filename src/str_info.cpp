@@ -76,8 +76,8 @@ STRInfo::STRInfo(const Options& options) {
      std::string chrom;
      int32_t start, thresh;
      double stutter_up, stutter_down, stutter_p;
-     while (!std::getline(freader, line)) {
-       std::cerr << "Parsing " << line << std::endl;
+     while (std::getline(freader, line)) {
+       items.clear();
        split_by_delim(line, '\t', items);
        chrom = items[chrom_col];
        start = atoi(items[start_col].c_str());
@@ -100,7 +100,6 @@ STRInfo::STRInfo(const Options& options) {
        }
        std::pair<std::string, int32_t> locus(chrom, start);
        str_info[locus] = sli;
-       std::cerr << "Adding " << chrom << " " << start << sli.exp_thresh << std::endl;
      }
   }
 }

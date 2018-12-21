@@ -30,19 +30,21 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 using namespace std;
 
 
-LikelihoodMaximizer::LikelihoodMaximizer(const Options& _options, SampleInfo& _sample_info, std::string samp) {
+LikelihoodMaximizer::LikelihoodMaximizer(const Options& _options, const SampleProfile& sp,
+					 const int32_t& read_len) {
   options = &_options;
   
-  obj_cov = _sample_info.GetCoverage(samp);
+  obj_cov = sp.coverage;
 
   // TODO don't use options for this, instead pass sample_info
+  // TODO working on splitting up global options (from sp) and per-locus options (in separate function)
   Options lik_options; // new object specifically for this sample
-  lik_options.use_mean_dist = _sample_info.GetInsertMean(samp);
-  lik_options.use_mean_sdev = _sample_info.GetInsertSdev(samp);
-  lik_options.use_coverage = _sample_info.GetCoverage(samp);
-  lik_options.use_dist_pdf = _sample_info.GetDistPDF(samp);
-  lik_options.use_dist_cdf = _sample_info.GetDistCDF(samp);
-  lik_options.read_len = _sample_info.GetReadLength();
+  lik_options.use_mean_dist = sp.dist_mean;
+  lik_options.use_mean_sdev = sp.dist_sdev;
+  lik_options.use_coverage = sp.coverage;
+  lik_options.use_dist_pdf = sp.dist_pdf;
+  lik_options.use_dist_cdf = sp.dist_cdf;
+  lik_options.read_len = read_len;
   
   enclosing_class_.SetOptions(lik_options);
   frr_class_.SetOptions(lik_options);
@@ -57,8 +59,6 @@ LikelihoodMaximizer::LikelihoodMaximizer(const Options& _options, SampleInfo& _s
   if (options->output_bootstrap) {
     bsfile_.open((options->outprefix + ".bootstrap.tab").c_str());
   }
-  //plotfile_.open((options->outprefix + ".plot.tab").c_str());
-
 
   // Setup random number generator
   const gsl_rng_type * T;
@@ -76,6 +76,9 @@ LikelihoodMaximizer::LikelihoodMaximizer(const Options& _options, SampleInfo& _s
   grid_set = false;
   grid_buffer = 3;
   grid_opt_threshold = 10000; // TODO lower if we want to do nlopt
+
+  // Locus params
+  locus_params_set = false;
 }
 
 void LikelihoodMaximizer::Reset() {
@@ -121,21 +124,6 @@ void LikelihoodMaximizer::AddOffTargetData(const int32_t& data) {
   rec.read_type = RC_OFFT;
   rec.data = data;
   read_pool.push_back(rec);
-}
-
-void LikelihoodMaximizer::PlotLikelihood(int32_t fix_allele,
-                                          int32_t start,
-                                          int32_t end,
-                                          int32_t step,
-                                          int32_t read_len,
-                                          int32_t motif_len,
-                                          int32_t ref_count){
-  double gt_ll;
-  for (int32_t var_allele = start; var_allele <= end; var_allele+=step){
-    GetGenotypeNegLogLikelihood(fix_allele, var_allele, read_len, motif_len, ref_count, false, &gt_ll);
-    //    plotfile_ << fix_allele << "\t" << var_allele << "\t"
-    //    << gt_ll << endl;
-  }
 }
 
 void LikelihoodMaximizer::SetCoverage(const double& cov) {
@@ -193,14 +181,11 @@ void LikelihoodMaximizer::ResampleReadPool(){
   //PrintReadPool();
 }
 
-bool LikelihoodMaximizer::GetConfidenceInterval(const int32_t& read_len, 
-						const int32_t& motif_len,
-						const int32_t& ref_count,
-						const int32_t& all1,
+bool LikelihoodMaximizer::GetConfidenceInterval(const int32_t& all1,
 						const int32_t& all2,
 						const Locus& locus,
 						double* lob1, double* hib1, double* lob2, double* hib2,
-						double* a1_se, double* a2_se){
+						double* a1_se, double* a2_se) {
   int32_t allele1, allele2;
   // TODO allow change of alpha
   double alpha = 0.05;   // Tail error on each end
@@ -220,49 +205,32 @@ bool LikelihoodMaximizer::GetConfidenceInterval(const int32_t& read_len,
   for (int i = 0; i < num_boot_samp + 1; i++){
     ResampleReadPool();
     if (options->ploidy == 2){
-      OptimizeLikelihood(read_len, motif_len, ref_count, 
-			 true, 1, allele1,
+      OptimizeLikelihood(true, 1, allele1,
 			 offtarget_share, 
 			 &boot_al2_1, &boot_al2_2, &min_negLike);
-      OptimizeLikelihood(read_len, motif_len, ref_count, 
-			 true, 1, allele2,
+      OptimizeLikelihood(true, 1, allele2,
 			 offtarget_share, 
 			 &boot_al1_1, &boot_al1_2, &min_negLike);
-      
-      //cerr << allele1 << ":\t" << boot_al2_1 << "\t" << boot_al2_2 << "\n"
-      //	   << allele2 << ":\t" << boot_al1_1 << "\t" << boot_al1_2 << "\n";
       if (boot_al1_1 == allele2)
 	boot_al1 = boot_al1_2;
       else if (boot_al1_2 == allele2)
 	boot_al1 = boot_al1_1;
       else
-	cerr<< "Hell Na\n";
-
+	cerr<< "Error running bootstrap\n";
       if (boot_al2_1 == allele1)
 	boot_al2 = boot_al2_2;
       else if (boot_al2_2 == allele1)
 	boot_al2 = boot_al2_1;
       else
-	cerr<< "Hell Na\n";
+	std::cerr<< "Error running likelihood optimization\n";
       double gt_ll1, gt_ll2;
-      // PrintReadPool();
-      //GetGenotypeNegLogLikelihood(allele1, boot_al1, read_len, motif_len, ref_count, true, &gt_ll1);
-      //GetGenotypeNegLogLikelihood(allele2, boot_al1, read_len, motif_len, ref_count, true, &gt_ll2);
-      //cerr << allele1 << ", "<< boot_al2 << "\t" << gt_ll1  << "\n";
-      //cerr << allele2 << ", "<< boot_al1 << "\t" << gt_ll2  << "\n";
-      // cerr << allele1 << "\t" << boot_al1 << endl;
-      // cerr << allele2 << "\t" << boot_al2 << endl;
     }
     else{ // haploid
-      OptimizeLikelihood(read_len, motif_len, ref_count, 
-			 true, 1, 0,
+      OptimizeLikelihood(true, 1, 0,
 			 offtarget_share, 
 			 &boot_al1, &boot_al2, &min_negLike);
     }
-    // cerr<<min(boot_al1, boot_al2)<<"\t"<<max(boot_al1, boot_al2)<<endl;
-    // small_alleles.push_back(min(boot_al1, boot_al2) - allele1);
-    // large_alleles.push_back(max(boot_al1, boot_al2) - allele2);
-    
+
     small_alleles.push_back(boot_al1);
     large_alleles.push_back(boot_al2);
     if (options->output_bootstrap) {
@@ -294,16 +262,6 @@ bool LikelihoodMaximizer::GetConfidenceInterval(const int32_t& read_len,
   for (int i =0; i <= num_boot_samp; i++)
     acum += double(large_alleles[i] - mean_lg_alleles) * double(large_alleles[i] - mean_lg_alleles);
   *a2_se = std::sqrt(acum / double(num_boot_samp + 1));
-  
-  
-  // TODO 0.9 or 0.1? allele1 -/+ lob1?
-  // TODO allow change of 0.9 and 0.1
-
-  // *lob1 = small_alleles.at(int(0.9 * (num_boot_samp + 1)));
-  // *hib1 = small_alleles.at(int(0.1 * (num_boot_samp + 1)));
-  // *lob2 = large_alleles.at(int(0.9 * (num_boot_samp + 1)));
-  // *hib2 = large_alleles.at(int(0.1 * (num_boot_samp + 1)));
-
   return true;  // TODO add return false cases
 }
 
@@ -326,197 +284,10 @@ std::size_t LikelihoodMaximizer::GetReadPoolSize() {
   return read_pool.size();
 }
 
-bool LikelihoodMaximizer::Getd2dA2NegLikelihood(const int32_t& allele1,
-						const int32_t& allele2,
-						const int32_t& read_len,
-						const int32_t& motif_len,
-						const int32_t& ref_count,
-						const bool& resampled,
-						const int32_t& h,//step is int because alleles are int
-						double* d2dA2){
-  double f1 = 0.0, f2 = 0.0, f3 = 0.0;
-  bool b1 = this -> GetGenotypeNegLogLikelihood(allele1 + h,
-						  allele2,
-						  read_len,
-						  motif_len,
-						  ref_count,
-						  resampled,
-						  &f1);
-  bool b2 = this -> GetGenotypeNegLogLikelihood(allele1,
-						  allele2,
-						  read_len,
-						  motif_len,
-						  ref_count,
-						  resampled,
-						  &f2);
-  bool b3 = this -> GetGenotypeNegLogLikelihood(allele1 - h,
-						  allele2,
-						  read_len,
-						  motif_len,
-						  ref_count,
-						  resampled,
-						  &f3);
-  if (!b1 or !b2 or !b3){
-    *d2dA2 = 0;
-    return false;
-  }
-  else{
-    *d2dA2 = (f1 - 2.0 * f2 + f3) / double(h * h);
-    return true;
-  } 
-}
-bool LikelihoodMaximizer::Getd2dB2NegLikelihood(const int32_t& allele1,
-						const int32_t& allele2,
-						const int32_t& read_len,
-						const int32_t& motif_len,
-						const int32_t& ref_count,
-						const bool& resampled,
-						const int32_t& h,//step is int because alleles are int
-						double* d2dB2){
-  double f1 = 0.0, f2 = 0.0, f3 = 0.0;
-  bool b1 = this -> GetGenotypeNegLogLikelihood(allele1,
-						  allele2 + h,
-						  read_len,
-						  motif_len,
-						  ref_count,
-						  resampled,
-						  &f1);
-  bool b2 = this -> GetGenotypeNegLogLikelihood(allele1,
-						  allele2,
-						  read_len,
-						  motif_len,
-						  ref_count,
-						  resampled,
-						  &f2);
-  bool b3 = this -> GetGenotypeNegLogLikelihood(allele1,
-						  allele2 - h,
-						  read_len,
-						  motif_len,
-						  ref_count,
-						  resampled,
-						  &f3);
-  if (!b1 or !b2 or !b3){
-    *d2dB2 = 0;
-    return false;
-  }
-  else{
-    *d2dB2 = (f1 - 2.0 * f2 + f3) / double(h * h);
-    return true;
-  } 
-}
-bool LikelihoodMaximizer::Getd2dABNegLikelihood(const int32_t& allele1,
-						const int32_t& allele2,
-						const int32_t& read_len,
-						const int32_t& motif_len,
-						const int32_t& ref_count,
-						const bool& resampled,
-						const int32_t& h,//step is int because alleles are int
-						double* d2dAB){
-  double f1 = 0.0, f2 = 0.0, f3 = 0.0, f4 = 0.0;
-  bool b1 = this -> GetGenotypeNegLogLikelihood(allele1 + h,
-						  allele2 + h,
-						  read_len,
-						  motif_len,
-						  ref_count,
-						  resampled,
-						  &f1);
-  bool b2 = this -> GetGenotypeNegLogLikelihood(allele1 + h,
-						  allele2 - h,
-						  read_len,
-						  motif_len,
-						  ref_count,
-						  resampled,
-						  &f2);
-  bool b3 = this -> GetGenotypeNegLogLikelihood(allele1 - h,
-						  allele2 + h,
-						  read_len,
-						  motif_len,
-						  ref_count,
-						  resampled,
-						  &f3);
-  bool b4 = this -> GetGenotypeNegLogLikelihood(allele1 - h,
-						  allele2 - h,
-						  read_len,
-						  motif_len,
-						  ref_count,
-						  resampled,
-						  &f4);
-  if (!b1 or !b2 or !b3 or !b4){
-    *d2dAB = 0;
-    return false;
-  }
-  else{
-    *d2dAB = (f1 - f2 - f3 + f4) / double(4 * h * h);
-    return true;
-  } 
-}
-
-bool LikelihoodMaximizer::GetStandardError(const int32_t& allele1,
-					   const int32_t& allele2,
-					   const int32_t& read_len,
-					   const int32_t& motif_len,
-					   const int32_t& ref_count,
-					   const bool& resampled,
-					   const int32_t& h,//step is int because alleles are int
-					   double* sigmaA,
-					   double* sigmaB,
-					   double* sigmaAB){
-  // Consider Hessian H:
-  // H = |a  b|
-  //     |c  d|
-  // std error matrix = - I^(-1) -> model that with -H^(-1)
-  double a = 0.0, b = 0.0, c = 0.0, d = 0.0;
-  bool flg1 = Getd2dA2NegLikelihood(allele1,
-				    allele2, 
-				    options->read_len,
-				    options->motif_len,
-				    ref_count,
-				    resampled,
-				    h,
-				    &a);  
-  bool flg2 = Getd2dB2NegLikelihood(allele1,
-				    allele2, 
-				    options->read_len,
-				    options->motif_len,
-				    ref_count,
-				    resampled,
-				    h,
-				    &d);
-  bool flg3 = Getd2dABNegLikelihood(allele1,
-				    allele2, 
-				    options->read_len,
-				    options->motif_len,
-				    ref_count,
-				    resampled,
-				    h,
-				    &b);
-  c = b;
-  if (!flg1 or !flg2 or !flg3){
-    *sigmaA = 0.0;
-    *sigmaB = 0.0;
-    *sigmaAB = 0.0;
-    return false;
-  }
-  else{
-    double determinant = 1.0 / (a * d - b * c);
-    *sigmaA = -1.0 * d / determinant;
-    *sigmaB = -1.0 * a / determinant;
-    *sigmaAB = -1.0 * (-b) / determinant;
-    return true;
-  }
-}
-
-// TODO + questions
-// 1. Are (a,b) and (b,a) double counted?
-// 2. Fail gracefully if boundaries don't make sense (e.g. hi<lo)
-// 3. this returns log value right?
 bool LikelihoodMaximizer::GetNegLikelihoodSurface(const int32_t& a_lo,
 						  const int32_t& a_hi,
 						  const int32_t& b_lo,
 						  const int32_t& b_hi,
-						  const int32_t& read_len,
-						  const int32_t& motif_len,
-						  const int32_t& ref_count,
 						  const bool& resampled,
 						  double* surfaceLL) {
   double neg_inf = -100000000;
@@ -531,22 +302,11 @@ bool LikelihoodMaximizer::GetNegLikelihoodSurface(const int32_t& a_lo,
   double min = 10000.0;
   int m_a, m_b;
   double ret_val = 0.0;
-  /*
-  if (!this->GetGenotypeNegLogLikelihood(a_hi, b_hi,
-					 read_len, motif_len,
-					 ref_count, resampled,
-					 &ret_val)){
-    *surfaceLL = neg_inf;
-    return false;
-    }*/
-  //sum = (-1.0) * ret_val - log(2); //compensating for adding a_hi,b_hi twice
   sum = neg_inf;
   for (int i = a_lo; i <= a_hi; i++){
     for (int j = b_lo; j <= b_hi; j++){
-      if (!this->GetGenotypeNegLogLikelihood(i, j,
-					     read_len, motif_len,
-					     ref_count, resampled,
-					     &ret_val)){
+      if (!this->GetGenotypeNegLogLikelihood(i, j, resampled,
+					     &ret_val)) {
 	*surfaceLL = neg_inf;
 	return false;
       }
@@ -567,9 +327,6 @@ bool LikelihoodMaximizer::GetNegLikelihoodSurface(const int32_t& a_lo,
 
 bool LikelihoodMaximizer::GetGenotypeNegLogLikelihood(const int32_t& allele1,
 						      const int32_t& allele2,
-						      const int32_t& read_len,
-						      const int32_t& motif_len,
-						      const int32_t& ref_count,
 						      const bool& resampled,
 						      double* gt_ll) {
   double frr_count_ll = 0.0, frr_ll, span_ll, encl_ll, flank_ll = 0.0;
@@ -668,7 +425,7 @@ bool LikelihoodMaximizer::GetGenotypeNegLogLikelihood(const int32_t& allele1,
 const int32_t STARTMIN = 1000000;
 const int32_t STARTMAX = 0;
 const int32_t DEFAULTMAX = 100;
-bool LikelihoodMaximizer::InferGridSize(const int32_t& read_len, const int32_t& motif_len) {
+bool LikelihoodMaximizer::InferGridSize() {
   grid_set = false;
   int32_t min_allele = STARTMIN;
   int32_t max_allele = STARTMAX;
@@ -721,8 +478,7 @@ void LikelihoodMaximizer::GetGridSize(int32_t* min_allele, int32_t* max_allele) 
 }
 
 void LikelihoodMaximizer::InferAlleleList(std::vector<int32_t>* allele_list,
-					  const int32_t& read_len, const int32_t& motif_len,
-					  const int32_t& ploidy, const int32_t& ref_count,
+					  const int32_t& ploidy,
 					  const bool& resampled, const int32_t& fix_allele) {
   allele_list->clear();
   if (upper_bound-lower_bound <= grid_opt_threshold) {
@@ -766,26 +522,32 @@ void LikelihoodMaximizer::InferAlleleList(std::vector<int32_t>* allele_list,
   }
 }
 
-bool LikelihoodMaximizer::GetExpansionProb(std::vector<double>* prob_vec, const int32_t& exp_threshold,
-					   const int32_t& read_len, const int32_t& motif_len,
-					   const int32_t& ref_count) {
+void LikelihoodMaximizer::SetLocusParams(const int32_t& _read_len, const int32_t& _motif_len,
+					 const int32_t& _ref_count) {
+  read_len = _read_len;
+  motif_len = _motif_len;
+  ref_count = _ref_count;
+  locus_params_set = true;
+}
+
+bool LikelihoodMaximizer::GetExpansionProb(std::vector<double>* prob_vec, const int32_t& exp_threshold) {
   double shortshort, shortlong, longlong;
 
   if (!GetNegLikelihoodSurface(lower_bound, exp_threshold-1,
 			       lower_bound, exp_threshold-1,
-			       read_len, motif_len, ref_count, false,
+			       false,
 			       &shortshort)) {
     return false;
   }
   if (!GetNegLikelihoodSurface(exp_threshold, upper_bound,
 			       exp_threshold, upper_bound,
-			       read_len, motif_len, ref_count, false,
+			       false,
 			       &longlong)) {
     return false;
   }
   if (!GetNegLikelihoodSurface(lower_bound, exp_threshold-1,
 			       exp_threshold, upper_bound,
-			       read_len, motif_len, ref_count, false,
+			       false,
 			       &shortlong)) {
     return false;
   }
@@ -801,16 +563,16 @@ bool LikelihoodMaximizer::GetExpansionProb(std::vector<double>* prob_vec, const 
   return true;
 }
 
-bool LikelihoodMaximizer::OptimizeLikelihood(const int32_t& read_len, 
-					     const int32_t& motif_len,
-					     const int32_t& ref_count, 
-					     const bool& resampled, 
-					     const int32_t& ploidy, 
+bool LikelihoodMaximizer::OptimizeLikelihood(const bool& resampled, const int32_t& use_ploidy,
 					     const int32_t& fix_allele,
 					     const double& off_share,
 					     int32_t* allele1, int32_t* allele2, double* min_negLike) {
+  if (!locus_params_set) {
+    PrintMessageDieOnError("Skipping locus with no params set", M_WARNING);
+    return false;
+  }
   if (obj_cov == -1) {
-    PrintMessageDieOnError("Skipping locus with likely extreme GC content", M_PROGRESS);
+    PrintMessageDieOnError("Skipping locus with likely extreme GC content", M_WARNING);
     return false;
   }
 
@@ -818,16 +580,13 @@ bool LikelihoodMaximizer::OptimizeLikelihood(const int32_t& read_len,
 
   // Get list of potential alleles to try
   std::vector<int32_t> allele_list;
-  InferAlleleList(&allele_list, read_len, motif_len, ploidy,
-		  ref_count, resampled, fix_allele);
+  InferAlleleList(&allele_list, use_ploidy, resampled, fix_allele);
 
-  if (ploidy == 2) {
-    findBestAlleleListTuple(allele_list, read_len, motif_len, ref_count,
-			    resampled, ploidy, 0, 
+  if (use_ploidy == 2) {
+    findBestAlleleListTuple(allele_list, use_ploidy, resampled, 0, 
 			    allele1, allele2, min_negLike);
-  } else if (ploidy == 1) {
-    findBestAlleleListTuple(allele_list, read_len, motif_len, ref_count,
-			    resampled, ploidy, fix_allele, 
+  } else if (use_ploidy == 1) {
+    findBestAlleleListTuple(allele_list, use_ploidy, resampled, fix_allele, 
 			    allele1, allele2, min_negLike);    
   }
   return true;
@@ -835,13 +594,13 @@ bool LikelihoodMaximizer::OptimizeLikelihood(const int32_t& read_len,
 
 
 bool LikelihoodMaximizer::findBestAlleleListTuple(std::vector<int32_t> allele_list,
-                          int32_t read_len, int32_t motif_len, int32_t ref_count, bool resampled,
-			  int32_t ploidy, int32_t fix_allele,
-                          int32_t* allele1, int32_t* allele2, double* min_negLike){
+						  int32_t use_ploidy,
+						  bool resampled, int32_t fix_allele,
+						  int32_t* allele1, int32_t* allele2, double* min_negLike) {
   double gt_ll;
   *min_negLike = 1000000;
   int32_t best_a1 = 0, best_a2 = 0;
-  if (ploidy == 2){
+  if (use_ploidy == 2) {
     for (std::vector<int32_t>::iterator a1_it = allele_list.begin();
             a1_it != allele_list.end();
             a1_it++){
@@ -851,7 +610,7 @@ bool LikelihoodMaximizer::findBestAlleleListTuple(std::vector<int32_t> allele_li
             a2_it != allele_list.end();
             a2_it++){
 	if (*a2_it < *a1_it) continue; // want a1 the smaller allele
-        GetGenotypeNegLogLikelihood(*a1_it, *a2_it, read_len, motif_len, ref_count, resampled, &gt_ll);
+        GetGenotypeNegLogLikelihood(*a1_it, *a2_it, resampled, &gt_ll);
         // if (!resampled)
         //   cerr<<endl<<*a1_it<<"\t"<<*a2_it<<"\t"<<gt_ll<<endl;
           if (gt_ll < *min_negLike){
@@ -862,12 +621,12 @@ bool LikelihoodMaximizer::findBestAlleleListTuple(std::vector<int32_t> allele_li
       }
     }
   }
-  else if (ploidy == 1){
+  else if (use_ploidy == 1) {
     best_a2 = fix_allele;
     for (std::vector<int32_t>::iterator a1_it = allele_list.begin();
             a1_it != allele_list.end();
             a1_it++){
-      GetGenotypeNegLogLikelihood(*a1_it, fix_allele, read_len, motif_len, ref_count, resampled, &gt_ll);
+      GetGenotypeNegLogLikelihood(*a1_it, fix_allele, resampled, &gt_ll);
       // cerr<<">> "<<fix_allele<<"\t"<<*a1_it<<"\t"<<gt_ll<<endl;
       if (gt_ll < *min_negLike){
         *min_negLike = gt_ll;
@@ -904,7 +663,7 @@ double nloptNegLikelihood(unsigned n, const double *x, double *grad, void *data)
   double gt_ll;
   if (n == 2){
     double A = x[0], B = x[1];
-    if(!lm_ptr->GetGenotypeNegLogLikelihood(A, B, read_len, motif_len, ref_count, resampled, &gt_ll))
+    if(!lm_ptr->GetGenotypeNegLogLikelihood(A, B, resampled, &gt_ll))
       return -100.0;
     else{
       return gt_ll;
@@ -912,7 +671,7 @@ double nloptNegLikelihood(unsigned n, const double *x, double *grad, void *data)
   }
   else{
     double A = x[0], B = fix_allele;
-    if(!lm_ptr->GetGenotypeNegLogLikelihood(A, B, read_len, motif_len, ref_count, resampled, &gt_ll))
+    if(!lm_ptr->GetGenotypeNegLogLikelihood(A, B, resampled, &gt_ll))
       return -100.0;
     else{
       return gt_ll;
@@ -1006,39 +765,5 @@ bool nlopt_1D_optimize(const int32_t& read_len, const int32_t& motif_len,
   *allele1 = int32_t(round(xx[0]));
   *ret_result = result;
   *minf_ret = minf;
-return true;  // TODO add false
+  return true;  // TODO add false
 }
-
-
-// /// GSL siman helper functions (not complete)
-// double simanEnergy(void *xp){
-//   siman_data *d = (siman_data *) xp;
-//   int read_len  = d -> read_len;
-//   int motif_len = d -> motif_len;
-//   int ref_count = d -> ref_count;
-//   int fix_allele = d -> fix_allele; 
-//   int A = d -> A;
-//   int B = d -> B;
-//   LikelihoodMaximizer* lm_ptr = d -> lm_ptr;
-//   double gt_ll;
-//   if(!lm_ptr->GetGenotypeNegLogLikelihood(A, B, read_len, motif_len, ref_count, &gt_ll))
-//       return -1.0;
-//     else{
-//       return gt_ll;
-//     }
-// }
-// double simanMetric(void *xp, void *yp){
-//   siman_data *d1 = (siman_data *) xp;
-//   siman_data *d2 = (siman_data *) yp;
-//   int A1 = d1 -> A;
-//   int B1 = d1 -> B;
-//   int A2 = d2 -> A;
-//   int B2 = d2 -> B;
-
-//   return sqrt(pow(A1 - A2, 2) + pow(B1 - B2, 2))
-// }
-// double siman_step(const gsl_rng * r, void *xp, double step_size){
-//   siman_data *old_d = (siman_data *) xp;
-//   int old_A = old_A -> A;
-// }
-// /// GSL siman helper functions (not complete)

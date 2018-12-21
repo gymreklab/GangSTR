@@ -241,5 +241,13 @@ double SampleInfo::GetDistMax(const std::string& sample) {
   return dist_mean+3*dist_sdev;
 }
 
+bool SampleInfo::GetSampleProfile(const std::string& sample, SampleProfile* sp) {
+  if (profile.find(sample) != profile.end()) {
+    *sp = profile[sample];
+    return true;
+  }
+  return false;
+}
+
 SampleInfo::~SampleInfo() {
 }

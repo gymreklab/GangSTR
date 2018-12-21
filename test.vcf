@@ -5,7 +5,7 @@
 ##INFO=<ID=REF,Number=1,Type=Float,Description="Reference copy number">
 ##INFO=<ID=GRID,Number=2,Type=Integer,Description="Range of optimization grid">
 ##INFO=<ID=EXPTHRESH,Number=1,Type=Integer,Description="Threshold for caling expansions">
-##FORMAT=<ID=GT,Number=2,Type=Integer,Description="Genotype">
+##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
 ##FORMAT=<ID=DP,Number=1,Type=Integer,Description="Read Depth">
 ##FORMAT=<ID=REPCN,Number=2,Type=Integer,Description="Genotype given in number of copies of the repeat motif">
 ##FORMAT=<ID=REPCI,Number=1,Type=String,Description="Confidence intervals">
@@ -15,4 +15,4 @@
 ##FORMAT=<ID=STDERR,Number=2,Type=Float,Description="Bootstrap standard error of each allele">
 ##FORMAT=<ID=QEXP,Number=3,Type=Float,Description="Prob. of no expansion, 1 expanded allele, both expanded alleles">
 #CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	NA13509
-chr4	3076604	.	cagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcag	cagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcag	.	.	END=3076660;RU=cag;REF=19;GRID=12,108;EXPTHRESH=40	GT:DP:REPCN:REPCI:RC:Q:INS:STDERR:QEXP	1/2:52:15,71:15-15,62-87:6,19,11,16:483.287:493.623,117.3:0,6.2228:0,1,2.81663e-118
+chr4	3076604	.	cagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcag	cagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcag	.	.	END=3076660;RU=cag;REF=19;GRID=12,108;EXPTHRESH=50	GT:DP:REPCN:REPCI:RC:Q:INS:STDERR:QEXP	1/2:52:15,71:15-15,62-87:6,19,11,16:483.287:493.623,117.3:0,6.2228:0,1,1.87084e-215
