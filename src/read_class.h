@@ -45,8 +45,6 @@ A read class consists of:
  */
 class ReadClass {
   friend class ReadClassTest;
-  // friend class enclosing_class;
-  // friend class FlankingClass;
  public:
   const static double NEG_INF = -25; // TODO make smaller?
   const static bool INS_NORMAL = false;
@@ -57,8 +55,9 @@ class ReadClass {
   void AddData(const int32_t& data);
   // Set options (e.g. insert sizes, stutter params)
   void SetOptions(const Options& options);
-  void SetOptions2(const SampleProfile& _sample_profile, const STRLocusInfo& sli,
-		   const int32_t& _flank_len, const bool& _read_prob_mode);
+  void SetGlobalParams(const SampleProfile& _sample_profile,
+		       const int32_t& _flank_len, const bool& _read_prob_mode);
+  void SetLocusParams(const STRLocusInfo& sli);
   // Calculate class log likelihood for diploid genotype P(data|<A,B>)
   bool GetClassLogLikelihood(const int32_t& allele1, const int32_t& allele2,
 			     const int32_t& read_len, const int32_t& motif_len,

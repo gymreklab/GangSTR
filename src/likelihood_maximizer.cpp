@@ -531,6 +531,13 @@ void LikelihoodMaximizer::SetLocusParams(const int32_t& _read_len, const int32_t
 }
 
 bool LikelihoodMaximizer::GetExpansionProb(std::vector<double>* prob_vec, const int32_t& exp_threshold) {
+  if (exp_threshold == -1) {
+    prob_vec->clear();
+    prob_vec->push_back(-1);
+    prob_vec->push_back(-1);
+    prob_vec->push_back(-1);
+    return true;
+  }
   double shortshort, shortlong, longlong;
   if (!GetNegLikelihoodSurface(lower_bound, exp_threshold-1,
 			       lower_bound, exp_threshold-1,

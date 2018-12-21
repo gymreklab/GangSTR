@@ -29,7 +29,7 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 using namespace std;
 
 STRInfo::STRInfo(const Options& options) {
-  default_info.exp_thresh = 40;
+  default_info.exp_thresh = -1;
   default_info.stutter_up = options.stutter_up;
   default_info.stutter_down = options.stutter_down;
   default_info.stutter_p = options.stutter_p;
