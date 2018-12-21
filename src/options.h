@@ -52,7 +52,7 @@ class Options {
   int max_gc_regions;
   std::vector<double> use_dist_pdf;
   std::vector<double> use_dist_cdf;
-
+  int32_t grid_threshold;
   int32_t dist_distribution_size;
   bool dist_man_set;   // whether insert size dist parameters manually set in command line
   // Stutter model

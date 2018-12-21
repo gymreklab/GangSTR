@@ -75,6 +75,11 @@ class Locus {
 
   // Threshold for calling expansions
   int32_t expansion_threshold;
+
+  // Stutter params
+  double stutter_up;
+  double stutter_down;
+  double stutter_p;
 };
 
 #endif  // SRC_LOCUS_H__

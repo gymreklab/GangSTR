@@ -206,8 +206,12 @@ const double SampleInfo::GetCoverage(std::string sample) {
   return profile[sample].coverage;
 }
 
-const std::vector<double> SampleInfo::GetGCCoverage(std::string sample) {
-  return profile[sample].gc_coverage;
+const double SampleInfo::GetGCCoverage(std::string sample, int32_t gcbin) {
+  if (gcbin == -1 || gcbin >= profile[sample].gc_coverage.size()) {
+    PrintMessageDieOnError("GC Bin not set or out of range. Returning mean coverage", M_WARNING);
+    return profile[sample].coverage;
+  }
+  return profile[sample].gc_coverage[gcbin];
 }
 
 std::vector<double> SampleInfo::GetDistPDF(std::string sample) {

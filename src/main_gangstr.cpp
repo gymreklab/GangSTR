@@ -74,6 +74,7 @@ void show_help() {
 	   << "\t" << "--useofftarget               " << "\t" << "Use off target regions included in the BAM file." << "\n"
 	   << "\t" << "--read-prob-mode              " << "\t" << "Use only read probability (ignore class probability)" << "\n"
 	   << "\t" << "--numbstrap   <int>           " << "\t" << "Number of bootstrap samples. Default: " << options.num_boot_samp << "\n"
+	   << "\t" << "--grid-threshold <int>        " << "\t" << "Use optimization rather than grid search to find MLE if more than this many possible alleles. Default: " << options.grid_threshold << "\n"
 	   << "\n Parameters for local realignment:\n"
 	   << "\t" << "--minscore    <int>           " << "\t" << "Minimum alignment score (out of 100). Default: " << options.min_score << "\n"
 	   << "\t" << "--minmatch    <int>           " << "\t" << "Minimum number of matching basepairs on each end of enclosing reads. Default:L " << options.min_match<< "\n"
@@ -98,6 +99,7 @@ void show_help() {
 
 void parse_commandline_options(int argc, char* argv[], Options* options) {
   enum LONG_OPTIONS {
+    OPT_GRIDTHRESH,
     OPT_BAMFILES,
     OPT_BAMSAMP,
     OPT_STRINFO,
@@ -134,6 +136,7 @@ void parse_commandline_options(int argc, char* argv[], Options* options) {
     OPT_VERSION,
   };
   static struct option long_options[] = {
+    {"grid-threshold", required_argument, NULL, OPT_GRIDTHRESH},
     {"bam",         required_argument,  NULL, OPT_BAMFILES},
     {"bam-samps",   required_argument,  NULL, OPT_BAMSAMP},
     {"str-info",    required_argument,  NULL, OPT_STRINFO},
@@ -177,6 +180,9 @@ void parse_commandline_options(int argc, char* argv[], Options* options) {
                    long_options, &option_index);
   while (ch != -1) {
     switch (ch) {
+    case OPT_GRIDTHRESH:
+      options->grid_threshold = atoi(optarg);
+      break;
     case OPT_BAMFILES:
       options->bamfiles.clear();
       split_by_delim(optarg, ',', options->bamfiles);

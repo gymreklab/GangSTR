@@ -29,7 +29,7 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 using namespace std;
 
 STRInfo::STRInfo(const Options& options) {
-  default_info.exp_thresh = 40;
+  default_info.exp_thresh = -1;
   default_info.stutter_up = options.stutter_up;
   default_info.stutter_down = options.stutter_down;
   default_info.stutter_p = options.stutter_p;
@@ -93,7 +93,7 @@ STRInfo::STRInfo(const Options& options) {
 	 sli.stutter_up = atof(items[stutter_up_col].c_str());
        }
        if (stutter_down_col != -1) {
-	 sli.stutter_up = atof(items[stutter_down_col].c_str());
+	 sli.stutter_down = atof(items[stutter_down_col].c_str());
        }
        if (stutter_p_col != -1) {
 	 sli.stutter_p = atof(items[stutter_p_col].c_str());
@@ -104,12 +104,48 @@ STRInfo::STRInfo(const Options& options) {
   }
 }
 
+const STRLocusInfo STRInfo::GetSTRInfo(const std::string& chrom, const int32_t& start) {
+  std::pair<std::string, int32_t> locus(chrom, start);
+  if (str_info.find(locus) == str_info.end()) {
+    return default_info;
+  } else {
+    return str_info[locus];
+  }
+}
+
 const int32_t STRInfo::GetExpansionThreshold(const std::string& chrom, const int32_t& start) {
   std::pair<std::string, int32_t> locus(chrom, start);
   if (str_info.find(locus) == str_info.end()) {
     return default_info.exp_thresh;
   } else {
     return str_info[locus].exp_thresh;
+  }
+}
+
+const double STRInfo::GetStutterUp(const std::string& chrom, const int32_t& start) {
+  std::pair<std::string, int32_t> locus(chrom, start);
+  if (str_info.find(locus) == str_info.end()) {
+    return default_info.stutter_up;
+  } else {
+    return str_info[locus].stutter_up;
+  }
+}
+
+const double STRInfo::GetStutterDown(const std::string& chrom, const int32_t& start) {
+  std::pair<std::string, int32_t> locus(chrom, start);
+  if (str_info.find(locus) == str_info.end()) {
+    return default_info.stutter_down;
+  } else {
+    return str_info[locus].stutter_down;
+  }
+}
+
+const double STRInfo::GetStutterP(const std::string& chrom, const int32_t& start) {
+  std::pair<std::string, int32_t> locus(chrom, start);
+  if (str_info.find(locus) == str_info.end()) {
+    return default_info.stutter_p;
+  } else {
+    return str_info[locus].stutter_p;
   }
 }
 

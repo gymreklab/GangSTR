@@ -47,6 +47,7 @@ Options::Options() {
   str_info_file = "";
   dist_mean.clear();
   dist_sdev.clear();
+  grid_threshold = 10000;
   dist_distribution_size = 2000;
   coverage.clear();
   use_mean_dist = 400;

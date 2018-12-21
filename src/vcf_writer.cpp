@@ -39,6 +39,9 @@ VCFWriter::VCFWriter(const std::string& _vcffile,
   writer_ << "##INFO=<ID=REF,Number=1,Type=Float,Description=\"Reference copy number\">" << endl;
   writer_ << "##INFO=<ID=GRID,Number=2,Type=Integer,Description=\"Range of optimization grid\">" << endl;
   writer_ << "##INFO=<ID=EXPTHRESH,Number=1,Type=Integer,Description=\"Threshold for caling expansions\">" << endl;
+  writer_ << "##INFO=<ID=STUTTERUP,Number=1,Type=Float,Description=\"Stutter model - up prob\">" << endl;
+  writer_ << "##INFO=<ID=STUTTERDOWN,Number=1,Type=Float,Description=\"Stutter model - down prob\">" << endl;
+  writer_ << "##INFO=<ID=STUTTERP,Number=1,Type=Float,Description=\"Stutter model - p\">" << endl;
   writer_ << "##FORMAT=<ID=GT,Number=1,Type=String,Description=\"Genotype\">" << endl;
   writer_ << "##FORMAT=<ID=DP,Number=1,Type=Integer,Description=\"Read Depth\">" << endl;
   writer_ << "##FORMAT=<ID=REPCN,Number=2,Type=Integer,Description=\"Genotype given in number of copies of the repeat motif\">" << endl;
@@ -111,6 +114,9 @@ void VCFWriter::WriteRecord(Locus& locus) {
 	  << "RU=" << locus.motif << ";"
 	  << "REF=" << refsize << ";"
 	  << "GRID=" << locus.grid_min_allele << "," << locus.grid_max_allele << ";"
+	  << "STUTTERUP=" << locus.stutter_up << ";"
+	  << "STUTTERDOWN=" << locus.stutter_down << ";"
+	  << "STUTTERP=" << locus.stutter_p << ";"
 	  << "EXPTHRESH=" << locus.expansion_threshold << "\t"
 	  << "GT:DP:REPCN:REPCI:RC:Q:INS:STDERR:QEXP";
   
