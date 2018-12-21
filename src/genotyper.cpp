@@ -110,8 +110,17 @@ bool Genotyper::ProcessLocus(BamCramMultiReader* bamreader, Locus* locus) {
   for (std::set<std::string>::iterator it = rg_samples.begin();
        it != rg_samples.end(); it++) {
     const std::string samp = *it;
-    sample_likelihood_maximizers[samp]->SetLocusParams(read_len, (int32_t)(locus->motif.size()),
-						       ref_count);
+    if (gcbin != -1) {
+      sample_likelihood_maximizers[samp]->SetLocusParams(str_info->GetSTRInfo(locus->chrom, locus->start),
+							 sample_info->GetGCCoverage(samp, gcbin),
+							 sample_info->GetReadLength(), (int32_t)(locus->motif.size()),
+							 ref_count);
+    } else {
+      sample_likelihood_maximizers[samp]->SetLocusParams(str_info->GetSTRInfo(locus->chrom, locus->start),
+							 sample_info->GetCoverage(samp),
+							 sample_info->GetReadLength(), (int32_t)(locus->motif.size()),
+							 ref_count);
+    }
     if (!sample_likelihood_maximizers[samp]->InferGridSize() ) {
       PrintMessageDieOnError("Error inferring grid size", M_PROGRESS);
       return false;
@@ -120,10 +129,13 @@ bool Genotyper::ProcessLocus(BamCramMultiReader* bamreader, Locus* locus) {
     if (sample_max_allele > max_allele) max_allele = sample_max_allele;
     if (sample_min_allele < min_allele) min_allele = sample_min_allele;
   }
+  // Set locus info to output to VCF
   locus->grid_min_allele = min_allele;
   locus->grid_max_allele = max_allele;
-  // Set locus info
   locus->expansion_threshold = str_info->GetExpansionThreshold(locus->chrom, locus->start);
+  locus->stutter_up = str_info->GetStutterUp(locus->chrom, locus->start);
+  locus->stutter_down = str_info->GetStutterDown(locus->chrom, locus->start);
+  locus->stutter_p = str_info->GetStutterP(locus->chrom, locus->start);
   // Maximize the likelihood
   if (options->verbose) {
     PrintMessageDieOnError("\tMaximizing likelihood", M_PROGRESS);
@@ -137,9 +149,6 @@ bool Genotyper::ProcessLocus(BamCramMultiReader* bamreader, Locus* locus) {
     const std::string samp = *it;
     locus->called[samp] = false;
     sample_likelihood_maximizers[samp]->SetGridSize(min_allele, max_allele);
-    if (gcbin != -1) {
-      sample_likelihood_maximizers[samp]->SetCoverage(sample_info->GetGCCoverage(samp)[gcbin]);
-    }
     try {
       if (!sample_likelihood_maximizers[samp]->OptimizeLikelihood(resampled, options->ploidy,
 								  0,

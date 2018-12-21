@@ -21,7 +21,6 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef SRC_READ_CLASS_H__
 #define SRC_READ_CLASS_H__
 
-#include "src/options.h"
 #include "src/bam_info_extract.h"
 #include "src/str_info.h"
 
@@ -53,11 +52,11 @@ class ReadClass {
 
   // Add a data point to the class data vector
   void AddData(const int32_t& data);
-  // Set options (e.g. insert sizes, stutter params)
-  void SetOptions(const Options& options);
+  // Set params
   void SetGlobalParams(const SampleProfile& _sample_profile,
 		       const int32_t& _flank_len, const bool& _read_prob_mode);
   void SetLocusParams(const STRLocusInfo& sli);
+  void SetCoverage(const int32_t& _coverage);
   // Calculate class log likelihood for diploid genotype P(data|<A,B>)
   bool GetClassLogLikelihood(const int32_t& allele1, const int32_t& allele2,
 			     const int32_t& read_len, const int32_t& motif_len,
@@ -88,6 +87,7 @@ class ReadClass {
   double stutter_down;
   double stutter_p;
   bool read_prob_mode;
+  int32_t cov;
   // pdf and CDF of non-parametric model for insert size
   int32_t dist_distribution_size;
   std::vector<double> dist_pdf;

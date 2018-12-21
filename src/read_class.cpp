@@ -29,7 +29,10 @@ using namespace std;
 
 ReadClass::ReadClass() {}
 
-// TODO add coverage to this
+void ReadClass::SetCoverage(const int32_t& _coverage) {
+  cov = _coverage;
+}
+
 void ReadClass::SetLocusParams(const STRLocusInfo& sli) {
   stutter_up = sli.stutter_up;
   stutter_down = sli.stutter_down;
@@ -45,19 +48,6 @@ void ReadClass::SetGlobalParams(const SampleProfile& _sample_profile,
   dist_distribution_size = dist_pdf.size();
   flank_len = _flank_len;
   read_prob_mode = _read_prob_mode;
-}
-
-void ReadClass::SetOptions(const Options& options) {
-  dist_mean = options.use_mean_dist;
-  dist_sdev = options.use_mean_sdev;
-  flank_len = options.flanklen;
-  stutter_up = options.stutter_up;
-  stutter_down = options.stutter_down;
-  stutter_p = options.stutter_p;
-  read_prob_mode = options.read_prob_mode;
-  dist_distribution_size = options.dist_distribution_size;
-  dist_pdf = options.use_dist_pdf;
-  dist_cdf = options.use_dist_cdf;
 }
 
 void ReadClass::AddData(const int32_t& data) {
@@ -176,10 +166,10 @@ bool ReadClass::GetLogReadProb(const int32_t& allele,
 bool ReadClass::GetGridBoundaries(int32_t* min_allele, int32_t* max_allele) {
   return false; // Implemented in child classes
 }
+
 void ReadClass::Reset() {
   read_class_data_.clear();
 }
-
 
 std::size_t ReadClass::GetDataSize() {
   return read_class_data_.size();

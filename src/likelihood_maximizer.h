@@ -71,9 +71,6 @@ class LikelihoodMaximizer {
   std::size_t GetOffTargetDataSize();
   std::size_t GetReadPoolSize();
 
-  // Set locus params used frequently
-  void SetLocusParams(const int32_t& _read_len, const int32_t& _motif_len,
-		      const int32_t& _ref_count);
   // Main likelihood function
   bool GetGenotypeNegLogLikelihood(const int32_t& allele1, const int32_t& allele2,
 				   const bool& resampled, double* gt_ll);
@@ -109,8 +106,10 @@ class LikelihoodMaximizer {
 			     double* lob1, double* hib1, double* lob2, double* hib2,
 			     double* a1_se, double* a2_se);
 
-  // Reset coverage
-  void SetCoverage(const double& cov);
+  // Set per-locus params
+  void SetLocusParams(const STRLocusInfo& sli, const double& cov,
+		      const int32_t& _read_len, const int32_t _motif_len,
+		      const int32_t& _ref_count);
 
   // Print read pool
   void PrintReadPool();

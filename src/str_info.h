@@ -43,6 +43,14 @@ class STRInfo {
 
   const int32_t GetExpansionThreshold(const std::string& chrom,
 				      const int32_t& start);
+  const double GetStutterUp(const std::string& chrom,
+			    const int32_t& start);
+  const double GetStutterDown(const std::string& chrom,
+			      const int32_t& start);
+  const double GetStutterP(const std::string& chrom,
+			   const int32_t& start);
+
+  const STRLocusInfo GetSTRInfo(const std::string& chrom, const int32_t& start);
 
  private:
   std::map<std::pair<std::string,int32_t>, STRLocusInfo> str_info;

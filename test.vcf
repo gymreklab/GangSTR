@@ -1,10 +1,13 @@
 ##fileformat=VCFv4.1
-##command=GangSTR-1.4.67-50cf-dirty --bam /storage/resources/datasets/PlatinumGenomesDbGaP/sra/SRR4435260.bam,/storage/resources/datasets/PlatinumGenomesDbGaP/sra/SRR4435261.bam --ref /storage/resources/dbase/human/hg19/hg19.fa --bam-samps SRR4435260,SRR4435261 --regions /storage/nmmsv/reference_TRF/hg19/hg19_ver9.bed --out test --verbose
+##command=GangSTR-1.4.67-50cf-dirty --bam /storage/resources/datasets/IlluminaRepeatExpansions/_EGAR00001587344_repeat_expansions_NA13509.bam --ref /storage/resources/dbase/human/hg19/hg19.fa --regions HTT_hg19.bed --str-info test_strinfo.bed --out test --verbose
 ##INFO=<ID=END,Number=1,Type=Integer,Description="End position of variant">
 ##INFO=<ID=RU,Number=1,Type=String,Description="Repeat motif">
 ##INFO=<ID=REF,Number=1,Type=Float,Description="Reference copy number">
 ##INFO=<ID=GRID,Number=2,Type=Integer,Description="Range of optimization grid">
 ##INFO=<ID=EXPTHRESH,Number=1,Type=Integer,Description="Threshold for caling expansions">
+##INFO=<ID=STUTTERUP,Number=1,Type=Float,Description="Stutter model - up prob">
+##INFO=<ID=STUTTERDOWN,Number=1,Type=Float,Description="Stutter model - down prob">
+##INFO=<ID=STUTTERP,Number=1,Type=Float,Description="Stutter model - p">
 ##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
 ##FORMAT=<ID=DP,Number=1,Type=Integer,Description="Read Depth">
 ##FORMAT=<ID=REPCN,Number=2,Type=Integer,Description="Genotype given in number of copies of the repeat motif">
@@ -14,9 +17,5 @@
 ##FORMAT=<ID=INS,Number=2,Type=Float,Description="Insert size mean and stddev">
 ##FORMAT=<ID=STDERR,Number=2,Type=Float,Description="Bootstrap standard error of each allele">
 ##FORMAT=<ID=QEXP,Number=3,Type=Float,Description="Prob. of no expansion, 1 expanded allele, both expanded alleles">
-#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	SRR4435260	SRR4435261
-chr1	16620	.	gctgctgctgct	.	.	.	END=16631;RU=gct;REF=4;GRID=1,7;EXPTHRESH=-1	GT:DP:REPCN:REPCI:RC:Q:INS:STDERR:QEXP	0/0:216:4,4:4-4,4-4:94,104,0,18:1430.67:305.383,73.0183:0,0:-1,-1,-1	0/0:160:4,4:4-4,4-4:67,82,0,11:1082.14:307.473,70.9735:0,0:-1,-1,-1
-chr1	26454	.	gtgtgtgtgtgt	.	.	.	END=26465;RU=gt;REF=6;GRID=3,9;EXPTHRESH=-1	GT:DP:REPCN:REPCI:RC:Q:INS:STDERR:QEXP	0/0:93:6,6:6-6,6-6:43,44,0,6:597.724:305.383,73.0183:0,0:-1,-1,-1	0/0:91:6,6:6-6,6-6:39,40,0,12:612.586:307.473,70.9735:0,0:-1,-1,-1
-chr1	35489	.	aaataaataaataaat	.	.	.	END=35504;RU=aaat;REF=4;GRID=1,7;EXPTHRESH=-1	GT:DP:REPCN:REPCI:RC:Q:INS:STDERR:QEXP	0/0:73:4,4:4-4,4-4:19,42,0,12:526.128:305.383,73.0183:0,0:-1,-1,-1	0/0:66:4,4:4-4,4-4:21,35,0,10:464.294:307.473,70.9735:0,0:-1,-1,-1
-chr1	40620	.	ttcttcttcttc	.	.	.	END=40631;RU=ttc;REF=4;GRID=1,7;EXPTHRESH=-1	GT:DP:REPCN:REPCI:RC:Q:INS:STDERR:QEXP	0/0:59:4,4:4-4,4-4:21,34,0,4:403.737:305.383,73.0183:0,0:-1,-1,-1	0/0:58:4,4:4-4,4-4:27,28,0,3:378.388:307.473,70.9735:0,0:-1,-1,-1
-chr1	44836	.	aaataaataaataaataaataaataaataaat	.	.	.	END=44867;RU=aaat;REF=8;GRID=5,11;EXPTHRESH=-1	GT:DP:REPCN:REPCI:RC:Q:INS:STDERR:QEXP	0/0:26:8,8:8-8,8-8:15,5,0,6:153.241:305.383,73.0183:0,0:-1,-1,-1	0/0:23:8,8:8-8,8-8:15,4,0,4:131.286:307.473,70.9735:0,0:-1,-1,-1
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	NA13509
+chr4	3076604	.	cagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcag	cagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcag	.	.	END=3076660;RU=cag;REF=19;GRID=12,108;STUTTERUP=0.1;STUTTERDOWN=0.1;STUTTERP=0.8;EXPTHRESH=50	GT:DP:REPCN:REPCI:RC:Q:INS:STDERR:QEXP	1/2:52:15,71:15-15,62-87:6,19,11,16:484.13:493.623,117.3:0,6.2228:0,1,3.86757e-204

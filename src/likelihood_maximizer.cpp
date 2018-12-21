@@ -32,29 +32,18 @@ using namespace std;
 
 LikelihoodMaximizer::LikelihoodMaximizer(const Options& _options, const SampleProfile& sp,
 					 const int32_t& read_len) {
-  options = &_options;
-  
+  options = &_options; // TODO remove options
+
+  enclosing_class_.SetGlobalParams(sp, options->flanklen, options->read_prob_mode);
+  frr_class_.SetGlobalParams(sp, options->flanklen, options->read_prob_mode);
+  spanning_class_.SetGlobalParams(sp, options->flanklen, options->read_prob_mode);
+  flanking_class_.SetGlobalParams(sp, options->flanklen, options->read_prob_mode);
+  resampled_enclosing_class_.SetGlobalParams(sp, options->flanklen, options->read_prob_mode);
+  resampled_frr_class_.SetGlobalParams(sp, options->flanklen, options->read_prob_mode);
+  resampled_spanning_class_.SetGlobalParams(sp, options->flanklen, options->read_prob_mode);
+  resampled_flanking_class_.SetGlobalParams(sp, options->flanklen, options->read_prob_mode);
+    
   obj_cov = sp.coverage;
-
-  // TODO don't use options for this, instead pass sample_info
-  // TODO working on splitting up global options (from sp) and per-locus options (in separate function)
-  Options lik_options; // new object specifically for this sample
-  lik_options.use_mean_dist = sp.dist_mean;
-  lik_options.use_mean_sdev = sp.dist_sdev;
-  lik_options.use_coverage = sp.coverage;
-  lik_options.use_dist_pdf = sp.dist_pdf;
-  lik_options.use_dist_cdf = sp.dist_cdf;
-  lik_options.read_len = read_len;
-  
-  enclosing_class_.SetOptions(lik_options);
-  frr_class_.SetOptions(lik_options);
-  spanning_class_.SetOptions(lik_options);
-  flanking_class_.SetOptions(lik_options);
-  resampled_enclosing_class_.SetOptions(lik_options);
-  resampled_frr_class_.SetOptions(lik_options);
-  resampled_spanning_class_.SetOptions(lik_options);
-  resampled_flanking_class_.SetOptions(lik_options);
-
   // Set up output file
   if (options->output_bootstrap) {
     bsfile_.open((options->outprefix + ".bootstrap.tab").c_str());
@@ -87,7 +76,13 @@ void LikelihoodMaximizer::Reset() {
   spanning_class_.Reset();
   flanking_class_.Reset();
   offtarget_class_.Reset();
+  resampled_enclosing_class_.Reset();
+  resampled_frr_class_.Reset();
+  resampled_spanning_class_.Reset();
+  resampled_flanking_class_.Reset();
   read_pool.clear();
+
+  locus_params_set = false;
 }
 
 void LikelihoodMaximizer::AddEnclosingData(const int32_t& data) {
@@ -126,8 +121,32 @@ void LikelihoodMaximizer::AddOffTargetData(const int32_t& data) {
   read_pool.push_back(rec);
 }
 
-void LikelihoodMaximizer::SetCoverage(const double& cov) {
+void LikelihoodMaximizer::SetLocusParams(const STRLocusInfo& sli, const double& cov,
+					 const int32_t& _read_len, const int32_t _motif_len,
+					 const int32_t& _ref_count) {
+  enclosing_class_.SetLocusParams(sli);
+  frr_class_.SetLocusParams(sli);
+  spanning_class_.SetLocusParams(sli);
+  flanking_class_.SetLocusParams(sli);
+  resampled_enclosing_class_.SetLocusParams(sli);
+  resampled_frr_class_.SetLocusParams(sli);
+  resampled_spanning_class_.SetLocusParams(sli);
+  resampled_flanking_class_.SetLocusParams(sli);
+
+  enclosing_class_.SetCoverage(cov);
+  frr_class_.SetCoverage(cov);
+  spanning_class_.SetCoverage(cov);
+  flanking_class_.SetCoverage(cov);
+  resampled_enclosing_class_.SetCoverage(cov);
+  resampled_frr_class_.SetCoverage(cov);
+  resampled_spanning_class_.SetCoverage(cov);
+  resampled_flanking_class_.SetCoverage(cov);
+
   obj_cov = cov;
+  read_len = _read_len;
+  motif_len = _motif_len;
+  ref_count = _ref_count;
+  locus_params_set = true;
 }
 
 void LikelihoodMaximizer::PrintReadPool(){
@@ -520,14 +539,6 @@ void LikelihoodMaximizer::InferAlleleList(std::vector<int32_t>* allele_list,
       allele_list->push_back(a1);
     }
   }
-}
-
-void LikelihoodMaximizer::SetLocusParams(const int32_t& _read_len, const int32_t& _motif_len,
-					 const int32_t& _ref_count) {
-  read_len = _read_len;
-  motif_len = _motif_len;
-  ref_count = _ref_count;
-  locus_params_set = true;
 }
 
 bool LikelihoodMaximizer::GetExpansionProb(std::vector<double>* prob_vec, const int32_t& exp_threshold) {

@@ -53,7 +53,7 @@ class SampleInfo {
   const double GetInsertMean(std::string sample);
   const double GetInsertSdev(std::string sample);
   const double GetCoverage(std::string sample);
-  const std::vector<double> GetGCCoverage(std::string sample);
+  const double GetGCCoverage(std::string sample, int32_t gcbin);
   const bool GetIsCustomRG();
   std::vector<double> GetDistPDF(std::string sample);
   std::vector<double> GetDistCDF(std::string sample);
