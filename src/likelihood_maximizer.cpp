@@ -75,7 +75,7 @@ LikelihoodMaximizer::LikelihoodMaximizer(const Options& _options, const SamplePr
   upper_bound = 600;
   grid_set = false;
   grid_buffer = 3;
-  grid_opt_threshold = 10000; // TODO lower if we want to do nlopt
+  grid_opt_threshold = options->grid_threshold;
 
   // Locus params
   locus_params_set = false;
