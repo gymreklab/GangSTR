@@ -377,6 +377,7 @@ bool LikelihoodMaximizer::GetGenotypeNegLogLikelihood(const int32_t& allele1,
     enclosing_class_.GetClassLogLikelihood(allele1, allele2, 
 					     read_len, motif_len, ref_count, 
 					   options->ploidy, &encl_ll);
+
     // flanking class overloads GetClassLogLikelihood function
     flanking_class_.FlankingClass::GetClassLogLikelihood(allele1, allele2, 
     							 read_len, motif_len, ref_count, 
@@ -500,6 +501,7 @@ void LikelihoodMaximizer::InferAlleleList(std::vector<int32_t>* allele_list,
 					  const int32_t& ploidy,
 					  const bool& resampled, const int32_t& fix_allele) {
   allele_list->clear();
+  enclosing_class_.ExtractEnclosingAlleles(allele_list);
   if (upper_bound-lower_bound <= grid_opt_threshold) {
     for (int32_t i=lower_bound; i<=upper_bound; i++) {
       allele_list->push_back(i);
@@ -508,7 +510,6 @@ void LikelihoodMaximizer::InferAlleleList(std::vector<int32_t>* allele_list,
     std::vector<int32_t> sublist;
     int32_t a1, a2, result;
     double minf;
-    enclosing_class_.ExtractEnclosingAlleles(allele_list);
     if (ploidy == 2) {
       for (std::vector<int32_t>::iterator allele_it = allele_list->begin();
 	   allele_it != allele_list->end();
@@ -599,7 +600,17 @@ bool LikelihoodMaximizer::OptimizeLikelihood(const bool& resampled, const int32_
   // Get list of potential alleles to try
   std::vector<int32_t> allele_list;
   InferAlleleList(&allele_list, use_ploidy, resampled, fix_allele);
-
+  /*
+  if (!resampled){
+    double gt_ll1;
+    for (int i1 = 1; i1 < 47; i1++){
+      for (int i2 = 1; i2 < 47; i2++){
+	GetGenotypeNegLogLikelihood(i1, i2, resampled, &gt_ll1);
+	cerr << ">> " << i1 << " " << i2 << "\t" << gt_ll1 << endl;
+      }
+    }
+  }
+  */
   if (use_ploidy == 2) {
     findBestAlleleListTuple(allele_list, use_ploidy, resampled, 0, 
 			    allele1, allele2, min_negLike);
@@ -629,13 +640,13 @@ bool LikelihoodMaximizer::findBestAlleleListTuple(std::vector<int32_t> allele_li
             a2_it++){
 	if (*a2_it < *a1_it) continue; // want a1 the smaller allele
         GetGenotypeNegLogLikelihood(*a1_it, *a2_it, resampled, &gt_ll);
-        // if (!resampled)
-        //   cerr<<endl<<*a1_it<<"\t"<<*a2_it<<"\t"<<gt_ll<<endl;
-          if (gt_ll < *min_negLike){
-            *min_negLike = gt_ll;
-            best_a1 = *a1_it;
-            best_a2 = *a2_it;
-          }
+        //if (!resampled)
+	//  cerr<<endl<<*a1_it<<"\t"<<*a2_it<<"\t"<<gt_ll<<endl;
+	if (gt_ll < *min_negLike){
+	  *min_negLike = gt_ll;
+	  best_a1 = *a1_it;
+	  best_a2 = *a2_it;
+	}
       }
     }
   }

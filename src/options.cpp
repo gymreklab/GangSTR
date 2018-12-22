@@ -70,7 +70,7 @@ Options::Options() {
   enclosing_weight = 1.0;
   spanning_weight = 1.0;
   flanking_weight = 1.0;
-  genome_wide = false;
+  genome_wide = true;
   chrom = "";
   verbose = false;
   very_verbose = false;

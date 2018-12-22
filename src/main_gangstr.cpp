@@ -54,7 +54,7 @@ void show_help() {
 	   << "\t" << "--regions     <regions.bed>   " << "\t" << "BED file containing TR coordinates" << "\n"
 	   << "\t" << "--out         <outprefix>     " << "\t" << "Prefix to name output files" << "\n"
 	   << "\n Additional general options:\n"
-	   << "\t" << "--genomewide                  " << "\t" << "Genome-wide mode" << "\n"
+	   << "\t" << "--targeted                    " << "\t" << "Targeted mode" << "\n"
 	   << "\t" << "--chrom                       " << "\t" << "Only genotype regions on this chromosome" << "\n"
            << "\t" << "--bam-samps   <string>        " << "\t" << "Comma separated list of sample IDs for --bam" << "\n"
 	   << "\t" << "--str-info    <string>        " << "\t" << "Tab file with additional per-STR info (see docs)" << "\n"
@@ -112,7 +112,7 @@ void parse_commandline_options(int argc, char* argv[], Options* options) {
     OPT_WENCLOSE,
     OPT_WSPAN,
     OPT_WFLANK,
-    OPT_GWIDE,
+    OPT_TARGETED,
     OPT_PLOIDY,
     OPT_READLEN,
     OPT_COVERAGE,
@@ -149,7 +149,7 @@ void parse_commandline_options(int argc, char* argv[], Options* options) {
     {"enclweight",  required_argument,  NULL, OPT_WENCLOSE},
     {"spanweight",  required_argument,  NULL, OPT_WSPAN},
     {"flankweight", required_argument,  NULL, OPT_WFLANK},
-    {"genomewide",  no_argument, NULL, OPT_GWIDE},
+    {"targeted",  no_argument, NULL, OPT_TARGETED},
     {"ploidy",      required_argument,  NULL, OPT_PLOIDY},
     {"readlength",  required_argument,  NULL, OPT_READLEN},
     {"coverage",    required_argument,  NULL, OPT_COVERAGE},
@@ -220,8 +220,8 @@ void parse_commandline_options(int argc, char* argv[], Options* options) {
     case OPT_WFLANK:
       options->flanking_weight = atof(optarg);
       break;
-    case OPT_GWIDE:
-      options->genome_wide = true;
+    case OPT_TARGETED:
+      options->genome_wide = false;
       break;
     case OPT_PLOIDY:
       options->ploidy = atoi(optarg);
