@@ -50,9 +50,6 @@ Options::Options() {
   grid_threshold = 10000;
   dist_distribution_size = 2000;
   coverage.clear();
-  use_mean_dist = 400;
-  use_mean_sdev = 100;
-  use_coverage = -1;
   model_gc_cov = false;
   gc_bin_size = 0.1;
   gc_region_len = 1000;
@@ -70,6 +67,7 @@ Options::Options() {
   enclosing_weight = 1.0;
   spanning_weight = 1.0;
   flanking_weight = 1.0;
+  include_ggl = false;
   genome_wide = true;
   chrom = "";
   verbose = false;

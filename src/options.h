@@ -43,9 +43,6 @@ class Options {
   std::vector<double> dist_sdev;
   std::vector<double> coverage;
   // Use these to set per-sample in likelihood. SHould change this
-  double use_mean_dist;
-  double use_mean_sdev;
-  double use_coverage;
   bool model_gc_cov;
   float gc_bin_size;
   int gc_region_len;
@@ -70,6 +67,7 @@ class Options {
   double enclosing_weight;
   double spanning_weight;
   double flanking_weight;
+  bool include_ggl;
   // Genome wide exploration mode
   bool genome_wide;
   std::string chrom;

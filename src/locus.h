@@ -22,6 +22,7 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 #define SRC_LOCUS_H__
 
 #include <map>
+#include <utility>
 #include <string>
 #include <vector>
 #include <stdint.h>
@@ -68,6 +69,7 @@ class Locus {
   std::map<std::string,size_t> depth;
   std::map<std::string,bool> called;
   std::map<std::string,std::vector<double> > expansion_probs;
+  std::map<std::string, std::map<std::pair<int32_t, int32_t>, double> > grid_likelihoods; // log10 lik
 
   // Likelihood grid
   int32_t grid_min_allele;
