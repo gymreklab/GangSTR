@@ -44,8 +44,10 @@ Options::Options() {
   reffa = "";
   regionsfile = "";
   outprefix = "";
+  str_info_file = "";
   dist_mean.clear();
   dist_sdev.clear();
+  grid_threshold = 10000;
   dist_distribution_size = 2000;
   coverage.clear();
   use_mean_dist = 400;
@@ -68,7 +70,7 @@ Options::Options() {
   enclosing_weight = 1.0;
   spanning_weight = 1.0;
   flanking_weight = 1.0;
-  genome_wide = false;
+  genome_wide = true;
   chrom = "";
   verbose = false;
   very_verbose = false;

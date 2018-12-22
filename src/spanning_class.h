@@ -39,6 +39,7 @@ class SpanningClass: public ReadClass {
 		      const int32_t& read_len, const int32_t& motif_len,
 		      const int32_t& ref_count,
 		      double* log_allele_prob);
+  bool GetGridBoundaries(int32_t* min_allele, int32_t* max_allele);
 };
 
 #endif  // SRC_SPANNING_CLASS_H__

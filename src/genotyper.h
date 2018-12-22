@@ -31,13 +31,15 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 #include "src/read_extractor.h"
 #include "src/ref_genome.h"
 #include "src/sample_info.h"
+#include "src/str_info.h"
 
 class Genotyper {
   friend class GenotyperTest;
  public:
   Genotyper(RefGenome& _refgenome,
 	    Options& _options,
-	    SampleInfo& sample_info);
+	    SampleInfo& _sample_info,
+	    STRInfo& _str_info);
   virtual ~Genotyper();
 
   bool ProcessLocus(BamCramMultiReader* bamreader, Locus* locus);
@@ -52,6 +54,7 @@ class Genotyper {
   SampleInfo* sample_info;
   std::map<std::string,LikelihoodMaximizer*> sample_likelihood_maximizers;
   ReadExtractor* read_extractor;
+  STRInfo* str_info;
 };
 
 #endif  // SRC_GENOTYPER_H__

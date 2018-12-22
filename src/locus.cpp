@@ -47,9 +47,14 @@ void Locus::Reset(){
   flanking_reads.clear();
   depth.clear();
   called.clear();
+  expansion_probs.clear();
 
   offtarget_set = false;
   offtarget_regions.clear();
   offtarget_share = 0.0;
+
+  grid_min_allele = 0;
+  grid_min_allele = 600;
+  expansion_threshold = 44;
 }
 Locus::~Locus() {}

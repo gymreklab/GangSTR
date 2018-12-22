@@ -49,7 +49,8 @@ GangSTR_SOURCES = main_gangstr.cpp \
 	ssw.h ssw.c \
 	ssw_cpp.h ssw_cpp.cpp \
 	vcf_writer.h vcf_writer.cpp \
-	bam_info_extract.h bam_info_extract.cpp
+	bam_info_extract.h bam_info_extract.cpp \
+	str_info.h str_info.cpp
 
 GangSTR_CPPFLAGS = $(AM_CPPFLAGS) $(AM_PROG_CC_C_O)
 GangSTR_CFLAGS = $(CFLAGS)	# Change to AM_CXXFLAGS For -o0 (Valgrind)

@@ -142,3 +142,7 @@ bool SpanningClass::GetLogReadProb(const int32_t& allele,
   else
     return false;
 }
+
+bool SpanningClass::GetGridBoundaries(int32_t* min_allele, int32_t* max_allele) {
+  return false; // Don't use spanning reads to decide boundaries
+}

@@ -50,8 +50,9 @@ struct ReadRecord{
 class LikelihoodMaximizer {
  friend class Genotyper;
  public:
- LikelihoodMaximizer(const Options& _options, SampleInfo& _sample_info, std::string samp);
-  // LikelihoodMaximizer(const LikelihoodMaximizer& lm_obj); // copy constructor
+ LikelihoodMaximizer(const Options& _options, const SampleProfile& sp,
+		     const int32_t& read_len);
+ // LikelihoodMaximizer(const LikelihoodMaximizer& lm_obj); // copy constructor
   virtual ~LikelihoodMaximizer();
 
   // Clear data of all classes
@@ -70,92 +71,45 @@ class LikelihoodMaximizer {
   std::size_t GetOffTargetDataSize();
   std::size_t GetReadPoolSize();
 
-  // Plot likelihood
-  void PlotLikelihood(int32_t fix_allele,
-                          int32_t start,
-                          int32_t end,
-                          int32_t step,
-                          int32_t read_len,
-                          int32_t motif_len,
-                          int32_t ref_count);
-  
   // Main likelihood function
   bool GetGenotypeNegLogLikelihood(const int32_t& allele1, const int32_t& allele2,
-				   const int32_t& read_len, const int32_t& motif_len,
-				   const int32_t& ref_count, const bool& resampled,
-				   double* gt_ll);
+				   const bool& resampled, double* gt_ll);
+  // Functions for dynamically setting grid size
+  bool InferGridSize();
+  void SetGridSize(const int32_t& min_allele, const int32_t max_allele);
+  void GetGridSize(int32_t* min_allele, int32_t* max_allele);
+  void InferAlleleList(std::vector<int32_t>* allele_list,
+		       const int32_t& ploidy,
+		       const bool& resampled, const int32_t& fix_allele);
+  // Functions for computing expansion probability
+  bool GetExpansionProb(std::vector<double>* prob_vec, const int32_t& exp_threshold);
   bool GetNegLikelihoodSurface(const int32_t& a_lo,
 			       const int32_t& a_hi,
 			       const int32_t& b_lo,
 			       const int32_t& b_hi,
-			       const int32_t& read_len,
-			       const int32_t& motif_len,
-			       const int32_t& ref_count,
 			       const bool& resampled,
 			       double* surfaceLL);
-  bool Getd2dA2NegLikelihood(const int32_t& allele1,
-			     const int32_t& allele2,
-			     const int32_t& read_len,
-			     const int32_t& motif_len,
-			     const int32_t& ref_count,
-			     const bool& resampled,
-			     const int32_t& h,//step is int because alleles are int
-			     double* d2dA2);
-  bool Getd2dB2NegLikelihood(const int32_t& allele1,
-			     const int32_t& allele2,
-			     const int32_t& read_len,
-			     const int32_t& motif_len,
-			     const int32_t& ref_count,
-			     const bool& resampled,
-			     const int32_t& h,//step is int because alleles are int
-			     double* d2dB2);
-  bool Getd2dABNegLikelihood(const int32_t& allele1,
-			     const int32_t& allele2,
-			     const int32_t& read_len,
-			     const int32_t& motif_len,
-			     const int32_t& ref_count,
-			     const bool& resampled,
-			     const int32_t& h,//step is int because alleles are int
-			     double* d2dAB);
-  
-  bool GetStandardError(const int32_t& allele1,
-			const int32_t& allele2,
-			const int32_t& read_len,
-			const int32_t& motif_len,
-			const int32_t& ref_count,
-			const bool& resampled,
-			const int32_t& h,//step is int because alleles are int
-			double* sigmaA,
-			double* sigmaB,
-			double* sigmaAB);
-
-  // Main optimization function - TODO also return other data
-  bool OptimizeLikelihood(const int32_t& read_len, 
-			  const int32_t& motif_len,
-			  const int32_t& ref_count, 
-			  const bool& resampled, 
-			  const int32_t& ploidy, 
+  // Main optimization function
+  bool OptimizeLikelihood(const bool& resampled, const int32_t& use_ploidy,
 			  const int32_t& fix_allele,
 			  const double& off_share,
 			  int32_t* allele1, int32_t* allele2, double* min_negLike);
   // Go over the list of the discovered alleles to find the best pair
-  bool findBestAlleleListTuple(std::vector<int32_t> allele_list,
-                          int32_t read_len, int32_t motif_len, int32_t ref_count, bool resampled,
-			  int32_t ploidy, int32_t fix_allele,
-                          int32_t* allele1, int32_t* allele2, double* min_negLike);
+  bool findBestAlleleListTuple(std::vector<int32_t> allele_list, int32_t use_ploidy,
+			       bool resampled, int32_t fix_allele,
+			       int32_t* allele1, int32_t* allele2, double* min_negLike);
 
   // Compute and return confidence interval with bootstrapping
-  bool GetConfidenceInterval(const int32_t& read_len, 
-			     const int32_t& motif_len,
-			     const int32_t& ref_count,
-			     const int32_t& allele1,
+  bool GetConfidenceInterval(const int32_t& allele1,
 			     const int32_t& allele2,
 			     const Locus& locus,
 			     double* lob1, double* hib1, double* lob2, double* hib2,
 			     double* a1_se, double* a2_se);
 
-  // Reset coverage
-  void SetCoverage(const double& cov);
+  // Set per-locus params
+  void SetLocusParams(const STRLocusInfo& sli, const double& cov,
+		      const int32_t& _read_len, const int32_t _motif_len,
+		      const int32_t& _ref_count);
 
   // Print read pool
   void PrintReadPool();
@@ -182,11 +136,23 @@ class LikelihoodMaximizer {
 
   // Write bootstrap samples to file
   ofstream bsfile_;
-  //  ofstream plotfile_;
   // Random number generator
   gsl_rng * r;
   // percentage of off-target reads
   double offtarget_share;
+
+  // Grid size
+  int32_t lower_bound;
+  int32_t upper_bound;
+  bool grid_set;
+  int32_t grid_buffer;
+  int32_t grid_opt_threshold; // Above this, use nlopt rather than brute force grid search
+
+  // Locus info
+  bool locus_params_set;
+  int32_t read_len;
+  int32_t motif_len;
+  int32_t ref_count;
 };
 
 // Helper struct for NLOPT gradient optimizer

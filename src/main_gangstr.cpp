@@ -34,6 +34,7 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 #include "src/ref_genome.h"
 #include "src/region_reader.h"
 #include "src/sample_info.h"
+#include "src/str_info.h"
 #include "src/stringops.h"
 #include "src/vcf_writer.h"
 
@@ -53,9 +54,10 @@ void show_help() {
 	   << "\t" << "--regions     <regions.bed>   " << "\t" << "BED file containing TR coordinates" << "\n"
 	   << "\t" << "--out         <outprefix>     " << "\t" << "Prefix to name output files" << "\n"
 	   << "\n Additional general options:\n"
-	   << "\t" << "--genomewide                  " << "\t" << "Genome-wide mode" << "\n"
+	   << "\t" << "--targeted                    " << "\t" << "Targeted mode" << "\n"
 	   << "\t" << "--chrom                       " << "\t" << "Only genotype regions on this chromosome" << "\n"
            << "\t" << "--bam-samps   <string>        " << "\t" << "Comma separated list of sample IDs for --bam" << "\n"
+	   << "\t" << "--str-info    <string>        " << "\t" << "Tab file with additional per-STR info (see docs)" << "\n"
 	   << "\n Options for different sequencing settings\n"
 	   << "\t" << "--readlength  <int>           " << "\t" << "Read length. Default: " << options.read_len << "\n"
 	   << "\t" << "--coverage    <float>         " << "\t" << "Average coverage. must be set for exome/targeted data. Comma separated list to specify for each BAM" << "\n"
@@ -72,6 +74,7 @@ void show_help() {
 	   << "\t" << "--useofftarget               " << "\t" << "Use off target regions included in the BAM file." << "\n"
 	   << "\t" << "--read-prob-mode              " << "\t" << "Use only read probability (ignore class probability)" << "\n"
 	   << "\t" << "--numbstrap   <int>           " << "\t" << "Number of bootstrap samples. Default: " << options.num_boot_samp << "\n"
+	   << "\t" << "--grid-threshold <int>        " << "\t" << "Use optimization rather than grid search to find MLE if more than this many possible alleles. Default: " << options.grid_threshold << "\n"
 	   << "\n Parameters for local realignment:\n"
 	   << "\t" << "--minscore    <int>           " << "\t" << "Minimum alignment score (out of 100). Default: " << options.min_score << "\n"
 	   << "\t" << "--minmatch    <int>           " << "\t" << "Minimum number of matching basepairs on each end of enclosing reads. Default:L " << options.min_match<< "\n"
@@ -96,8 +99,10 @@ void show_help() {
 
 void parse_commandline_options(int argc, char* argv[], Options* options) {
   enum LONG_OPTIONS {
+    OPT_GRIDTHRESH,
     OPT_BAMFILES,
     OPT_BAMSAMP,
+    OPT_STRINFO,
     OPT_CHROM,
     OPT_REFFA,
     OPT_REGIONS,
@@ -107,7 +112,7 @@ void parse_commandline_options(int argc, char* argv[], Options* options) {
     OPT_WENCLOSE,
     OPT_WSPAN,
     OPT_WFLANK,
-    OPT_GWIDE,
+    OPT_TARGETED,
     OPT_PLOIDY,
     OPT_READLEN,
     OPT_COVERAGE,
@@ -131,8 +136,10 @@ void parse_commandline_options(int argc, char* argv[], Options* options) {
     OPT_VERSION,
   };
   static struct option long_options[] = {
+    {"grid-threshold", required_argument, NULL, OPT_GRIDTHRESH},
     {"bam",         required_argument,  NULL, OPT_BAMFILES},
     {"bam-samps",   required_argument,  NULL, OPT_BAMSAMP},
+    {"str-info",    required_argument,  NULL, OPT_STRINFO},
     {"chrom",       required_argument,  NULL, OPT_CHROM},
     {"ref",         required_argument,  NULL, OPT_REFFA},
     {"regions",     required_argument,  NULL, OPT_REGIONS},
@@ -142,7 +149,7 @@ void parse_commandline_options(int argc, char* argv[], Options* options) {
     {"enclweight",  required_argument,  NULL, OPT_WENCLOSE},
     {"spanweight",  required_argument,  NULL, OPT_WSPAN},
     {"flankweight", required_argument,  NULL, OPT_WFLANK},
-    {"genomewide",  no_argument, NULL, OPT_GWIDE},
+    {"targeted",  no_argument, NULL, OPT_TARGETED},
     {"ploidy",      required_argument,  NULL, OPT_PLOIDY},
     {"readlength",  required_argument,  NULL, OPT_READLEN},
     {"coverage",    required_argument,  NULL, OPT_COVERAGE},
@@ -173,12 +180,18 @@ void parse_commandline_options(int argc, char* argv[], Options* options) {
                    long_options, &option_index);
   while (ch != -1) {
     switch (ch) {
+    case OPT_GRIDTHRESH:
+      options->grid_threshold = atoi(optarg);
+      break;
     case OPT_BAMFILES:
       options->bamfiles.clear();
       split_by_delim(optarg, ',', options->bamfiles);
       break;
     case OPT_BAMSAMP:
       options->rg_sample_string = optarg;
+      break;
+    case OPT_STRINFO:
+      options->str_info_file = optarg;
       break;
     case OPT_CHROM:
       options->chrom = optarg;
@@ -207,8 +220,8 @@ void parse_commandline_options(int argc, char* argv[], Options* options) {
     case OPT_WFLANK:
       options->flanking_weight = atof(optarg);
       break;
-    case OPT_GWIDE:
-      options->genome_wide = true;
+    case OPT_TARGETED:
+      options->genome_wide = false;
       break;
     case OPT_PLOIDY:
       options->ploidy = atoi(optarg);
@@ -360,8 +373,9 @@ int main(int argc, char* argv[]) {
   
   // Process each region
   region_reader.Reset();
+  STRInfo str_info(options);
   VCFWriter vcfwriter(options.outprefix + ".vcf", full_command, sample_info);
-  Genotyper genotyper(refgenome, options, sample_info);
+  Genotyper genotyper(refgenome, options, sample_info, str_info);
 
   stringstream ss;
   while (region_reader.GetNextRegion(&locus)) {
