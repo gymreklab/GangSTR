@@ -71,6 +71,7 @@ class Options {
   // Genome wide exploration mode
   bool genome_wide;
   std::string chrom;
+  std::vector<int32_t> period;
   // Helpers
   bool verbose;
   bool very_verbose;

@@ -70,6 +70,7 @@ Options::Options() {
   include_ggl = false;
   genome_wide = true;
   chrom = "";
+  period.clear();
   verbose = false;
   very_verbose = false;
   ploidy = 2;

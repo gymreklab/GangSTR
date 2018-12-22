@@ -20,7 +20,6 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <getopt.h>
 #include <stdlib.h>
-
 #include <iostream>
 #include <set>
 #include <sstream>
@@ -58,6 +57,7 @@ void show_help() {
 	   << "\t" << "--chrom                       " << "\t" << "Only genotype regions on this chromosome" << "\n"
            << "\t" << "--bam-samps   <string>        " << "\t" << "Comma separated list of sample IDs for --bam" << "\n"
 	   << "\t" << "--str-info    <string>        " << "\t" << "Tab file with additional per-STR info (see docs)" << "\n"
+	   << "\t" << "--period      <string>        " << "\t" << "Comma-separated list of periods to consider" << "\n"
 	   << "\n Options for different sequencing settings\n"
 	   << "\t" << "--readlength  <int>           " << "\t" << "Read length. Default: " << options.read_len << "\n"
 	   << "\t" << "--coverage    <float>         " << "\t" << "Average coverage. must be set for exome/targeted data. Comma separated list to specify for each BAM" << "\n"
@@ -100,6 +100,7 @@ void show_help() {
 
 void parse_commandline_options(int argc, char* argv[], Options* options) {
   enum LONG_OPTIONS {
+    OPT_PERIOD,
     OPT_GGL,
     OPT_GRIDTHRESH,
     OPT_BAMFILES,
@@ -138,6 +139,7 @@ void parse_commandline_options(int argc, char* argv[], Options* options) {
     OPT_VERSION,
   };
   static struct option long_options[] = {
+    {"period",      required_argument,  NULL, OPT_PERIOD},
     {"include-ggl", no_argument, NULL, OPT_GGL},
     {"grid-threshold", required_argument, NULL, OPT_GRIDTHRESH},
     {"bam",         required_argument,  NULL, OPT_BAMFILES},
@@ -176,13 +178,20 @@ void parse_commandline_options(int argc, char* argv[], Options* options) {
     {"version",     no_argument,        NULL, OPT_VERSION},
     {NULL,          no_argument,        NULL, 0},
   };
-  std::vector<std::string> dist_means_str, dist_sdev_str, coverage_str;
+  std::vector<std::string> dist_means_str, dist_sdev_str, coverage_str, pers;
   int ch;
   int option_index = 0;
   ch = getopt_long(argc, argv, "hv?",
                    long_options, &option_index);
   while (ch != -1) {
     switch (ch) {
+    case OPT_PERIOD:
+      split_by_delim(optarg, ',', pers);
+      options->period.clear();
+      for (size_t i=0; i<pers.size(); i++) {
+	options->period.push_back(atoi(pers[i].c_str()));
+      }
+      break;
     case OPT_GGL:
       options->include_ggl = true;
       break;
@@ -387,6 +396,10 @@ int main(int argc, char* argv[]) {
   stringstream ss;
   while (region_reader.GetNextRegion(&locus)) {
     if (!options.chrom.empty() && locus.chrom != options.chrom) {continue;}
+    if (!options.period.empty() &&
+	std::find(options.period.begin(), options.period.end(), locus.period) == options.period.end()) {
+      continue;
+    }
     ss.str("");
     ss.clear();
     ss << "Processing " << locus.chrom << ":" << locus.start;
