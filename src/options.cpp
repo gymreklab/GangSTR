@@ -66,7 +66,7 @@ Options::Options() {
   flanklen = 3000;
   realignment_flanklen = 100;
   regionsize = 2000;
-  frr_weight = 0.5;
+  frr_weight = 1.0;
   enclosing_weight = 1.0;
   spanning_weight = 1.0;
   flanking_weight = 1.0;
