@@ -30,6 +30,8 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 #include "src/options.h"
 #include "src/region_reader.h"
 
+#include <gsl/gsl_randist.h>
+#include <gsl/gsl_cdf.h>
 
 /*
   Keep track of per-sample info on read groups,

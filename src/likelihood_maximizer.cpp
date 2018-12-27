@@ -34,14 +34,14 @@ LikelihoodMaximizer::LikelihoodMaximizer(const Options& _options, const SamplePr
 					 const int32_t& read_len) {
   options = &_options; // TODO remove options
 
-  enclosing_class_.SetGlobalParams(sp, options->flanklen, options->read_prob_mode);
-  frr_class_.SetGlobalParams(sp, options->flanklen, options->read_prob_mode);
-  spanning_class_.SetGlobalParams(sp, options->flanklen, options->read_prob_mode);
-  flanking_class_.SetGlobalParams(sp, options->flanklen, options->read_prob_mode);
-  resampled_enclosing_class_.SetGlobalParams(sp, options->flanklen, options->read_prob_mode);
-  resampled_frr_class_.SetGlobalParams(sp, options->flanklen, options->read_prob_mode);
-  resampled_spanning_class_.SetGlobalParams(sp, options->flanklen, options->read_prob_mode);
-  resampled_flanking_class_.SetGlobalParams(sp, options->flanklen, options->read_prob_mode);
+  enclosing_class_.SetGlobalParams(sp, options->flanklen, options->read_prob_mode, options->hist_mode);
+  frr_class_.SetGlobalParams(sp, options->flanklen, options->read_prob_mode, options->hist_mode);
+  spanning_class_.SetGlobalParams(sp, options->flanklen, options->read_prob_mode, options->hist_mode);
+  flanking_class_.SetGlobalParams(sp, options->flanklen, options->read_prob_mode, options->hist_mode);
+  resampled_enclosing_class_.SetGlobalParams(sp, options->flanklen, options->read_prob_mode, options->hist_mode);
+  resampled_frr_class_.SetGlobalParams(sp, options->flanklen, options->read_prob_mode, options->hist_mode);
+  resampled_spanning_class_.SetGlobalParams(sp, options->flanklen, options->read_prob_mode, options->hist_mode);
+  resampled_flanking_class_.SetGlobalParams(sp, options->flanklen, options->read_prob_mode, options->hist_mode);
     
   obj_cov = sp.coverage;
   // Set up output file

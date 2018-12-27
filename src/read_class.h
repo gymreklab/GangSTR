@@ -46,7 +46,6 @@ class ReadClass {
   friend class ReadClassTest;
  public:
   const static double NEG_INF = -25; // TODO make smaller?
-  const static bool INS_NORMAL = true;
   ReadClass();
   virtual ~ReadClass();
 
@@ -54,7 +53,8 @@ class ReadClass {
   void AddData(const int32_t& data);
   // Set params
   void SetGlobalParams(const SampleProfile& _sample_profile,
-		       const int32_t& _flank_len, const bool& _read_prob_mode);
+		       const int32_t& _flank_len, const bool& _read_prob_mode,
+		       const bool& _hist_mode);
   void SetLocusParams(const STRLocusInfo& sli);
   void SetCoverage(const int32_t& _coverage);
   // Calculate class log likelihood for diploid genotype P(data|<A,B>)
@@ -88,6 +88,7 @@ class ReadClass {
   double stutter_p;
   bool read_prob_mode;
   int32_t cov;
+  bool hist_mode;
   // pdf and CDF of non-parametric model for insert size
   int32_t dist_distribution_size;
   std::vector<double> dist_pdf;

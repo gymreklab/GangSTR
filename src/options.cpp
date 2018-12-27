@@ -85,6 +85,7 @@ Options::Options() {
   min_match = 5;
   use_cov = true;
   use_off = false;
+  hist_mode = false;
 }
 
 Options::~Options() {}
