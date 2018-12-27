@@ -39,7 +39,7 @@ bool SpanningClass::GetLogClassProb(const int32_t& allele,
 	    gsl_cdf_gaussian_P(2 * read_len - dist_mean, dist_sdev);  
 	}
 	else{
-	  norm_const = InsertSizeCDF(2 * flank_len + str_len) - InsertSizeCDF(2 * read_len);  
+	  norm_const = InsertSizeCDF(2 * flank_len + str_len) - InsertSizeCDF(2 * read_len);
 	}
 	
 	
