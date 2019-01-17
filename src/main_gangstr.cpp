@@ -71,10 +71,11 @@ void show_help() {
 	   << "\t" << "--spanweight  <float>         " << "\t" << "Weight for spanning reads. Default: " << options.spanning_weight << "\n"
 	   << "\t" << "--flankweight <float>         " << "\t" << "Weight for flanking reads. Default: " << options.flanking_weight << "\n"
 	   << "\t" << "--ploidy      <int>           " << "\t" << "Indicate whether data is haploid (1) or diploid (2). Default: " << options.ploidy << "\n"
-	   << "\t" << "--useofftarget               " << "\t" << "Use off target regions included in the BAM file." << "\n"
+	   << "\t" << "--skipofftarget               " << "\t" << "Skip off target regions included in the BED file." << "\n"
 	   << "\t" << "--read-prob-mode              " << "\t" << "Use only read probability (ignore class probability)" << "\n"
 	   << "\t" << "--numbstrap   <int>           " << "\t" << "Number of bootstrap samples. Default: " << options.num_boot_samp << "\n"
 	   << "\t" << "--grid-threshold <int>        " << "\t" << "Use optimization rather than grid search to find MLE if more than this many possible alleles. Default: " << options.grid_threshold << "\n"
+	   << "\t" << "--rescue-count <int>          " << "\t" << "Number of regions that GangSTR attempts to rescue mates from (excluding off-target regions) Default: " << options.rescue_count << "\n"
 	   << "\n Parameters for local realignment:\n"
 	   << "\t" << "--minscore    <int>           " << "\t" << "Minimum alignment score (out of 100). Default: " << options.min_score << "\n"
 	   << "\t" << "--minmatch    <int>           " << "\t" << "Minimum number of matching basepairs on each end of enclosing reads. Default:L " << options.min_match<< "\n"
@@ -100,6 +101,7 @@ void show_help() {
 void parse_commandline_options(int argc, char* argv[], Options* options) {
   enum LONG_OPTIONS {
     OPT_GRIDTHRESH,
+    OPT_RESCUE,
     OPT_BAMFILES,
     OPT_BAMSAMP,
     OPT_STRINFO,
@@ -117,7 +119,7 @@ void parse_commandline_options(int argc, char* argv[], Options* options) {
     OPT_READLEN,
     OPT_COVERAGE,
     OPT_GCCOV,
-    OPT_USEOFF,
+    OPT_SKIPOFF,
     OPT_NONUNIF,
     OPT_INSMEAN,
     OPT_INSSDEV,
@@ -137,6 +139,7 @@ void parse_commandline_options(int argc, char* argv[], Options* options) {
   };
   static struct option long_options[] = {
     {"grid-threshold", required_argument, NULL, OPT_GRIDTHRESH},
+    {"rescue-count", required_argument, NULL, OPT_RESCUE},
     {"bam",         required_argument,  NULL, OPT_BAMFILES},
     {"bam-samps",   required_argument,  NULL, OPT_BAMSAMP},
     {"str-info",    required_argument,  NULL, OPT_STRINFO},
@@ -155,7 +158,7 @@ void parse_commandline_options(int argc, char* argv[], Options* options) {
     {"coverage",    required_argument,  NULL, OPT_COVERAGE},
     {"model-gc-coverage", no_argument, NULL, OPT_GCCOV},
     {"nonuniform",  no_argument,  NULL, OPT_NONUNIF},
-    {"useofftarget",no_argument,  NULL, OPT_USEOFF},
+    {"skipofftarget",no_argument,  NULL, OPT_SKIPOFF},
     {"insertmean",  required_argument,  NULL, OPT_INSMEAN},
     {"insertsdev",  required_argument,  NULL, OPT_INSSDEV},
     {"minscore",    required_argument,  NULL, OPT_MINSCORE},
@@ -182,6 +185,9 @@ void parse_commandline_options(int argc, char* argv[], Options* options) {
     switch (ch) {
     case OPT_GRIDTHRESH:
       options->grid_threshold = atoi(optarg);
+      break;
+    case OPT_RESCUE:
+      options->rescue_count = atoi(optarg);
       break;
     case OPT_BAMFILES:
       options->bamfiles.clear();
@@ -241,9 +247,10 @@ void parse_commandline_options(int argc, char* argv[], Options* options) {
       break;
     case OPT_NONUNIF:
       options->use_cov = false;
+      options->use_off = false;
       break;
-    case OPT_USEOFF:
-      options->use_off = true;
+    case OPT_SKIPOFF:
+      options->use_off = false;
       break;
     case OPT_INSMEAN:
       split_by_delim(optarg, ',', dist_means_str);

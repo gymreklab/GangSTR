@@ -384,7 +384,7 @@ bool LikelihoodMaximizer::GetGenotypeNegLogLikelihood(const int32_t& allele1,
     							 options->ploidy, &flank_ll);
     // TODO Substituting these lines changes optimization result. Find out why?!
     //if ((options->coverage > 0) && (frr_class_.GetDataSize() > 0)){
-
+    
     if (use_cov && obj_cov > 0 && frr_count > 0){
       frr_class_.GetCountLogLikelihood(allele1, 
 				       allele2,

@@ -422,7 +422,7 @@ bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
       continue;
     }
     num_rescue++;
-    if (num_rescue > 200){
+    if (num_rescue > options.rescue_count){
       continue;
     }
 
@@ -510,7 +510,7 @@ bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
   }
 
   // Get bam alignments from off target region
-  if (locus.offtarget_set){
+  if (locus.offtarget_set and options.use_off){
     for (std::vector<GenomeRegion>::const_iterator reg_it = locus.offtarget_regions.begin();
 	 reg_it != locus.offtarget_regions.end(); reg_it++){
       if (options.verbose) {

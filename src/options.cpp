@@ -84,8 +84,9 @@ Options::Options() {
   seed = 123;
   min_match = 5;
   use_cov = true;
-  use_off = false;
+  use_off = true;
   hist_mode = false;
+  rescue_count = 200;
 }
 
 Options::~Options() {}
