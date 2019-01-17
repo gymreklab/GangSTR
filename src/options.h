@@ -43,9 +43,6 @@ class Options {
   std::vector<double> dist_sdev;
   std::vector<double> coverage;
   // Use these to set per-sample in likelihood. SHould change this
-  double use_mean_dist;
-  double use_mean_sdev;
-  double use_coverage;
   bool model_gc_cov;
   float gc_bin_size;
   int gc_region_len;
@@ -70,9 +67,11 @@ class Options {
   double enclosing_weight;
   double spanning_weight;
   double flanking_weight;
+  bool include_ggl;
   // Genome wide exploration mode
   bool genome_wide;
   std::string chrom;
+  std::vector<int32_t> period;
   // Helpers
   bool verbose;
   bool very_verbose;
@@ -96,6 +95,10 @@ class Options {
   bool use_off;
   // Random number generator seed
   int32_t seed;
+  // Histogram mode
+  bool hist_mode;
+  // number of rescue attempts
+  int32_t rescue_count;
 };
 
 #endif  // SRC_OPTIONS_H__

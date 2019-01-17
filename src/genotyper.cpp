@@ -63,6 +63,22 @@ bool Genotyper::SetFlanks(Locus* locus) {
   return true;
 }
 
+bool Genotyper::SetGGL(Locus& locus, const std::string& samp) {
+  std::map<std::pair<int32_t, int32_t>, double> gridlik;
+  for (int32_t a1=locus.grid_min_allele; a1<=locus.grid_max_allele; a1++) {
+    for (int32_t a2=a1; a2<=locus.grid_max_allele; a2++) {
+      double gt_ll;
+      if (!sample_likelihood_maximizers[samp]->GetGenotypeNegLogLikelihood(a1, a2, false, &gt_ll)) {
+	return false;
+      }
+      std::pair<int32_t, int32_t> gt(a1, a2);
+      gridlik[gt] = gt_ll/log(10)*-1;
+    }
+  }
+  locus.grid_likelihoods[samp] = gridlik;
+  return true;
+}
+
 bool Genotyper::ProcessLocus(BamCramMultiReader* bamreader, Locus* locus) {
   int32_t read_len = sample_info->GetReadLength();
 
@@ -175,6 +191,9 @@ bool Genotyper::ProcessLocus(BamCramMultiReader* bamreader, Locus* locus) {
       locus->flanking_reads[samp] = sample_likelihood_maximizers[samp]->GetFlankingDataSize();
       locus->depth[samp] = sample_likelihood_maximizers[samp]->GetReadPoolSize();
       locus->called[samp] = true;
+      if (options->include_ggl && !SetGGL(*locus, samp)) {
+	PrintMessageDieOnError("\tProblem setting genotype likelihoods", M_WARNING);
+      }
       if (options->num_boot_samp > 0){
 	if (options->verbose) {
 	  PrintMessageDieOnError("\tGetting confidence intervals", M_PROGRESS);

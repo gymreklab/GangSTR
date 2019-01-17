@@ -69,6 +69,8 @@ bool expansion_aware_realign(const std::string& seq,
 			     const std::string& post_flank,
 			     const std::string& motif,
 			     const int32_t& min_match,
+			     const int32_t& min_nCopy,
+			     const int32_t& total_nCopy,
 			     int32_t* nCopy, 
 			     int32_t* start_pos, 
 			     int32_t* end_pos, 
@@ -80,9 +82,8 @@ bool expansion_aware_realign(const std::string& seq,
   *fm_end = FM_NOMATCH;
   int32_t read_len = (int32_t)seq.size();
   int32_t period = (int32_t)motif.size();
-  int32_t min_nCopy = 0, total_nCopy = 0;
   // Find longest stretch of motif as starting point of our search.
-  find_longest_stretch(seq, motif, &min_nCopy, &total_nCopy);
+  //find_longest_stretch(seq, motif, &min_nCopy, &total_nCopy);
   if (min_nCopy < 2 and total_nCopy < 10){
       *nCopy = 0;
       *score = 0;
@@ -106,7 +107,9 @@ bool expansion_aware_realign(const std::string& seq,
   MARGIN = 1 * period;
   
   //cerr << min_nCopy << " ";
-  for (current_nCopy=min_nCopy; current_nCopy<(int32_t)(read_len/period)+2; current_nCopy++) {
+  for (current_nCopy=min_nCopy; 
+       current_nCopy<(int32_t)(total_nCopy * 1.1)+2; 
+       current_nCopy++) {
     std::stringstream var_realign_ss;
     var_realign_ss << pre_flank;
     for (int i = 0; i<current_nCopy; i++) {

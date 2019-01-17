@@ -21,7 +21,11 @@ For a list of TR references available, see [references](#references) below.
 
 ## Basic Install
 
-GangSTR requires third party packages [nlopt](https://nlopt.readthedocs.io/en/latest/), [gsl](https://www.gnu.org/software/gsl/doc/html/index.html), and [htslib](http://www.htslib.org//). The built-in script `install-gangstr.sh` installs these for you before compiling and installing GangSTR. Both UNIX and Mac OSX are supported.
+GangSTR requires third party packages [nlopt](https://nlopt.readthedocs.io/en/latest/), [gsl](https://www.gnu.org/software/gsl/doc/html/index.html), and [htslib](http://www.htslib.org//).
+
+If you are installing from the tarball (which for most purposes you should be), the following instructions will install all dependencies as well as GangSTR itself. Both UNIX and Mac OSX are supported.
+
+If you are attempting to compile and install directly from a cloned github repository (e.g. if you would like the latest and greatest unreleased feature or would like to contribute a fix or new feature), the following steps will not work and you should follow instructions under "Compiling from git source" below.
 
 If you are running as root:
 ```
@@ -44,6 +48,25 @@ where `PREFIX` is a place you have write permissions. In most cases this will be
 Typing `GangSTR --help` should show a help message if GangSTR was successfully installed.
 
 <a name="usage"></a>
+
+## Compiling from git source
+
+To compile from git source, first make sure nlopt, gsl, and htslib are installed, then run the following:
+
+```
+# Clone the repo
+git clone https://github.com/gymreklab/GangSTR
+cd GangSTR/
+
+# Generate the configure script
+./reconf
+
+# Compile and install GangSTR
+./configure
+make
+make install
+```
+
 ## Usage
 To run GangSTR using default parameters use the following command:
 ```

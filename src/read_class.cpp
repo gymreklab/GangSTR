@@ -40,7 +40,9 @@ void ReadClass::SetLocusParams(const STRLocusInfo& sli) {
 }
 
 void ReadClass::SetGlobalParams(const SampleProfile& _sample_profile,
-				const int32_t& _flank_len, const bool& _read_prob_mode) {
+				const int32_t& _flank_len, 
+				const bool& _read_prob_mode,
+				const bool& _hist_mode) {
   dist_mean = _sample_profile.dist_mean;
   dist_sdev = _sample_profile.dist_sdev;
   dist_pdf = _sample_profile.dist_pdf;
@@ -48,6 +50,7 @@ void ReadClass::SetGlobalParams(const SampleProfile& _sample_profile,
   dist_distribution_size = dist_pdf.size();
   flank_len = _flank_len;
   read_prob_mode = _read_prob_mode;
+  hist_mode = _hist_mode;
 }
 
 void ReadClass::AddData(const int32_t& data) {

@@ -50,9 +50,6 @@ Options::Options() {
   grid_threshold = 10000;
   dist_distribution_size = 2000;
   coverage.clear();
-  use_mean_dist = 400;
-  use_mean_sdev = 100;
-  use_coverage = -1;
   model_gc_cov = false;
   gc_bin_size = 0.1;
   gc_region_len = 1000;
@@ -66,12 +63,14 @@ Options::Options() {
   flanklen = 3000;
   realignment_flanklen = 100;
   regionsize = 2000;
-  frr_weight = 0.5;
+  frr_weight = 1.0;
   enclosing_weight = 1.0;
   spanning_weight = 1.0;
   flanking_weight = 1.0;
+  include_ggl = false;
   genome_wide = true;
   chrom = "";
+  period.clear();
   verbose = false;
   very_verbose = false;
   ploidy = 2;
@@ -84,7 +83,9 @@ Options::Options() {
   seed = 123;
   min_match = 5;
   use_cov = true;
-  use_off = false;
+  use_off = true;
+  hist_mode = false;
+  rescue_count = 200;
 }
 
 Options::~Options() {}

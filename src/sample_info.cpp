@@ -102,6 +102,22 @@ bool SampleInfo::ExtractBamInfo(const Options& options, BamCramMultiReader& bamr
 	   it != rg_samples.end(); it++) {
 	profile[*it].dist_mean = options.dist_mean[i];
 	profile[*it].dist_sdev = options.dist_sdev[i];
+	// Precalculating pdf and cdf
+	int32_t dist_size = options.dist_distribution_size;
+	std::vector<double> dist_pdf(dist_size);
+	std::vector<double> dist_cdf(dist_size);
+	std::vector<double> dist_integral(dist_size);
+	double integral = 0;
+	for (int j = 0; j < dist_size; j++){
+	  dist_pdf[j] = gsl_ran_gaussian_pdf(j - options.dist_mean[i], options.dist_sdev[i]);
+	  dist_cdf[j] = gsl_cdf_gaussian_P(j - options.dist_mean[i], options.dist_sdev[i]);
+	  integral += j * dist_pdf[j];
+	  dist_integral[j] = integral;
+	}
+	dist_cdf[dist_size - 1] = 1.0;
+	profile[*it].dist_pdf = dist_pdf;
+	profile[*it].dist_cdf = dist_cdf;
+	profile[*it].dist_integral = dist_integral;
       }
     } else {
       if (options.dist_mean.size() != options.bamfiles.size()) {
@@ -113,6 +129,22 @@ bool SampleInfo::ExtractBamInfo(const Options& options, BamCramMultiReader& bamr
       for (size_t i=0; i<options.bamfiles.size(); i++) {
 	profile[options.bamfiles[i]].dist_mean = options.dist_mean[i];
 	profile[options.bamfiles[i]].dist_sdev = options.dist_sdev[i];
+	// Precalculating pdf and cdf
+	int32_t dist_size = options.dist_distribution_size;
+	std::vector<double> dist_pdf(dist_size);
+	std::vector<double> dist_cdf(dist_size);
+	std::vector<double> dist_integral(dist_size);
+	double integral = 0;
+	for (int j = 0; j < dist_size; j++){
+	  dist_pdf[j] = gsl_ran_gaussian_pdf(j - options.dist_mean[i], options.dist_sdev[i]);
+	  dist_cdf[j] = gsl_cdf_gaussian_P(j - options.dist_mean[i], options.dist_sdev[i]);
+	  integral += j * dist_pdf[j];
+	  dist_integral[j] = integral;
+	}
+	dist_cdf[dist_size - 1] = 1.0;
+	profile[options.bamfiles[i]].dist_pdf = dist_pdf;
+	profile[options.bamfiles[i]].dist_cdf = dist_cdf;
+	profile[options.bamfiles[i]].dist_integral = dist_integral;
       }
     }
   }
