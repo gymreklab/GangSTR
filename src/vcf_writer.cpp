@@ -28,8 +28,10 @@ using namespace std;
 
 VCFWriter::VCFWriter(const std::string& _vcffile,
 		     const std::string& full_command,
-		     SampleInfo& _sample_info) {
+		     SampleInfo& _sample_info,
+		     bool _include_ggl) {
   sample_info = &_sample_info;
+  include_ggl = _include_ggl;
   writer_.open(_vcffile.c_str());
   // Write header
   writer_ << "##fileformat=VCFv4.1" << std::endl;
@@ -51,6 +53,9 @@ VCFWriter::VCFWriter(const std::string& _vcffile,
   writer_ << "##FORMAT=<ID=INS,Number=2,Type=Float,Description=\"Insert size mean and stddev\">" << endl;
   writer_ << "##FORMAT=<ID=STDERR,Number=2,Type=Float,Description=\"Bootstrap standard error of each allele\">" << endl;
   writer_ << "##FORMAT=<ID=QEXP,Number=3,Type=Float,Description=\"Prob. of no expansion, 1 expanded allele, both expanded alleles\">" << endl;
+  if (include_ggl) {
+    writer_ << "##FORMAT=<ID=GGL,Number=1,Type=String,Description=\"GangSTR genotype likelihoods\">" << endl;
+  }
   writer_ << "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT";
   const std::set<std::string> rg_samples = sample_info->GetSamples();
   sample_names.clear();
@@ -119,6 +124,9 @@ void VCFWriter::WriteRecord(Locus& locus) {
 	  << "STUTTERP=" << locus.stutter_p << ";"
 	  << "EXPTHRESH=" << locus.expansion_threshold << "\t"
 	  << "GT:DP:REPCN:REPCI:RC:Q:INS:STDERR:QEXP";
+  if (include_ggl) {
+    writer_ << ":GGL";
+  }
   
   // Write info for each sample
   stringstream gt_str;
@@ -145,9 +153,46 @@ void VCFWriter::WriteRecord(Locus& locus) {
 	    << locus.a1_se[samp]<<","<<locus.a2_se[samp] << ":"
 	    << locus.expansion_probs[samp][0] << "," << locus.expansion_probs[samp][1]
 	    << "," << locus.expansion_probs[samp][2];
+    if (include_ggl) {
+      writer_ << ":" << GetGGLString(locus, samp);
+    }
   }
   writer_ << endl;
   writer_.flush();
+}
+
+// F(j/k) = (k*(k+1)/2)+j
+const std::string VCFWriter::GetGGLString(Locus& locus, const std::string& samp) {
+  if (locus.grid_likelihoods.find(samp) == locus.grid_likelihoods.end()) {
+    return ".";
+  }
+  int32_t num_alleles = locus.grid_max_allele-locus.grid_min_allele+1;
+  std::vector<double> liks;
+  liks.resize(num_alleles*(num_alleles-1)/2+num_alleles);
+  int32_t j, k;
+  for (int32_t jj=locus.grid_min_allele; jj<=locus.grid_max_allele; jj++) {
+    for (int32_t kk=jj; kk<=locus.grid_max_allele; kk++) {
+      j = jj-locus.grid_min_allele;
+      k = kk-locus.grid_min_allele;
+      std::pair<int32_t, int32_t> gt(jj,kk);
+      if (locus.grid_likelihoods[samp].find(gt) == locus.grid_likelihoods[samp].end()) {
+	return ".";
+      }
+      if (k*(k+1)/2+j >= liks.size()) {
+	return ".";
+      }
+      liks[k*(k+1)/2+j] = locus.grid_likelihoods[samp][gt];
+    }
+  }
+  if (liks.size() == 0) {
+    return ".";
+  }
+  std::stringstream glstring;
+  glstring << liks[0];
+  for (size_t i=1; i<liks.size(); i++) {
+    glstring << "," << liks[i];
+  }
+  return glstring.str();
 }
 
 VCFWriter::~VCFWriter() {

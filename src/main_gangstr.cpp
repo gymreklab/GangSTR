@@ -20,7 +20,6 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <getopt.h>
 #include <stdlib.h>
-
 #include <iostream>
 #include <set>
 #include <sstream>
@@ -58,6 +57,7 @@ void show_help() {
 	   << "\t" << "--chrom                       " << "\t" << "Only genotype regions on this chromosome" << "\n"
            << "\t" << "--bam-samps   <string>        " << "\t" << "Comma separated list of sample IDs for --bam" << "\n"
 	   << "\t" << "--str-info    <string>        " << "\t" << "Tab file with additional per-STR info (see docs)" << "\n"
+	   << "\t" << "--period      <string>        " << "\t" << "Comma-separated list of periods to consider" << "\n"
 	   << "\n Options for different sequencing settings\n"
 	   << "\t" << "--readlength  <int>           " << "\t" << "Read length. Default: " << options.read_len << "\n"
 	   << "\t" << "--coverage    <float>         " << "\t" << "Average coverage. must be set for exome/targeted data. Comma separated list to specify for each BAM" << "\n"
@@ -78,13 +78,14 @@ void show_help() {
 	   << "\n Parameters for local realignment:\n"
 	   << "\t" << "--minscore    <int>           " << "\t" << "Minimum alignment score (out of 100). Default: " << options.min_score << "\n"
 	   << "\t" << "--minmatch    <int>           " << "\t" << "Minimum number of matching basepairs on each end of enclosing reads. Default:L " << options.min_match<< "\n"
-	   << "\n Stutter model parameters:\n"
+	   << "\n Default stutter model parameters:\n"
 	   << "\t" << "--stutterup   <float>         " << "\t" << "Stutter insertion probability. Default: " << options.stutter_up << "\n"
 	   << "\t" << "--stutterdown <float>         " << "\t" << "Stutter deletion probability. Default: " << options.stutter_down << "\n"
 	   << "\t" << "--stutterprob <float>         " << "\t" << "Stutter step size parameter. Default: " << options.stutter_p << "\n"
 	   << "\n Parameters for more detailed info about each locus:\n"
 	   << "\t" << "--output-bootstraps           " << "\t" << "Output file with bootstrap samples" << "\n"
 	   << "\t" << "--output-readinfo             " << "\t" << "Output read class info (for debugging)" << "\n"
+	   << "\t" << "--include-ggl                 " << "\t" << "Output GGL (special GL field) in VCF" << "\n"
 	   << "\n Additional optional paramters:\n"
 	   << "\t" << "-h,--help                     " << "\t" << "display this help screen" << "\n"
 	   << "\t" << "--seed                        " << "\t" << "Random number generator initial seed" << "\n"
@@ -99,6 +100,8 @@ void show_help() {
 
 void parse_commandline_options(int argc, char* argv[], Options* options) {
   enum LONG_OPTIONS {
+    OPT_PERIOD,
+    OPT_GGL,
     OPT_GRIDTHRESH,
     OPT_BAMFILES,
     OPT_BAMSAMP,
@@ -136,6 +139,8 @@ void parse_commandline_options(int argc, char* argv[], Options* options) {
     OPT_VERSION,
   };
   static struct option long_options[] = {
+    {"period",      required_argument,  NULL, OPT_PERIOD},
+    {"include-ggl", no_argument, NULL, OPT_GGL},
     {"grid-threshold", required_argument, NULL, OPT_GRIDTHRESH},
     {"bam",         required_argument,  NULL, OPT_BAMFILES},
     {"bam-samps",   required_argument,  NULL, OPT_BAMSAMP},
@@ -173,13 +178,23 @@ void parse_commandline_options(int argc, char* argv[], Options* options) {
     {"version",     no_argument,        NULL, OPT_VERSION},
     {NULL,          no_argument,        NULL, 0},
   };
-  std::vector<std::string> dist_means_str, dist_sdev_str, coverage_str;
+  std::vector<std::string> dist_means_str, dist_sdev_str, coverage_str, pers;
   int ch;
   int option_index = 0;
   ch = getopt_long(argc, argv, "hv?",
                    long_options, &option_index);
   while (ch != -1) {
     switch (ch) {
+    case OPT_PERIOD:
+      split_by_delim(optarg, ',', pers);
+      options->period.clear();
+      for (size_t i=0; i<pers.size(); i++) {
+	options->period.push_back(atoi(pers[i].c_str()));
+      }
+      break;
+    case OPT_GGL:
+      options->include_ggl = true;
+      break;
     case OPT_GRIDTHRESH:
       options->grid_threshold = atoi(optarg);
       break;
@@ -374,12 +389,17 @@ int main(int argc, char* argv[]) {
   // Process each region
   region_reader.Reset();
   STRInfo str_info(options);
-  VCFWriter vcfwriter(options.outprefix + ".vcf", full_command, sample_info);
+  VCFWriter vcfwriter(options.outprefix + ".vcf", full_command,
+		      sample_info, options.include_ggl);
   Genotyper genotyper(refgenome, options, sample_info, str_info);
 
   stringstream ss;
   while (region_reader.GetNextRegion(&locus)) {
     if (!options.chrom.empty() && locus.chrom != options.chrom) {continue;}
+    if (!options.period.empty() &&
+	std::find(options.period.begin(), options.period.end(), locus.period) == options.period.end()) {
+      continue;
+    }
     ss.str("");
     ss.clear();
     ss << "Processing " << locus.chrom << ":" << locus.start;

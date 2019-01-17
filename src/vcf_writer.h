@@ -32,13 +32,15 @@ using namespace std;
 class VCFWriter {
  public:
   VCFWriter(const std::string& _vcffile, const std::string& full_command,
-	    SampleInfo& _sample_info);
+	    SampleInfo& _sample_info, bool _include_ggl);
   void WriteRecord(Locus& locus);
+  const std::string GetGGLString(Locus& locus, const std::string& samp);
   virtual ~VCFWriter();
  private:
   ofstream writer_;
   std::vector<std::string> sample_names;
   SampleInfo* sample_info;
+  bool include_ggl;
 };
 
 #endif  // SRC_VCF_WRITER_H__

@@ -43,8 +43,9 @@ class Genotyper {
   virtual ~Genotyper();
 
   bool ProcessLocus(BamCramMultiReader* bamreader, Locus* locus);
-
+  bool SetGGL(Locus& locus, const std::string& samp);
   void Debug(BamCramMultiReader* bamreader); // For testing member classes. can remove later
+
  protected:
   // Set locus flanking regions
   bool SetFlanks(Locus* locus);
