@@ -95,6 +95,10 @@ class Options {
   bool use_off;
   // Random number generator seed
   int32_t seed;
+  // Histogram mode
+  bool hist_mode;
+  // number of rescue attempts
+  int32_t rescue_count;
 };
 
 #endif  // SRC_OPTIONS_H__

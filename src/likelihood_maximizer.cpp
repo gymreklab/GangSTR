@@ -34,14 +34,14 @@ LikelihoodMaximizer::LikelihoodMaximizer(const Options& _options, const SamplePr
 					 const int32_t& read_len) {
   options = &_options; // TODO remove options
 
-  enclosing_class_.SetGlobalParams(sp, options->flanklen, options->read_prob_mode);
-  frr_class_.SetGlobalParams(sp, options->flanklen, options->read_prob_mode);
-  spanning_class_.SetGlobalParams(sp, options->flanklen, options->read_prob_mode);
-  flanking_class_.SetGlobalParams(sp, options->flanklen, options->read_prob_mode);
-  resampled_enclosing_class_.SetGlobalParams(sp, options->flanklen, options->read_prob_mode);
-  resampled_frr_class_.SetGlobalParams(sp, options->flanklen, options->read_prob_mode);
-  resampled_spanning_class_.SetGlobalParams(sp, options->flanklen, options->read_prob_mode);
-  resampled_flanking_class_.SetGlobalParams(sp, options->flanklen, options->read_prob_mode);
+  enclosing_class_.SetGlobalParams(sp, options->flanklen, options->read_prob_mode, options->hist_mode);
+  frr_class_.SetGlobalParams(sp, options->flanklen, options->read_prob_mode, options->hist_mode);
+  spanning_class_.SetGlobalParams(sp, options->flanklen, options->read_prob_mode, options->hist_mode);
+  flanking_class_.SetGlobalParams(sp, options->flanklen, options->read_prob_mode, options->hist_mode);
+  resampled_enclosing_class_.SetGlobalParams(sp, options->flanklen, options->read_prob_mode, options->hist_mode);
+  resampled_frr_class_.SetGlobalParams(sp, options->flanklen, options->read_prob_mode, options->hist_mode);
+  resampled_spanning_class_.SetGlobalParams(sp, options->flanklen, options->read_prob_mode, options->hist_mode);
+  resampled_flanking_class_.SetGlobalParams(sp, options->flanklen, options->read_prob_mode, options->hist_mode);
     
   obj_cov = sp.coverage;
   // Set up output file
@@ -384,7 +384,7 @@ bool LikelihoodMaximizer::GetGenotypeNegLogLikelihood(const int32_t& allele1,
     							 options->ploidy, &flank_ll);
     // TODO Substituting these lines changes optimization result. Find out why?!
     //if ((options->coverage > 0) && (frr_class_.GetDataSize() > 0)){
-
+    
     if (use_cov && obj_cov > 0 && frr_count > 0){
       frr_class_.GetCountLogLikelihood(allele1, 
 				       allele2,
