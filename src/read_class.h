@@ -45,7 +45,7 @@ A read class consists of:
 class ReadClass {
   friend class ReadClassTest;
  public:
-  const static double NEG_INF = -25; // TODO make smaller?
+  constexpr static double NEG_INF = -25; // TODO make smaller?
   ReadClass();
   virtual ~ReadClass();
 
@@ -99,8 +99,8 @@ class ReadClass {
   
 
   // Allele weights. TODO: change if phasing available, would need per-read weights
-  const static double allele1_weight_ = 0.5;
-  const static double allele2_weight_ = 0.5;
+  constexpr static double allele1_weight_ = 0.5;
+  constexpr static double allele2_weight_ = 0.5;
 
  private:
   // Calculate class probability for an allele - implemented in children classes
