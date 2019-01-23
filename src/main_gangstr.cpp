@@ -308,23 +308,23 @@ void parse_commandline_options(int argc, char* argv[], Options* options) {
       options->num_boot_samp = atoi(optarg);
       break;
     case OPT_OUTBS:
-      options->output_bootstrap++;
+      options->output_bootstrap = true;
       break;
     case OPT_RDPROB:
-      options->read_prob_mode++;
+      options->read_prob_mode = true;
       break;
     case OPT_OUTREADINFO:
-      options->output_readinfo++;
+      options->output_readinfo= true;
       break;
     case OPT_SEED:
       options->seed = atoi(optarg);
       break;
     case OPT_VERBOSE:
     case 'v':
-      options->verbose++;
+      options->verbose = true;
       break;
     case OPT_VERYVERBOSE:
-      options->very_verbose++;
+      options->very_verbose = true;
       break;
     case OPT_VERSION:
       cerr << _GIT_VERSION << endl;
