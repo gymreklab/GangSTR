@@ -38,6 +38,7 @@ VCFWriter::VCFWriter(const std::string& _vcffile,
   writer_ << "##command=" << full_command << std::endl;
   writer_ << "##INFO=<ID=END,Number=1,Type=Integer,Description=\"End position of variant\">" << endl;
   writer_ << "##INFO=<ID=RU,Number=1,Type=String,Description=\"Repeat motif\">" << endl;
+  writer_ << "##INFO=<ID=PERIOD,Number=1,Type=Integer,Description=\"Repeat period (length of motif)\">" << endl;
   writer_ << "##INFO=<ID=REF,Number=1,Type=Float,Description=\"Reference copy number\">" << endl;
   writer_ << "##INFO=<ID=GRID,Number=2,Type=Integer,Description=\"Range of optimization grid\">" << endl;
   writer_ << "##INFO=<ID=EXPTHRESH,Number=1,Type=Integer,Description=\"Threshold for caling expansions\">" << endl;
@@ -46,10 +47,11 @@ VCFWriter::VCFWriter(const std::string& _vcffile,
   writer_ << "##INFO=<ID=STUTTERP,Number=1,Type=Float,Description=\"Stutter model - p\">" << endl;
   writer_ << "##FORMAT=<ID=GT,Number=1,Type=String,Description=\"Genotype\">" << endl;
   writer_ << "##FORMAT=<ID=DP,Number=1,Type=Integer,Description=\"Read Depth\">" << endl;
+  writer_ << "##FORMAT=<ID=Q,Number=1,Type=Float,Description=\"Quality Score (posterior probability)\">" << endl;
   writer_ << "##FORMAT=<ID=REPCN,Number=2,Type=Integer,Description=\"Genotype given in number of copies of the repeat motif\">" << endl;
   writer_ << "##FORMAT=<ID=REPCI,Number=1,Type=String,Description=\"Confidence intervals\">" << endl;
   writer_ << "##FORMAT=<ID=RC,Number=1,Type=String,Description=\"Number of reads in each class (enclosing, spanning, FRR, bounding)\">" << endl;
-  writer_ << "##FORMAT=<ID=Q,Number=1,Type=Float,Description=\"Min. negative likelihood\">" << endl;
+  writer_ << "##FORMAT=<ID=ML,Number=1,Type=Float,Description=\"Maximum likelihood\">" << endl;
   writer_ << "##FORMAT=<ID=INS,Number=2,Type=Float,Description=\"Insert size mean and stddev\">" << endl;
   writer_ << "##FORMAT=<ID=STDERR,Number=2,Type=Float,Description=\"Bootstrap standard error of each allele\">" << endl;
   writer_ << "##FORMAT=<ID=QEXP,Number=3,Type=Float,Description=\"Prob. of no expansion, 1 expanded allele, both expanded alleles\">" << endl;
@@ -117,13 +119,14 @@ void VCFWriter::WriteRecord(Locus& locus) {
 	  << "." << "\t"
 	  << "END=" << locus.end << ";"
 	  << "RU=" << locus.motif << ";"
+	  << "PERIOD="<< locus.motif.size() << ";"
 	  << "REF=" << refsize << ";"
 	  << "GRID=" << locus.grid_min_allele << "," << locus.grid_max_allele << ";"
 	  << "STUTTERUP=" << locus.stutter_up << ";"
 	  << "STUTTERDOWN=" << locus.stutter_down << ";"
 	  << "STUTTERP=" << locus.stutter_p << ";"
 	  << "EXPTHRESH=" << locus.expansion_threshold << "\t"
-	  << "GT:DP:REPCN:REPCI:RC:Q:INS:STDERR:QEXP";
+	  << "GT:DP:Q:REPCN:REPCI:RC:ML:INS:STDERR:QEXP";
   if (include_ggl) {
     writer_ << ":GGL";
   }
@@ -142,6 +145,7 @@ void VCFWriter::WriteRecord(Locus& locus) {
     writer_ << "\t"
 	    << gt_str.str() << ":"
 	    << locus.depth[samp] << ":"
+	    << locus.q_scores[samp] << ":"
 	    << locus.allele1[samp] << "," <<  locus.allele2[samp] << ":"
       	    << locus.lob1[samp] << "-" 
 	    << locus.hib1[samp] << "," 
