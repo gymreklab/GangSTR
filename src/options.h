@@ -99,6 +99,8 @@ class Options {
   bool hist_mode;
   // number of rescue attempts
   int32_t rescue_count;
+  // Minimum number of reads per sample for successfull calculation of coverage
+  int32_t min_reads_per_sample;
 };
 
 #endif  // SRC_OPTIONS_H__

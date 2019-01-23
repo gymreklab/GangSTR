@@ -317,7 +317,7 @@ bool LikelihoodMaximizer::GetNegLikelihoodSurface(const int32_t& a_lo,
     return true;
   }
 
-  double sum = 0.0;
+  double sum = neg_inf;
   double min = 10000.0;
   int m_a, m_b;
   double ret_val = 0.0;
@@ -541,7 +541,34 @@ void LikelihoodMaximizer::InferAlleleList(std::vector<int32_t>* allele_list,
     }
   }
 }
-
+bool LikelihoodMaximizer::GetQScore(int32_t a1, int32_t a2, double* Q) {
+  double surface, gt_ll;
+  *Q = -1;
+  if (!GetNegLikelihoodSurface(lower_bound, upper_bound,
+			       lower_bound, upper_bound,
+			       false,
+			       &surface)) {
+    return false;
+  }
+  if (!GetGenotypeNegLogLikelihood(a1, a2, false, &gt_ll)) {
+    return false;
+  }
+  // adding log(2) because of uninformative prior: P(a1,a2) + P(a2,a1), unless a1 == a2
+  // Posterior: Q = gt_ll * prior_a1_a2 / (surface * prior_ai_aj) 
+  // if a1 == a2: prior_a1_a2 = prior_ai_aj
+  // if a1 != aj: prior_a1_a2 = 2 * prior_ai_aj (to consider for both cases as described above ^^)
+  if (a1 == a2){
+    *Q = exp(gt_ll * -1 - surface);
+  }
+  else {
+    *Q = exp(gt_ll * -1 - surface + log(2));
+  }
+  if (*Q > 1.01 or *Q < 0){
+    *Q = -1;
+    return false;
+  }
+  return true;
+}
 bool LikelihoodMaximizer::GetExpansionProb(std::vector<double>* prob_vec, const int32_t& exp_threshold) {
   if (exp_threshold == -1) {
     prob_vec->clear();

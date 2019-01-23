@@ -65,6 +65,7 @@ void show_help() {
 	   << "\t" << "--insertmean  <float>         " << "\t" << "Fragment length mean. Comma separated list to specify for each BAM separately." << "\n" 
 	   << "\t" << "--insertsdev  <float>         " << "\t" << "Fragment length standard deviation. Comma separated list to specify for each BAM separately. " << "\n"
 	   << "\t" << "--nonuniform                  " << "\t" << "Indicate whether data has non-uniform coverage (i.e., exome)" << "\n"
+	   << "\t" << "--min-reads-cov <int>         " << "\t" << "Minimum number of reads required for calculation of coverage." << "\n"
 	   << "\n Advanced paramters for likelihood model:\n"
 	   << "\t" << "--frrweight   <float>         " << "\t" << "Weight for FRR reads. Default: " << options.frr_weight << "\n"
 	   << "\t" << "--enclweight  <float>         " << "\t" << "Weight for enclosing reads. Default: " << options.enclosing_weight << "\n"
@@ -101,6 +102,7 @@ void show_help() {
 
 void parse_commandline_options(int argc, char* argv[], Options* options) {
   enum LONG_OPTIONS {
+    OPT_MINREAD,
     OPT_PERIOD,
     OPT_GGL,
     OPT_GRIDTHRESH,
@@ -141,6 +143,7 @@ void parse_commandline_options(int argc, char* argv[], Options* options) {
     OPT_VERSION,
   };
   static struct option long_options[] = {
+    {"min-read-cov", required_argument, NULL, OPT_MINREAD},
     {"period",      required_argument,  NULL, OPT_PERIOD},
     {"include-ggl", no_argument, NULL, OPT_GGL},
     {"grid-threshold", required_argument, NULL, OPT_GRIDTHRESH},
@@ -188,6 +191,9 @@ void parse_commandline_options(int argc, char* argv[], Options* options) {
                    long_options, &option_index);
   while (ch != -1) {
     switch (ch) {
+    case OPT_MINREAD:
+      options->min_reads_per_sample = atoi(optarg);
+      break;
     case OPT_PERIOD:
       split_by_delim(optarg, ',', pers);
       options->period.clear();

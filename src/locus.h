@@ -70,7 +70,7 @@ class Locus {
   std::map<std::string,bool> called;
   std::map<std::string,std::vector<double> > expansion_probs;
   std::map<std::string, std::map<std::pair<int32_t, int32_t>, double> > grid_likelihoods; // log10 lik
-
+  std::map<std::string, double> q_scores;
   // Likelihood grid
   int32_t grid_min_allele;
   int32_t grid_max_allele;
