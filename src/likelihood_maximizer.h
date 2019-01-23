@@ -81,6 +81,8 @@ class LikelihoodMaximizer {
   void InferAlleleList(std::vector<int32_t>* allele_list,
 		       const int32_t& ploidy,
 		       const bool& resampled, const int32_t& fix_allele);
+  // Function for computing Q Score
+  bool GetQScore(int32_t a1, int32_t a2, double* Q);
   // Functions for computing expansion probability
   bool GetExpansionProb(std::vector<double>* prob_vec, const int32_t& exp_threshold);
   bool GetNegLikelihoodSurface(const int32_t& a_lo,

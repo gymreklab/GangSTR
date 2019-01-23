@@ -48,6 +48,7 @@ void Locus::Reset(){
   depth.clear();
   called.clear();
   expansion_probs.clear();
+  q_scores.clear();
 
   offtarget_set = false;
   offtarget_regions.clear();

@@ -157,7 +157,7 @@ bool Genotyper::ProcessLocus(BamCramMultiReader* bamreader, Locus* locus) {
     PrintMessageDieOnError("\tMaximizing likelihood", M_PROGRESS);
   }
   int32_t allele1, allele2;
-  double min_negLike, lob1, lob2, hib1, hib2;
+  double min_negLike, lob1, lob2, hib1, hib2, q_score;
   double a1_se, a2_se;
   bool resampled = false;
   for (std::set<std::string>::iterator it = rg_samples.begin();
@@ -181,6 +181,10 @@ bool Genotyper::ProcessLocus(BamCramMultiReader* bamreader, Locus* locus) {
 	sample_prob_vec.push_back(-1.0);
 	sample_prob_vec.push_back(-1.0);
       }
+      if (!sample_likelihood_maximizers[samp]->GetQScore(allele1, allele2, &q_score)){ 
+	PrintMessageDieOnError("\tProblem setting quality scores", M_WARNING);
+      }
+      locus->q_scores[samp] = q_score;
       locus->expansion_probs[samp] = sample_prob_vec;
       locus->allele1[samp] = allele1;
       locus->allele2[samp] = allele2;
