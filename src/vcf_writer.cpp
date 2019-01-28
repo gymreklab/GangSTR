@@ -41,7 +41,7 @@ VCFWriter::VCFWriter(const std::string& _vcffile,
   writer_ << "##INFO=<ID=PERIOD,Number=1,Type=Integer,Description=\"Repeat period (length of motif)\">" << endl;
   writer_ << "##INFO=<ID=REF,Number=1,Type=Float,Description=\"Reference copy number\">" << endl;
   writer_ << "##INFO=<ID=GRID,Number=2,Type=Integer,Description=\"Range of optimization grid\">" << endl;
-  writer_ << "##INFO=<ID=EXPTHRESH,Number=1,Type=Integer,Description=\"Threshold for caling expansions\">" << endl;
+  writer_ << "##INFO=<ID=EXPTHRESH,Number=1,Type=Integer,Description=\"Threshold for calling expansions\">" << endl;
   writer_ << "##INFO=<ID=STUTTERUP,Number=1,Type=Float,Description=\"Stutter model - up prob\">" << endl;
   writer_ << "##INFO=<ID=STUTTERDOWN,Number=1,Type=Float,Description=\"Stutter model - down prob\">" << endl;
   writer_ << "##INFO=<ID=STUTTERP,Number=1,Type=Float,Description=\"Stutter model - p\">" << endl;
