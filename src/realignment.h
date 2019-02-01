@@ -26,6 +26,7 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <stdint.h>
 #include "src/ssw_cpp.h"
+#include "src/bam_io.h"
 
 // Set NW params
 // NOTE: the other score triple (12,-12,-16) causes issues in realignment test (ambigous cases)
@@ -143,5 +144,19 @@ bool classify_realigned_read(const std::string& seq,
 			     const FlankMatchState& fm_start,
 			     const FlankMatchState& fm_end,
 			     SingleReadType* single_read_class);
+
+// Estimate copy number based on CIGAR score
+// If not conclusive enough CIGAR score return false
+bool cigar_realignment(BamAlignment& aln,
+		       const int32_t& str_pos,
+		       const int32_t& str_end,
+		       const int32_t& period,
+		       int32_t* nCopy,
+		       int32_t* start_pos,
+		       int32_t* end_pos,
+		       int32_t* score,
+		       FlankMatchState* fm_start,
+		       FlankMatchState* fm_end);
+		       
 
 #endif  // SRC_REALIGNMENT_H__

@@ -701,45 +701,53 @@ bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
   std::string seq_rev = reverse_complement(seq);
   std::string qual = alignment.Qualities();
   int32_t read_length = (int32_t)seq.size();
-  bool realign_fwd = false, realign_rev = false;
-  int32_t fwd_str = -1, fwd_tot = -1, rev_str = -1 ,rev_tot = -1;
-  find_longest_stretch(seq, locus.motif, &fwd_str, &fwd_tot);
-  find_longest_stretch(seq_rev, locus.motif, &rev_str, &rev_tot);
-  
-  if (fwd_tot > 1 and fwd_tot >= rev_tot){
-    realign_fwd = true;
+  bool perform_ssw = true;
+  if (cigar_realignment(alignment, locus.start, locus.end, locus.period,
+			 &nCopy, &start_pos, &end_pos, &score,
+			 &fm_start, &fm_end)) {
+    perform_ssw = false;
   }
-  if (rev_tot > 1 and rev_tot >= fwd_tot){
-    realign_rev = true;
-  }
-  /* Perform realignment and classification */
-  if (realign_fwd){
-    if (!expansion_aware_realign(seq, qual, locus.pre_flank, locus.post_flank, 
-				 locus.motif, min_match, fwd_str, fwd_tot,
-				 &nCopy, &start_pos, &end_pos, 
-				 &score, &fm_start, &fm_end)) {
-      return false;
+  if (perform_ssw) {
+    bool realign_fwd = false, realign_rev = false;
+    int32_t fwd_str = -1, fwd_tot = -1, rev_str = -1 ,rev_tot = -1;
+    find_longest_stretch(seq, locus.motif, &fwd_str, &fwd_tot);
+    find_longest_stretch(seq_rev, locus.motif, &rev_str, &rev_tot);
+    
+    if (fwd_tot > 1 and fwd_tot >= rev_tot){
+      realign_fwd = true;
     }
-  }
-  if (realign_rev){
-    if (!expansion_aware_realign(seq_rev, qual, locus.pre_flank, locus.post_flank, 
-				 locus.motif, min_match, rev_str, rev_tot,
-				 &nCopy_rev, &start_pos_rev, &end_pos_rev, 
-				 &score_rev, &fm_start_rev, &fm_end_rev)) {
-      return false;
+    if (rev_tot > 1 and rev_tot >= fwd_tot){
+      realign_rev = true;
     }
-  }
-  
-  //  cerr << realign_fwd << "\t" << fwd_tot << " " << score << "\t" << seq << endl
-  //       << realign_rev << "\t" << rev_tot << " " << score_rev << "\t" << seq_rev << endl << endl;
-  if ((realign_fwd and score_rev > score) or (realign_rev and !realign_fwd)) {
-    nCopy = nCopy_rev;
-    start_pos = start_pos_rev;
-    score = score_rev;
-    seq = seq_rev;
-    end_pos = end_pos_rev;
-    fm_start = fm_start_rev;
-    fm_end = fm_end_rev;
+    /* Perform realignment and classification */
+    if (realign_fwd){
+      if (!expansion_aware_realign(seq, qual, locus.pre_flank, locus.post_flank, 
+				   locus.motif, min_match, fwd_str, fwd_tot,
+				   &nCopy, &start_pos, &end_pos, 
+				   &score, &fm_start, &fm_end)) {
+	return false;
+      }
+    }
+    if (realign_rev){
+      if (!expansion_aware_realign(seq_rev, qual, locus.pre_flank, locus.post_flank, 
+				   locus.motif, min_match, rev_str, rev_tot,
+				   &nCopy_rev, &start_pos_rev, &end_pos_rev, 
+				   &score_rev, &fm_start_rev, &fm_end_rev)) {
+	return false;
+      }
+    }
+    
+    //  cerr << realign_fwd << "\t" << fwd_tot << " " << score << "\t" << seq << endl
+    //       << realign_rev << "\t" << rev_tot << " " << score_rev << "\t" << seq_rev << endl << endl;
+    if ((realign_fwd and score_rev > score) or (realign_rev and !realign_fwd)) {
+      nCopy = nCopy_rev;
+      start_pos = start_pos_rev;
+      score = score_rev;
+      seq = seq_rev;
+      end_pos = end_pos_rev;
+      fm_start = fm_start_rev;
+      fm_end = fm_end_rev;
+    }
   }
   *nCopy_value = nCopy;
   *score_value = score;

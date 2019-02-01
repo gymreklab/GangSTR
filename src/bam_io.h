@@ -36,6 +36,11 @@ class CigarOp {
     Type   = type;
     Length = length;
   }
+
+  CigarOp() { // Added default constructor
+    Type = 'M';
+    Length = 0;
+  }
 };
 
 
