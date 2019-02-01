@@ -403,6 +403,7 @@ int main(int argc, char* argv[]) {
   region_reader.Reset();
   STRInfo str_info(options);
   VCFWriter vcfwriter(options.outprefix + ".vcf", full_command,
+		      refgenome, 
 		      sample_info, options.include_ggl);
   Genotyper genotyper(refgenome, options, sample_info, str_info);
 
