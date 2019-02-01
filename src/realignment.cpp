@@ -594,10 +594,9 @@ bool classify_realigned_read(const std::string& seq,
 }
 
 // min allowed distance from STR boundary to read ends
-size_t MIN_DIST_FROM_END = 20;
+const size_t MIN_DIST_FROM_END = 20;
 // more than this is likely bad alignment
 const size_t MAX_CIGAR_SIZE = 10;
-
 bool cigar_realignment(BamAlignment& aln,
 		       const int32_t& str_pos,
 		       const int32_t& str_end,
