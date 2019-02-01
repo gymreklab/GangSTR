@@ -28,6 +28,7 @@ using namespace std;
 
 VCFWriter::VCFWriter(const std::string& _vcffile,
 		     const std::string& full_command,
+		     const RefGenome& ref_genome,
 		     SampleInfo& _sample_info,
 		     bool _include_ggl) {
   sample_info = &_sample_info;
@@ -36,6 +37,12 @@ VCFWriter::VCFWriter(const std::string& _vcffile,
   // Write header
   writer_ << "##fileformat=VCFv4.1" << std::endl;
   writer_ << "##command=" << full_command << std::endl;
+  // Include contigs
+  std::vector<std::string> chroms = ref_genome.GetChroms();
+  for (std::vector<std::string>::iterator chromit=chroms.begin();
+       chromit != chroms.end(); chromit++) {
+    writer_ << "##contig=<ID=" << *chromit << ",length=" << ref_genome.GetChromSize(*chromit) << ">" << endl;
+  }
   writer_ << "##INFO=<ID=END,Number=1,Type=Integer,Description=\"End position of variant\">" << endl;
   writer_ << "##INFO=<ID=RU,Number=1,Type=String,Description=\"Repeat motif\">" << endl;
   writer_ << "##INFO=<ID=PERIOD,Number=1,Type=Integer,Description=\"Repeat period (length of motif)\">" << endl;
@@ -136,7 +143,7 @@ void VCFWriter::WriteRecord(Locus& locus) {
   int period = static_cast<int>(locus_motif.size());
   for (size_t i=0; i<sample_names.size(); i++) {
     std::string samp = sample_names[i];
-    if (!locus.called[samp]) {
+    if (!locus.called[samp] or locus.depth[samp]==0) {
       writer_ << "\t.";
       continue;
     }

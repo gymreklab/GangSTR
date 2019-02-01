@@ -26,12 +26,14 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "src/locus.h"
 #include "src/sample_info.h"
+#include "src/ref_genome.h"
 
 using namespace std;
 
 class VCFWriter {
  public:
   VCFWriter(const std::string& _vcffile, const std::string& full_command,
+	    const RefGenome& refgenome,
 	    SampleInfo& _sample_info, bool _include_ggl);
   void WriteRecord(Locus& locus);
   const std::string GetGGLString(Locus& locus, const std::string& samp);
