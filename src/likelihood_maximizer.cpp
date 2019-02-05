@@ -660,7 +660,7 @@ bool LikelihoodMaximizer::findBestAlleleListTuple(std::vector<int32_t> allele_li
     for (std::vector<int32_t>::iterator a1_it = allele_list.begin();
             a1_it != allele_list.end();
             a1_it++){
-      // if (!resampled)
+      //if (!resampled)
       //   cerr<<*a1_it<<endl;
       for (std::vector<int32_t>::iterator a2_it = allele_list.begin();
             a2_it != allele_list.end();

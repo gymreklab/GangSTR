@@ -150,7 +150,7 @@ bool ReadExtractor::ExtractReads(BamCramMultiReader* bamreader,
 	sample_likelihood_maximizers[samp]->AddFlankingData(iter->second.max_nCopy-1);
         flank++;
       }
-    } else if (iter->second.read_type == RC_ENCL) {
+    } else if (iter->second.data_value > 0 && iter->second.read_type == RC_ENCL) {
       if (options.output_readinfo) {
 	readfile_ << locus.chrom << "\t" 
 		  << locus.start << "\t" 
