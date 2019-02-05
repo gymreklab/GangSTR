@@ -614,11 +614,11 @@ bool LikelihoodMaximizer::OptimizeLikelihood(const bool& resampled, const int32_
 					     const double& off_share,
 					     int32_t* allele1, int32_t* allele2, double* min_negLike) {
   if (!locus_params_set) {
-    PrintMessageDieOnError("Skipping locus with no params set", M_WARNING);
+    //    PrintMessageDieOnError("Skipping locus with no params set", M_WARNING);
     return false;
   }
   if (obj_cov == -1) {
-    PrintMessageDieOnError("Skipping locus with likely extreme GC content", M_WARNING);
+    //    PrintMessageDieOnError("Skipping locus with likely extreme GC content", M_WARNING);
     return false;
   }
 

@@ -62,7 +62,6 @@ bool find_longest_stretch(const std::string& seq,
   *nCopy_total = total;
 }
 
-
 bool expansion_aware_realign(const std::string& seq,
 			     const std::string& qual,
 			     const std::string& pre_flank,
@@ -77,7 +76,8 @@ bool expansion_aware_realign(const std::string& seq,
 			     int32_t* score,
 			     FlankMatchState* fm_start,
 			     FlankMatchState* fm_end) {
-
+  //int MIN_INTERMEDIATE_SCORE = 0.7*min_nCopy*motif.size()*SSW_MATCH_SCORE; // Give up if we don't get to this
+  int MIN_INTERMEDIATE_SCORE = 0.5*seq.size()*SSW_MATCH_SCORE;
   *fm_start = FM_NOMATCH;
   *fm_end = FM_NOMATCH;
   int32_t read_len = (int32_t)seq.size();
@@ -117,12 +117,16 @@ bool expansion_aware_realign(const std::string& seq,
     }
     var_realign_ss << post_flank;
     std::string var_realign_string = var_realign_ss.str();
-    
-
+   
     if (!striped_smith_waterman(var_realign_string, seq, qual, &current_start_pos, &current_end_pos, &current_score, &current_num_mismatch)) {
       return false;
     }
     
+    // Check if this is hopeless
+    //    std::cerr << seq << " " << var_realign_string << " " << motif << " " << current_nCopy << " " << current_score << std::endl;
+    if (current_score < MIN_INTERMEDIATE_SCORE) {
+      return false;
+    }
 
     // Flank match check
     // Preflank
@@ -591,6 +595,16 @@ bool classify_realigned_read(const std::string& seq,
   *single_read_class = SR_UNKNOWN;
   return true; 
 
+}
+
+float MeanQual(const std::string& quals) {
+  float total_qual = 0;
+  float num_qual = 0;
+  for (size_t i=0; i<quals.size(); i++) {
+    total_qual += quals[i];
+    num_qual += 1;
+  }
+  return total_qual/num_qual;
 }
 
 // min allowed distance from STR boundary to read ends

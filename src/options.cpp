@@ -73,6 +73,7 @@ Options::Options() {
   period.clear();
   verbose = false;
   very_verbose = false;
+  quiet = false;
   ploidy = 2;
   num_boot_samp = 100;
   read_prob_mode = false;

@@ -32,7 +32,7 @@ enum MSGTYPE {
   M_PROGRESS = 3
 };
 void PrintMessageDieOnError(const std::string& msg,
-                            MSGTYPE msgtype);
+                            MSGTYPE msgtype, bool quiet);
 
 float GetGC(const std::string& seq);
 

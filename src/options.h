@@ -75,6 +75,7 @@ class Options {
   // Helpers
   bool verbose;
   bool very_verbose;
+  bool quiet;
   // Experiment parameters for likelihood maximizer
   int32_t read_len;
   int32_t motif_len;

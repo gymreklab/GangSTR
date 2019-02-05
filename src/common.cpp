@@ -28,7 +28,8 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 
 using namespace std;
 
-void PrintMessageDieOnError(const string& msg, MSGTYPE msgtype) {
+void PrintMessageDieOnError(const string& msg, MSGTYPE msgtype, bool quiet) {
+  if (quiet) return;
   string typestring = "";
   switch (msgtype) {
   case M_ERROR:

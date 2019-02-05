@@ -52,7 +52,7 @@ bool ReadExtractor::ExtractReads(BamCramMultiReader* bamreader,
 
   int32_t frr = 0, span = 0, encl = 0, flank = 0, offt = 0; // TODO do these need to be per sample?
   if (read_pairs.size() == 0){
-    PrintMessageDieOnError("\tNot enough reads extracted. Aborting..", M_PROGRESS);
+    PrintMessageDieOnError("\tNot enough reads extracted. Aborting..", M_PROGRESS, options.quiet);
     return false;
   }
   // Find median bound, and filter out any bound reads with data > 3 * median
@@ -215,7 +215,7 @@ bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
 				     const Locus& locus, const int32_t& regionsize, const int32_t& min_match,
 				     std::map<std::string, ReadPair>* read_pairs, bool custom_read_group) {
   if (locus.end < locus.start){
-    PrintMessageDieOnError("\tLocus end preceeds locus start. Aborting..", M_PROGRESS);
+    PrintMessageDieOnError("\tLocus end preceeds locus start. Aborting..", M_PROGRESS, options.quiet);
     return false;
   }
   // Get bam alignments from the relevant region
@@ -247,7 +247,7 @@ bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
       continue;
     }
     if (!alignment.GetStringTag("RG", read_group) & !custom_read_group) {
-      PrintMessageDieOnError("Could not find read group for " + alignment.Name(), M_WARNING);
+      PrintMessageDieOnError("Could not find read group for " + alignment.Name(), M_WARNING, options.quiet);
       continue;
     }
 
@@ -297,8 +297,10 @@ bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
         ReadType read_type;
         SingleReadType srt;
 	
-        ProcessSingleRead(alignment, chrom_ref_id, locus, min_match, false,
-              &data_value, &nCopy_value, &score_value, &read_type, &srt);
+	if (!ProcessSingleRead(alignment, chrom_ref_id, locus, min_match, false,
+			       &data_value, &nCopy_value, &score_value, &read_type, &srt)) {
+	  continue;
+	}
 	
 
         if (debug) {
@@ -398,8 +400,10 @@ bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
     ReadType read_type;
     ReadPair read_pair;
     SingleReadType srt;
-    ProcessSingleRead(alignment, chrom_ref_id, locus, min_match, false,
-          &data_value, &nCopy_value, &score_value, &read_type, &srt);
+    if (!ProcessSingleRead(alignment, chrom_ref_id, locus, min_match, false,
+			   &data_value, &nCopy_value, &score_value, &read_type, &srt)) {
+      continue;
+    }
 
     if (custom_read_group) {
       read_pair.rgid = fname;
@@ -446,8 +450,10 @@ bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
     int32_t nCopy_value = 0;
     ReadType read_type;
     SingleReadType srt;
-    ProcessSingleRead(matepair, chrom_ref_id, locus, min_match, false,
-          &data_value, &nCopy_value, &score_value, &read_type, &srt);
+    if (!ProcessSingleRead(matepair, chrom_ref_id, locus, min_match, false,
+			   &data_value, &nCopy_value, &score_value, &read_type, &srt)) {
+      continue;
+    }
 
     int32_t read_length = (int32_t)matepair.QueryBases().size();
     if (debug) {
@@ -517,7 +523,7 @@ bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
 	stringstream ss;
 	ss << "\tAnalyzing off target region: " << reg_it->chrom << ':'
 	   << reg_it->start <<  '-' <<  reg_it->end;
-	  PrintMessageDieOnError(ss.str(), M_PROGRESS);
+	PrintMessageDieOnError(ss.str(), M_PROGRESS, options.quiet);
       }
       bamreader->SetRegion(reg_it->chrom, reg_it->start, reg_it->end);
 
@@ -542,8 +548,10 @@ bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
 	  read_pair.rgid = fname + ":" + read_group;
 	}
 	SingleReadType srt;
-	ProcessSingleRead(alignment, chrom_ref_id, locus, min_match, true,
-			  &data_value, &nCopy_value, &score_value, &read_type, &srt);
+	if (!ProcessSingleRead(alignment, chrom_ref_id, locus, min_match, true,
+			       &data_value, &nCopy_value, &score_value, &read_type, &srt)) {
+	  continue;
+	}
 
 	//  Check if read's mate already processed
 	std::map<std::string, ReadPair>::iterator rp_iter = read_pairs->find(aln_key);
@@ -670,7 +678,7 @@ bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
     if (sample_info.GetIsCustomRG()) {
       rgid = alignment.file_;
     } else {
-      PrintMessageDieOnError("Could not find read ID " + alignment.Name(), M_ERROR);
+      PrintMessageDieOnError("Could not find read ID " + alignment.Name(), M_ERROR, false);
     }
   } 
   if(!sample_info.GetIsCustomRG())
@@ -702,24 +710,30 @@ bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
   std::string qual = alignment.Qualities();
   int32_t read_length = (int32_t)seq.size();
   bool perform_ssw = true;
+  // Check if we can get good info from the CIGAR score first
   if (cigar_realignment(alignment, locus.start, locus.end, locus.period,
 			 &nCopy, &start_pos, &end_pos, &score,
 			 &fm_start, &fm_end)) {
     perform_ssw = false;
   }
+  // Check quality before we move on
   if (perform_ssw) {
     bool realign_fwd = false, realign_rev = false;
     int32_t fwd_str = -1, fwd_tot = -1, rev_str = -1 ,rev_tot = -1;
     find_longest_stretch(seq, locus.motif, &fwd_str, &fwd_tot);
     find_longest_stretch(seq_rev, locus.motif, &rev_str, &rev_tot);
     
-    if (fwd_tot > 1 and fwd_tot >= rev_tot){
+    if (fwd_str > 1 && fwd_str >= rev_str){
       realign_fwd = true;
     }
-    if (rev_tot > 1 and rev_tot >= fwd_tot){
+    if (rev_str > 1 && rev_str >= fwd_str){
       realign_rev = true;
     }
     /* Perform realignment and classification */
+    if (!(realign_fwd || realign_rev)) {
+      return false;
+    }
+    //    std::cerr << "realigning ssw: " << seq << " " << locus.motif << std::endl;
     if (realign_fwd){
       if (!expansion_aware_realign(seq, qual, locus.pre_flank, locus.post_flank, 
 				   locus.motif, min_match, fwd_str, fwd_tot,
@@ -736,7 +750,6 @@ bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
 	return false;
       }
     }
-    
     //  cerr << realign_fwd << "\t" << fwd_tot << " " << score << "\t" << seq << endl
     //       << realign_rev << "\t" << rev_tot << " " << score_rev << "\t" << seq_rev << endl << endl;
     if ((realign_fwd and score_rev > score) or (realign_rev and !realign_fwd)) {

@@ -103,7 +103,7 @@ bool BamInfoExtract::GetCoverageGC(std::map<std::string, SampleProfile>* profile
 				regions_per_bin)) {
       stringstream ss;
       ss << "Could not find GC regions " << lb << "-" << ub;
-      PrintMessageDieOnError(ss.str(), M_WARNING);
+      PrintMessageDieOnError(ss.str(), M_WARNING, options->quiet);
     }
     // For each locus get num total bases and coverage per sample
     for (std::vector<Locus>::iterator it = gc_bin_loci.begin(); it != gc_bin_loci.end(); it++) {
@@ -123,7 +123,7 @@ bool BamInfoExtract::GetCoverageGC(std::map<std::string, SampleProfile>* profile
 	  found_sample = true;
 	} else {
 	  if (!alignment.GetStringTag("RG", read_group)) {
-	    PrintMessageDieOnError("Could not find read group for " + alignment.Name(), M_WARNING);
+	    PrintMessageDieOnError("Could not find read group for " + alignment.Name(), M_WARNING, options->quiet);
 	    found_sample = false;
 	  }
 	  rgid = fname + ":" + read_group;
@@ -194,7 +194,7 @@ bool BamInfoExtract::GetCoverage(std::map<std::string, SampleProfile>* profile,
 	found_sample = true;
       } else {
 	if (!alignment.GetStringTag("RG", read_group)) {
-	  PrintMessageDieOnError("Could not find read group for " + alignment.Name(), M_WARNING);
+	  PrintMessageDieOnError("Could not find read group for " + alignment.Name(), M_WARNING, options->quiet);
 	  found_sample = false;
 	}
 	rgid = fname + ":" + read_group;
@@ -259,7 +259,7 @@ bool BamInfoExtract::GetInsertSizeDistribution(std::map<std::string, SampleProfi
 	found_sample = true;
       } else {
 	if (!alignment.GetStringTag("RG", read_group)) {
-	  PrintMessageDieOnError("Could not find read group for " + alignment.Name(), M_WARNING);
+	  PrintMessageDieOnError("Could not find read group for " + alignment.Name(), M_WARNING, options->quiet);
 	  found_sample = false;
 	}
 	rgid = fname + ":" + read_group;
@@ -307,7 +307,7 @@ bool BamInfoExtract::GetInsertSizeDistribution(std::map<std::string, SampleProfi
     if (tlen_vec_filt.size() < min_reads_per_sample) {
       std::stringstream ss;
       ss << "Not enough reads for " << *it << " " << tlen_vec_filt.size();
-      PrintMessageDieOnError(ss.str(), M_ERROR);
+      PrintMessageDieOnError(ss.str(), M_ERROR, false);
       return false;
     }
     // Set pdf/cdf

@@ -145,6 +145,8 @@ bool classify_realigned_read(const std::string& seq,
 			     const FlankMatchState& fm_end,
 			     SingleReadType* single_read_class);
 
+float MeanQual(const std::string& quals);
+
 // Estimate copy number based on CIGAR score
 // If not conclusive enough CIGAR score return false
 bool cigar_realignment(BamAlignment& aln,
