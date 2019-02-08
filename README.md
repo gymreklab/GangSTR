@@ -173,12 +173,22 @@ FORMAT fields contain information specific to each genotype call. The following 
 
 | **FIELD** | **DESCRIPTION** |
 |-----------|------------------|
-| GB | Base pair length differences of genotype from reference for each allele |
-| CI| 95% confidence intervals for each allele | 
-| RC| Number of reads in each class (enclosing, spanning, FRR, flanking)| 
-| Q| Minimum negative likelihood| 
+| GT | Genotype |
+| DP | Read Depth (number of informative reads) |
+| Q | Quality Score (posterior probability) |
+| REPCN | Genotype given in number of copies of the repeat motif |
+| REPCI | 95% Confidence interval for each allele |
+| RC | Number of reads in each class (enclosing, spanning, FRR, flanking) | 
+| ML | Maximum likelihood | 
 | INS| Insert size mean and stddev at the locus| 
+| STDERR | Bootstrap standard error of each allele |
+| QEXP | Prob. of no expansion, 1 expanded allele, both expanded alleles |
 
+**Q**: Posterior probability of extimated alleles (REPCN). This quality score is a measure of GangSTR's confidence in short allele calls (shorter than read length)
+
+**STDERR**: Standard error of estimated alleles using bootstrap method.
+
+**QEXP**: Given estimated alleles, the likelihood plain, and an expansion threshold, this field shows the probability of two alleles being smaller than threshold, one allele larger and one smaller than threshold, and both allele larger than threshold. The expansion threshold should be provided using `--str-info` field.
 
 <a name="references"></a>
 ## GangSTR reference files
