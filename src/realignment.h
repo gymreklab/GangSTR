@@ -101,6 +101,9 @@ bool expansion_aware_realign(const std::string& seq,
 			     const int32_t& min_match,
 			     const int32_t& min_nCopy,
 			     const int32_t& total_nCopy,
+			     const StripedSmithWaterman::Aligner* aligner,
+			     const StripedSmithWaterman::Filter* filter,
+			     StripedSmithWaterman::Alignment* alignment,
 			     int32_t* nCopy, 
 			     int32_t* start_pos, 
 			     int32_t* end_pos, 
@@ -114,9 +117,12 @@ bool smith_waterman(const std::string& seq1,
 		    int32_t* pos, int32_t* end, int32_t* score);
 
 bool striped_smith_waterman(const std::string& ref,
-        const std::string& seq,
-        const std::string& qual,
-        int32_t* pos, int32_t* pos_temp, int32_t* score, int32_t* mismatches);
+			    const std::string& seq,
+			    const std::string& qual,
+			    const StripedSmithWaterman::Aligner* aligner,
+			    const StripedSmithWaterman::Filter* filter,
+			    StripedSmithWaterman::Alignment* alignment,
+			    int32_t* pos, int32_t* pos_temp, int32_t* score, int32_t* mismatches);
 //static void ssw_PrintAlignment(const StripedSmithWaterman::Alignment& alignment);
 bool create_score_matrix(const int32_t& rows, const int32_t& cols,
 			 const std::string& seq1,

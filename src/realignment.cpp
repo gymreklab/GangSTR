@@ -70,6 +70,9 @@ bool expansion_aware_realign(const std::string& seq,
 			     const int32_t& min_match,
 			     const int32_t& min_nCopy,
 			     const int32_t& total_nCopy,
+			     const StripedSmithWaterman::Aligner* aligner,
+			     const StripedSmithWaterman::Filter* filter,
+			     StripedSmithWaterman::Alignment* alignment,
 			     int32_t* nCopy, 
 			     int32_t* start_pos, 
 			     int32_t* end_pos, 
@@ -118,7 +121,9 @@ bool expansion_aware_realign(const std::string& seq,
     var_realign_ss << post_flank;
     std::string var_realign_string = var_realign_ss.str();
    
-    if (!striped_smith_waterman(var_realign_string, seq, qual, &current_start_pos, &current_end_pos, &current_score, &current_num_mismatch)) {
+    if (!striped_smith_waterman(var_realign_string, seq, qual,
+				aligner, filter, alignment,
+				&current_start_pos, &current_end_pos, &current_score, &current_num_mismatch)) {
       return false;
     }
     
@@ -261,24 +266,13 @@ bool next_move(std::vector<std::vector<int32_t> > score_matrix,
 }
 
 bool striped_smith_waterman(const std::string& ref,
-        const std::string& seq,
-        const std::string& qual,
-        int32_t* pos, int32_t* end, int32_t* score, int32_t* mismatches) {
-
-  // SSW Objects
-  StripedSmithWaterman::Aligner* aligner;
-  StripedSmithWaterman::Filter* filter;
-  StripedSmithWaterman::Alignment* alignment;
-
-  aligner = new StripedSmithWaterman::Aligner(SSW_MATCH_SCORE, 
-                              SSW_MISMATCH_SCORE, 
-                              SSW_GAP_OPEN, 
-                              SSW_GAP_EXTEND);
-  filter = new StripedSmithWaterman::Filter;
-  alignment = new StripedSmithWaterman::Alignment;
-  int32_t maskLen = seq.size() / 2;
-  maskLen = maskLen < 15 ? 15 : maskLen;
-  maskLen = 15;
+			    const std::string& seq,
+			    const std::string& qual,
+			    const StripedSmithWaterman::Aligner* aligner,
+			    const StripedSmithWaterman::Filter* filter,
+			    StripedSmithWaterman::Alignment* alignment,
+			    int32_t* pos, int32_t* end, int32_t* score, int32_t* mismatches) {
+  int32_t maskLen = 15;
   aligner->Align(seq.c_str(), ref.c_str(), (int32_t)ref.size(), *filter, alignment, maskLen);
 
   *pos = alignment->ref_begin;
@@ -286,9 +280,6 @@ bool striped_smith_waterman(const std::string& ref,
   *score = alignment->sw_score;
   *mismatches = alignment->mismatches;
 
-  delete aligner;
-  delete filter;
-  delete alignment;
   return true;
 }
 

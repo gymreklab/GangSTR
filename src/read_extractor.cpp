@@ -31,6 +31,13 @@ ReadExtractor::ReadExtractor(const Options& options_, SampleInfo& sample_info_) 
   if (options.output_readinfo) {
     readfile_.open((options.outprefix + ".readinfo.tab").c_str());
   }
+  ssw_aligner = new StripedSmithWaterman::Aligner(SSW_MATCH_SCORE, 
+                              SSW_MISMATCH_SCORE, 
+                              SSW_GAP_OPEN, 
+                              SSW_GAP_EXTEND);
+  ssw_filter = new StripedSmithWaterman::Filter;
+  ssw_alignment = new StripedSmithWaterman::Alignment;
+
 }
 
 /*
@@ -723,20 +730,41 @@ bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
     find_longest_stretch(seq, locus.motif, &fwd_str, &fwd_tot);
     find_longest_stretch(seq_rev, locus.motif, &rev_str, &rev_tot);
     
-    if (fwd_str > 1 && fwd_str >= rev_str){
+    if (((locus.period == 2 and fwd_str >= 5) 
+	 or (locus.period == 3 and fwd_str >= 4)
+	 or (locus.period >= 4 and fwd_str >= 3)) && fwd_str >= rev_str){
       realign_fwd = true;
     }
-    if (rev_str > 1 && rev_str >= fwd_str){
+    if (((locus.period == 2 and rev_str >= 5) 
+	 or (locus.period == 3 and rev_str >= 4)
+	 or (locus.period >= 4 and rev_str >= 3)) && rev_str >= fwd_str){
       realign_rev = true;
     }
+    /*
+    if (((locus.period == 2 and fwd_str >= 5) 
+	 or (locus.period == 3 and fwd_str >= 4)
+	 or (locus.period >= 4 and fwd_str >= 3)) && fwd_str >= rev_str){
+      realign_fwd = true;
+    }
+    if (((locus.period == 2 and rev_str >= 5) 
+	 or (locus.period == 3 and rev_str >= 4)
+	 or (locus.period >= 4 and rev_str >= 3)) && rev_str >= fwd_str){
+      realign_rev = true;
+    }
+    */
     /* Perform realignment and classification */
     if (!(realign_fwd || realign_rev)) {
       return false;
+    }
+    else{
+      //cout << fwd_str << " " << fwd_tot << " " << seq << endl;
+      //cout << rev_str << " " << rev_tot << endl;
     }
     //    std::cerr << "realigning ssw: " << seq << " " << locus.motif << std::endl;
     if (realign_fwd){
       if (!expansion_aware_realign(seq, qual, locus.pre_flank, locus.post_flank, 
 				   locus.motif, min_match, fwd_str, fwd_tot,
+				   ssw_aligner, ssw_filter, ssw_alignment,
 				   &nCopy, &start_pos, &end_pos, 
 				   &score, &fm_start, &fm_end)) {
 	return false;
@@ -745,6 +773,7 @@ bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
     if (realign_rev){
       if (!expansion_aware_realign(seq_rev, qual, locus.pre_flank, locus.post_flank, 
 				   locus.motif, min_match, rev_str, rev_tot,
+				   ssw_aligner, ssw_filter, ssw_alignment,
 				   &nCopy_rev, &start_pos_rev, &end_pos_rev, 
 				   &score_rev, &fm_start_rev, &fm_end_rev)) {
 	return false;
@@ -789,7 +818,9 @@ bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
       var_realign_frr << locus.motif;
     }
     std::string frr_ref = var_realign_frr.str();
-    striped_smith_waterman(frr_ref, seq, qual, &pos_frr, &end_frr, &score_frr, &mismatches_frr);
+    striped_smith_waterman(frr_ref, seq, qual, 
+			   ssw_aligner, ssw_filter, ssw_alignment, 
+			   &pos_frr, &end_frr, &score_frr, &mismatches_frr);
     int gaps_frr = abs(int(end_frr - pos_frr - seq.size()));
     // cerr << mismatches_frr << "\t" << seq << endl;
     
@@ -936,6 +967,10 @@ ReadExtractor::~ReadExtractor() {
   if (options.output_readinfo) {
     readfile_.close();
   }
+  
+  delete ssw_aligner;
+  delete ssw_filter;
+  delete ssw_alignment;
   
 }
 
