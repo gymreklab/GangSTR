@@ -656,114 +656,37 @@ bool cigar_realignment(BamAlignment& aln,
     return true;
   }
 
-  // get only cigar score spanning the STR
-  const int& str_start_in_cigar = str_pos-aln.Position();
-    // position into the segment
-    int pos = 0;
-    // base pairs spanned by this cigar item
-    int bp = 0;
-    // type of the cigar item
-    char cigar_type;
-    // index into the cigar score
-    size_t cigar_index = 0;
-    // diff to go until end of this segment
-    int diff = 0;
-    // temp cigar list to store when removing flanks
-    std::vector<CigarOp> new_cigar_list;
-    // list with only cigars for the STR region
-    std::vector<CigarOp> str_cigar_list;
-    // Diff in bp from ref STR
-    int diff_from_ref = 0;
+  // get from copy
+  BamAlignment copy_aln(aln);
+  int32_t min_read_start = str_pos-MIN_DIST_FROM_END;
+  int32_t max_read_stop = str_end+MIN_DIST_FROM_END;
+  copy_aln.TrimAlignment(min_read_start, max_read_stop);
 
-    // get rid of left flanking region
-    while (pos <= str_start_in_cigar  &&
-	   cigar_index < cigar_list.size()) {
-      bp = cigar_list.at(cigar_index).Length;
-      cigar_type = cigar_list.at(cigar_index).Type;
-      // If match or del, increment position
-      if (cigar_type == 'M' || cigar_type == 'D' || cigar_type == 'S') pos += bp;
-      // bp to go until we hit STR
-      diff = pos - str_start_in_cigar;
-      if (diff >= 0) {
-	size_t cigar_index_to_include = cigar_index;
-	// If left adjacent cigar is not M or S, include it
-	if (diff == 0 && (cigar_list.at(cigar_index).Type == 'M' ||
-			  cigar_list.at(cigar_index).Type == 'S')) {
-	  cigar_index_to_include += 1;
-	} else {
-	  diff -= cigar_list.at(cigar_index).Length;
-	}
-	size_t newsize = cigar_list.size() - cigar_index_to_include;
-	new_cigar_list.resize(newsize);
-	copy(cigar_list.begin() + cigar_index_to_include,
-	     cigar_list.end(),
-	     new_cigar_list.begin());
-	break;
-      }
-      cigar_index += 1;
+  // set diff from ref
+  std::vector<CigarOp> str_cigar_list = copy_aln.CigarData();
+  int diff_from_ref = 0;
+  for (size_t i = 0; i < str_cigar_list.size(); i++) {
+    if (str_cigar_list.at(i).Type == 'I') {
+      diff_from_ref += str_cigar_list.at(i).Length;
     }
-    // Update STR cigar taking away left flank
-    str_cigar_list = new_cigar_list;
-    new_cigar_list.clear();
-    
-    // get rid of right flank cigars
-    // start at beginning of STR list
-    cigar_index = 0;
-    // Pos from end of the STR region
-    pos = diff;
-    int total_str_len = static_cast<int>(ms_length);
-    while (pos < total_str_len) {
-      if (cigar_index >= str_cigar_list.size()) {
-	return false;
-      }
-      bp = str_cigar_list.at(cigar_index).Length;
-      cigar_type = str_cigar_list.at(cigar_index).Type;
-      if (cigar_type == 'M' || cigar_type == 'D' || cigar_type == 'S')
-	pos += bp;
-      // Difference between our position and the end of the STR
-      diff = pos-total_str_len;
-      if (diff >= 0) {
-	size_t cigar_index_to_include = cigar_index;
-	// If right adjacent is not M or S, include it
-	if (cigar_index < str_cigar_list.size() - 1) {
-	    const char& next_type = str_cigar_list.
-	      at(cigar_index+1).Type;
-	    if (next_type != 'M' && next_type != 'S' && diff == 0) {
-	      cigar_index_to_include += 1;
-	    }
-	}
-	new_cigar_list.resize(cigar_index_to_include + 1);
-	copy(str_cigar_list.begin(),
-	     str_cigar_list.begin() + cigar_index_to_include + 1,
-	     new_cigar_list.begin());
-	break;
-      }
-      cigar_index += 1;
+    if (str_cigar_list.at(i).Type == 'D') {
+      diff_from_ref -= str_cigar_list.at(i).Length;
     }
-    str_cigar_list.clear();
-    str_cigar_list = new_cigar_list;
+  }
 
-    // set diff from ref
-    diff_from_ref = 0;
-    for (size_t i = 0; i < str_cigar_list.size(); i++) {
-      if (str_cigar_list.at(i).Type == 'I') {
-	diff_from_ref += str_cigar_list.at(i).Length;
-      }
-      if (str_cigar_list.at(i).Type == 'D') {
-	diff_from_ref -= str_cigar_list.at(i).Length;
-      }
-    }
+  // Skeptical if not multiple of the repeat unit
+  if (diff_from_ref % period != 0) {
+    return false;
+  }
+  // std::cerr << aln.Name() << " " << aln.QueryBases() << " " << diff_from_ref << std::endl;
 
-    // Skeptical if not multiple of the repeat unit
-    if (diff_from_ref % period != 0) {
-      return false;
-    }
-    // Set outputs
-    *nCopy = (int32_t)(str_end-str_pos + 1 + diff_from_ref)/period;
-    *score = 10000; // Score not meaningful here
-    *start_pos = aln.Position();
-    *end_pos = aln.Position() + aln.QueryBases().size() + diff_from_ref;
-    *fm_start = FM_COMPLETE;
-    *fm_end = FM_COMPLETE;
-    return true;
+  // Set outputs
+  *nCopy = (int32_t)(str_end-str_pos + 1 + diff_from_ref)/period;
+  *score = 10000; // Score not meaningful here
+  *start_pos = aln.Position();
+  *end_pos = aln.Position() + aln.QueryBases().size() + diff_from_ref;
+  *fm_start = FM_COMPLETE;
+  *fm_end = FM_COMPLETE;
+  return true;
+
 }
