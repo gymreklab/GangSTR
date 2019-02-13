@@ -135,6 +135,7 @@ Additional optional parameters:
 #### --str-info
 A tab delimited with the following header and format can be used to specify additional per locus information.
 GangSTR currently supports expansion threshold through str-info. The threshold is specified in number of repeat copies, and it is used to calculate expansion probability. (See **QEXP** field in VCF format).
+Note: The loci represented in this file are unique and duplicates should be removed. 
 
 | **chrom** | **pos** | **end** | **thresh** |
 | ------| ------| ------| ----- |
