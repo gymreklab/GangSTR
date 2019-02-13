@@ -27,7 +27,7 @@ If you are installing from the tarball (which for most purposes you should be), 
 
 If you are attempting to compile and install directly from a cloned github repository (e.g. if you would like the latest and greatest unreleased feature or would like to contribute a fix or new feature), the following steps will not work and you should follow instructions under "Compiling from git source" below.
 
-It has been tested and verfied against the following gcc compiler versions: 4.9.2, 5.4.0, 6.3.0, 7.3.0
+These steps have been tested and verfied against the following gcc compiler versions: 4.9.2, 5.4.0, 6.3.0, 7.3.0
 
 If you are running as root:
 ```
