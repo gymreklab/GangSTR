@@ -93,7 +93,7 @@ Additional general options:
 Options for different sequencing settings
 * **--readlength \<int\>** Preset read length (default: extract from alignments if not provided)
 * **--coverage \<float\>** Preset average coverage, should be set for exome/targeted data. Comma separated list to specify for each BAM. (default: calculate if not provided)
-* **--model-gc-coverage** Model coverage as a function of GC content. Requires genome-wide data.
+* **--model-gc-coverage** Model coverage as a function of GC content. Requires genome-wide data. Experimental feature.
 * **--insertmean \<float\>** Fragment length mean. (default: calculate if not provided)
 * **--insertsdev \<float\>** Fragment length standard deviation. (default: calculate if not provided)
 * **--nonuniform** Indicates non-uniform coverage in alignment file (i.e., used for exome sequencing). Using this flag removes the likelihood term corresponding to FRR count.
