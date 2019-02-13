@@ -42,7 +42,7 @@ Genotyper::Genotyper(RefGenome& _refgenome,
     if (sample_info->GetSampleProfile(*it, &sp)) {
       sample_likelihood_maximizers[*it] = new LikelihoodMaximizer(_options, sp, sample_info->GetReadLength());
     } else {
-      PrintMessageDieOnError("Could not find sample profile for " + *it, M_ERROR);
+      PrintMessageDieOnError("Could not find sample profile for " + *it, M_ERROR, false);
     }
   }
 }
@@ -84,7 +84,7 @@ bool Genotyper::ProcessLocus(BamCramMultiReader* bamreader, Locus* locus) {
 
   // Load preflank and postflank to locus
   if (options->verbose) {
-    PrintMessageDieOnError("\tSetting flanking regions", M_PROGRESS);
+    PrintMessageDieOnError("\tSetting flanking regions", M_PROGRESS, options->quiet);
   }
   if (!SetFlanks(locus)) {
     return false;
@@ -109,7 +109,7 @@ bool Genotyper::ProcessLocus(BamCramMultiReader* bamreader, Locus* locus) {
   }
   // Load all read data
   if (options->verbose) {
-    PrintMessageDieOnError("\tLoading read data", M_PROGRESS);
+    PrintMessageDieOnError("\tLoading read data", M_PROGRESS, options->quiet);
   }
   if (!read_extractor->ExtractReads(bamreader, *locus, options->regionsize,
 				    options->min_match, sample_likelihood_maximizers)) {
@@ -138,7 +138,7 @@ bool Genotyper::ProcessLocus(BamCramMultiReader* bamreader, Locus* locus) {
 							 ref_count);
     }
     if (!sample_likelihood_maximizers[samp]->InferGridSize() ) {
-      PrintMessageDieOnError("Error inferring grid size", M_PROGRESS);
+      PrintMessageDieOnError("Error inferring grid size", M_PROGRESS, options->quiet);
       return false;
     }
     sample_likelihood_maximizers[samp]->GetGridSize(&sample_min_allele, &sample_max_allele);
@@ -154,7 +154,7 @@ bool Genotyper::ProcessLocus(BamCramMultiReader* bamreader, Locus* locus) {
   locus->stutter_p = str_info->GetStutterP(locus->chrom, locus->start);
   // Maximize the likelihood
   if (options->verbose) {
-    PrintMessageDieOnError("\tMaximizing likelihood", M_PROGRESS);
+    PrintMessageDieOnError("\tMaximizing likelihood", M_PROGRESS, options->quiet);
   }
   int32_t allele1, allele2;
   double min_negLike, lob1, lob2, hib1, hib2, q_score;
@@ -181,8 +181,14 @@ bool Genotyper::ProcessLocus(BamCramMultiReader* bamreader, Locus* locus) {
 	sample_prob_vec.push_back(-1.0);
 	sample_prob_vec.push_back(-1.0);
       }
-      if (!sample_likelihood_maximizers[samp]->GetQScore(allele1, allele2, &q_score)){ 
-	PrintMessageDieOnError("\tProblem setting quality scores", M_WARNING);
+      if (!options->skip_qscore){
+	if (!sample_likelihood_maximizers[samp]->GetQScore(allele1, allele2, &q_score)){ 
+	  q_score = -1;
+	  PrintMessageDieOnError("\tProblem setting quality scores", M_WARNING, options->quiet);
+	}
+      }
+      else{
+	q_score = -1;
       }
       locus->q_scores[samp] = q_score;
       locus->expansion_probs[samp] = sample_prob_vec;
@@ -196,11 +202,11 @@ bool Genotyper::ProcessLocus(BamCramMultiReader* bamreader, Locus* locus) {
       locus->depth[samp] = sample_likelihood_maximizers[samp]->GetReadPoolSize();
       locus->called[samp] = true;
       if (options->include_ggl && !SetGGL(*locus, samp)) {
-	PrintMessageDieOnError("\tProblem setting genotype likelihoods", M_WARNING);
+	PrintMessageDieOnError("\tProblem setting genotype likelihoods", M_WARNING, options->quiet);
       }
       if (options->num_boot_samp > 0){
 	if (options->verbose) {
-	  PrintMessageDieOnError("\tGetting confidence intervals", M_PROGRESS);
+	  PrintMessageDieOnError("\tGetting confidence intervals", M_PROGRESS, options->quiet);
 	}
 	try{
 	  if (!sample_likelihood_maximizers[samp]->GetConfidenceInterval(allele1, allele2, *locus,
@@ -217,23 +223,23 @@ bool Genotyper::ProcessLocus(BamCramMultiReader* bamreader, Locus* locus) {
 	  
 	  stringstream msg;
 	  msg<<"\tGenotyper Results:  "<<allele1<<", "<<allele2<<"\tlikelihood = "<<min_negLike;
-	  PrintMessageDieOnError(msg.str(), M_PROGRESS);
+	  PrintMessageDieOnError(msg.str(), M_PROGRESS, options->quiet);
 	  if (options->verbose) {
 	    msg.clear();
 	    msg.str(std::string());
 	    msg<<"\tSmall Allele Bound: ["<<lob1<<", "<<hib1<<"]";
-	    PrintMessageDieOnError(msg.str(), M_PROGRESS);
+	    PrintMessageDieOnError(msg.str(), M_PROGRESS, options->quiet);
 	    msg.clear();
 	    msg.str(std::string());
 	    msg<<"\tLarge Allele Bound: ["<<lob2<<", "<<hib2<<"]";
-	    PrintMessageDieOnError(msg.str(), M_PROGRESS);
+	    PrintMessageDieOnError(msg.str(), M_PROGRESS, options->quiet);
 	  }
 	}
 	catch (std::exception &exc){
 	  if (options->verbose) {
 	    stringstream msg;
 	    msg<<"\tEncountered error("<< exc.what() <<") in likelihood maximization for CI. Skipping locus";
-	    PrintMessageDieOnError(msg.str(), M_PROGRESS);
+	    PrintMessageDieOnError(msg.str(), M_PROGRESS, options->quiet);
 	  }
 	  locus->called[samp] = false;
 	}
@@ -243,7 +249,7 @@ bool Genotyper::ProcessLocus(BamCramMultiReader* bamreader, Locus* locus) {
       if (options->verbose) {
 	stringstream msg;
 	msg<<"\tEncountered error("<< exc.what() <<") in likelihood maximization. Skipping locus";
-	PrintMessageDieOnError(msg.str(), M_PROGRESS);
+	PrintMessageDieOnError(msg.str(), M_PROGRESS, options->quiet);
       }
       locus->called[samp] = false;
     }

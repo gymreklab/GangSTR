@@ -62,7 +62,6 @@ bool find_longest_stretch(const std::string& seq,
   *nCopy_total = total;
 }
 
-
 bool expansion_aware_realign(const std::string& seq,
 			     const std::string& qual,
 			     const std::string& pre_flank,
@@ -71,13 +70,17 @@ bool expansion_aware_realign(const std::string& seq,
 			     const int32_t& min_match,
 			     const int32_t& min_nCopy,
 			     const int32_t& total_nCopy,
+			     const StripedSmithWaterman::Aligner* aligner,
+			     const StripedSmithWaterman::Filter* filter,
+			     StripedSmithWaterman::Alignment* alignment,
 			     int32_t* nCopy, 
 			     int32_t* start_pos, 
 			     int32_t* end_pos, 
 			     int32_t* score,
 			     FlankMatchState* fm_start,
 			     FlankMatchState* fm_end) {
-
+  //int MIN_INTERMEDIATE_SCORE = 0.7*min_nCopy*motif.size()*SSW_MATCH_SCORE; // Give up if we don't get to this
+  int MIN_INTERMEDIATE_SCORE = 0.5*seq.size()*SSW_MATCH_SCORE;
   *fm_start = FM_NOMATCH;
   *fm_end = FM_NOMATCH;
   int32_t read_len = (int32_t)seq.size();
@@ -117,12 +120,18 @@ bool expansion_aware_realign(const std::string& seq,
     }
     var_realign_ss << post_flank;
     std::string var_realign_string = var_realign_ss.str();
-    
-
-    if (!striped_smith_waterman(var_realign_string, seq, qual, &current_start_pos, &current_end_pos, &current_score, &current_num_mismatch)) {
+   
+    if (!striped_smith_waterman(var_realign_string, seq, qual,
+				aligner, filter, alignment,
+				&current_start_pos, &current_end_pos, &current_score, &current_num_mismatch)) {
       return false;
     }
     
+    // Check if this is hopeless
+    //    std::cerr << seq << " " << var_realign_string << " " << motif << " " << current_nCopy << " " << current_score << std::endl;
+    if (current_score < MIN_INTERMEDIATE_SCORE) {
+      return false;
+    }
 
     // Flank match check
     // Preflank
@@ -257,24 +266,13 @@ bool next_move(std::vector<std::vector<int32_t> > score_matrix,
 }
 
 bool striped_smith_waterman(const std::string& ref,
-        const std::string& seq,
-        const std::string& qual,
-        int32_t* pos, int32_t* end, int32_t* score, int32_t* mismatches) {
-
-  // SSW Objects
-  StripedSmithWaterman::Aligner* aligner;
-  StripedSmithWaterman::Filter* filter;
-  StripedSmithWaterman::Alignment* alignment;
-
-  aligner = new StripedSmithWaterman::Aligner(SSW_MATCH_SCORE, 
-                              SSW_MISMATCH_SCORE, 
-                              SSW_GAP_OPEN, 
-                              SSW_GAP_EXTEND);
-  filter = new StripedSmithWaterman::Filter;
-  alignment = new StripedSmithWaterman::Alignment;
-  int32_t maskLen = seq.size() / 2;
-  maskLen = maskLen < 15 ? 15 : maskLen;
-  maskLen = 15;
+			    const std::string& seq,
+			    const std::string& qual,
+			    const StripedSmithWaterman::Aligner* aligner,
+			    const StripedSmithWaterman::Filter* filter,
+			    StripedSmithWaterman::Alignment* alignment,
+			    int32_t* pos, int32_t* end, int32_t* score, int32_t* mismatches) {
+  int32_t maskLen = 15;
   aligner->Align(seq.c_str(), ref.c_str(), (int32_t)ref.size(), *filter, alignment, maskLen);
 
   *pos = alignment->ref_begin;
@@ -282,9 +280,6 @@ bool striped_smith_waterman(const std::string& ref,
   *score = alignment->sw_score;
   *mismatches = alignment->mismatches;
 
-  delete aligner;
-  delete filter;
-  delete alignment;
   return true;
 }
 
@@ -590,5 +585,108 @@ bool classify_realigned_read(const std::string& seq,
   // If no other class matches this read pair:
   *single_read_class = SR_UNKNOWN;
   return true; 
+
+}
+
+float MeanQual(const std::string& quals) {
+  float total_qual = 0;
+  float num_qual = 0;
+  for (size_t i=0; i<quals.size(); i++) {
+    total_qual += quals[i];
+    num_qual += 1;
+  }
+  return total_qual/num_qual;
+}
+
+// min allowed distance from STR boundary to read ends
+const size_t MIN_DIST_FROM_END = 20;
+// more than this is likely bad alignment
+const size_t MAX_CIGAR_SIZE = 10;
+bool cigar_realignment(BamAlignment& aln,
+		       const int32_t& str_pos,
+		       const int32_t& str_end,
+		       const int32_t& period,
+		       int32_t* nCopy,
+		       int32_t* start_pos,
+		       int32_t* end_pos,
+		       int32_t* score,
+		       FlankMatchState* fm_start,
+		       FlankMatchState* fm_end) {
+  // Initial check that STR encompassed by read
+  if (str_pos < aln.Position()) {
+    return false;
+  }
+  // index where STR starts in the read
+  size_t str_index = str_pos - aln.Position() + 1;
+  // Length of the total STR region
+  size_t ms_length = str_end - str_pos + 1;
+
+  // check that not too close to ends
+  size_t span = 0;
+  std::vector<CigarOp> cigar_list = aln.CigarData();
+  if (cigar_list.size() == 0) return false;
+  for (size_t i = 0; i < cigar_list.size(); i++) {
+    const int& s = cigar_list.at(i).Length;
+    const char& t = cigar_list.at(i).Type;
+    if (t == 'M' || t == 'D') span += s;
+  }
+  size_t str_index_end = aln.Position() + span - str_end;
+  if (str_end > aln.Position() + span) {
+    return false;
+  }
+  if ((str_index < MIN_DIST_FROM_END || str_index_end < MIN_DIST_FROM_END)) {
+    return false;
+  }
+
+  // If alignment is too messy, get rid of it
+  if (cigar_list.size() > MAX_CIGAR_SIZE) {
+    return false;
+  }
+
+  // same as reference
+  if (cigar_list.size() == 1 &&
+      cigar_list.at(0).Type == 'M'
+      && cigar_list.at(0).Length == aln.QueryBases().size()) {
+    *nCopy = (int32_t)(str_end-str_pos + 1)/period;
+    *score = 10000; // Score not meaningful here
+    *start_pos = aln.Position();
+    *end_pos = aln.Position() + aln.QueryBases().size();
+    *fm_start = FM_COMPLETE;
+    *fm_end = FM_COMPLETE;
+    return true;
+  }
+
+  // get from copy
+  BamAlignment copy_aln(aln);
+  int32_t min_read_start = str_pos-MIN_DIST_FROM_END;
+  int32_t max_read_stop = str_end+MIN_DIST_FROM_END;
+  copy_aln.TrimAlignment(min_read_start, max_read_stop);
+
+  // set diff from ref
+  std::vector<CigarOp> str_cigar_list = copy_aln.CigarData();
+  int diff_from_ref = 0;
+  for (size_t i = 0; i < str_cigar_list.size(); i++) {
+    if (str_cigar_list.at(i).Type == 'I') {
+      diff_from_ref += str_cigar_list.at(i).Length;
+    }
+    if (str_cigar_list.at(i).Type == 'D') {
+      diff_from_ref -= str_cigar_list.at(i).Length;
+    }
+  }
+
+  // Skeptical if not multiple of the repeat unit
+  if (diff_from_ref % period != 0) {
+    return false;
+  }
+  // std::cerr << aln.Name() << " " << aln.QueryBases() << " " << diff_from_ref << std::endl;
+
+  // Set outputs
+  *nCopy = (int32_t)(str_end-str_pos + 1 + diff_from_ref)/period;
+  *score = 10000; // Score not meaningful here
+  *start_pos = aln.Position();
+  *end_pos = aln.Position() + aln.QueryBases().size() + diff_from_ref;
+  *fm_start = FM_COMPLETE;
+  *fm_end = FM_COMPLETE;
+  return true;
 
 }

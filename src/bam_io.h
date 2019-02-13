@@ -36,6 +36,11 @@ class CigarOp {
     Type   = type;
     Length = length;
   }
+
+  CigarOp() { // Added default constructor
+    Type = 'M';
+    Length = 0;
+  }
 };
 
 
@@ -409,13 +414,13 @@ class BamHeader {
       return "*";
     if (ref_id >= 0 && ref_id < (int)seq_names_.size())
       return seq_names_[ref_id];
-    PrintMessageDieOnError("Invalid reference ID provided to ref_name() function", M_ERROR);
+    PrintMessageDieOnError("Invalid reference ID provided to ref_name() function", M_ERROR, false);
   }
 
   uint32_t ref_length(int32_t ref_id) const {
     if (ref_id >= 0 && ref_id < (int)seq_lengths_.size())
       return seq_lengths_[ref_id];
-    PrintMessageDieOnError("Invalid reference ID provided to ref_length() function", M_ERROR);
+    PrintMessageDieOnError("Invalid reference ID provided to ref_length() function", M_ERROR, false);
   }
 
   ~BamHeader(){
@@ -457,13 +462,13 @@ class BamCramReader {
 
     // Open the file itself
     if (!file_exists(path))
-      PrintMessageDieOnError("File " + path + " doest not exist", M_ERROR);
+      PrintMessageDieOnError("File " + path + " doest not exist", M_ERROR, false);
     in_ = sam_open(path.c_str(), "r");
     if (in_ == NULL)
-      PrintMessageDieOnError("Failed to open file " + path, M_ERROR);
+      PrintMessageDieOnError("Failed to open file " + path, M_ERROR, false);
 
     if (in_->is_cram){
-      PrintMessageDieOnError("No support for CRAM files yet", M_ERROR);
+      PrintMessageDieOnError("No support for CRAM files yet", M_ERROR, false);
       /*
       if (fasta_path.empty())
 	PrintMessageDieOnError("Must specify a FASTA reference file path for CRAM file " + path, M_ERROR);
@@ -481,13 +486,13 @@ class BamCramReader {
 
     // Read the header
     if ((hdr_ = sam_hdr_read(in_)) == 0)
-      PrintMessageDieOnError("Failed to read the header for file " + path, M_ERROR);
+      PrintMessageDieOnError("Failed to read the header for file " + path, M_ERROR, false);
     header_ = new BamHeader(hdr_);
 
     // Open the index
     idx_ = sam_index_load(in_, path.c_str());
     if (idx_ == NULL) 
-      PrintMessageDieOnError("Failed to load the index for file " + path, M_ERROR);
+      PrintMessageDieOnError("Failed to load the index for file " + path, M_ERROR, false);
 
     iter_       = NULL;
     start_      = -1;
@@ -539,9 +544,9 @@ class BamCramMultiReader {
 
   BamCramMultiReader(const std::vector<std::string>& paths, std::string fasta_path = "", int merge_type = ORDER_ALNS_BY_POSITION){
     if (paths.empty())
-      PrintMessageDieOnError("Must provide at least one file to BamCramMultiReader constructor", M_ERROR);
+      PrintMessageDieOnError("Must provide at least one file to BamCramMultiReader constructor", M_ERROR, false);
     if (merge_type != ORDER_ALNS_BY_POSITION && merge_type != ORDER_ALNS_BY_FILE)
-      PrintMessageDieOnError("Invalid merge type provided to BamCramMultiReader constructor", M_ERROR);
+      PrintMessageDieOnError("Invalid merge type provided to BamCramMultiReader constructor", M_ERROR, false);
     for (size_t i = 0; i < paths.size(); i++){
       cached_alns_.push_back(BamAlignment());
       bam_readers_.push_back(new BamCramReader(paths[i], fasta_path));
@@ -564,7 +569,7 @@ class BamCramMultiReader {
   const BamHeader* bam_header(int file_index) const {
     if (file_index >= 0 && file_index < (int)bam_readers_.size())
       return bam_readers_[file_index]->bam_header(); 
-    PrintMessageDieOnError("Invalid file index provided to bam_header() function", M_ERROR);
+    PrintMessageDieOnError("Invalid file index provided to bam_header() function", M_ERROR, false);
   }
 
   bool SetRegion(const std::string& chrom, int32_t start, int32_t end);
@@ -592,14 +597,14 @@ class BamWriter {
     std::string mode = "w";
     output_ = bgzf_open(path.c_str(), mode.c_str());
     if (output_ == NULL)
-      PrintMessageDieOnError("Failed to open BAM output file", M_ERROR);
+      PrintMessageDieOnError("Failed to open BAM output file", M_ERROR, false);
     if (bam_hdr_write(output_, bam_header->header_) == -1)
-      PrintMessageDieOnError("Failed to write the BAM header to the output file", M_ERROR);
+      PrintMessageDieOnError("Failed to write the BAM header to the output file", M_ERROR, false);
   }
 
   void Close(){
     if (bgzf_close(output_) != 0)
-      PrintMessageDieOnError("Failed to close BAM output file", M_ERROR);
+      PrintMessageDieOnError("Failed to close BAM output file", M_ERROR, false);
     output_ = NULL;
   }
 

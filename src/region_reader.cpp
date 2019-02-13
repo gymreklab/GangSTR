@@ -32,7 +32,7 @@ using namespace std;
 RegionReader::RegionReader(const std::string& filename) {
   freader = new std::ifstream(filename.c_str());
   if (!freader->is_open()) {
-    PrintMessageDieOnError("Could not open regions file", M_ERROR);
+    PrintMessageDieOnError("Could not open regions file", M_ERROR, false);
   }
 }
 
@@ -51,7 +51,7 @@ bool RegionReader::GetNextRegion(Locus* locus) {
   split_by_delim(line, '\t', items);
   
   if (items.size() < 5) {
-    PrintMessageDieOnError("Regions file not formatted correctly", M_ERROR);
+    PrintMessageDieOnError("Regions file not formatted correctly", M_ERROR, false);
   }
   else if (items.size() == 6){
     offtarget_str = items[5];

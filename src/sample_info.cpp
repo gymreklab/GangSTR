@@ -38,10 +38,10 @@ bool SampleInfo::SetCustomReadGroups(const Options& options) {
   split_by_delim(options.rg_sample_string, ',', read_groups);
 
   if (options.bamfiles.size() != read_groups.size()) {
-    PrintMessageDieOnError("Number of BAM files in --bam and samples in --bam-samps must match", M_ERROR);
+    PrintMessageDieOnError("Number of BAM files in --bam and samples in --bam-samps must match", M_ERROR, false);
   }
   for (size_t i=0; i<options.bamfiles.size(); i++) {
-    PrintMessageDieOnError("Loading read group  " + read_groups[i] + " for file " + options.bamfiles[i], M_PROGRESS);
+    PrintMessageDieOnError("Loading read group  " + read_groups[i] + " for file " + options.bamfiles[i], M_PROGRESS, options.quiet);
     rg_ids_to_sample[options.bamfiles[i]] = read_groups[i];
     rg_samples.insert(read_groups[i]);
   }
@@ -52,21 +52,21 @@ bool SampleInfo::LoadReadGroups(const Options& options, const BamCramMultiReader
   for (size_t i=0; i<options.bamfiles.size(); i++) {
     const std::vector<ReadGroup>& read_groups = bamreader.bam_header(i)->read_groups();
     if (read_groups.empty()) {
-      PrintMessageDieOnError("\tNo read group specified in BAM file", M_ERROR);
+      PrintMessageDieOnError("\tNo read group specified in BAM file", M_ERROR, false);
     } 
     for (std::vector<ReadGroup>::const_iterator rg_iter = read_groups.begin(); rg_iter != read_groups.end(); rg_iter++) {
       if (!rg_iter->HasID()) {
-	PrintMessageDieOnError("RG in BAM/CRAM header is lacking the ID tag", M_ERROR);
+	PrintMessageDieOnError("RG in BAM/CRAM header is lacking the ID tag", M_ERROR, false);
       }
       if (!rg_iter->HasSample()) {
-	PrintMessageDieOnError("RG in BAM/CRAM header is lacking the SM tag",M_ERROR);
+	PrintMessageDieOnError("RG in BAM/CRAM header is lacking the SM tag",M_ERROR, false);
       }
       if (rg_ids_to_sample.find(rg_iter->GetID()) != rg_ids_to_sample.end()) {
 	if (rg_ids_to_sample[rg_iter->GetID()].compare(rg_iter->GetSample()) != 0) {
-	  PrintMessageDieOnError("Read group id " + rg_iter->GetID() + " maps to more than one sample", M_ERROR);
+	  PrintMessageDieOnError("Read group id " + rg_iter->GetID() + " maps to more than one sample", M_ERROR, false);
 	}
       }
-      PrintMessageDieOnError("Loading read group id " + rg_iter->GetID() + " for sample " + rg_iter->GetSample(), M_PROGRESS);
+      PrintMessageDieOnError("Loading read group id " + rg_iter->GetID() + " for sample " + rg_iter->GetSample(), M_PROGRESS, options.quiet);
       rg_ids_to_sample[options.bamfiles[i]+":"+rg_iter->GetID()] = rg_iter->GetSample();
       rg_samples.insert(rg_iter->GetSample());
     } 
@@ -79,7 +79,7 @@ bool SampleInfo::ExtractBamInfo(const Options& options, BamCramMultiReader& bamr
   BamInfoExtract bam_info(&options, &bamreader, &region_reader, &ref_genome);
   if (options.read_len == -1) {
     if (!bam_info.GetReadLen(&read_len)) {
-      PrintMessageDieOnError("Error extracting read length", M_ERROR);
+      PrintMessageDieOnError("Error extracting read length", M_ERROR, false);
     }
   }
   else{
@@ -90,11 +90,11 @@ bool SampleInfo::ExtractBamInfo(const Options& options, BamCramMultiReader& bamr
   // Set insert size distribution
   if (options.dist_mean.empty() or options.dist_sdev.empty()) {
     if (!bam_info.GetInsertSizeDistribution(&profile, rg_samples, rg_ids_to_sample, custom_read_groups)) {
-      PrintMessageDieOnError("Error extracting insert size info", M_ERROR);
+      PrintMessageDieOnError("Error extracting insert size info", M_ERROR, false);
     }
   } else {
     if (options.dist_mean.size() != options.dist_sdev.size()) {
-      PrintMessageDieOnError("Different number of dist means and dist sdevs input", M_ERROR);
+      PrintMessageDieOnError("Different number of dist means and dist sdevs input", M_ERROR, false);
     }
     if (options.dist_mean.size() == 1) {
       size_t i = 0;
@@ -121,10 +121,10 @@ bool SampleInfo::ExtractBamInfo(const Options& options, BamCramMultiReader& bamr
       }
     } else {
       if (options.dist_mean.size() != options.bamfiles.size()) {
-	PrintMessageDieOnError("Different number of dist means and BAM files input", M_ERROR);
+	PrintMessageDieOnError("Different number of dist means and BAM files input", M_ERROR, false);
       }
       if (!custom_read_groups) {
-	PrintMessageDieOnError("Can only set per-BAM dists if using custom read groups", M_ERROR);
+	PrintMessageDieOnError("Can only set per-BAM dists if using custom read groups", M_ERROR, false);
       }
       for (size_t i=0; i<options.bamfiles.size(); i++) {
 	profile[options.bamfiles[i]].dist_mean = options.dist_mean[i];
@@ -152,7 +152,7 @@ bool SampleInfo::ExtractBamInfo(const Options& options, BamCramMultiReader& bamr
   // Set coverage
   if (options.coverage.empty()) {
     if (!bam_info.GetCoverage(&profile, rg_samples, rg_ids_to_sample, custom_read_groups)) {
-      PrintMessageDieOnError("Error extracting coverage info", M_ERROR);
+      PrintMessageDieOnError("Error extracting coverage info", M_ERROR, false);
     }
   } else {
     if (options.coverage.size() == 1) {
@@ -163,10 +163,10 @@ bool SampleInfo::ExtractBamInfo(const Options& options, BamCramMultiReader& bamr
       }
     } else {
       if (options.coverage.size() != options.bamfiles.size()) {
-	PrintMessageDieOnError("Different number of coverages and BAM files input", M_ERROR);
+	PrintMessageDieOnError("Different number of coverages and BAM files input", M_ERROR, false);
       }
       if (!custom_read_groups) {
-	PrintMessageDieOnError("Can only set per-BAM coverages if using custom read groups", M_ERROR);
+	PrintMessageDieOnError("Can only set per-BAM coverages if using custom read groups", M_ERROR, false);
       }
       for (size_t i=0; i<options.bamfiles.size(); i++) {
 	profile[options.bamfiles[i]].coverage = options.coverage[i];
@@ -195,7 +195,7 @@ void SampleInfo::PrintSampleInfo(const std::string& logfilename) {
       }
     }
   }
-  PrintMessageDieOnError(ss.str(), M_PROGRESS);
+  //  PrintMessageDieOnError(ss.str(), M_PROGRESS,);
   // now print to log file
   ofstream sample_log_file;
   sample_log_file.open(logfilename.c_str());
@@ -240,7 +240,7 @@ const double SampleInfo::GetCoverage(std::string sample) {
 
 const double SampleInfo::GetGCCoverage(std::string sample, int32_t gcbin) {
   if (gcbin == -1 || gcbin >= profile[sample].gc_coverage.size()) {
-    PrintMessageDieOnError("GC Bin not set or out of range. Returning mean coverage", M_WARNING);
+    //    PrintMessageDieOnError("GC Bin not set or out of range. Returning mean coverage", M_WARNING);
     return profile[sample].coverage;
   }
   return profile[sample].gc_coverage[gcbin];

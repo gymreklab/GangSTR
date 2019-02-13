@@ -58,6 +58,7 @@ void show_help() {
            << "\t" << "--bam-samps   <string>        " << "\t" << "Comma separated list of sample IDs for --bam" << "\n"
 	   << "\t" << "--str-info    <string>        " << "\t" << "Tab file with additional per-STR info (see docs)" << "\n"
 	   << "\t" << "--period      <string>        " << "\t" << "Comma-separated list of periods to consider" << "\n"
+	   << "\t" << "--skip-qscore                 " << "\t" << "Skip calculation of Q-score" << "\n"
 	   << "\n Options for different sequencing settings\n"
 	   << "\t" << "--readlength  <int>           " << "\t" << "Read length. Default: " << options.read_len << "\n"
 	   << "\t" << "--coverage    <float>         " << "\t" << "Average coverage. must be set for exome/targeted data. Comma separated list to specify for each BAM" << "\n"
@@ -93,6 +94,7 @@ void show_help() {
 	   << "\t" << "--seed                        " << "\t" << "Random number generator initial seed" << "\n"
 	   << "\t" << "-v,--verbose                  " << "\t" << "Print out useful progress messages" << "\n"
 	   << "\t" << "--very                        " << "\t" << "Print out more detailed progress messages for debugging" << "\n"
+	   << "\t" << "--quiet                       " << "\t" << "Don't print anything" << "\n"
 	   << "\t" << "--version                     " << "\t" << "Print out the version of this software.\n"
 	   << "\n\nThis program takes in aligned reads in BAM format\n"
 	   << "and outputs estimated genotypes at each TR in VCF format.\n\n";
@@ -102,6 +104,7 @@ void show_help() {
 
 void parse_commandline_options(int argc, char* argv[], Options* options) {
   enum LONG_OPTIONS {
+    OPT_SKIPQ,
     OPT_MINREAD,
     OPT_PERIOD,
     OPT_GGL,
@@ -140,9 +143,11 @@ void parse_commandline_options(int argc, char* argv[], Options* options) {
     OPT_SEED,
     OPT_VERBOSE,
     OPT_VERYVERBOSE,
+    OPT_QUIET,
     OPT_VERSION,
   };
   static struct option long_options[] = {
+    {"skip-qscore", no_argument, NULL, OPT_SKIPQ},
     {"min-read-cov", required_argument, NULL, OPT_MINREAD},
     {"period",      required_argument,  NULL, OPT_PERIOD},
     {"include-ggl", no_argument, NULL, OPT_GGL},
@@ -181,6 +186,7 @@ void parse_commandline_options(int argc, char* argv[], Options* options) {
     {"seed",        required_argument,  NULL, OPT_SEED},
     {"verbose",     no_argument,        NULL, OPT_VERBOSE},
     {"very",  no_argument, NULL, OPT_VERYVERBOSE},
+    {"quiet", no_argument, NULL, OPT_QUIET},
     {"version",     no_argument,        NULL, OPT_VERSION},
     {NULL,          no_argument,        NULL, 0},
   };
@@ -191,6 +197,9 @@ void parse_commandline_options(int argc, char* argv[], Options* options) {
                    long_options, &option_index);
   while (ch != -1) {
     switch (ch) {
+    case OPT_SKIPQ:
+      options->skip_qscore = true;
+      break;
     case OPT_MINREAD:
       options->min_reads_per_sample = atoi(optarg);
       break;
@@ -326,6 +335,9 @@ void parse_commandline_options(int argc, char* argv[], Options* options) {
     case OPT_VERYVERBOSE:
       options->very_verbose = true;
       break;
+    case OPT_QUIET:
+      options->quiet = true;
+      break;
     case OPT_VERSION:
       cerr << _GIT_VERSION << endl;
       exit(0);
@@ -339,26 +351,26 @@ void parse_commandline_options(int argc, char* argv[], Options* options) {
   };
   // Leftover arguments are errors
   if (optind < argc) {
-    PrintMessageDieOnError("Unnecessary leftover arguments", M_ERROR);
+    PrintMessageDieOnError("Unnecessary leftover arguments", M_ERROR, false);
   }
   // Perform other error checking
   if (options->bamfiles.empty()) {
-    PrintMessageDieOnError("No --bam files specified", M_ERROR);
+    PrintMessageDieOnError("No --bam files specified", M_ERROR, false);
   }
   if (options->regionsfile.empty()) {
-    PrintMessageDieOnError("No --regions option specified", M_ERROR);
+    PrintMessageDieOnError("No --regions option specified", M_ERROR, false);
   }
   if (options->reffa.empty()) {
-    PrintMessageDieOnError("No --ref option specified", M_ERROR);
+    PrintMessageDieOnError("No --ref option specified", M_ERROR, false);
   }
   if (options->outprefix.empty()) {
-    PrintMessageDieOnError("No --out option specified", M_ERROR);
+    PrintMessageDieOnError("No --out option specified", M_ERROR, false);
   }
   if (options->min_match < 0 or (options->read_len != -1 and options->min_match > options->read_len)){
-    PrintMessageDieOnError("--minmatch parameter must be in (0, read_len) range", M_ERROR);
+    PrintMessageDieOnError("--minmatch parameter must be in (0, read_len) range", M_ERROR, false);
   }
   if (options->min_score < 0 and options->min_score > 100){
-    PrintMessageDieOnError("--min_score parameter must be in (0, 100) range", M_ERROR);
+    PrintMessageDieOnError("--min_score parameter must be in (0, 100) range", M_ERROR, false);
   }
   
 }
@@ -382,18 +394,18 @@ int main(int argc, char* argv[]) {
   SampleInfo sample_info;
   if (!options.rg_sample_string.empty()) {
     if (!sample_info.SetCustomReadGroups(options)) {
-      PrintMessageDieOnError("Error setting custom read groups", M_ERROR);
+      PrintMessageDieOnError("Error setting custom read groups", M_ERROR, false);
     }
   } else {
     if (!sample_info.LoadReadGroups(options, bamreader)) {
-      PrintMessageDieOnError("Error loading read groups", M_ERROR);
+      PrintMessageDieOnError("Error loading read groups", M_ERROR, false);
     }
   }
 
   // Extract information from bam file (read length, insert size distribution, ..)
   RefGenome refgenome(options.reffa);
   if (!sample_info.ExtractBamInfo(options, bamreader, region_reader, refgenome)) {
-    PrintMessageDieOnError("Error extracting info from BAM file", M_ERROR);
+    PrintMessageDieOnError("Error extracting info from BAM file", M_ERROR, false);
   }
   options.realignment_flanklen = sample_info.GetReadLength();
   // Write out values found for each sample
@@ -417,7 +429,7 @@ int main(int argc, char* argv[]) {
     ss.str("");
     ss.clear();
     ss << "Processing " << locus.chrom << ":" << locus.start;
-    PrintMessageDieOnError(ss.str(), M_PROGRESS);
+    PrintMessageDieOnError(ss.str(), M_PROGRESS, options.quiet);
 
     if (options.use_off){
       locus.offtarget_share = 1.0;

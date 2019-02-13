@@ -38,7 +38,7 @@ STRInfo::STRInfo(const Options& options) {
   if (!options.str_info_file.empty()) {
      std::ifstream freader(options.str_info_file.c_str());
      if (!freader.is_open()) {
-       PrintMessageDieOnError("Could not open STR info file" , M_ERROR);
+       PrintMessageDieOnError("Could not open STR info file" , M_ERROR, false);
      }
      // Get header and col nums
      std::string line;
@@ -46,11 +46,11 @@ STRInfo::STRInfo(const Options& options) {
      int chrom_col, start_col, end_col, thresh_col,
        stutter_up_col, stutter_down_col, stutter_p_col;
      if (!std::getline(freader, line)) {
-       PrintMessageDieOnError("No header in STR info file" , M_ERROR);
+       PrintMessageDieOnError("No header in STR info file" , M_ERROR, false);
      }
      split_by_delim(line, '\t', items);
      if (items.size() <= 3) {
-       PrintMessageDieOnError("No relevant STR info found. Check format." , M_ERROR);
+       PrintMessageDieOnError("No relevant STR info found. Check format." , M_ERROR, false);
      }
      chrom_col = 0;
      start_col = 1;
@@ -69,7 +69,7 @@ STRInfo::STRInfo(const Options& options) {
        } else if (colname == "stutter_p") {
 	 stutter_p_col = i;
        } else {
-	 PrintMessageDieOnError("Unknown STR info column detected... " + colname, M_WARNING);
+	 PrintMessageDieOnError("Unknown STR info column detected... " + colname, M_WARNING, options.quiet);
        }
      }
      // Get info for each STR

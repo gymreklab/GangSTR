@@ -99,7 +99,7 @@ bool EnclosingClass::ExtractEnclosingAlleles(std::vector<int> *alleles){
 
 	for (std::vector<int32_t>::iterator data_it = this->read_class_data_.begin();
        data_it != this->read_class_data_.end();
-       data_it++) {
+       data_it++) { 
        	if (allele_repeats.find(*data_it) == allele_repeats.end()){
        		allele_repeats[*data_it] = 1;
        	}

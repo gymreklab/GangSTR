@@ -124,7 +124,7 @@ bool BamCramMultiReader::SetRegion(const std::string& chrom, int32_t start, int3
       else if (merge_type_ == ORDER_ALNS_BY_FILE)
 	aln_heap_.push_back(std::pair<int32_t, int32_t>(-reader_index, reader_index));
       else
-	PrintMessageDieOnError("Invalid merge order in SetRegion()", M_ERROR);
+	PrintMessageDieOnError("Invalid merge order in SetRegion()", M_ERROR, false);
     }
   }
   std::make_heap(aln_heap_.begin(), aln_heap_.end());
@@ -148,7 +148,7 @@ bool BamCramMultiReader::GetNextAlignment(BamAlignment& aln){
     else if (merge_type_ == ORDER_ALNS_BY_FILE)
       aln_heap_.push_back(std::pair<int32_t, int32_t>(-reader_index, reader_index));
     else
-      PrintMessageDieOnError("Invalid merge order in GetNextAlignment()", M_ERROR);
+      PrintMessageDieOnError("Invalid merge order in GetNextAlignment()", M_ERROR, false);
 
     std::push_heap(aln_heap_.begin(), aln_heap_.end());
   }
@@ -160,17 +160,17 @@ void compare_bam_headers(const BamHeader* hdr_a, const BamHeader* hdr_b, const s
   std::stringstream error_msg;
   if (hdr_a->num_seqs() != hdr_b->num_seqs()){
     error_msg << "BAM header mismatch issue. BAM headers for files " << file_a << " and " << file_b << " must have the same number of reference sequences";
-    PrintMessageDieOnError(error_msg.str(), M_ERROR);
+    PrintMessageDieOnError(error_msg.str(), M_ERROR, false);
   }
 
   for (int32_t i = 0; i < hdr_a->num_seqs(); ++i){
     if (hdr_a->ref_name(i).compare(hdr_b->ref_name(i)) != 0){
       error_msg << "BAM header mismatch issue. Order of reference sequences in BAM headers for files " << file_a << " and " << file_b << " must match";
-      PrintMessageDieOnError(error_msg.str(), M_ERROR);
+      PrintMessageDieOnError(error_msg.str(), M_ERROR, false);
     }
     if (hdr_a->ref_length(i) != hdr_b->ref_length(i)){
       error_msg << "BAM header mismatch issue. Length of reference sequences in BAM headers for files " << file_a << " and " << file_b << " must match";
-      PrintMessageDieOnError(error_msg.str(), M_ERROR);
+      PrintMessageDieOnError(error_msg.str(), M_ERROR, false);
     }
   }
 }
@@ -193,7 +193,7 @@ void BamAlignment::TrimAlignment(int32_t min_read_start, int32_t max_read_stop, 
     case 'D': case 'H':
       break;
     default:
-      PrintMessageDieOnError("Invalid CIGAR option encountered in trimAlignment", M_ERROR);
+      PrintMessageDieOnError("Invalid CIGAR option encountered in trimAlignment", M_ERROR, false);
       break;
     }
     if (qual_above_thresh)
@@ -213,7 +213,7 @@ void BamAlignment::TrimAlignment(int32_t min_read_start, int32_t max_read_stop, 
     case 'H':
       break;
     default:
-      PrintMessageDieOnError("Invalid CIGAR option encountered in TrimAlignment", M_ERROR);
+      PrintMessageDieOnError("Invalid CIGAR option encountered in TrimAlignment", M_ERROR, false);
       break;
     }
     if (cigar_ops_.front().Length == 1)
@@ -234,7 +234,7 @@ void BamAlignment::TrimAlignment(int32_t min_read_start, int32_t max_read_stop, 
     case 'D': case 'H':
       break;
     default:
-      PrintMessageDieOnError("Invalid CIGAR option encountered in TrimAlignment", M_ERROR);
+      PrintMessageDieOnError("Invalid CIGAR option encountered in TrimAlignment", M_ERROR, false);
       break;
     }
     if (qual_above_thresh)
@@ -254,7 +254,7 @@ void BamAlignment::TrimAlignment(int32_t min_read_start, int32_t max_read_stop, 
     case 'H':
       break;
     default:
-      PrintMessageDieOnError("Invalid CIGAR option encountered in trimAlignment", M_ERROR);
+      PrintMessageDieOnError("Invalid CIGAR option encountered in trimAlignment", M_ERROR, false);
       break;
     }
     if (cigar_ops_.back().Length == 1)

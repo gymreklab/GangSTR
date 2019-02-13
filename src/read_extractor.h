@@ -96,6 +96,11 @@ private:
   const Options options;
   SampleInfo sample_info;
   ofstream readfile_;
+  // SSW Objects
+  StripedSmithWaterman::Aligner* ssw_aligner;
+  StripedSmithWaterman::Filter* ssw_filter;
+  StripedSmithWaterman::Alignment* ssw_alignment;
+
 };
 
 #endif  // SRC_READ_EXTRACTOR_H__

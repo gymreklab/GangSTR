@@ -26,6 +26,7 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <stdint.h>
 #include "src/ssw_cpp.h"
+#include "src/bam_io.h"
 
 // Set NW params
 // NOTE: the other score triple (12,-12,-16) causes issues in realignment test (ambigous cases)
@@ -100,6 +101,9 @@ bool expansion_aware_realign(const std::string& seq,
 			     const int32_t& min_match,
 			     const int32_t& min_nCopy,
 			     const int32_t& total_nCopy,
+			     const StripedSmithWaterman::Aligner* aligner,
+			     const StripedSmithWaterman::Filter* filter,
+			     StripedSmithWaterman::Alignment* alignment,
 			     int32_t* nCopy, 
 			     int32_t* start_pos, 
 			     int32_t* end_pos, 
@@ -113,9 +117,12 @@ bool smith_waterman(const std::string& seq1,
 		    int32_t* pos, int32_t* end, int32_t* score);
 
 bool striped_smith_waterman(const std::string& ref,
-        const std::string& seq,
-        const std::string& qual,
-        int32_t* pos, int32_t* pos_temp, int32_t* score, int32_t* mismatches);
+			    const std::string& seq,
+			    const std::string& qual,
+			    const StripedSmithWaterman::Aligner* aligner,
+			    const StripedSmithWaterman::Filter* filter,
+			    StripedSmithWaterman::Alignment* alignment,
+			    int32_t* pos, int32_t* pos_temp, int32_t* score, int32_t* mismatches);
 //static void ssw_PrintAlignment(const StripedSmithWaterman::Alignment& alignment);
 bool create_score_matrix(const int32_t& rows, const int32_t& cols,
 			 const std::string& seq1,
@@ -143,5 +150,21 @@ bool classify_realigned_read(const std::string& seq,
 			     const FlankMatchState& fm_start,
 			     const FlankMatchState& fm_end,
 			     SingleReadType* single_read_class);
+
+float MeanQual(const std::string& quals);
+
+// Estimate copy number based on CIGAR score
+// If not conclusive enough CIGAR score return false
+bool cigar_realignment(BamAlignment& aln,
+		       const int32_t& str_pos,
+		       const int32_t& str_end,
+		       const int32_t& period,
+		       int32_t* nCopy,
+		       int32_t* start_pos,
+		       int32_t* end_pos,
+		       int32_t* score,
+		       FlankMatchState* fm_start,
+		       FlankMatchState* fm_end);
+		       
 
 #endif  // SRC_REALIGNMENT_H__
