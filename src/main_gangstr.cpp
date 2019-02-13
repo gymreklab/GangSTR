@@ -58,6 +58,7 @@ void show_help() {
            << "\t" << "--bam-samps   <string>        " << "\t" << "Comma separated list of sample IDs for --bam" << "\n"
 	   << "\t" << "--str-info    <string>        " << "\t" << "Tab file with additional per-STR info (see docs)" << "\n"
 	   << "\t" << "--period      <string>        " << "\t" << "Comma-separated list of periods to consider" << "\n"
+	   << "\t" << "--skip-qscore                 " << "\t" << "Skip calculation of Q-score" << "\n"
 	   << "\n Options for different sequencing settings\n"
 	   << "\t" << "--readlength  <int>           " << "\t" << "Read length. Default: " << options.read_len << "\n"
 	   << "\t" << "--coverage    <float>         " << "\t" << "Average coverage. must be set for exome/targeted data. Comma separated list to specify for each BAM" << "\n"
@@ -103,6 +104,7 @@ void show_help() {
 
 void parse_commandline_options(int argc, char* argv[], Options* options) {
   enum LONG_OPTIONS {
+    OPT_SKIPQ,
     OPT_MINREAD,
     OPT_PERIOD,
     OPT_GGL,
@@ -145,6 +147,7 @@ void parse_commandline_options(int argc, char* argv[], Options* options) {
     OPT_VERSION,
   };
   static struct option long_options[] = {
+    {"skip-qscore", no_argument, NULL, OPT_SKIPQ},
     {"min-read-cov", required_argument, NULL, OPT_MINREAD},
     {"period",      required_argument,  NULL, OPT_PERIOD},
     {"include-ggl", no_argument, NULL, OPT_GGL},
@@ -194,6 +197,9 @@ void parse_commandline_options(int argc, char* argv[], Options* options) {
                    long_options, &option_index);
   while (ch != -1) {
     switch (ch) {
+    case OPT_SKIPQ:
+      options->skip_qscore = true;
+      break;
     case OPT_MINREAD:
       options->min_reads_per_sample = atoi(optarg);
       break;

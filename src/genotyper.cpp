@@ -181,8 +181,14 @@ bool Genotyper::ProcessLocus(BamCramMultiReader* bamreader, Locus* locus) {
 	sample_prob_vec.push_back(-1.0);
 	sample_prob_vec.push_back(-1.0);
       }
-      if (!sample_likelihood_maximizers[samp]->GetQScore(allele1, allele2, &q_score)){ 
-	PrintMessageDieOnError("\tProblem setting quality scores", M_WARNING, options->quiet);
+      if (!options->skip_qscore){
+	if (!sample_likelihood_maximizers[samp]->GetQScore(allele1, allele2, &q_score)){ 
+	  q_score = -1;
+	  PrintMessageDieOnError("\tProblem setting quality scores", M_WARNING, options->quiet);
+	}
+      }
+      else{
+	q_score = -1;
       }
       locus->q_scores[samp] = q_score;
       locus->expansion_probs[samp] = sample_prob_vec;
