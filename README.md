@@ -78,44 +78,52 @@ GangSTR --bam file.bam
         --out outprefix 
 ```
 Required parameters:
-* **--bam** Alignment file (.bam)
+* **--bam \<file.bam,[file2.bam]\>** Comma separated list of input BAM files
 * **--ref** Refererence genome (.fa)
-* **--regions** Target TR loci (.bed)
+* **--regions** Target TR loci (regions) (.bed)
 * **--out** Output prefix
 
 Additional general options:
-* **--genomewide** Run GangSTR in genome-wide mode. This mode has more stringent filtering steps to prevent false positive in genome-wide profiling.
+* **--targeted** Run GangSTR in targeted mode. This mode should be used when targeting disease loci. (as opposed to genome-wide run)
+* **--chrom \<string\>** Only genotype regions on this chromosome.
+* **--str-info \<string\>** Tab file with additional per-STR info (i.e., expansion cutoff)
+* **--period \<string\>** Only genotype loci with periods (motif lengths) in this comma-separated list.
+* **-skip-qscore** Skip calculation of Q-score (see **Q** field in VCF output).
 
 Options for different sequencing settings
 * **--readlength \<int\>** Preset read length (default: extract from alignments if not provided)
-* **--coverage \<float\>** Preset average coverage, should be set for targeted data (default: calculate if not provided)
+* **--coverage \<float\>** Preset average coverage, should be set for exome/targeted data. Comma separated list to specify for each BAM. (default: calculate if not provided)
+* **--model-gc-coverage** Model coverage as a function of GC content. Requires genome-wide data.
+* **--insertmean \<float\>** Fragment length mean. (default: calculate if not provided)
+* **--insertsdev \<float\>** Fragment length standard deviation. (default: calculate if not provided)
 * **--nonuniform** Indicates non-uniform coverage in alignment file (i.e., used for exome sequencing). Using this flag removes the likelihood term corresponding to FRR count.
+* **--min-reads-cov \<int\>** Minimum number of reads required for calculation of coverage.
 
 Advanced parameters for likelihood model:
-* **--frrweight \<float\>** Reset weight for FRR class in likelihood model (default 0.5)
-* **--spanweight \<float\>** Reset weight for Spanning class in likelihood model (default 1.0)
-* **--enclweight \<float\>** Reset weight for Enclosing class in likelihood model (default 1.0)
-* **--flankweight \<float\>** Reset weight for Flanking class in likelihood model (default 1.0)
-* **--ploidy [1,2]** Haploid (1) or diploid (2) genotyping (default 2)
-* **--useofftarget** Extract off-target FRRs based on the off-target regions provided in the regions file.
-* **--insertmean \<float\>** Fragment length mean (default: calculate if not provided)
-* **--insertsdev \<float\>** Fragment length standard deviation (default: calculate if not provided)
-* **--insertmax \<float\>** Maximum allowed fragment length (default: no filtering based on fragment length)
-* **--readprobmode** Only use read probabilities in likelihood model (ignore class probability)
-* **--numbstrap \<int\>** Number of bootstrap samples for calculating confidence intervals (default 100)
+* **--frrweight \<float\>** Reset weight for FRR class in likelihood model. (default 1.0)
+* **--spanweight \<float\>** Reset weight for Spanning class in likelihood model. (default 1.0)
+* **--enclweight \<float\>** Reset weight for Enclosing class in likelihood model. (default 1.0)
+* **--flankweight \<float\>** Reset weight for Flanking class in likelihood model. (default 1.0)
+* **--ploidy [1,2]** Haploid (1) or diploid (2) genotyping. (default 2)
+* **--skipofftarget** Skip off target regions included in the regions file.
+* **--readprobmode** Only use read probabilities in likelihood model. (ignore class probability)
+* **--numbstrap \<int\>** Number of bootstrap samples for calculating confidence intervals. (default 100)
+* **--grid-theshold \<int\>** Use optimization rather than grid search to find MLE if search space (grid) contains more alleles than this threshold. Default: 10000
+* **--rescure-count \<int\>** Number of regions that GangSTR attempts to rescue mates from (excluding off-target regions). Default: 0
 
 Parameters for local realignment:
-* **--minscore \<int\>** Minimun alignment score for accepting reads (default 75)
-* **--minmatch \<int\>** Minimum matching basepairs required at the edge of the repeat region to accept flanking and enclosing reads (default 5)
+* **--minscore \<int\>** Minimun alignment score for accepting reads (default 75).
+* **--minmatch \<int\>** Minimum matching basepairs required at the edge of the repeat region to accept flanking and enclosing reads (default 5).
 
 Stutter model parameters:
-* **--stutterup \<float\>** Stutter insertion probability (default 0.0364653)
-* **--stutterdown \<float\>**	Stutter deletion probability (default: 0.0428387)
-* **--stutterprob \<float\>**	Stutter step size parameter (default: 0.818913)
+* **--stutterup \<float\>** Stutter insertion probability (default 0.05)
+* **--stutterdown \<float\>**	Stutter deletion probability (default: 0.05)
+* **--stutterprob \<float\>**	Stutter step size parameter (default: 0.90)
 
 Parameters for more detailed info about each locus:
-* **--output-readinfo** Output a file containing extracted read information
-* **--output-bootstraps** Output a file containing bootstrap samples
+* **--output-readinfo** Output a file containing extracted read information.
+* **--output-bootstraps** Output a file containing bootstrap samples.
+* **--include-ggl** Output GGL (special GL field) in VCF.
 
 Additional optional parameters:
 * **-h,--help** display help screen
@@ -123,6 +131,19 @@ Additional optional parameters:
 * **-v,--verbose** Print progress information (major steps)
 * **--very** Print detailed progress information
 * **--version** Print out the version of this software
+
+
+### Detailed Usage:
+#### --str-info
+A tab delimited with the following header and format can be used to specify additional per locus information.
+GangSTR currently supports expansion threshold through str-info. The threshold is specified in number of repeat copies, and it is used to calculate expansion probability. (See **QEXP** field in VCF format).
+Note: The loci represented in this file are unique and duplicates should be removed. 
+
+| **chrom** | **pos** | **end** | **thresh** |
+| ------| ------| ------| ----- |
+| chr1 | 26454 | 26465 | 50 | 
+| chr1 | 31556 | 31570 | 20 | 
+| chr1 | 35489 | 35504 | 25 | 
 
 <a name="formats"></a>
 ## File formats
@@ -175,12 +196,23 @@ FORMAT fields contain information specific to each genotype call. The following 
 
 | **FIELD** | **DESCRIPTION** |
 |-----------|------------------|
-| GB | Base pair length differences of genotype from reference for each allele |
-| CI| 95% confidence intervals for each allele | 
-| RC| Number of reads in each class (enclosing, spanning, FRR, flanking)| 
-| Q| Minimum negative likelihood| 
+| GT | Genotype |
+| DP | Read Depth (number of informative reads) |
+| Q | Quality Score (posterior probability) |
+| REPCN | Genotype given in number of copies of the repeat motif |
+| REPCI | 95% Confidence interval for each allele |
+| RC | Number of reads in each class (enclosing, spanning, FRR, flanking) | 
+| ML | Maximum likelihood | 
 | INS| Insert size mean and stddev at the locus| 
+| STDERR | Bootstrap standard error of each allele |
+| QEXP | Prob. of no expansion, 1 expanded allele, both expanded alleles |
+| GGL | Genotpye Likelihood of all pairs of alleles in the search space |
 
+**Q**: Posterior probability of extimated alleles (REPCN). This quality score is a measure of GangSTR's confidence in short allele calls (shorter than read length). Calculation of Q-score can be slow if the estimation search space (grid) is large. To skip this step, use --skip-qscore option.
+
+**STDERR**: Standard error of estimated alleles using bootstrap method.
+
+**QEXP**: Given estimated alleles, the likelihood plain, and an expansion threshold, this field shows the probability of two alleles being smaller than threshold, one allele larger and one smaller than threshold, and both allele larger than threshold. The expansion threshold should be provided using `--str-info` field.
 
 <a name="references"></a>
 ## GangSTR reference files
