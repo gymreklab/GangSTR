@@ -86,9 +86,9 @@ Required parameters:
 Additional general options:
 * **--targeted** Run GangSTR in targeted mode. This mode should be used when targeting disease loci. (as opposed to genome-wide run)
 * **--chrom \<string\>** Only genotype regions on this chromosome.
-* **--str-info \<string\>** Tab file with additional per-STR info (i.e., expansion cutoff)
+* **--str-info \<string\>** Tab file with additional per-STR info (e.g., expansion cutoff. see below for format)
 * **--period \<string\>** Only genotype loci with periods (motif lengths) in this comma-separated list.
-* **-skip-qscore** Skip calculation of Q-score (see **Q** field in VCF output).
+* **--skip-qscore** Skip calculation of Q-score (see **Q** field in VCF output).
 
 Options for different sequencing settings
 * **--readlength \<int\>** Preset read length (default: extract from alignments if not provided)
@@ -109,7 +109,7 @@ Advanced parameters for likelihood model:
 * **--readprobmode** Only use read probabilities in likelihood model. (ignore class probability)
 * **--numbstrap \<int\>** Number of bootstrap samples for calculating confidence intervals. (default 100)
 * **--grid-theshold \<int\>** Use optimization rather than grid search to find MLE if search space (grid) contains more alleles than this threshold. Default: 10000
-* **--rescure-count \<int\>** Number of regions that GangSTR attempts to rescue mates from (excluding off-target regions). Default: 0
+* **--rescue-count \<int\>** Number of regions that GangSTR attempts to rescue mates from (excluding off-target regions). Default: 0
 
 Parameters for local realignment:
 * **--minscore \<int\>** Minimun alignment score for accepting reads (default 75).
@@ -127,23 +127,11 @@ Parameters for more detailed info about each locus:
 
 Additional optional parameters:
 * **-h,--help** display help screen
+* **--quiet** Don't print out anything
 * **--seed** Random number generator initial seed
 * **-v,--verbose** Print progress information (major steps)
 * **--very** Print detailed progress information
 * **--version** Print out the version of this software
-
-
-### Detailed Usage:
-#### --str-info
-A tab delimited with the following header and format can be used to specify additional per locus information.
-GangSTR currently supports expansion threshold through str-info. The threshold is specified in number of repeat copies, and it is used to calculate expansion probability. (See **QEXP** field in VCF format).
-Note: The loci represented in this file are unique and duplicates should be removed. 
-
-| **chrom** | **pos** | **end** | **thresh** |
-| ------| ------| ------| ----- |
-| chr1 | 26454 | 26465 | 50 | 
-| chr1 | 31556 | 31570 | 20 | 
-| chr1 | 35489 | 35504 | 25 | 
 
 <a name="formats"></a>
 ## File formats
@@ -178,6 +166,17 @@ Below is an example file which contains 5 TR loci. Standard references for hg19 
 |chr4   | 150889 | 150909 | 2    |   TG      ||
 | chr19 | 45770205 | 45770264	| 3	| CAG	|chr2:163338502-163338506,chr3:197333949-197333955,chr6:16327632-16327646,chr6:170561926-170561931,chr7:122288209-122288215,chr8:133055822-133055827,chr11:28310883-28310888,chr17:4887671-4887677,chr18:55586148-55586165,chr19:13207866-13207871 |
 
+#### --str-info
+A tab delimited with the following header and format can be used to specify additional per locus information.
+GangSTR currently supports expansion threshold through str-info. The threshold is specified in number of repeat copies, and it is used to calculate expansion probability. (See **QEXP** field in VCF format).
+Note: The loci represented in this file are unique and duplicates should be removed. 
+
+| **chrom** | **pos** | **end** | **thresh** |
+| ------| ------| ------| ----- |
+| chr1 | 26454 | 26465 | 50 | 
+| chr1 | 31556 | 31570 | 20 | 
+| chr1 | 35489 | 35504 | 25 | 
+
 ### VCF (output)
 For more information on VCF file format, see the [VCF spec](http://samtools.github.io/hts-specs/VCFv4.2.pdf). In addition to standard VCF fields, GangSTR adds custom fields described below.
 
@@ -198,7 +197,7 @@ FORMAT fields contain information specific to each genotype call. The following 
 |-----------|------------------|
 | GT | Genotype |
 | DP | Read Depth (number of informative reads) |
-| Q | Quality Score (posterior probability) |
+| Q | Quality Score |
 | REPCN | Genotype given in number of copies of the repeat motif |
 | REPCI | 95% Confidence interval for each allele |
 | RC | Number of reads in each class (enclosing, spanning, FRR, flanking) | 
@@ -208,11 +207,11 @@ FORMAT fields contain information specific to each genotype call. The following 
 | QEXP | Prob. of no expansion, 1 expanded allele, both expanded alleles |
 | GGL | Genotpye Likelihood of all pairs of alleles in the search space |
 
-**Q**: Posterior probability of extimated alleles (REPCN). This quality score is a measure of GangSTR's confidence in short allele calls (shorter than read length). Calculation of Q-score can be slow if the estimation search space (grid) is large. To skip this step, use --skip-qscore option.
+**Q**: Quality score estimated alleles (REPCN), between 0 and 1. This quality score is a measure of GangSTR's confidence in short allele calls (shorter than read length). It gives the likelihood of the maximum likelihood genotype divided by the sum of likelihoods of all possible genotypes. This can be interpreted as a posterior probability with a uniform prior over all possible genotypes. Calculation of Q-score can be slow if the estimation search space (grid) is large. To skip this step, use --skip-qscore option.
 
 **STDERR**: Standard error of estimated alleles using bootstrap method.
 
-**QEXP**: Given estimated alleles, the likelihood plain, and an expansion threshold, this field shows the probability of two alleles being smaller than threshold, one allele larger and one smaller than threshold, and both allele larger than threshold. The expansion threshold should be provided using `--str-info` field.
+**QEXP**: Given estimated alleles, the likelihood plane, and an expansion threshold, this field shows three numbers: the probability of both alleles being smaller than the threshold, one allele larger and one smaller than threshold, and both alleles larger than threshold. The expansion threshold should be provided using `--str-info` field.
 
 <a name="references"></a>
 ## GangSTR reference files
