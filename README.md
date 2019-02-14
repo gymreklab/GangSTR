@@ -216,7 +216,7 @@ FORMAT fields contain information specific to each genotype call. The following 
 <a name="references"></a>
 ## GangSTR reference files
 
-The following lists available references created using Tandem Repeats Finder. We update the reference periodically with additional loci or annotation changes. Please see the Changelog file for details. Note references must be unzipped before using with GangSTR. The file listed in bold is the current recommended version.
+The following lists available references created using Tandem Repeats Finder. We update the reference periodically with additional loci or annotation changes. Note references must be unzipped before using with GangSTR. The file listed in bold is the current recommended version.
 
 | **Reference build** | **Version** | **Link** | **Comment** |
 | --------------------| ------------|----------|-------------|
