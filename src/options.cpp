@@ -57,9 +57,9 @@ Options::Options() {
   read_len = -1;
   min_score = 75;
   dist_man_set = false;
-  stutter_up = 0.0364653;
-  stutter_down = 0.0428387;
-  stutter_p = 0.818913;
+  stutter_up = 0.05;
+  stutter_down = 0.05;
+  stutter_p = 0.9;
   flanklen = 3000;
   realignment_flanklen = 100;
   regionsize = 2000;
@@ -86,7 +86,7 @@ Options::Options() {
   use_cov = true;
   use_off = true;
   hist_mode = false;
-  rescue_count = 200;
+  rescue_count = 0;
   min_reads_per_sample = 500;
   skip_qscore = false;
 }
