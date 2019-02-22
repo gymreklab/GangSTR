@@ -8,7 +8,13 @@ GangSTR takes aligned reads (BAM) and a set of repeats in the reference genome a
 
 For questions on installation or usage, please open an issue, submit a pull request, or contact Nima Mousavi (mousavi@ucsd.edu).
 
-[Download](#download) | [Install](#install) | [Basic Usage](#usage) | [File formats](#formats) | [Advanced topics](#advanced) | [Reference files](#references)
+For advanced topics such as those below, see the [GangSTR wiki](https://github.com/gymreklab/GangSTR/wiki).
+* [Filtering GangSTR output using dumpSTR](https://github.com/gymreklab/GangSTR/wiki/Filtering-GangSTR-output)
+* [Identifying repeat expansions](https://github.com/gymreklab/GangSTR/wiki/Identifying-repeat-expansions-using-GangSTR)
+
+
+
+[Download](#download) | [Install](#install) | [Basic Usage](#usage) | [File formats](#formats) | [Reference files](#references)
 
 <a name="download"></a>
 ## Download
@@ -217,12 +223,6 @@ FORMAT fields contain information specific to each genotype call. The following 
 **STDERR**: Standard error of estimated alleles using bootstrap method.
 
 **QEXP**: Given estimated alleles, the likelihood plane, and an expansion threshold, this field shows three numbers: the probability of both alleles being smaller than the threshold, one allele larger and one smaller than threshold, and both alleles larger than threshold. The expansion threshold should be provided using `--str-info` field.
-
-<a name="advanced"></a>
-## Advanced topics
-
-* [Filtering GangSTR output using dumpSTR](https://github.com/gymreklab/GangSTR/wiki/Filtering-GangSTR-output)
-* [Identifying repeat expansions](https://github.com/gymreklab/GangSTR/wiki/Identifying-repeat-expansions-using-GangSTR)
 
 <a name="references"></a>
 ## GangSTR reference files
