@@ -8,7 +8,7 @@ GangSTR takes aligned reads (BAM) and a set of repeats in the reference genome a
 
 For questions on installation or usage, please open an issue, submit a pull request, or contact Nima Mousavi (mousavi@ucsd.edu).
 
-[Download](#download) | [Install](#install) | [Usage](#usage) | [File formats](#formats) | [References](#references)
+[Download](#download) | [Install](#install) | [Basic Usage](#usage) | [File formats](#formats) | [Advanced topics](#advanced) | [Reference files](#references)
 
 <a name="download"></a>
 ## Download
@@ -49,8 +49,6 @@ where `PREFIX` is a place you have write permissions. In most cases this will be
 
 Typing `GangSTR --help` should show a help message if GangSTR was successfully installed.
 
-<a name="usage"></a>
-
 ## Compiling from git source
 
 To compile from git source, first make sure nlopt, gsl, and htslib are installed, then run the following:
@@ -69,7 +67,8 @@ make
 make install
 ```
 
-## Usage
+<a name="usage"></a>
+## Basic usage
 To run GangSTR using default parameters use the following command:
 ```
 GangSTR --bam file.bam 
@@ -78,60 +77,60 @@ GangSTR --bam file.bam
         --out outprefix 
 ```
 Required parameters:
-* **--bam \<file.bam,[file2.bam]\>** Comma separated list of input BAM files
-* **--ref** Refererence genome (.fa)
-* **--regions** Target TR loci (regions) (.bed)
-* **--out** Output prefix
+* **`--bam <file.bam,[file2.bam]>`** Comma separated list of input BAM files
+* **`--ref`** Refererence genome (.fa)
+* **`--regions`** Target TR loci (regions) (.bed)
+* **`--out`** Output prefix
 
 Additional general options:
-* **--targeted** Run GangSTR in targeted mode. This mode should be used when targeting disease loci. (as opposed to genome-wide run)
-* **--chrom \<string\>** Only genotype regions on this chromosome.
-* **--str-info \<string\>** Tab file with additional per-STR info (e.g., expansion cutoff. see below for format)
-* **--period \<string\>** Only genotype loci with periods (motif lengths) in this comma-separated list.
-* **--skip-qscore** Skip calculation of Q-score (see **Q** field in VCF output).
+* **`--targeted`** Run GangSTR in targeted mode. This mode should be used when targeting disease loci. (as opposed to genome-wide run)
+* **`--chrom <string>`** Only genotype regions on this chromosome.
+* **`--str-info <string>`** Tab file with additional per-STR info (e.g., expansion cutoff. see below for format)
+* **`--period <string>`** Only genotype loci with periods (motif lengths) in this comma-separated list.
+* **`--skip-qscore`** Skip calculation of Q-score (see **Q** field in VCF output).
 
 Options for different sequencing settings
-* **--readlength \<int\>** Preset read length (default: extract from alignments if not provided)
-* **--coverage \<float\>** Preset average coverage, should be set for exome/targeted data. Comma separated list to specify for each BAM. (default: calculate if not provided)
-* **--model-gc-coverage** Model coverage as a function of GC content. Requires genome-wide data. Experimental feature.
-* **--insertmean \<float\>** Fragment length mean. (default: calculate if not provided)
-* **--insertsdev \<float\>** Fragment length standard deviation. (default: calculate if not provided)
-* **--nonuniform** Indicates non-uniform coverage in alignment file (i.e., used for exome sequencing). Using this flag removes the likelihood term corresponding to FRR count.
-* **--min-reads-cov \<int\>** Minimum number of reads required for calculation of coverage.
+* **`--readlength <int>`** Preset read length (default: extract from alignments if not provided)
+* **`--coverage <float>`** Preset average coverage, should be set for exome/targeted data. Comma separated list to specify for each BAM. (default: calculate if not provided)
+* **`--model-gc-coverage`** Model coverage as a function of GC content. Requires genome-wide data. Experimental feature.
+* **`--insertmean <float>`** Fragment length mean. (default: calculate if not provided)
+* **`--insertsdev <float>`** Fragment length standard deviation. (default: calculate if not provided)
+* **`--nonuniform`** Indicates non-uniform coverage in alignment file (i.e., used for exome sequencing). Using this flag removes the likelihood term corresponding to FRR count.
+* **`--min-reads-cov <int>`** Minimum number of reads required for calculation of coverage.
 
 Advanced parameters for likelihood model:
-* **--frrweight \<float\>** Reset weight for FRR class in likelihood model. (default 1.0)
-* **--spanweight \<float\>** Reset weight for Spanning class in likelihood model. (default 1.0)
-* **--enclweight \<float\>** Reset weight for Enclosing class in likelihood model. (default 1.0)
-* **--flankweight \<float\>** Reset weight for Flanking class in likelihood model. (default 1.0)
-* **--ploidy [1,2]** Haploid (1) or diploid (2) genotyping. (default 2)
-* **--skipofftarget** Skip off target regions included in the regions file.
-* **--readprobmode** Only use read probabilities in likelihood model. (ignore class probability)
-* **--numbstrap \<int\>** Number of bootstrap samples for calculating confidence intervals. (default 100)
-* **--grid-theshold \<int\>** Use optimization rather than grid search to find MLE if search space (grid) contains more alleles than this threshold. Default: 10000
+* **`--frrweight <float>`** Reset weight for FRR class in likelihood model. (default 1.0)
+* **`--spanweight <float>`** Reset weight for Spanning class in likelihood model. (default 1.0)
+* **`--enclweight <float>`** Reset weight for Enclosing class in likelihood model. (default 1.0)
+* **`--flankweight <float>`** Reset weight for Flanking class in likelihood model. (default 1.0)
+* **`--ploidy [1,2]`** Haploid (1) or diploid (2) genotyping. (default 2)
+* **`--skipofftarget`** Skip off target regions included in the regions file.
+* **`--readprobmode**` Only use read probabilities in likelihood model. (ignore class probability)
+* **`--numbstrap <int>`** Number of bootstrap samples for calculating confidence intervals. (default 100)
+* **`--grid-theshold <int>`** Use optimization rather than grid search to find MLE if search space (grid) contains more alleles than this threshold. Default: 10000
 * **--rescue-count \<int\>** Number of regions that GangSTR attempts to rescue mates from (excluding off-target regions). Default: 0
 
 Parameters for local realignment:
-* **--minscore \<int\>** Minimun alignment score for accepting reads (default 75).
-* **--minmatch \<int\>** Minimum matching basepairs required at the edge of the repeat region to accept flanking and enclosing reads (default 5).
+* **`--minscore <int>`** Minimun alignment score for accepting reads (default 75).
+* **`--minmatch <int>`** Minimum matching basepairs required at the edge of the repeat region to accept flanking and enclosing reads (default 5).
 
 Stutter model parameters:
-* **--stutterup \<float\>** Stutter insertion probability (default 0.05)
-* **--stutterdown \<float\>**	Stutter deletion probability (default: 0.05)
-* **--stutterprob \<float\>**	Stutter step size parameter (default: 0.90)
+* **`--stutterup <float>`** Stutter insertion probability (default 0.05)
+* **`--stutterdown <float>`**	Stutter deletion probability (default: 0.05)
+* **`--stutterprob <float>`**	Stutter step size parameter (default: 0.90)
 
 Parameters for more detailed info about each locus:
-* **--output-readinfo** Output a file containing extracted read information.
-* **--output-bootstraps** Output a file containing bootstrap samples.
-* **--include-ggl** Output GGL (special GL field) in VCF.
+* **`--output-readinfo`** Output a file containing extracted read information.
+* **`--output-bootstraps`** Output a file containing bootstrap samples.
+* **`--include-ggl`** Output GGL (special GL field) in VCF.
 
 Additional optional parameters:
-* **-h,--help** display help screen
-* **--quiet** Don't print out anything
-* **--seed** Random number generator initial seed
-* **-v,--verbose** Print progress information (major steps)
-* **--very** Print detailed progress information
-* **--version** Print out the version of this software
+* **`-h,--help`** display help screen
+* **`--quiet`** Don't print out anything
+* **`--seed`** Random number generator initial seed
+* **`-v,--verbose`** Print progress information (major steps)
+* **`--very`** Print detailed progress information
+* **`--version`** Print out the version of this software
 
 <a name="formats"></a>
 ## File formats
@@ -187,7 +186,13 @@ INFO fields contain aggregated statistics about each TR. The following custom fi
 | **FIELD** | **DESCRIPTION** |
 |-----------|------------------|
 | END | End position of the TR |
-| RU| Repeat motif | 
+| PERIOD | Length of the repeat unit |
+| GRID | Range of the optimization grid. Gives min and max repeat copy number considered |
+| EXPTHRESH | The threshold copy number used to test for repeat expansions |
+| STUTTERUP | The model probability to observe a stutter error increasing the repeat number |
+| STUTTERDOWN | The model probability to observe a stutter error decreasing the repeat number |
+| STUTTERP | The geometric parameter for modeling the stutter step size distribution| 
+| RU | Repeat motif | 
 | REF| Reference copy number (number of repeat units| 
 
 #### FORMAT fields
@@ -199,19 +204,25 @@ FORMAT fields contain information specific to each genotype call. The following 
 | DP | Read Depth (number of informative reads) |
 | Q | Quality Score |
 | REPCN | Genotype given in number of copies of the repeat motif |
-| REPCI | 95% Confidence interval for each allele |
+| REPCI | 95% Confidence interval for each allele based on bootstrapping |
 | RC | Number of reads in each class (enclosing, spanning, FRR, flanking) | 
 | ML | Maximum likelihood | 
 | INS| Insert size mean and stddev at the locus| 
 | STDERR | Bootstrap standard error of each allele |
 | QEXP | Prob. of no expansion, 1 expanded allele, both expanded alleles |
-| GGL | Genotpye Likelihood of all pairs of alleles in the search space |
+| GGL | Genotpye Likelihood of all pairs of alleles in the search space. Formatted similar to standard GL fields but with allele space defined by the INFO/GRID field |
 
-**Q**: Quality score estimated alleles (REPCN), between 0 and 1. This quality score is a measure of GangSTR's confidence in short allele calls (shorter than read length). It gives the likelihood of the maximum likelihood genotype divided by the sum of likelihoods of all possible genotypes. This can be interpreted as a posterior probability with a uniform prior over all possible genotypes. Calculation of Q-score can be slow if the estimation search space (grid) is large. To skip this step, use --skip-qscore option.
+**Q**: Quality score estimated alleles (REPCN), between 0 and 1. This quality score is a measure of GangSTR's confidence in short allele calls (shorter than read length). It gives the likelihood of the maximum likelihood genotype divided by the sum of likelihoods of all possible genotypes. This can be interpreted as a posterior probability with a uniform prior over all possible genotypes. Calculation of Q-score can be slow if the estimation search space (grid) is large. To skip this step, use `--skip-qscore` option.
 
 **STDERR**: Standard error of estimated alleles using bootstrap method.
 
 **QEXP**: Given estimated alleles, the likelihood plane, and an expansion threshold, this field shows three numbers: the probability of both alleles being smaller than the threshold, one allele larger and one smaller than threshold, and both alleles larger than threshold. The expansion threshold should be provided using `--str-info` field.
+
+<a name="advanced"></a>
+## Advanced topics
+
+* [Filtering GangSTR output using dumpSTR](https://github.com/gymreklab/GangSTR/wiki/Filtering-GangSTR-output)
+* [Identifying repeat expansions](https://github.com/gymreklab/GangSTR/wiki/Identifying-repeat-expansions-using-GangSTR)
 
 <a name="references"></a>
 ## GangSTR reference files
