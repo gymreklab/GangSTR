@@ -12,7 +12,7 @@ For advanced topics such as those below, see the [GangSTR wiki](https://github.c
 * [Filtering GangSTR output using dumpSTR](https://github.com/gymreklab/GangSTR/wiki/Filtering-GangSTR-output)
 * [Identifying repeat expansions](https://github.com/gymreklab/GangSTR/wiki/Identifying-repeat-expansions-using-GangSTR)
 
-
+A Docker with GangSTR plus the dumpSTR filtering tool installed is available at [gymreklab/str-toolkit](https://hub.docker.com/r/gymreklab/str-toolkit) from Docker hub.
 
 [Download](#download) | [Install](#install) | [Basic Usage](#usage) | [File formats](#formats) | [Reference files](#references)
 
