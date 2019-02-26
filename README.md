@@ -258,4 +258,4 @@ The references below contain pre-defined off-target loci for target pathogenic l
 | HTT | [HTT_hg38.bed](https://s3.amazonaws.com/gangstr/HTT_hg38.bed) | [HTT_hg19.bed](https://s3.amazonaws.com/gangstr/hg19/HTT_hg19.bed) |
 | DM1 | [DM1_hg38.bed](https://s3.amazonaws.com/gangstr/DM1_hg38.bed) | [DM1_hg19.bed](https://s3.amazonaws.com/gangstr/hg19/DM1_hg19.bed) |
 | FMR1 | [FMR1_hg38.bed](https://s3.amazonaws.com/gangstr/hg38/FMR1_hg38.bed) | [FMR1_hg19.bed](https://s3.amazonaws.com/gangstr/hg19/FMR1_hg19.bed) |
-
+| C9ORF72 | [C9ORF72_hg38.bed](https://s3.amazonaws.com/gangstr/hg38/C9ORF72_hg38.bed) | [C9ORF72_hg19.bed](https://s3.amazonaws.com/gangstr/hg19/C9ORF72_hg19.bed) |
