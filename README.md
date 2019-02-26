@@ -247,15 +247,15 @@ The references below contain pre-defined off-target loci for target pathogenic l
 
 | **Locus** | **hg38 Link** | **hg19 Link** |
 | ------| ------| ------|
-| SCA1 | [SCA1_hg38.bed](https://s3.amazonaws.com/gangstr/SCA1_hg38.bed) | [SCA1_hg19.bed](https://s3.amazonaws.com/gangstr/hg19/SCA1_hg19.bed) |
-| SCA2 | [SCA2_hg38.bed](https://s3.amazonaws.com/gangstr/SCA2_hg38.bed) | [SCA2_hg19.bed](https://s3.amazonaws.com/gangstr/hg19/SCA2_hg19.bed) |
-| SCA3 | [SCA3_hg38.bed](https://s3.amazonaws.com/gangstr/SCA3_hg38.bed) | [SCA3_hg19.bed](https://s3.amazonaws.com/gangstr/hg19/SCA3_hg19.bed) |
-| SCA6 | [SCA6_hg38.bed](https://s3.amazonaws.com/gangstr/SCA6_hg38.bed) | [SCA6_hg19.bed](https://s3.amazonaws.com/gangstr/hg19/SCA6_hg19.bed) |
-| SCA7 | [SCA7_hg38.bed](https://s3.amazonaws.com/gangstr/SCA7_hg38.bed) | [SCA7_hg19.bed](https://s3.amazonaws.com/gangstr/hg19/SCA7_hg19.bed) |
-| SCA8 | [SCA8_hg38.bed](https://s3.amazonaws.com/gangstr/SCA8_hg38.bed) | [SCA8_hg19.bed](https://s3.amazonaws.com/gangstr/hg19/SCA8_hg19.bed) |
-| SCA12 | [SCA12_hg38.bed](https://s3.amazonaws.com/gangstr/SCA12_hg38.bed) | [SCA12_hg19.bed](https://s3.amazonaws.com/gangstr/hg19/SCA12_hg19.bed) |
-| SCA17 | [SCA17_hg38.bed](https://s3.amazonaws.com/gangstr/SCA17_hg38.bed) | [SCA17_hg19.bed](https://s3.amazonaws.com/gangstr/hg19/SCA17_hg19.bed) |
-| HTT | [HTT_hg38.bed](https://s3.amazonaws.com/gangstr/HTT_hg38.bed) | [HTT_hg19.bed](https://s3.amazonaws.com/gangstr/hg19/HTT_hg19.bed) |
-| DM1 | [DM1_hg38.bed](https://s3.amazonaws.com/gangstr/DM1_hg38.bed) | [DM1_hg19.bed](https://s3.amazonaws.com/gangstr/hg19/DM1_hg19.bed) |
+| SCA1 | [SCA1_hg38.bed](https://s3.amazonaws.com/gangstr/hg38/SCA1_hg38.bed) | [SCA1_hg19.bed](https://s3.amazonaws.com/gangstr/hg19/SCA1_hg19.bed) |
+| SCA2 | [SCA2_hg38.bed](https://s3.amazonaws.com/gangstr/hg38/SCA2_hg38.bed) | [SCA2_hg19.bed](https://s3.amazonaws.com/gangstr/hg19/SCA2_hg19.bed) |
+| SCA3 | [SCA3_hg38.bed](https://s3.amazonaws.com/gangstr/hg38/SCA3_hg38.bed) | [SCA3_hg19.bed](https://s3.amazonaws.com/gangstr/hg19/SCA3_hg19.bed) |
+| SCA6 | [SCA6_hg38.bed](https://s3.amazonaws.com/gangstr/hg38/SCA6_hg38.bed) | [SCA6_hg19.bed](https://s3.amazonaws.com/gangstr/hg19/SCA6_hg19.bed) |
+| SCA7 | [SCA7_hg38.bed](https://s3.amazonaws.com/gangstr/hg38/SCA7_hg38.bed) | [SCA7_hg19.bed](https://s3.amazonaws.com/gangstr/hg19/SCA7_hg19.bed) |
+| SCA8 | [SCA8_hg38.bed](https://s3.amazonaws.com/gangstr/hg38/SCA8_hg38.bed) | [SCA8_hg19.bed](https://s3.amazonaws.com/gangstr/hg19/SCA8_hg19.bed) |
+| SCA12 | [SCA12_hg38.bed](https://s3.amazonaws.com/gangstr/hg38/SCA12_hg38.bed) | [SCA12_hg19.bed](https://s3.amazonaws.com/gangstr/hg19/SCA12_hg19.bed) |
+| SCA17 | [SCA17_hg38.bed](https://s3.amazonaws.com/gangstr/hg38/SCA17_hg38.bed) | [SCA17_hg19.bed](https://s3.amazonaws.com/gangstr/hg19/SCA17_hg19.bed) |
+| HTT | [HTT_hg38.bed](https://s3.amazonaws.com/gangstr/hg38/HTT_hg38.bed) | [HTT_hg19.bed](https://s3.amazonaws.com/gangstr/hg19/HTT_hg19.bed) |
+| DM1 | [DM1_hg38.bed](https://s3.amazonaws.com/gangstr/hg38/DM1_hg38.bed) | [DM1_hg19.bed](https://s3.amazonaws.com/gangstr/hg19/DM1_hg19.bed) |
 | FMR1 | [FMR1_hg38.bed](https://s3.amazonaws.com/gangstr/hg38/FMR1_hg38.bed) | [FMR1_hg19.bed](https://s3.amazonaws.com/gangstr/hg19/FMR1_hg19.bed) |
 | C9ORF72 | [C9ORF72_hg38.bed](https://s3.amazonaws.com/gangstr/hg38/C9ORF72_hg38.bed) | [C9ORF72_hg19.bed](https://s3.amazonaws.com/gangstr/hg19/C9ORF72_hg19.bed) |
