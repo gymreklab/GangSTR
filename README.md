@@ -102,7 +102,7 @@ Options for different sequencing settings
 * **`--insertmean <float>`** Fragment length mean. (default: calculate if not provided)
 * **`--insertsdev <float>`** Fragment length standard deviation. (default: calculate if not provided)
 * **`--nonuniform`** Indicates non-uniform coverage in alignment file (i.e., used for exome sequencing). Using this flag removes the likelihood term corresponding to FRR count.
-* **`--min-reads-cov <int>`** Minimum number of reads required for calculation of coverage.
+* **`--min-sample-reads <int>`** Minimum number of reads per sample.
 
 Advanced parameters for likelihood model:
 * **`--frrweight <float>`** Reset weight for FRR class in likelihood model. (default 1.0)
