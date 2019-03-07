@@ -14,7 +14,9 @@
 #include <sys/stat.h>
 
 #include "htslib/bgzf.h"
-//#include "htslib/cram.h"
+#include "htslib/cram.h"
+#include "htslib/hts.h"
+
 #define bam_ins_size(b)  (b)->core.isize;
 #include "htslib/sam.h"
 
@@ -459,7 +461,7 @@ class BamCramReader {
  public:
   BamCramReader(const std::string& path, std::string fasta_path = "")
     : path_(path), chrom_(""){
-
+    
     // Open the file itself
     if (!file_exists(path))
       PrintMessageDieOnError("File " + path + " doest not exist", M_ERROR, false);
@@ -467,23 +469,27 @@ class BamCramReader {
     if (in_ == NULL)
       PrintMessageDieOnError("Failed to open file " + path, M_ERROR, false);
 
-    if (in_->is_cram){
-      PrintMessageDieOnError("No support for CRAM files yet", M_ERROR, false);
-      /*
-      if (fasta_path.empty())
-	PrintMessageDieOnError("Must specify a FASTA reference file path for CRAM file " + path, M_ERROR);
-      
-      // Open the FASTA reference file for the CRAM
-      char* fasta = new char[fasta_path.size()+1];
-      for (size_t i = 0; i < fasta_path.size(); ++i)
-	fasta[i] = fasta_path[i];
-      fasta[fasta_path.size()] = '\0';
-      if (cram_load_reference(in_->fp.cram, fasta) < 0)
-	PrintMessageDieOnError("Failed to open FASTA reference file for CRAM file", M_ERROR);
-      delete [] fasta;
-      */
-    }
+    if (in_->is_cram) {
+      if (fasta_path.empty()) {
+	PrintMessageDieOnError("Must specify a FASTA reference file path for CRAM file " + path, M_ERROR, false);
+      }
+      if (!file_exists(fasta_path+".fai")) {
+	PrintMessageDieOnError("File " + fasta_path + ".fai doest not exist", M_ERROR, false);
+      }
+      // Open fasta fai file for CRAM
+      std::string fai_path = fasta_path+".fai";
+      char* fai = new char[fai_path.size()+1];
+      for (size_t i = 0; i<fai_path.size(); ++i) {
+	fai[i] = fai_path[i];
+      }
+      fai[fai_path.size()] = '\0';
 
+      if (hts_set_fai_filename(in_, fai) <0 ) {
+	PrintMessageDieOnError("Failed to open FASTA reference file for CRAM file", M_ERROR, false);
+      }
+      delete [] fai;
+    }
+    
     // Read the header
     if ((hdr_ = sam_hdr_read(in_)) == 0)
       PrintMessageDieOnError("Failed to read the header for file " + path, M_ERROR, false);
