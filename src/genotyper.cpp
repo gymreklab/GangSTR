@@ -201,6 +201,11 @@ bool Genotyper::ProcessLocus(BamCramMultiReader* bamreader, Locus* locus) {
       locus->flanking_reads[samp] = sample_likelihood_maximizers[samp]->GetFlankingDataSize();
       locus->depth[samp] = sample_likelihood_maximizers[samp]->GetReadPoolSize();
       locus->called[samp] = true;
+      if (allele1 <= 0 and allele2 <= 0){
+	PrintMessageDieOnError("\tProblem maximizing likelihood. Skipping locus", M_WARNING, options->quiet);
+	locus->called[samp] = false;
+	continue;
+      }
       if (options->include_ggl && !SetGGL(*locus, samp)) {
 	PrintMessageDieOnError("\tProblem setting genotype likelihoods", M_WARNING, options->quiet);
       }
@@ -238,7 +243,7 @@ bool Genotyper::ProcessLocus(BamCramMultiReader* bamreader, Locus* locus) {
 	catch (std::exception &exc){
 	  if (options->verbose) {
 	    stringstream msg;
-	    msg<<"\tEncountered error("<< exc.what() <<") in likelihood maximization for CI. Skipping locus";
+	    msg<<"\tEncountered error("<< exc.what() <<") in likelihood maximization for confidence interval. Skipping locus";
 	    PrintMessageDieOnError(msg.str(), M_PROGRESS, options->quiet);
 	  }
 	  locus->called[samp] = false;
