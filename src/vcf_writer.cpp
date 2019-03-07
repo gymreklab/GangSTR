@@ -90,10 +90,10 @@ void VCFWriter::WriteRecord(Locus& locus) {
   std::set<int> alt_allele_lengths;
   for (size_t i=0; i<sample_names.size(); i++) {
     std::string samp = sample_names[i];
-    if (locus.allele1[samp] != refsize) {
+    if (locus.allele1[samp] != refsize and locus.allele1[samp] > 0) {
       alt_allele_lengths.insert(locus.allele1[samp]);
     }
-    if (locus.allele2[samp] != refsize) {
+    if (locus.allele2[samp] != refsize and locus.allele2[samp] > 0) {
       alt_allele_lengths.insert(locus.allele2[samp]);
     }
   } 
