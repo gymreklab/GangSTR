@@ -686,7 +686,7 @@ bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
     rgid = alignment.file_ ;
   } else {
     if (!alignment.GetStringTag("RG", rgtag)) {
-      PrintMessageDieOnError("Could not find read ID " + alignment.Name(), M_ERROR, false);
+      PrintMessageDieOnError("Could not find read group ID " + alignment.Name(), M_ERROR, false);
     }
     rgid = alignment.file_ + ':' + rgtag;
   }
