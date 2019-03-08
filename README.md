@@ -259,3 +259,7 @@ The references below contain pre-defined off-target loci for target pathogenic l
 | DM1 | [DM1_hg38.bed](https://s3.amazonaws.com/gangstr/hg38/DM1_hg38.bed) | [DM1_hg19.bed](https://s3.amazonaws.com/gangstr/hg19/DM1_hg19.bed) |
 | FMR1 | [FMR1_hg38.bed](https://s3.amazonaws.com/gangstr/hg38/FMR1_hg38.bed) | [FMR1_hg19.bed](https://s3.amazonaws.com/gangstr/hg19/FMR1_hg19.bed) |
 | C9ORF72 | [C9ORF72_hg38.bed](https://s3.amazonaws.com/gangstr/hg38/C9ORF72_hg38.bed) | [C9ORF72_hg19.bed](https://s3.amazonaws.com/gangstr/hg19/C9ORF72_hg19.bed) |
+
+## Known Issues:
+* Multi-sample run with `--bam-samps` may generate innacurate results. This issue is fixed in the repository and will be packaged in our next release.
+* Multi-sample run with manually set insert size (using `--insertmean` and `--insertsdev`) may generate innacurate results. This issue is fixed in the repository and will be packaged in our next release.
