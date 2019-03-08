@@ -691,7 +691,6 @@ bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
     rgid = alignment.file_ + ':' + rgtag;
   }
   sample = sample_info.GetSampleFromID(rgid);
-
   *srt = SR_UNKNOWN;
 
   /* If mapped read in vicinity but not close to STR, save for later */

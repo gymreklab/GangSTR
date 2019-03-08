@@ -127,8 +127,7 @@ bool SampleInfo::ExtractBamInfo(const Options& options, BamCramMultiReader& bamr
 	PrintMessageDieOnError("Can only set per-BAM dists if using custom read groups", M_ERROR, false);
       }
       for (size_t i=0; i<options.bamfiles.size(); i++) {
-	profile[options.bamfiles[i]].dist_mean = options.dist_mean[i];
-	profile[options.bamfiles[i]].dist_sdev = options.dist_sdev[i];
+	cerr << "set for: " << options.bamfiles[i] << endl;
 	// Precalculating pdf and cdf
 	int32_t dist_size = options.dist_distribution_size;
 	std::vector<double> dist_pdf(dist_size);
@@ -142,9 +141,11 @@ bool SampleInfo::ExtractBamInfo(const Options& options, BamCramMultiReader& bamr
 	  dist_integral[j] = integral;
 	}
 	dist_cdf[dist_size - 1] = 1.0;
-	profile[options.bamfiles[i]].dist_pdf = dist_pdf;
-	profile[options.bamfiles[i]].dist_cdf = dist_cdf;
-	profile[options.bamfiles[i]].dist_integral = dist_integral;
+	profile[GetSampleFromID(options.bamfiles[i])].dist_mean = options.dist_mean[i];
+	profile[GetSampleFromID(options.bamfiles[i])].dist_sdev = options.dist_sdev[i];
+	profile[GetSampleFromID(options.bamfiles[i])].dist_pdf = dist_pdf;
+	profile[GetSampleFromID(options.bamfiles[i])].dist_cdf = dist_cdf;
+	profile[GetSampleFromID(options.bamfiles[i])].dist_integral = dist_integral;
       }
     }
   }
