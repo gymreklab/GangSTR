@@ -27,6 +27,7 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 
 using namespace std;
 
+
 ReadExtractor::ReadExtractor(const Options& options_, SampleInfo& sample_info_) : options(options_), sample_info(sample_info_) {
   if (options.output_readinfo) {
     readfile_.open((options.outprefix + ".readinfo.tab").c_str());
