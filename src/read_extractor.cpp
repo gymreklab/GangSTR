@@ -681,17 +681,16 @@ bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
 
   /* Pull out sample ID so can get mean/sdev */
   std::string sample, rgid, rgtag;
-  if (!alignment.GetStringTag("RG", rgtag)) {
-    if (sample_info.GetIsCustomRG()) {
-      rgid = alignment.file_;
-    } else {
-      PrintMessageDieOnError("Could not find read ID " + alignment.Name(), M_ERROR, false);
+  /* Pull out sample ID so can get mean/sdev */
+  if (sample_info.GetIsCustomRG()) {
+    rgid = alignment.file_ ;
+  } else {
+    if (!alignment.GetStringTag("RG", rgtag)) {
+      PrintMessageDieOnError("Could not find read group ID " + alignment.Name(), M_ERROR, false);
     }
-  } 
-  if(!sample_info.GetIsCustomRG())
     rgid = alignment.file_ + ':' + rgtag;
+  }
   sample = sample_info.GetSampleFromID(rgid);
-
   *srt = SR_UNKNOWN;
 
   /* If mapped read in vicinity but not close to STR, save for later */
