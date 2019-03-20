@@ -1,7 +1,7 @@
 import sys
 
 if len(sys.argv) < 3:
-    print "Usage: python remove_messy.py in.bed out.bed supp.bed"
+    print "Usage: python remove_messy.py in.bed out.bed supp1.bed,...,suppN.bed"
     sys.exit()
 in_bed = sys.argv[1]
 out_bed = sys.argv[2]
