@@ -73,8 +73,8 @@ with open(in_bed, 'r') as ref:
             if is_compound(motif):
                 continue
             
-            if len(motif) == 1:
-                continue
+            #if len(motif) == 1:
+            #    continue
 
             st,en = minimal_trim(repeat_str, motif)
             

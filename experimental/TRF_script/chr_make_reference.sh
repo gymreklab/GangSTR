@@ -5,6 +5,7 @@ OUTFILE=$2
 TRF=$3
 NUMPROC=$4
 MAXCHR=$5
+TMPPREF=$6
 
 BASE=$(basename -- "$0")
 usage()
@@ -44,10 +45,10 @@ if ! type ${TRF} > /dev/null 2>&1; then
 fi
 
 matchscore=2
-#mismatchscore=5
-#indelscore=17
-mismatchscore=3
-indelscore=5
+mismatchscore=5
+indelscore=17
+#mismatchscore=3
+#indelscore=5
 
 maxperiod=20 # Largest repeat unit
 pm=80
@@ -56,7 +57,7 @@ minscore=24 # Require at least 12 bp perfect matching
 maxlen=1000
 
 # Put temp outputs here
-tmpdir=$(mktemp -d)
+tmpdir=$(mktemp -d -p $TMPPREF)
 cd ${tmpdir}
 
 echo "Running in ${tmpdir}"
