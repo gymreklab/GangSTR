@@ -40,7 +40,7 @@ test -d ${OUT_DIR} || die "cannot access ${OUT_DIR}: No such file or directory"
 
 
 REMOVE_TMP=false
-SUPP_FLAG=true
+SUPP_FLAG=false
 DISEASE_BED=/storage/nmmsv/GangSTR/experimental/supplement_bed/${REF}_disease.txt
 CODIS_BED=/storage/nmmsv/GangSTR/experimental/supplement_bed/${REF}_codis.bed
 

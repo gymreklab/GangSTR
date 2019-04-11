@@ -401,9 +401,9 @@ int main(int argc, char* argv[]) {
       PrintMessageDieOnError("Error loading read groups", M_ERROR, false);
     }
   }
-
   // Extract information from bam file (read length, insert size distribution, ..)
   RefGenome refgenome(options.reffa);
+  
   if (!sample_info.ExtractBamInfo(options, bamreader, region_reader, refgenome)) {
     PrintMessageDieOnError("Error extracting info from BAM file", M_ERROR, false);
   }
