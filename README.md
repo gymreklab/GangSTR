@@ -11,6 +11,8 @@ For questions on installation or usage, please open an issue, submit a pull requ
 For advanced topics such as those below, see the [GangSTR wiki](https://github.com/gymreklab/GangSTR/wiki).
 * [Filtering GangSTR output using dumpSTR](https://github.com/gymreklab/GangSTR/wiki/Filtering-GangSTR-output)
 * [Identifying repeat expansions](https://github.com/gymreklab/GangSTR/wiki/Identifying-repeat-expansions-using-GangSTR)
+* [Creating custom reference panel](https://github.com/gymreklab/GangSTR/wiki/Creating-a-custom-reference-panel)
+
 
 A Docker with GangSTR plus the dumpSTR filtering tool installed is available at [gymreklab/str-toolkit](https://hub.docker.com/r/gymreklab/str-toolkit) from Docker hub.
 
