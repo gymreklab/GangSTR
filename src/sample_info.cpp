@@ -77,6 +77,7 @@ bool SampleInfo::LoadReadGroups(const Options& options, const BamCramMultiReader
 bool SampleInfo::ExtractBamInfo(const Options& options, BamCramMultiReader& bamreader,
 				RegionReader& region_reader, const RefGenome& ref_genome) {
   BamInfoExtract bam_info(&options, &bamreader, &region_reader, &ref_genome);
+  
   if (options.read_len == -1) {
     if (!bam_info.GetReadLen(&read_len)) {
       PrintMessageDieOnError("Error extracting read length", M_ERROR, false);
@@ -86,7 +87,7 @@ bool SampleInfo::ExtractBamInfo(const Options& options, BamCramMultiReader& bamr
     read_len = options.read_len;
   }
   region_reader.Reset();
-  
+
   // Set insert size distribution
   if (options.dist_mean.empty() or options.dist_sdev.empty()) {
     if (!bam_info.GetInsertSizeDistribution(&profile, rg_samples, rg_ids_to_sample, custom_read_groups)) {

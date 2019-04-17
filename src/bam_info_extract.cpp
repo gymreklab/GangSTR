@@ -222,6 +222,7 @@ bool BamInfoExtract::GetInsertSizeDistribution(std::map<std::string, SampleProfi
 					       std::map<std::string, std::string> rg_ids_to_sample,
 					       bool custom_read_groups) {
   // Keep track of template lengths for each sample
+
   std::map<std::string, std::vector<int32_t> > sample_to_tlens;
   for (std::set<std::string>::const_iterator it = samples.begin();
        it != samples.end(); it++) {
@@ -273,7 +274,7 @@ bool BamInfoExtract::GetInsertSizeDistribution(std::map<std::string, SampleProfi
     }
     num_regions_so_far++;
   }
-
+  
   // Summarize distributions
   ofstream ins_file;
   ins_file.open((options->outprefix + ".insdata.tab").c_str());  
@@ -292,6 +293,13 @@ bool BamInfoExtract::GetInsertSizeDistribution(std::map<std::string, SampleProfi
       dist_cdf[i] = 0;
       dist_integral[i] = 0;
     }
+
+    if (tlen_vec.size() < min_reads_per_sample) {
+      std::stringstream ss;
+      ss << "Not enough reads for " << *it << " " << tlen_vec.size()<<". Please set insert size distribution manually.";
+      PrintMessageDieOnError(ss.str(), M_ERROR, false);
+      return false;
+    }
     // Filter out extremes
     sort(tlen_vec.begin(), tlen_vec.end());
     int32_t median = tlen_vec.at(int32_t(tlen_vec.size()/2));
@@ -306,7 +314,7 @@ bool BamInfoExtract::GetInsertSizeDistribution(std::map<std::string, SampleProfi
     }
     if (tlen_vec_filt.size() < min_reads_per_sample) {
       std::stringstream ss;
-      ss << "Not enough reads for " << *it << " " << tlen_vec_filt.size();
+      ss << "Not enough reads for " << *it << " " << tlen_vec_filt.size()<<". Please set insert size distribution manually.";
       PrintMessageDieOnError(ss.str(), M_ERROR, false);
       return false;
     }

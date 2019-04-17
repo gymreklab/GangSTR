@@ -5,7 +5,11 @@ OUTFILE=$2
 TRF=$3
 NUMPROC=$4
 MAXCHR=$5
-TMPPREF=$6
+NONNUMCHR=$6
+TMPPREF=$7
+
+$NONNUM=${NONNUMCHR//,/ }
+
 
 BASE=$(basename -- "$0")
 usage()
@@ -62,7 +66,7 @@ cd ${tmpdir}
 
 echo "Running in ${tmpdir}"
 
-for chrom in $(seq 1 $MAXCHR) X Y
+for chrom in $(seq 1 $MAXCHR) $NONNUM
 do
     echo "${TRF} \
 	${CHROMFA}/chr${chrom}.fa \
@@ -74,7 +78,7 @@ do
 done | xargs -P${NUMPROC} -I% -n 1 sh -c "%"
 
 # TODO implement here any other filters we would like to have on the reference
-for chrom in $(seq 1 $MAXCHR) X Y
+for chrom in $(seq 1 $MAXCHR) $NONNUM
 do
     cat ${tmpdir}/chr${chrom}.fa.${matchscore}.${mismatchscore}.${indelscore}.${pm}.${pi}.${minscore}.${maxperiod}.dat | \
 	awk -F' ' '(NF==15)' | \

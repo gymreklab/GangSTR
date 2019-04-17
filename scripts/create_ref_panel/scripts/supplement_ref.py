@@ -24,6 +24,7 @@ for bed in supp_bed:
     with open(bed, 'r') as disease_file:
         for rec in disease_file:
             recs = rec.strip().split('\t')
+            print recs
             line = [recs[0], recs[1], recs[2], \
                     recs[3], recs[4], \
                     ((int(recs[2]) - int(recs[1]) + 1) / int(recs[3])) * recs[4], str(0)]
