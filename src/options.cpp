@@ -88,6 +88,7 @@ Options::Options() {
   hist_mode = false;
   rescue_count = 0;
   min_reads_per_sample = 500;
+  max_processed_reads_per_sample = 3000;
   skip_qscore = false;
 }
 
