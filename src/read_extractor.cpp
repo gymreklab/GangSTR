@@ -49,14 +49,14 @@ bool ReadExtractor::ExtractReads(BamCramMultiReader* bamreader,
 				 const int32_t& regionsize,
 				 const int32_t& min_match, 
 				 std::map<std::string, LikelihoodMaximizer*> sample_likelihood_maximizers) {
-
+  total_processed_reads = 0;
   // This will keep track of information for each read pair
   std::map<std::string, ReadPair> read_pairs;
 
   if (!ProcessReadPairs(bamreader, locus, regionsize, min_match, &read_pairs, sample_info.GetIsCustomRG())) {
     return false;
   }
-
+  
   int32_t frr = 0, span = 0, encl = 0, flank = 0, offt = 0; // TODO do these need to be per sample?
   if (read_pairs.size() == 0){
     PrintMessageDieOnError("\tNot enough reads extracted. Aborting..", M_PROGRESS, options.quiet);
@@ -243,6 +243,10 @@ bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
   BamAlignment alignment;
 
   while (bamreader->GetNextAlignment(alignment)) {
+    if (total_processed_reads > options.max_processed_reads_per_sample) {
+      PrintMessageDieOnError("Region exceeds maximum total processed reads per sample.", M_WARNING, false);
+      return false;
+    }
     std::string read_group;
     std::string fname = alignment.file_;
     if (debug) {
@@ -678,7 +682,7 @@ bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
 				      int32_t* score_value,
 				      ReadType* read_type,
 				      SingleReadType* srt) {
-
+  total_processed_reads++;
   /* Pull out sample ID so can get mean/sdev */
   std::string sample, rgid, rgtag;
   /* Pull out sample ID so can get mean/sdev */

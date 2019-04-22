@@ -78,6 +78,7 @@ void show_help() {
 	   << "\t" << "--numbstrap   <int>           " << "\t" << "Number of bootstrap samples. Default: " << options.num_boot_samp << "\n"
 	   << "\t" << "--grid-threshold <int>        " << "\t" << "Use optimization rather than grid search to find MLE if more than this many possible alleles. Default: " << options.grid_threshold << "\n"
 	   << "\t" << "--rescue-count <int>          " << "\t" << "Number of regions that GangSTR attempts to rescue mates from (excluding off-target regions) Default: " << options.rescue_count << "\n"
+	   << "\t" << "--max-proc-read <int>         " << "\t" << "Maximum number of processed reads per sample before a region is skipped. Default: " << options.max_processed_reads_per_sample << "\n"
 	   << "\n Parameters for local realignment:\n"
 	   << "\t" << "--minscore    <int>           " << "\t" << "Minimum alignment score (out of 100). Default: " << options.min_score << "\n"
 	   << "\t" << "--minmatch    <int>           " << "\t" << "Minimum number of matching basepairs on each end of enclosing reads. Default: " << options.min_match<< "\n"
@@ -104,6 +105,7 @@ void show_help() {
 
 void parse_commandline_options(int argc, char* argv[], Options* options) {
   enum LONG_OPTIONS {
+    OPT_MAXPROCREAD,
     OPT_SKIPQ,
     OPT_MINREAD,
     OPT_PERIOD,
@@ -147,6 +149,7 @@ void parse_commandline_options(int argc, char* argv[], Options* options) {
     OPT_VERSION,
   };
   static struct option long_options[] = {
+    {"max-proc-read", required_argument, NULL, OPT_MAXPROCREAD},
     {"skip-qscore", no_argument, NULL, OPT_SKIPQ},
     {"min-sample-reads", required_argument, NULL, OPT_MINREAD},
     {"period",      required_argument,  NULL, OPT_PERIOD},
@@ -197,6 +200,9 @@ void parse_commandline_options(int argc, char* argv[], Options* options) {
                    long_options, &option_index);
   while (ch != -1) {
     switch (ch) {
+    case OPT_MAXPROCREAD:
+      options->max_processed_reads_per_sample = atoi(optarg);
+      break;
     case OPT_SKIPQ:
       options->skip_qscore = true;
       break;

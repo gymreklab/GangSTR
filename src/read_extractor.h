@@ -96,6 +96,7 @@ private:
   const Options options;
   SampleInfo sample_info;
   ofstream readfile_;
+  int32_t total_processed_reads;
   // SSW Objects
   StripedSmithWaterman::Aligner* ssw_aligner;
   StripedSmithWaterman::Filter* ssw_filter;

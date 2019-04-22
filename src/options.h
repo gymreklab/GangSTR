@@ -102,6 +102,8 @@ class Options {
   int32_t rescue_count;
   // Minimum number of reads per sample for successfull calculation of coverage
   int32_t min_reads_per_sample;
+  // Maximum number of processed reads per sample (to avoid massive coverage regions like telomeres)
+  int32_t max_processed_reads_per_sample;
   // Skip calculation of qscore
   bool skip_qscore;
 };
