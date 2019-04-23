@@ -70,6 +70,10 @@ class LikelihoodMaximizer {
   std::size_t GetFlankingDataSize();
   std::size_t GetOffTargetDataSize();
   std::size_t GetReadPoolSize();
+  
+  // Get data dictionary string
+  std::string GetEnclosingReadDictStr();
+  std::string GetFlankingReadDictStr();
 
   // Main likelihood function
   bool GetGenotypeNegLogLikelihood(const int32_t& allele1, const int32_t& allele2,

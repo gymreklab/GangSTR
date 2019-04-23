@@ -178,4 +178,27 @@ std::size_t ReadClass::GetDataSize() {
   return read_class_data_.size();
 }
 
+std::string ReadClass::GetReadDictStr() {
+  std::map <int32_t, int32_t> readDict;
+  for (std::vector<int32_t>::iterator data_it = read_class_data_.begin();
+       data_it != read_class_data_.end();
+       data_it++) {
+    if (readDict.find(*data_it) == readDict.end()){
+      readDict[*data_it] = 1;
+    }
+    else{
+      readDict[*data_it] = readDict[*data_it] + 1;
+    }
+  }
+  std::string out = "";
+  std::map<int32_t, int32_t>::iterator it = readDict.begin();
+  while(it != readDict.end())
+   {
+     if (out != "")
+       out+= "|";
+     out = out + std::to_string(it->first) + "," + std::to_string(it->second);
+     it++;
+   }
+  return out;
+}
 ReadClass::~ReadClass() {}

@@ -58,6 +58,8 @@ VCFWriter::VCFWriter(const std::string& _vcffile,
   writer_ << "##FORMAT=<ID=REPCN,Number=2,Type=Integer,Description=\"Genotype given in number of copies of the repeat motif\">" << endl;
   writer_ << "##FORMAT=<ID=REPCI,Number=1,Type=String,Description=\"Confidence intervals\">" << endl;
   writer_ << "##FORMAT=<ID=RC,Number=1,Type=String,Description=\"Number of reads in each class (enclosing, spanning, FRR, bounding)\">" << endl;
+  writer_ << "##FORMAT=<ID=ENCLREADS,Number=1,Type=String,Description=\"Summary of reads in enclosing class. Keys are number of copies and values show number of reads with that many copies. \">" << endl;
+  writer_ << "##FORMAT=<ID=FLNKREADS,Number=1,Type=String,Description=\"Summary of reads in flanking class. Keys are number of copies and values show number of reads with that many copies. \">" << endl;
   writer_ << "##FORMAT=<ID=ML,Number=1,Type=Float,Description=\"Maximum likelihood\">" << endl;
   writer_ << "##FORMAT=<ID=INS,Number=2,Type=Float,Description=\"Insert size mean and stddev\">" << endl;
   writer_ << "##FORMAT=<ID=STDERR,Number=2,Type=Float,Description=\"Bootstrap standard error of each allele\">" << endl;
@@ -133,7 +135,7 @@ void VCFWriter::WriteRecord(Locus& locus) {
 	  << "STUTTERDOWN=" << locus.stutter_down << ";"
 	  << "STUTTERP=" << locus.stutter_p << ";"
 	  << "EXPTHRESH=" << locus.expansion_threshold << "\t"
-	  << "GT:DP:Q:REPCN:REPCI:RC:ML:INS:STDERR:QEXP";
+	  << "GT:DP:Q:REPCN:REPCI:RC:ENCLREADS:FLNKREADS:ML:INS:STDERR:QEXP";
   if (include_ggl) {
     writer_ << ":GGL";
   }
@@ -159,6 +161,8 @@ void VCFWriter::WriteRecord(Locus& locus) {
 	    << locus.lob2[samp] << "-" 
 	    << locus.hib2[samp] << ":"
       	    << locus.enclosing_reads[samp] << "," << locus.spanning_reads[samp] << "," << locus.frr_reads[samp] << "," << locus.flanking_reads[samp] << ":"
+	    << locus.enclosing_reads_dict[samp] << ":"
+	    << locus.flanking_reads_dict[samp] << ":"
 	    << locus.min_neg_lik[samp] << ":"
 	    << sample_info->GetInsertMean(samp) << "," << sample_info->GetInsertSdev(samp) << ":"
 	    << locus.a1_se[samp]<<","<<locus.a2_se[samp] << ":"

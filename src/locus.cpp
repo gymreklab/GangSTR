@@ -45,6 +45,8 @@ void Locus::Reset(){
   spanning_reads.clear();
   frr_reads.clear();
   flanking_reads.clear();
+  enclosing_reads_dict.clear();
+  flanking_reads_dict.clear();
   depth.clear();
   called.clear();
   expansion_probs.clear();
