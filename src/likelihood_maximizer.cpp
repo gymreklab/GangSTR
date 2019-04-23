@@ -303,6 +303,21 @@ std::size_t LikelihoodMaximizer::GetReadPoolSize() {
   return read_pool.size();
 }
 
+std::string LikelihoodMaximizer::GetEnclosingReadDictStr() {
+  std::string ret_str = enclosing_class_.GetReadDictStr(); 
+  if (ret_str == "") 
+    return "NULL";
+  else
+    return ret_str;
+}
+std::string LikelihoodMaximizer::GetFlankingReadDictStr() {
+  std::string ret_str = flanking_class_.GetReadDictStr();
+  if (ret_str == "") 
+    return "NULL";
+  else
+    return ret_str;
+}
+
 bool LikelihoodMaximizer::GetNegLikelihoodSurface(const int32_t& a_lo,
 						  const int32_t& a_hi,
 						  const int32_t& b_lo,

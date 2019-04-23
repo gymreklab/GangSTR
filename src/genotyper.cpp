@@ -199,6 +199,10 @@ bool Genotyper::ProcessLocus(BamCramMultiReader* bamreader, Locus* locus) {
       locus->spanning_reads[samp] = sample_likelihood_maximizers[samp]->GetSpanningDataSize();
       locus->frr_reads[samp] = sample_likelihood_maximizers[samp]->GetFRRDataSize();
       locus->flanking_reads[samp] = sample_likelihood_maximizers[samp]->GetFlankingDataSize();
+      locus->enclosing_reads_dict[samp] = sample_likelihood_maximizers[samp]->GetEnclosingReadDictStr();
+      locus->flanking_reads_dict[samp] = sample_likelihood_maximizers[samp]->GetFlankingReadDictStr();
+
+
       locus->depth[samp] = sample_likelihood_maximizers[samp]->GetReadPoolSize();
       locus->called[samp] = true;
       if (allele1 <= 0 and allele2 <= 0){

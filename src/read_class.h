@@ -64,6 +64,7 @@ class ReadClass {
 			     double* class_ll);
   // Get min and max alleles supported - implemented in children classes
   virtual bool GetGridBoundaries(int32_t* min_allele, int32_t* max_allele);
+  std::string GetReadDictStr();
   // Clear all data from the class
   void Reset();
   // Check how many data points

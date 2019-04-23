@@ -66,6 +66,8 @@ class Locus {
   std::map<std::string,size_t> spanning_reads;
   std::map<std::string,size_t> frr_reads;
   std::map<std::string,size_t> flanking_reads;
+  std::map<std::string,std::string> enclosing_reads_dict;
+  std::map<std::string,std::string> flanking_reads_dict;
   std::map<std::string,size_t> depth;
   std::map<std::string,bool> called;
   std::map<std::string,std::vector<double> > expansion_probs;
