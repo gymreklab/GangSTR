@@ -233,6 +233,7 @@ The following lists available references created using Tandem Repeats Finder. We
 
 | **Reference build** | **Version** | **Link** | **Comment** |
 | --------------------| ------------|----------|-------------|
+| **hg19** | **ver13.1** | [hg19_ver13_1.bed.gz](https://s3.amazonaws.com/gangstr/hg19_ver13_1.bed.gz) | Added two disease loci to the reference (C9ORF72 and FMR1) |
 | **hg19** | **ver13** | [hg19_ver13.bed.gz](https://s3.amazonaws.com/gangstr/hg19_ver13.bed.gz) | More strict removal of locus bundles |
 | **hs37** | **ver13** | [hs37_ver13.bed.gz](https://s3.amazonaws.com/gangstr/hs37_ver13.bed.gz) | More strict removal of locus bundles |
 | **hg38** | **ver13** | [hg38_ver13.bed.gz](https://s3.amazonaws.com/gangstr/hg38_ver13.bed.gz) | More strict removal of locus bundles |
@@ -268,6 +269,13 @@ Non-human reference builds:
 | --------------------| ------------|----------|-------------|
 | **mm10** | **ver2** | [mm10_ver2.bed.gz](https://s3.amazonaws.com/gangstr/mm10/mm10_ver2.bed.gz) |  |
 | **mm9** | **ver2** | [mm9_ver2.bed.gz](https://s3.amazonaws.com/gangstr/mm9/mm9_ver2.bed.gz) |  |
+
+## GangSTR callsets
+GangSTR callsets on publicly available datasets.
+
+| **Dataset** | **Reference build and version** | **Link** | 
+| ----------- | -------------------- | ----------|
+| NA12878, NA12891, NA12892 | hg19 v13.1 | [NA12878_trio_hg19_v13_1_filtered_level1.vcf.gz](https://s3.amazonaws.com/gangstr/callsets/NA12878_trio_hg19_v13_1_filtered_level1.vcf.gz) |
 
 ## Known Issues:
 * Multi-sample run with `--bam-samps` may generate innacurate results. This issue is fixed in the repository and will be packaged in our next release.
