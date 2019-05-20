@@ -239,7 +239,7 @@ The following lists available references created using Tandem Repeats Finder. We
 | **hg38** | **ver13** | [hg38_ver13.bed.gz](https://s3.amazonaws.com/gangstr/hg38/genomewide/hg38_ver13.bed.gz) | More strict removal of locus bundles |
 | hg19 | ver12 | [hg19_ver12.bed.gz](https://s3.amazonaws.com/gangstr/hg19/genomewide/hg19_ver12.bed.gz) | Motifs of up to 20 bps, includes ChrX and ChrY, Trimmed messy loci |
 | hs37 | ver12 | [hs37_ver12.bed.gz](https://s3.amazonaws.com/gangstr/hs37_ver12.bed.gz) | Motifs of up to 20 bps, includes ChrX and ChrY, Trimmed messy loci |
-| hg38 | ver12 | [hg38_ver12.bed.gz](https://s3.amazonaws.com/gangstr/hg38/genomewide/hg38_ver12.bed.gz) | Trimmed messy loci |
+| hg38 | ver12 | [hg38_ver12.bed.gz](https://s3.amazonaws.com/gangstr/hg38/genomewide/hg38_ver12.bed.gz) | Motifs of up to 20 bps, Trimmed messy loci |
 | hg19 | ver8 | [hg19_ver8.bed.gz](https://s3.amazonaws.com/gangstr/hg19/genomewide/hg19_ver8.bed.gz) | Motifs of up to 15 bps |
 | hg19 | ver10 | [hg19_ver10.sorted.bed.gz](https://s3.amazonaws.com/gangstr/hg19/genomewide/hg19_ver10.sorted.bed.gz) | Motifs of up to 20 bps, includes ChrX and ChrY |
 | hs37 | ver8 | [hs37_ver8.bed.gz](https://s3.amazonaws.com/gangstr/hs37_ver8.bed.gz) | Motifs of up to 15 bps |
