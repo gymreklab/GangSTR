@@ -26,7 +26,7 @@ parser.add_argument('--bed', type=str, required=True, help='GangSTR reference be
 parser.add_argument('--out', type=str, required=True, help='Path to STR-info output')
 parser.add_argument('--readlen', type=int, required=True, help='Read length used to calculate threshold (Priority 1)')
 parser.add_argument('--population', type=str, help='A file in bed format containing thresholdsf for low priority regions that need to be overwritten (Priority 2)')
-parser.add_argument('--motif', nargs=2, action='append', help='Overwrite all canonical instances of the motif to a value. format: --motif motif1 thresh1 --motif motif2 thresh2 (Priority e)')
+parser.add_argument('--motif', nargs=2, action='append', help='Overwrite all canonical instances of the motif to a min(pop_thesh,thresh). format: --motif motif1 thresh1 --motif motif2 thresh2 (Priority e)')
 parser.add_argument('--disease', type=str, help='A file in bed format containing thresholds for high priority regions that need to be overwritten (Priority 4)')
 parser.add_argument('--population-pad', type=int, default=0, help='Incresing the thresholds in population bed by this amount to avoind false positives.')
 
@@ -140,7 +140,8 @@ with open(out_file, 'w') as out:
                     thresh = pop_dict[chrom][pos_end]
             # Priority 3: Set thresh based on motif
             if canonical_motif in motif_dict:
-                thresh = motif_dict[canonical_motif]
+                thresh = min(int(thresh), int(motif_dict[canonical_motif]))
+
             # Priority 4 (highest): Set thresh based on disease bed
             if chrom in ov_dict:
                 if pos_end in ov_dict[chrom]:
