@@ -15,5 +15,5 @@ scripts/chr_make_reference.sh \
     trf \
     4 \
     $MAX_CHR_NUM \
-    $NON_NUM_CHR \
+    $NON_NUM_CHRS \
     $TMP
