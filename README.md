@@ -1,10 +1,11 @@
 # GangSTR
+<img align="right" src="logo/GangSTR_logo_square.png" alt="GangSTR" width="200" height="200"> 
 
 GangSTR is a tool for genome-wide profiling tandem repeats from short reads. A key advantage of GangSTR over existing genome-wide TR tools (e.g. [lobSTR](https://github.com/mgymrek/lobstr-code) or [hipSTR](https://github.com/tfwillems/HipSTR)) is that it can handle repeats that are longer than the read length.
 
 GangSTR takes aligned reads (BAM) and a set of repeats in the reference genome as input and outputs a VCF file containing genotypes for each locus.
 
-**Updated bioRxiv preprint** manuscript: http://bit.ly/gangstr-biorxiv
+**Manuscript**: https://doi.org/10.1093/nar/gkz501
 
 For questions on installation or usage, please open an issue, submit a pull request, or contact Nima Mousavi (mousavi@ucsd.edu).
 
