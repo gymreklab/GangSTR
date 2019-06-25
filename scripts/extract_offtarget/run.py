@@ -37,20 +37,20 @@ indel_frac = 0.0
 indel_xtnd = 0.0
 
 
-cmd = subprocess.Popen([read_simulator, \
-                        fa_path, \
-                        fq1_path, \
-                        fq2_path, \
-                        '-e', str(base_error), \
-                        '-d', str(insert_size_mean), \
-                        '-s', str(insert_size_sdev), \
-                        '-N', str(read_count), \
-                        '-1', str(read_len), \
-                        '-2', str(read_len), \
-                        '-r', str(mutat_rate), \
-                        '-R', str(indel_frac), \
-                        '-X', str(indel_xtnd), \
-                        '-S', str(0)])
+cmd = subprocess.Popen([read_simulator,
+                        '-e', str(base_error),
+                        '-d', str(insert_size_mean),
+                        '-s', str(insert_size_sdev),
+                        '-N', str(read_count),
+                        '-1', str(read_len),
+                        '-2', str(read_len),
+                        '-r', str(mutat_rate),
+                        '-R', str(indel_frac),
+                        '-X', str(indel_xtnd),
+                        '-S', str(0),
+                        fa_path,
+                        fq1_path,
+                        fq2_path])
 cmd.wait()
 
 
