@@ -61,13 +61,13 @@ cmd.wait()
 # Align reads
 sam_path = temp_dir + exp + '.sam'
 sam_handle = open(sam_path, 'w')
-cmd = subprocess.Popen(['bwa', 'mem',\
-                        ref_genome,\
-                        fq1_path,\
-                        fq2_path,\
-                        '-M',\
-                        '-t', '4',\
-                        '-R', '@RG\tID:foo\tSM:bar'], stdout = sam_handle)
+cmd = subprocess.Popen(['bwa', 'mem',
+                        '-M',
+                        '-t', '4',
+                        '-R', '@RG\\tID:foo\\tSM:bar',
+                        ref_genome,
+                        fq1_path,
+                        fq2_path], stdout = sam_handle)
 cmd.wait()
 sam_handle.close()
 
