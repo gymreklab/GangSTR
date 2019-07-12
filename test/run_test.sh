@@ -12,7 +12,6 @@ do
 	--regions HTT.bed \
 	--out results/$name \
 	--coverage 50 \
-	--useofftarget \
 	--output-readinfo \
 	--verbose
 done
