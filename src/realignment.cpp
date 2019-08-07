@@ -58,6 +58,9 @@ bool find_longest_stretch(const std::string& seq,
       longest_stretch = current_stretch;
     }
   }
+  if (longest_stretch >= 10){
+    cerr << longest_stretch << "\t" << seq << endl;
+  }
   *nCopy_stretch = longest_stretch;
   *nCopy_total = total;
 }
@@ -79,6 +82,7 @@ bool expansion_aware_realign(const std::string& seq,
 			     int32_t* score,
 			     FlankMatchState* fm_start,
 			     FlankMatchState* fm_end) {
+
   //int MIN_INTERMEDIATE_SCORE = 0.7*min_nCopy*motif.size()*SSW_MATCH_SCORE; // Give up if we don't get to this
   int MIN_INTERMEDIATE_SCORE = 0.5*seq.size()*SSW_MATCH_SCORE;
   *fm_start = FM_NOMATCH;

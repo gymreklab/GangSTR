@@ -43,7 +43,6 @@ bool BamInfoExtract::GetReadLen(int32_t* read_len){
   BamAlignment alignment;
   
   int32_t curr_len = 0, curr_streak = 0;
-  
   while(region_reader->GetNextRegion(&locus) and !found_read_len){
     chrom_ref_id = bam_header->ref_id(locus.chrom);
     // if (chrom_ref_id == -1){

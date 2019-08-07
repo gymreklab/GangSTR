@@ -730,15 +730,16 @@ bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
   if (perform_ssw) {
     bool realign_fwd = false, realign_rev = false;
     int32_t fwd_str = -1, fwd_tot = -1, rev_str = -1 ,rev_tot = -1;
+
     find_longest_stretch(seq, locus.motif, &fwd_str, &fwd_tot);
     find_longest_stretch(seq_rev, locus.motif, &rev_str, &rev_tot);
     
-    if (((locus.period == 2 and fwd_str >= 5) 
+    if (((locus.period <= 2 and fwd_str >= 5) 
 	 or (locus.period == 3 and fwd_str >= 4)
 	 or (locus.period >= 4 and fwd_str >= 3)) && fwd_str >= rev_str){
       realign_fwd = true;
     }
-    if (((locus.period == 2 and rev_str >= 5) 
+    if (((locus.period <= 2 and rev_str >= 5) 
 	 or (locus.period == 3 and rev_str >= 4)
 	 or (locus.period >= 4 and rev_str >= 3)) && rev_str >= fwd_str){
       realign_rev = true;
@@ -764,6 +765,7 @@ bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
       //cout << rev_str << " " << rev_tot << endl;
     }
     //    std::cerr << "realigning ssw: " << seq << " " << locus.motif << std::endl;
+
     if (realign_fwd){
       if (!expansion_aware_realign(seq, qual, locus.pre_flank, locus.post_flank, 
 				   locus.motif, min_match, fwd_str, fwd_tot,
