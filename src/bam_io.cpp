@@ -7,7 +7,7 @@
 #include "stringops.h"
 
 void BamAlignment::ExtractSequenceFields(){
-  int32_t length = b_->core.l_qseq;
+  int32_t length = 128;//b_->core.l_qseq;
   bases_         = std::string(length, ' ');
   qualities_     = std::string(length, ' '); 
   if (length == 0)
