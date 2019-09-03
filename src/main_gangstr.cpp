@@ -68,7 +68,7 @@ void show_help() {
 	   << "\t" << "--nonuniform                  " << "\t" << "Indicate whether data has non-uniform coverage (i.e., exome)" << "\n"
 	   << "\t" << "--min-sample-reads <int>      " << "\t" << "Minimum number of reads per sample." << "\n"
      << "\t" << "--trim-to-readlength <int>    " << "\t" << "Trim reads longer than this length to this length." << "\n"
-     << "\t" << "--drop-dupes                  " << "\t" << "Do no process optical or PCR duplicates." << "\n"
+     << "\t" << "--drop-dupes                  " << "\t" << "Do not process optical or PCR duplicates." << "\n"
 	   << "\n Advanced paramters for likelihood model:\n"
 	   << "\t" << "--frrweight   <float>         " << "\t" << "Weight for FRR reads. Default: " << options.frr_weight << "\n"
 	   << "\t" << "--enclweight  <float>         " << "\t" << "Weight for enclosing reads. Default: " << options.enclosing_weight << "\n"
