@@ -58,9 +58,9 @@ bool find_longest_stretch(const std::string& seq,
       longest_stretch = current_stretch;
     }
   }
-  if (longest_stretch >= 10){
-    cerr << longest_stretch << "\t" << seq << endl;
-  }
+  // if (longest_stretch >= 10){
+  //   cerr << longest_stretch << "\t" << seq << endl;
+  // }
   *nCopy_stretch = longest_stretch;
   *nCopy_total = total;
 }
