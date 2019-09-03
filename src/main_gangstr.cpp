@@ -67,6 +67,8 @@ void show_help() {
 	   << "\t" << "--insertsdev  <float>         " << "\t" << "Fragment length standard deviation. Comma separated list to specify for each BAM separately. " << "\n"
 	   << "\t" << "--nonuniform                  " << "\t" << "Indicate whether data has non-uniform coverage (i.e., exome)" << "\n"
 	   << "\t" << "--min-sample-reads <int>      " << "\t" << "Minimum number of reads per sample." << "\n"
+     << "\t" << "--trim-to-readlength <int>    " << "\t" << "Trim reads longer than this length to this length." << "\n"
+     << "\t" << "--drop-dupes                  " << "\t" << "Do no process optical or PCR duplicates." << "\n"
 	   << "\n Advanced paramters for likelihood model:\n"
 	   << "\t" << "--frrweight   <float>         " << "\t" << "Weight for FRR reads. Default: " << options.frr_weight << "\n"
 	   << "\t" << "--enclweight  <float>         " << "\t" << "Weight for enclosing reads. Default: " << options.enclosing_weight << "\n"
@@ -147,6 +149,8 @@ void parse_commandline_options(int argc, char* argv[], Options* options) {
     OPT_VERYVERBOSE,
     OPT_QUIET,
     OPT_VERSION,
+    OPT_TRIMTOREAD,
+    OPT_DROPDUPES
   };
   static struct option long_options[] = {
     {"max-proc-read", required_argument, NULL, OPT_MAXPROCREAD},
@@ -191,6 +195,8 @@ void parse_commandline_options(int argc, char* argv[], Options* options) {
     {"very",  no_argument, NULL, OPT_VERYVERBOSE},
     {"quiet", no_argument, NULL, OPT_QUIET},
     {"version",     no_argument,        NULL, OPT_VERSION},
+    {"trim-to-readlength",     required_argument,        NULL, OPT_TRIMTOREAD},
+    {"drop-dupes",     no_argument,        NULL, OPT_DROPDUPES},
     {NULL,          no_argument,        NULL, 0},
   };
   std::vector<std::string> dist_means_str, dist_sdev_str, coverage_str, pers;
@@ -347,6 +353,12 @@ void parse_commandline_options(int argc, char* argv[], Options* options) {
     case OPT_VERSION:
       cerr << _GIT_VERSION << endl;
       exit(0);
+    case OPT_TRIMTOREAD:
+      options->trim_to_readlen = atoi(optarg);
+      break;
+    case OPT_DROPDUPES:
+      options->drop_dupes = true;
+      break;
     case '?':
       show_help();
     default:

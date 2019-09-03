@@ -7,7 +7,7 @@
 #include "stringops.h"
 
 void BamAlignment::ExtractSequenceFields(){
-  int32_t length = 128;//b_->core.l_qseq;
+  int32_t length = length_; //b_->core.l_qseq; // changed to accomodate end trimming
   bases_         = std::string(length, ' ');
   qualities_     = std::string(length, ' '); 
   if (length == 0)
@@ -28,8 +28,38 @@ void BamAlignment::ExtractSequenceFields(){
   int32_t num_cigar_ops = b_->core.n_cigar;
   uint32_t* cigars      = bam_get_cigar(b_);
   cigar_ops_.clear();
-  for (int32_t i = 0; i < num_cigar_ops; ++i)
-    cigar_ops_.push_back(CigarOp(bam_cigar_opchr(cigars[i]), bam_cigar_oplen(cigars[i])));
+  
+  // this accomodates end trimming via the trim_to_readlen option
+  char opchr;
+  int32_t oplen;
+  int32_t seq_l = 0;
+  for (int32_t i = 0; i < num_cigar_ops; ++i) {
+
+    opchr = bam_cigar_opchr(cigars[i]);
+    oplen = bam_cigar_oplen(cigars[i]);
+
+    switch (opchr){
+    case 'M': case '=': case 'X': case 'I': case 'S':
+      seq_l = seq_l + oplen;
+      break;
+    case 'D': case 'H':
+      break;
+    default:
+      PrintMessageDieOnError("Invalid CIGAR option encountered in ExtractSequenceFields", M_ERROR, false);
+      break;
+    }
+
+    if (seq_l < length) {
+      cigar_ops_.push_back(CigarOp(opchr, oplen));
+    } else if (seq_l == length)
+    {
+      cigar_ops_.push_back(CigarOp(opchr, oplen));
+      break;
+    } else {
+      cigar_ops_.push_back(CigarOp(opchr, length - (seq_l - oplen)));
+      break;
+    }
+  }
   
   built_ = true;
 }
@@ -88,6 +118,31 @@ bool BamCramReader::SetRegion(const std::string& chrom, int32_t start, int32_t e
   }
 }
 
+void BamAlignment::TrimEnd(int32_t trim_to) {
+  // method for trimming reads to a defined length
+  // use-case example: mixed readlength sequencing data
+
+  // update length if read length is larger than trim_to; otherwise do nothing
+  if (b_->core.l_qseq > trim_to && trim_to >= 1) {
+    length_ = trim_to;
+    
+    // update the cigar_ops_ because these will be needed to calculate end_pos_
+    ExtractSequenceFields();
+
+    // bam_endpos uses bam_cigar2rlen to determine the final position; code below replicates this explicitly.
+    int32_t seq_l = 0;
+    for (CigarOp i : cigar_ops_) {
+      if (i.Type == 'M' | i.Type == 'D' | i.Type == 'N' | i.Type == '=' | i.Type == 'X')
+        seq_l = seq_l + i.Length;
+    }
+    if (IsMapped() && b_->core.n_cigar > 0) {
+      end_pos_ = pos_ + seq_l;
+    } else {
+      end_pos_ = pos_ + 1;
+    }
+  }
+}
+
 bool BamCramReader::GetNextAlignment(BamAlignment& aln){
   if (iter_ == NULL) return false;
 
@@ -113,12 +168,14 @@ bool BamCramReader::GetNextAlignment(BamAlignment& aln){
 
 
 
-bool BamCramMultiReader::SetRegion(const std::string& chrom, int32_t start, int32_t end){
+bool BamCramMultiReader::SetRegion(const std::string& chrom, int32_t start, int32_t end, int32_t trim_to = -1){
   aln_heap_.clear();
   for (int32_t reader_index = 0; reader_index < bam_readers_.size(); reader_index++){
     if (!bam_readers_[reader_index]->SetRegion(chrom, start, end))
       return false;
     if (bam_readers_[reader_index]->GetNextAlignment(cached_alns_[reader_index])){
+      // trim the read; default value of -1 will do nothing
+      cached_alns_[reader_index].TrimEnd(trim_to);
       if (merge_type_ == ORDER_ALNS_BY_POSITION)
 	aln_heap_.push_back(std::pair<int32_t, int32_t>(-cached_alns_[reader_index].Position(), reader_index));
       else if (merge_type_ == ORDER_ALNS_BY_FILE)
@@ -131,7 +188,7 @@ bool BamCramMultiReader::SetRegion(const std::string& chrom, int32_t start, int3
   return true;
 }
 
-bool BamCramMultiReader::GetNextAlignment(BamAlignment& aln){
+bool BamCramMultiReader::GetNextAlignment(BamAlignment& aln, int32_t trim_to = -1){
   if (aln_heap_.empty())
     return false;
   std::pop_heap(aln_heap_.begin(), aln_heap_.end());
@@ -143,6 +200,8 @@ bool BamCramMultiReader::GetNextAlignment(BamAlignment& aln){
 
   // Add reader's next alignment to the cache
   if (bam_readers_[reader_index]->GetNextAlignment(cached_alns_[reader_index])){
+    // trim the read; default value of -1 will do nothing
+    cached_alns_[reader_index].TrimEnd(trim_to);
     if (merge_type_ == ORDER_ALNS_BY_POSITION)
       aln_heap_.push_back(std::pair<int32_t, int32_t>(-cached_alns_[reader_index].Position(), reader_index));
     else if (merge_type_ == ORDER_ALNS_BY_FILE)

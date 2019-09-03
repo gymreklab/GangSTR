@@ -228,7 +228,8 @@ bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
   // Get bam alignments from the relevant region
   bamreader->SetRegion(locus.chrom, 
 		       locus.start-regionsize, 
-		       locus.end+regionsize);
+		       locus.end+regionsize,
+           options.trim_to_readlen);
 
   // Keep track of which file we're processing
   int32_t file_index = 0;
@@ -242,7 +243,7 @@ bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
   // Go through each alignment in the region
   BamAlignment alignment;
 
-  while (bamreader->GetNextAlignment(alignment)) {
+  while (bamreader->GetNextAlignment(alignment, options.trim_to_readlen)) {
     if (total_processed_reads > options.max_processed_reads_per_sample) {
       PrintMessageDieOnError("Region exceeds maximum total processed reads per sample.", M_WARNING, false);
       return false;
@@ -536,12 +537,12 @@ bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
 	   << reg_it->start <<  '-' <<  reg_it->end;
 	PrintMessageDieOnError(ss.str(), M_PROGRESS, options.quiet);
       }
-      bamreader->SetRegion(reg_it->chrom, reg_it->start, reg_it->end);
+      bamreader->SetRegion(reg_it->chrom, reg_it->start, reg_it->end, options.trim_to_readlen);
 
       const int32_t offchrom_ref_id = bam_header->ref_id(reg_it->chrom);
 
       // Go through each alignment in the region
-      while (bamreader->GetNextAlignment(alignment)) {
+      while (bamreader->GetNextAlignment(alignment, options.trim_to_readlen)) {
 	std::string read_group;
 	std::string fname = alignment.file_;
 	if (alignment.IsSecondary() or alignment.IsSupplementary()) {continue;}
@@ -696,6 +697,11 @@ bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
   }
   sample = sample_info.GetSampleFromID(rgid);
   *srt = SR_UNKNOWN;
+
+  // check if read is a PCR/optical duplicate and discard
+  if (options.drop_dupes) {
+    if (alignment.IsDuplicate()) return false;
+  }
 
   /* If mapped read in vicinity but not close to STR, save for later */
   if (!off_target_read &&
@@ -939,10 +945,10 @@ bool ReadExtractor::RescueMate(BamCramMultiReader* bamreader,
   }
 
   bamreader->SetRegion(bam_header->ref_name(alignment.MateRefID()),
-           alignment.MatePosition()-1, alignment.MatePosition()+1);
+           alignment.MatePosition()-1, alignment.MatePosition()+1, options.trim_to_readlen);
   BamAlignment aln;
   int32_t count = 0;
-  while (bamreader->GetNextAlignment(aln)) {
+  while (bamreader->GetNextAlignment(aln, options.trim_to_readlen)) {
     std::string aln_key2 = trim_alignment_name(aln);
     count++;
     if (count > 50){ // Skip this region if mate was not found in the first 50 alignments

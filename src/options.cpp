@@ -90,6 +90,8 @@ Options::Options() {
   min_reads_per_sample = 500;
   max_processed_reads_per_sample = 3000;
   skip_qscore = false;
+  trim_to_readlen = -1;
+  drop_dupes = false;
 }
 
 Options::~Options() {}

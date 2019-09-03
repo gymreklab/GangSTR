@@ -272,9 +272,9 @@ void Genotyper::Debug(BamCramMultiReader* bamreader) {
   refgenome->GetSequence("3", 63898261, 63898360, &seq);
   cerr << seq << endl;
   cerr << "testing bam" << endl;
-  bamreader->SetRegion("1", 0, 10000);
+  bamreader->SetRegion("1", 0, 10000, options->trim_to_readlen);
   BamAlignment aln;
-  if (bamreader->GetNextAlignment(aln)) { // Requires SetRegion was called
+  if (bamreader->GetNextAlignment(aln, options->trim_to_readlen)) { // Requires SetRegion was called
     std::string testread = aln.QueryBases();
     cerr << testread << endl;
   } else {

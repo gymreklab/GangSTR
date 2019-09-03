@@ -52,11 +52,12 @@ bool BamInfoExtract::GetReadLen(int32_t* read_len){
     // collecting reads mapped around locus
     bamreader->SetRegion(locus.chrom, 
 			 locus.start - flank_size > 0 ? locus.start - flank_size : 0, 
-			 locus.start + flank_size);
+			 locus.start + flank_size,
+       options->trim_to_readlen);
     num_reads = 0;
     curr_streak = 0;
     // Go through each alignment in the region until you have enough reads
-    while (bamreader->GetNextAlignment(alignment) and curr_streak < req_streak) {
+    while (bamreader->GetNextAlignment(alignment, options->trim_to_readlen) and curr_streak < req_streak) {
       has_reads = true;
       if(alignment.QueryBases().size() == curr_len){
 	curr_streak++;
@@ -107,9 +108,9 @@ bool BamInfoExtract::GetCoverageGC(std::map<std::string, SampleProfile>* profile
     // For each locus get num total bases and coverage per sample
     for (std::vector<Locus>::iterator it = gc_bin_loci.begin(); it != gc_bin_loci.end(); it++) {
       const Locus locus = *it;
-      bamreader->SetRegion(locus.chrom, locus.start, locus.end);
+      bamreader->SetRegion(locus.chrom, locus.start, locus.end, options->trim_to_readlen);
       //      std::cerr << "Locus " << locus.chrom << ":" << locus.start << " " << lb <<"-" << ub << std::endl;
-      while (bamreader->GetNextAlignment(alignment)) {
+      while (bamreader->GetNextAlignment(alignment, options->trim_to_readlen)) {
 	// Is this read worth looking at?
 	if (alignment.IsSupplementary() || alignment.IsSecondary() || 
 	    !alignment.IsProperPair()) {
@@ -179,8 +180,8 @@ bool BamInfoExtract::GetCoverage(std::map<std::string, SampleProfile>* profile,
   BamAlignment alignment;
   while ((num_regions_so_far < num_regions_to_use) &&
 	 region_reader->GetNextRegion(&locus)) {
-    bamreader->SetRegion(locus.chrom, locus.start+region_offset, locus.start+region_offset+region_length);
-    while (bamreader->GetNextAlignment(alignment)) {
+    bamreader->SetRegion(locus.chrom, locus.start+region_offset, locus.start+region_offset+region_length, options->trim_to_readlen);
+    while (bamreader->GetNextAlignment(alignment, options->trim_to_readlen)) {
       // Is this read worth looking at?
       if (alignment.IsSupplementary() || alignment.IsSecondary() || 
 	  !alignment.IsProperPair()) {
@@ -245,8 +246,8 @@ bool BamInfoExtract::GetInsertSizeDistribution(std::map<std::string, SampleProfi
   BamAlignment alignment;
   while ((num_regions_so_far < num_regions_to_use) &&
 	 region_reader->GetNextRegion(&locus)) {
-    bamreader->SetRegion(locus.chrom, locus.start+region_offset, locus.start+region_offset+region_length);
-    while (bamreader->GetNextAlignment(alignment)) {
+    bamreader->SetRegion(locus.chrom, locus.start+region_offset, locus.start+region_offset+region_length, options->trim_to_readlen);
+    while (bamreader->GetNextAlignment(alignment, options->trim_to_readlen)) {
       // Is this read worth looking at?
       if (alignment.IsSupplementary() || alignment.IsSecondary() || 
 	  !alignment.IsProperPair()) {

@@ -320,6 +320,8 @@ class BamAlignment {
   void TrimAlignment(int32_t min_read_start, int32_t max_read_stop, char min_base_qual='~');
 
   void TrimLowQualityEnds(char min_base_qual);
+
+  void TrimEnd(int32_t trim_to);
 };
 
 
@@ -578,9 +580,9 @@ class BamCramMultiReader {
     PrintMessageDieOnError("Invalid file index provided to bam_header() function", M_ERROR, false);
   }
 
-  bool SetRegion(const std::string& chrom, int32_t start, int32_t end);
+  bool SetRegion(const std::string& chrom, int32_t start, int32_t end, int32_t trim_to);
 
-  bool GetNextAlignment(BamAlignment& aln);
+  bool GetNextAlignment(BamAlignment& aln, int32_t trim_to);
 };
 
 

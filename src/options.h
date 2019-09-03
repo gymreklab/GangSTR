@@ -106,6 +106,9 @@ class Options {
   int32_t max_processed_reads_per_sample;
   // Skip calculation of qscore
   bool skip_qscore;
+  int32_t trim_to_readlen;
+  // Drop any reads which have 0x400 flag set to 1 in the bam file (PCR/optical duplicate)
+  bool drop_dupes;
 };
 
 #endif  // SRC_OPTIONS_H__
