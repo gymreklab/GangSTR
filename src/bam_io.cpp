@@ -123,7 +123,9 @@ void BamAlignment::TrimEnd(int32_t trim_to) {
   // use-case example: mixed readlength sequencing data
 
   // update length if read length is larger than trim_to; otherwise do nothing
-  if (b_->core.l_qseq > trim_to && trim_to >= 1) {
+  if (trim_to >= 1 && b_->core.l_qseq > trim_to) {
+    // for default case where trim_to == -1 only a single check is performed and conditional exists doing nothing
+    // for non default case, this clause will execute ~50% of the time
     length_ = trim_to;
     
     // update the cigar_ops_ because these will be needed to calculate end_pos_
@@ -140,6 +142,32 @@ void BamAlignment::TrimEnd(int32_t trim_to) {
     } else {
       end_pos_ = pos_ + 1;
     }
+  } else if (b_->core.l_qseq == trim_to) {
+    // trimming is not necessary and no need to report on this condition
+    // for non default case, this clause will execute ~50% of the time if clause 1 did not execute
+  } else if (b_->core.l_qseq == 0) {
+    // likely error in option passing/parsing. trimming to zero length doesn't make sense
+    PrintMessageDieOnError("Invalid trim_to In TrimEnd(). 'trim-to-readlength' should not be 0.", M_ERROR, false);
+  } else if (trim_to > b_->core.l_qseq) {
+    /* 
+    This can happen if:
+    1) trim_to is longer than both first and second read
+      - Won't trigger trimming
+      - Likely user error in passing options, b/c presumably user wanted some end trimming
+    2) trim_to is longer than first and shorter than second read or vice-versa
+      - Will trigger trimming of one read, but not the other
+      - Reads will still be unequal in length which is not supported
+    */
+
+    // in this case need to check that this read is not short because of hard clipping
+    uint32_t* cigars = bam_get_cigar(b_);
+    if (bam_cigar_opchr(cigars[0]) != 'H' && bam_cigar_opchr(cigars[b_->core.n_cigar - 1]) != 'H') {
+      PrintMessageDieOnError("Invalid trim_to In TrimEnd(). 'trim-to-readlength' should be <= length of both 1st and 2nd read.", M_ERROR, false);
+    }
+  } else if (trim_to < -1) {
+    // edge case option passing/parsing error with negative value
+    // this clause should almost never get executed
+    PrintMessageDieOnError("Invalid trim_to In TrimEnd(). 'trim-to-readlength' should be positive.", M_ERROR, false);
   }
 }
 
