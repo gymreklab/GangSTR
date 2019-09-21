@@ -50,9 +50,9 @@ bool ReadExtractor::ExtractReads(BamCramMultiReader* bamreader,
 				 const int32_t& min_match, 
 				 std::map<std::string, LikelihoodMaximizer*> sample_likelihood_maximizers) {
   total_processed_reads = 0;
+  number_of_samples = sample_likelihood_maximizers.size();
   // This will keep track of information for each read pair
   std::map<std::string, ReadPair> read_pairs;
-
   if (!ProcessReadPairs(bamreader, locus, regionsize, min_match, &read_pairs, sample_info.GetIsCustomRG())) {
     return false;
   }
@@ -243,7 +243,7 @@ bool ReadExtractor::ProcessReadPairs(BamCramMultiReader* bamreader,
   BamAlignment alignment;
 
   while (bamreader->GetNextAlignment(alignment)) {
-    if (total_processed_reads > options.max_processed_reads_per_sample) {
+    if (total_processed_reads > options.max_processed_reads_per_sample * number_of_samples) {
       PrintMessageDieOnError("Region exceeds maximum total processed reads per sample.", M_WARNING, false);
       return false;
     }
