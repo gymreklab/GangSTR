@@ -174,9 +174,9 @@ bool expansion_aware_realign(const std::string& seq,
       max_end_pos = current_end_pos;
     }
   
-    if (*fm_start == FM_COMPLETE && *fm_end == FM_COMPLETE){
+    /*    if (*fm_start == FM_COMPLETE && *fm_end == FM_COMPLETE){
       break;
-    }
+      } */ // Why not continue if there is a better match?
     if (current_score == prev_score)
       current_score_run++;
     else
