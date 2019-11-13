@@ -788,8 +788,8 @@ bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
 	return false;
       }
     }
-    //  cerr << realign_fwd << "\t" << fwd_tot << " " << score << "\t" << seq << endl
-    //       << realign_rev << "\t" << rev_tot << " " << score_rev << "\t" << seq_rev << endl << endl;
+    //        cerr << realign_fwd << "\t" << fwd_tot << " " << score << "\t" << seq << "\t" << start_pos << " " << end_pos << " " << fm_start << " " << fm_end << " " << nCopy << endl
+    //      << realign_rev << "\t" << rev_tot << " " << score_rev << "\t" << seq_rev << endl << endl;
     if ((realign_fwd and score_rev > score) or (realign_rev and !realign_fwd)) {
       nCopy = nCopy_rev;
       start_pos = start_pos_rev;
