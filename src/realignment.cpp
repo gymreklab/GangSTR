@@ -126,7 +126,7 @@ bool expansion_aware_realign(const std::string& seq,
 				&current_start_pos, &current_end_pos, &current_score, &current_num_mismatch)) {
       return false;
     }
-    
+
     // Check if this is hopeless
     //    std::cerr << seq << " " << var_realign_string << " " << motif << " " << current_nCopy << " " << current_score << std::endl;
     if (current_score < MIN_INTERMEDIATE_SCORE) {
@@ -424,9 +424,8 @@ bool classify_realigned_read(const std::string& seq,
     end_in_str = true;
   }
     
-  
   // Check if perfect flanks exist:
-  if (fm_start == FM_COMPLETE && fm_end == FM_COMPLETE){
+  if (fm_start == FM_COMPLETE && fm_end == FM_COMPLETE && !start_in_str && !end_in_str){
     *single_read_class = SR_ENCLOSING;
     return true;
   }
