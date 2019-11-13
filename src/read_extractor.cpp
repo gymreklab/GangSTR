@@ -132,7 +132,8 @@ bool ReadExtractor::ExtractReads(BamCramMultiReader* bamreader,
     if (iter->second.read_type == RC_SPAN) {
       if (iter->second.data_value < sample_info.GetDistMax(samp)) {
         if (options.output_readinfo) {
-	  readfile_ << locus.chrom << "\t" 
+	  readfile_ << samp << "\t"
+		    << locus.chrom << "\t" 
 		    << locus.start << "\t" 
 		    << locus.end << "\t"
 		    << iter->first << "\t" 
@@ -146,7 +147,8 @@ bool ReadExtractor::ExtractReads(BamCramMultiReader* bamreader,
       // In spanning case, we can also have flanking reads:
       if (iter->second.max_nCopy > 0 and iter->second.max_nCopy < bound_thresh) {
 	if (options.output_readinfo) {
-	  readfile_ << locus.chrom << "\t" 
+	  readfile_ << samp << "\t"
+		    << locus.chrom << "\t" 
 		    << locus.start << "\t" 
 		    << locus.end << "\t"
 		    << iter->first << "\t" 
@@ -159,7 +161,8 @@ bool ReadExtractor::ExtractReads(BamCramMultiReader* bamreader,
       }
     } else if (iter->second.data_value > 0 && iter->second.read_type == RC_ENCL) {
       if (options.output_readinfo) {
-	readfile_ << locus.chrom << "\t" 
+	readfile_ << samp << "\t"
+		  << locus.chrom << "\t" 
 		  << locus.start << "\t" 
 		  << locus.end << "\t"
 		  << iter->first << "\t" 
@@ -172,7 +175,8 @@ bool ReadExtractor::ExtractReads(BamCramMultiReader* bamreader,
     } else if (iter->second.read_type == RC_FRR or iter->second.read_type == RC_POT_OFFT) {
       if (accept_FRR && iter->second.data_value < sample_info.GetDistMax(samp)-sample_info.GetReadLength()) {
 	if (options.output_readinfo) {
-	  readfile_ << locus.chrom << "\t" 
+	  readfile_ << samp << "\t"
+		    << locus.chrom << "\t" 
 		    << locus.start << "\t" 
 		    << locus.end << "\t"
 		    << iter->first << "\t" 
@@ -185,7 +189,8 @@ bool ReadExtractor::ExtractReads(BamCramMultiReader* bamreader,
       }
     } else if (iter->second.read_type == RC_BOUND and iter->second.data_value < bound_thresh) {
       if (options.output_readinfo) {
-	readfile_ << locus.chrom << "\t" 
+	readfile_ << samp << "\t"
+		  << locus.chrom << "\t" 
 		  << locus.start << "\t" 
 		  << locus.end << "\t"
 		  << iter->first << "\t" 
@@ -197,7 +202,8 @@ bool ReadExtractor::ExtractReads(BamCramMultiReader* bamreader,
       flank++;
     } else if (iter->second.read_type == RC_OFFT){
       if (options.output_readinfo) {
-	readfile_ << locus.chrom << "\t" 
+	readfile_ << samp << "\t"
+		  << locus.chrom << "\t" 
 		  << locus.start << "\t" 
 		  << locus.end << "\t"
 		  << iter->first << "\t" 
