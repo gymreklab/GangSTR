@@ -114,10 +114,10 @@ Advanced parameters for likelihood model:
 * **`--flankweight <float>`** Reset weight for Flanking class in likelihood model. (default 1.0)
 * **`--ploidy [1,2]`** Haploid (1) or diploid (2) genotyping. (default 2)
 * **`--skipofftarget`** Skip off target regions included in the regions file.
-* **`--readprobmode**` Only use read probabilities in likelihood model. (ignore class probability)
+* **`--readprobmode`** Only use read probabilities in likelihood model. (ignore class probability)
 * **`--numbstrap <int>`** Number of bootstrap samples for calculating confidence intervals. (default 100)
 * **`--grid-theshold <int>`** Use optimization rather than grid search to find MLE if search space (grid) contains more alleles than this threshold. Default: 10000
-* **--rescue-count \<int\>** Number of regions that GangSTR attempts to rescue mates from (excluding off-target regions). Default: 0
+* **`--rescue-count <int>`** Number of regions that GangSTR attempts to rescue mates from (excluding off-target regions). Default: 0
 
 Parameters for local realignment:
 * **`--minscore <int>`** Minimun alignment score for accepting reads (default 75).
@@ -214,7 +214,9 @@ FORMAT fields contain information specific to each genotype call. The following 
 | Q | Quality Score |
 | REPCN | Genotype given in number of copies of the repeat motif |
 | REPCI | 95% Confidence interval for each allele based on bootstrapping |
-| RC | Number of reads in each class (enclosing, spanning, FRR, flanking) | 
+| RC | Number of reads in each class (enclosing, spanning, FRR, flanking) |
+| ENCLREADS | Summary of reads in enclosing class in **`\|`** separated key-value pairs. Keys are number of copies and values show number of reads with that many copies. |
+| FLNKREADS | Summary of reads in flanking class in **`\|`** separated key-value pairs. Keys are number of copies and values show number of reads with that many copies. |
 | ML | Maximum likelihood | 
 | INS| Insert size mean and stddev at the locus| 
 | STDERR | Bootstrap standard error of each allele |
