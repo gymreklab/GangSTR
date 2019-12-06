@@ -58,8 +58,8 @@ VCFWriter::VCFWriter(const std::string& _vcffile,
   writer_ << "##FORMAT=<ID=REPCN,Number=2,Type=Integer,Description=\"Genotype given in number of copies of the repeat motif\">" << endl;
   writer_ << "##FORMAT=<ID=REPCI,Number=1,Type=String,Description=\"Confidence intervals\">" << endl;
   writer_ << "##FORMAT=<ID=RC,Number=1,Type=String,Description=\"Number of reads in each class (enclosing, spanning, FRR, bounding)\">" << endl;
-  writer_ << "##FORMAT=<ID=ENCLREADS,Number=1,Type=String,Description=\"Summary of reads in enclosing class. Keys are number of copies and values show number of reads with that many copies. \">" << endl;
-  writer_ << "##FORMAT=<ID=FLNKREADS,Number=1,Type=String,Description=\"Summary of reads in flanking class. Keys are number of copies and values show number of reads with that many copies. \">" << endl;
+  writer_ << "##FORMAT=<ID=ENCLREADS,Number=1,Type=String,Description=\"Summary of reads in enclosing class. Keys are number of copies and values show number of reads with that many copies.\">" << endl;
+  writer_ << "##FORMAT=<ID=FLNKREADS,Number=1,Type=String,Description=\"Summary of reads in flanking class. Keys are number of copies and values show number of reads with that many copies.\">" << endl;
   writer_ << "##FORMAT=<ID=ML,Number=1,Type=Float,Description=\"Maximum likelihood\">" << endl;
   writer_ << "##FORMAT=<ID=INS,Number=2,Type=Float,Description=\"Insert size mean and stddev\">" << endl;
   writer_ << "##FORMAT=<ID=STDERR,Number=2,Type=Float,Description=\"Bootstrap standard error of each allele\">" << endl;
