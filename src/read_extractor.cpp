@@ -720,7 +720,8 @@ bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
   int32_t end_pos, end_pos_rev;
   int32_t score = 0, score_rev = 0;
   int32_t nCopy, nCopy_rev;
-  FlankMatchState fm_start, fm_end, fm_start_rev, fm_end_rev;
+  FlankMatchState fm_pref, fm_posf, fm_pref_rev, fm_posf_rev;
+  ReadEndMatchState re_start, re_end, re_start_rev, re_end_rev;
   std::string seq = lowercase(alignment.QueryBases());
   std::string seq_rev = reverse_complement(seq);
   std::string qual = alignment.Qualities();
@@ -729,7 +730,7 @@ bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
   // Check if we can get good info from the CIGAR score first
   if (cigar_realignment(alignment, locus.start, locus.end, locus.period,
 			 &nCopy, &start_pos, &end_pos, &score,
-			 &fm_start, &fm_end)) {
+			&fm_pref, &fm_posf, &re_start, &re_end)) {
     perform_ssw = false;
   }
   // Check quality before we move on
@@ -775,7 +776,7 @@ bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
 				   locus.motif, min_match, fwd_str, fwd_tot,
 				   ssw_aligner, ssw_filter, ssw_alignment,
 				   &nCopy, &start_pos, &end_pos, 
-				   &score, &fm_start, &fm_end)) {
+				   &score, &fm_pref, &fm_posf, &re_start, &re_end)) {
 	return false;
       }
     }
@@ -784,11 +785,11 @@ bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
 				   locus.motif, min_match, rev_str, rev_tot,
 				   ssw_aligner, ssw_filter, ssw_alignment,
 				   &nCopy_rev, &start_pos_rev, &end_pos_rev, 
-				   &score_rev, &fm_start_rev, &fm_end_rev)) {
+				   &score_rev, &fm_pref_rev, &fm_posf_rev, &re_start_rev, &re_end_rev)) {
 	return false;
       }
     }
-    //        cerr << realign_fwd << "\t" << fwd_tot << " " << score << "\t" << seq << "\t" << start_pos << " " << end_pos << " " << fm_start << " " << fm_end << " " << nCopy << endl
+    //        cerr << realign_fwd << "\t" << fwd_tot << " " << score << "\t" << seq << "\t" << start_pos << " " << end_pos << " " << fm_pref << " " << fm_posf << " " << nCopy << endl
     //      << realign_rev << "\t" << rev_tot << " " << score_rev << "\t" << seq_rev << endl << endl;
     if ((realign_fwd and score_rev > score) or (realign_rev and !realign_fwd)) {
       nCopy = nCopy_rev;
@@ -796,8 +797,10 @@ bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
       score = score_rev;
       seq = seq_rev;
       end_pos = end_pos_rev;
-      fm_start = fm_start_rev;
-      fm_end = fm_end_rev;
+      fm_pref = fm_pref_rev;
+      fm_posf = fm_posf_rev;
+      re_start = re_start_rev;
+      re_end = re_end_rev;
     }
   }
   *nCopy_value = nCopy;
@@ -808,7 +811,7 @@ bool ReadExtractor::ProcessSingleRead(BamAlignment alignment,
 			       (int32_t)locus.pre_flank.size(), 
 			       min_match, alignment.IsMapped(), 
 			       locus.pre_flank, locus.post_flank, 
-			       fm_start, fm_end, srt)) {
+			       fm_pref, fm_posf, re_start, re_end, srt)) {
     return false;
   }
   
