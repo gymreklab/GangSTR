@@ -77,12 +77,16 @@ bool expansion_aware_realign(const std::string& seq,
 			     int32_t* start_pos, 
 			     int32_t* end_pos, 
 			     int32_t* score,
-			     FlankMatchState* fm_start,
-			     FlankMatchState* fm_end) {
+			     FlankMatchState* fm_pref,
+			     FlankMatchState* fm_posf,
+			     ReadEndMatchState* re_start,
+			     ReadEndMatchState* re_end) {
   //int MIN_INTERMEDIATE_SCORE = 0.7*min_nCopy*motif.size()*SSW_MATCH_SCORE; // Give up if we don't get to this
   int MIN_INTERMEDIATE_SCORE = 0.5*seq.size()*SSW_MATCH_SCORE;
-  *fm_start = FM_NOMATCH;
-  *fm_end = FM_NOMATCH;
+  *fm_pref = FM_NOMATCH;
+  *fm_posf = FM_NOMATCH;
+  *re_start = RE_NOMATCH;
+  *re_end = RE_NOMATCH;
   int32_t read_len = (int32_t)seq.size();
   int32_t period = (int32_t)motif.size();
   // Find longest stretch of motif as starting point of our search.
@@ -108,7 +112,41 @@ bool expansion_aware_realign(const std::string& seq,
   std::string template_sub, sequence_sub;
   int32_t current_score_run = 0;
   MARGIN = 1 * period;
-  
+
+
+  // Read end match check (Check if read end or start matches motif)	       
+  int32_t num_reps = min_match / period + min_match + 1;
+  std::string rep_mot = "";
+  for (int y = 0; y < num_reps; y++){
+    rep_mot += motif;
+  }
+  //  cerr << rep_mot << endl;
+  std::string re_tmp;
+  bool start_match = false, end_match = false;
+  std::string seq_start = seq.substr(0, min_match);
+  std::string seq_end = seq.substr(read_len - min_match, min_match);
+  for (int u = 0; u < period; u++) {
+    re_tmp = rep_mot.substr(u, min_match);
+    //cerr << "u: " << u << "\t" << re_tmp << endl;
+    if (!start_match){
+      if (re_tmp == seq_start){
+	start_match = true;
+	*re_start = RE_COMPLETE;
+      }
+    }
+    if (!end_match){
+      if (re_tmp == seq_end){
+	end_match = true;
+	*re_end = RE_COMPLETE;
+      }
+    }
+    if (start_match and end_match){
+      break;
+    }
+  }
+
+
+
   //cerr << min_nCopy << " ";
   for (current_nCopy=min_nCopy; 
        current_nCopy<(int32_t)(total_nCopy * 1.1)+2; 
@@ -140,14 +178,14 @@ bool expansion_aware_realign(const std::string& seq,
       sequence_sub = seq.substr(read_len - current_start_pos - min_match, 2 * min_match);
       template_sub = var_realign_string.substr(read_len - min_match, 2 * min_match);
       if (sequence_sub == template_sub){
-	*fm_start = FM_COMPLETE;
+	*fm_pref = FM_COMPLETE;
       }
       else{
-	*fm_start = FM_NOMATCH;
+	*fm_pref = FM_NOMATCH;
       }
     }
     else{
-      *fm_start = FM_NOMATCH;
+      *fm_pref = FM_NOMATCH;
     }
     // Postflank
     if (read_len - current_start_pos + current_nCopy * period + min_match <= read_len &&
@@ -156,15 +194,18 @@ bool expansion_aware_realign(const std::string& seq,
       template_sub = var_realign_string.substr(read_len + current_nCopy * period - min_match, 2 * min_match);
       
       if (sequence_sub == template_sub){
-	*fm_end = FM_COMPLETE;
+	*fm_posf = FM_COMPLETE;
       }
       else{
-	*fm_end = FM_NOMATCH;
+	*fm_posf = FM_NOMATCH;
       }
     }
     else{
-      *fm_end = FM_NOMATCH;
+      *fm_posf = FM_NOMATCH;
     }
+
+
+    
     if (current_score > max_score) {
       second_best_score = max_score;
       second_best_nCopy = max_nCopy;
@@ -174,7 +215,7 @@ bool expansion_aware_realign(const std::string& seq,
       max_end_pos = current_end_pos;
     }
   
-    /*    if (*fm_start == FM_COMPLETE && *fm_end == FM_COMPLETE){
+    /*    if (*fm_pref == FM_COMPLETE && *fm_posf == FM_COMPLETE){
       break;
       } */ // Why not continue if there is a better match?
     if (current_score == prev_score)
@@ -197,7 +238,7 @@ bool expansion_aware_realign(const std::string& seq,
   //cerr << current_nCopy << endl;
   }
   if (max_nCopy < 0.85 * read_len / period and 
-      *fm_start == FM_NOMATCH and *fm_end == FM_NOMATCH){
+      *fm_pref == FM_NOMATCH and *fm_posf == FM_NOMATCH){
     max_nCopy = 0;
   }
   if (max_nCopy > read_len / period){ // did we overshoot?
@@ -403,8 +444,10 @@ bool classify_realigned_read(const std::string& seq,
 			     const bool& isMapped,
 			     const std::string& pre_flank,
 			     const std::string& post_flank,
-			     const FlankMatchState& fm_start,
-			     const FlankMatchState& fm_end,
+			     const FlankMatchState& fm_pref, // preflank match status
+			     const FlankMatchState& fm_posf, // postflank match status
+			     const ReadEndMatchState& re_start,
+			     const ReadEndMatchState& re_end,
 			     SingleReadType* single_read_class) {
 
   int32_t i,j, limit;
@@ -425,15 +468,15 @@ bool classify_realigned_read(const std::string& seq,
   }
     
   // Check if perfect flanks exist:
-  if (fm_start == FM_COMPLETE && fm_end == FM_COMPLETE && !start_in_str && !end_in_str){
+  if (fm_pref == FM_COMPLETE && fm_posf == FM_COMPLETE && !start_in_str && !end_in_str){
     *single_read_class = SR_ENCLOSING;
     return true;
   }
-  else if (fm_start == FM_COMPLETE && end_in_str){
+  else if (fm_pref == FM_COMPLETE && end_in_str && re_end == RE_COMPLETE){ // TODO remove redundant condition
     *single_read_class = SR_PREFLANK;
     return true;
   }
-  else if (fm_end == FM_COMPLETE && start_in_str){
+  else if (fm_posf == FM_COMPLETE && start_in_str && re_start == RE_COMPLETE){ // TODO remove redundant condition
     *single_read_class = SR_POSTFLANK;
     return true;
   }
@@ -609,8 +652,10 @@ bool cigar_realignment(BamAlignment& aln,
 		       int32_t* start_pos,
 		       int32_t* end_pos,
 		       int32_t* score,
-		       FlankMatchState* fm_start,
-		       FlankMatchState* fm_end) {
+		       FlankMatchState* fm_pref,
+		       FlankMatchState* fm_posf,
+		       ReadEndMatchState* re_start,
+		       ReadEndMatchState* re_end) {
   // Initial check that STR encompassed by read
   if (str_pos < aln.Position()) {
     return false;
@@ -650,8 +695,8 @@ bool cigar_realignment(BamAlignment& aln,
     *score = 10000; // Score not meaningful here
     *start_pos = aln.Position();
     *end_pos = aln.Position() + aln.QueryBases().size();
-    *fm_start = FM_COMPLETE;
-    *fm_end = FM_COMPLETE;
+    *fm_pref = FM_COMPLETE;
+    *fm_posf = FM_COMPLETE;
     return true;
   }
 
@@ -684,8 +729,8 @@ bool cigar_realignment(BamAlignment& aln,
   *score = 10000; // Score not meaningful here
   *start_pos = aln.Position();
   *end_pos = aln.Position() + aln.QueryBases().size() + diff_from_ref;
-  *fm_start = FM_COMPLETE;
-  *fm_end = FM_COMPLETE;
+  *fm_pref = FM_COMPLETE;
+  *fm_posf = FM_COMPLETE;
   return true;
 
 }
