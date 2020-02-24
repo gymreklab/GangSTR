@@ -249,6 +249,7 @@ The following lists available references created using Tandem Repeats Finder. We
 | hg38 | ver5 | [hg38_ver5.bed.gz](https://s3.amazonaws.com/gangstr/hg38/genomewide/hg38_ver5.bed.gz) | Motifs of up to 15 bps |
 | hg38 | ver6 | [hg38_ver6.sorted.bed.gz](https://s3.amazonaws.com/gangstr/hg38/genomewide/hg38_ver6.sorted.bed.gz) | Motifs of up to 20 bps, includes ChrX and ChrY | 
 | hg38 | ver16 | [hg38_ver16.bed.gz](https://s3.amazonaws.com/gangstr/hg38/genomewide/hg38_ver16.bed.gz) |  | 
+| hg38 | ver17 | [hg38_ver17.bed.gz](https://s3.amazonaws.com/gangstr/hg38/genomewide/hg38_ver17.bed.gz) |  |
 
 The references below contain pre-defined off-target loci for target pathogenic loci (hg38 coordinates):
 
