@@ -2,7 +2,7 @@
 
 #ifndef BAM_IO_H_
 #define BAM_IO_H_
-
+#include <unistd.h> // Nima: Added to fix error on some systems
 #include <algorithm>
 #include <iostream>
 #include <inttypes.h>
