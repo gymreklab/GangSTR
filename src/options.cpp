@@ -41,6 +41,7 @@ Options::Options() {
 
   // CACNA1A_47
   rg_sample_string = "";
+  sample_sex_string = "";
   reffa = "";
   regionsfile = "";
   outprefix = "";
