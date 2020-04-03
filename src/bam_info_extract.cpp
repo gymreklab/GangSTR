@@ -237,7 +237,7 @@ bool BamInfoExtract::GetInsertSizeDistribution(std::map<std::string, SampleProfi
   int region_offset = 1000; // Look this far away from STR
   int region_length = 5000; // Use this length of region to look at
   // Requirements to continue with each sample
-  size_t min_reads_per_sample = options->min_reads_per_sample / 2 * options->ploidy;
+  size_t min_reads_per_sample = options->min_reads_per_sample / 2 * (options->ploidy==-1?2:options->ploidy);
   // Set up
   std::string read_group, rgid, sample, fname;
   bool found_sample;

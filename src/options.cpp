@@ -77,7 +77,7 @@ Options::Options() {
   verbose = false;
   very_verbose = false;
   quiet = false;
-  ploidy = 2;
+  ploidy = -1;
   num_boot_samp = 100;
   read_prob_mode = false;
   output_bootstrap = false;
