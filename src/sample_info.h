@@ -54,6 +54,7 @@ class SampleInfo {
   const std::set<std::string> GetSamples();
   const double GetInsertMean(std::string sample);
   const double GetInsertSdev(std::string sample);
+  const std::string GetSampleSex(std::string sample);
   const double GetCoverage(std::string sample);
   const double GetGCCoverage(std::string sample, int32_t gcbin);
   const bool GetIsCustomRG();
@@ -70,6 +71,7 @@ class SampleInfo {
   bool custom_read_groups;
   std::set<std::string> rg_samples;
   std::map<std::string, std::string> rg_ids_to_sample;
+  std::map<std::string, std::string> rg_sample_to_sex;
   std::map<std::string, SampleProfile> profile;
   
   int32_t read_len;

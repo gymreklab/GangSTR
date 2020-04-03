@@ -31,9 +31,10 @@ using namespace std;
 
 
 LikelihoodMaximizer::LikelihoodMaximizer(const Options& _options, const SampleProfile& sp,
-					 const int32_t& read_len) {
+					 const int32_t& read_len, const std::string& _sex) {
   options = &_options; // TODO remove options
-
+  sex = &_sex;
+  local_ploidy = 2;
   enclosing_class_.SetGlobalParams(sp, options->flanklen, options->read_prob_mode, options->hist_mode);
   frr_class_.SetGlobalParams(sp, options->flanklen, options->read_prob_mode, options->hist_mode);
   spanning_class_.SetGlobalParams(sp, options->flanklen, options->read_prob_mode, options->hist_mode);
@@ -123,7 +124,7 @@ void LikelihoodMaximizer::AddOffTargetData(const int32_t& data) {
 
 void LikelihoodMaximizer::SetLocusParams(const STRLocusInfo& sli, const double& cov,
 					 const int32_t& _read_len, const int32_t _motif_len,
-					 const int32_t& _ref_count) {
+					 const int32_t& _ref_count, const std::string chrom) {
   enclosing_class_.SetLocusParams(sli);
   frr_class_.SetLocusParams(sli);
   spanning_class_.SetLocusParams(sli);
@@ -146,6 +147,16 @@ void LikelihoodMaximizer::SetLocusParams(const STRLocusInfo& sli, const double& 
   read_len = _read_len;
   motif_len = _motif_len;
   ref_count = _ref_count;
+  // Set local_ploidy based on ploidy and sex
+  if (options->ploidy != -1){
+    local_ploidy = options->ploidy;
+  }
+  else{
+    local_ploidy = 2;
+    if (sex->compare("M") == 0 and (chrom.compare("chrY") == 0 or chrom.compare("Y") == 0)){
+      local_ploidy = 1;
+    }
+  }
   locus_params_set = true;
 }
 

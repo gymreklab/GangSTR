@@ -29,20 +29,37 @@ SampleInfo::SampleInfo() {
   custom_read_groups = false;
   rg_samples.clear();
   rg_ids_to_sample.clear();
-  
+  rg_sample_to_sex.clear();
 }
 
 bool SampleInfo::SetCustomReadGroups(const Options& options) {
   custom_read_groups = true;
+  bool sex_set = false;
   std::vector<std::string> read_groups;
+  std::vector<std::string> samp_sex;
   split_by_delim(options.rg_sample_string, ',', read_groups);
-
+  if (!options.sample_sex_string.empty()){
+    sex_set = true;
+    split_by_delim(options.sample_sex_string, ',', samp_sex);
+  }
   if (options.bamfiles.size() != read_groups.size()) {
     PrintMessageDieOnError("Number of BAM files in --bam and samples in --bam-samps must match", M_ERROR, false);
+  }
+  if (sex_set and samp_sex.size() != read_groups.size()) {
+    PrintMessageDieOnError("Number of samples in --bam-samps and sexes in --samp-sex must match", M_ERROR, false);
+  }
+  else { 
+    // samp-sex has been set, check all values are 'M' or 'F'
+    for (size_t j=0; j < samp_sex.size(); j++){
+      if (options.possible_sex.find(samp_sex[j]) == options.possible_sex.end()){
+	PrintMessageDieOnError("Comma separated arguments after --samp-sex must be from this set {M, F, U}", M_ERROR, false);
+      }
+    }
   }
   for (size_t i=0; i<options.bamfiles.size(); i++) {
     PrintMessageDieOnError("Loading read group  " + read_groups[i] + " for file " + options.bamfiles[i], M_PROGRESS, options.quiet);
     rg_ids_to_sample[options.bamfiles[i]] = read_groups[i];
+    rg_sample_to_sex[read_groups[i]] = samp_sex[i];
     rg_samples.insert(read_groups[i]);
   }
   return true;
@@ -68,6 +85,7 @@ bool SampleInfo::LoadReadGroups(const Options& options, const BamCramMultiReader
       }
       PrintMessageDieOnError("Loading read group id " + rg_iter->GetID() + " for sample " + rg_iter->GetSample(), M_PROGRESS, options.quiet);
       rg_ids_to_sample[options.bamfiles[i]+":"+rg_iter->GetID()] = rg_iter->GetSample();
+      rg_sample_to_sex[rg_iter->GetSample()] = options.default_sex;
       rg_samples.insert(rg_iter->GetSample());
     } 
   }
@@ -234,6 +252,10 @@ const double SampleInfo::GetInsertMean(std::string sample) {
 
 const double SampleInfo::GetInsertSdev(std::string sample) {
   return profile[sample].dist_sdev;
+}
+
+const std::string SampleInfo::GetSampleSex(std::string sample) {
+  return rg_sample_to_sex[sample];
 }
 
 const double SampleInfo::GetCoverage(std::string sample) {

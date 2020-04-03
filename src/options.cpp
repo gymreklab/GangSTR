@@ -42,6 +42,8 @@ Options::Options() {
   // CACNA1A_47
   rg_sample_string = "";
   sample_sex_string = "";
+  default_sex = "F";
+  possible_sex = {"M","F","U"};
   reffa = "";
   regionsfile = "";
   outprefix = "";
