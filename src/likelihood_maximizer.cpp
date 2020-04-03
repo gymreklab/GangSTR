@@ -247,7 +247,6 @@ bool LikelihoodMaximizer::GetConfidenceInterval(const int32_t& all1,
 	boot_al1 = boot_al1_1;
       else{
 	cerr<< "Error running bootstrap\n";
-	cerr << allele1 << " " << allele2 << "\t" << boot_al1_1 << " " << boot_al1_2 << endl;
       }
       if (boot_al2_1 == allele1)
 	boot_al2 = boot_al2_2;
@@ -255,7 +254,6 @@ bool LikelihoodMaximizer::GetConfidenceInterval(const int32_t& all1,
 	boot_al2 = boot_al2_1;
       else{
 	std::cerr<< "Error running likelihood optimization\n";	
-      cerr << allele1 << " " << allele2 << "\t" << boot_al2_1 << " " << boot_al2_2 << endl;
       }
       double gt_ll1, gt_ll2;
     }
@@ -698,13 +696,20 @@ bool LikelihoodMaximizer::OptimizeLikelihood(const bool& resampled, const int32_
 
 
 bool LikelihoodMaximizer::findBestAlleleListTuple(std::vector<int32_t> allele_list,
-						  int32_t use_ploidy,
+						  int32_t ovwr_ploidy,
 						  bool resampled, int32_t fix_allele,
 						  int32_t* allele1, int32_t* allele2, double* min_negLike) {
   double gt_ll;
   *min_negLike = 1000000;
   int32_t best_a1 = 0, best_a2 = 0;
-  if (local_ploidy == 2) {
+  int32_t func_ploidy; 
+  if (ovwr_ploidy == -1){
+    func_ploidy = local_ploidy;
+  }
+  else { 
+    func_ploidy = ovwr_ploidy;
+  }
+  if (func_ploidy == 2) {
     for (std::vector<int32_t>::iterator a1_it = allele_list.begin();
             a1_it != allele_list.end();
             a1_it++){
@@ -725,7 +730,7 @@ bool LikelihoodMaximizer::findBestAlleleListTuple(std::vector<int32_t> allele_li
       }
     }
   }
-  else if (local_ploidy == 1) {
+  else if (func_ploidy == 1) {
     best_a2 = fix_allele;
     for (std::vector<int32_t>::iterator a1_it = allele_list.begin();
             a1_it != allele_list.end();
