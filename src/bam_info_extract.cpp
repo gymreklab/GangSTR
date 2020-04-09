@@ -34,7 +34,7 @@ BamInfoExtract::BamInfoExtract(const Options* options_,
 
 bool BamInfoExtract::GetReadLen(int32_t* read_len){
   *read_len = -1;
-  int32_t flank_size = 20000;
+  int32_t flank_size = 200000;
   int32_t req_streak = 10;
   bool found_read_len = false, has_reads = false;
   // Header has info about chromosome names

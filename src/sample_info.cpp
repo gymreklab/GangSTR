@@ -48,7 +48,7 @@ bool SampleInfo::SetCustomReadGroups(const Options& options) {
   if (sex_set and samp_sex.size() != read_groups.size()) {
     PrintMessageDieOnError("Number of samples in --bam-samps and sexes in --samp-sex must match", M_ERROR, false);
   }
-  else { 
+  if (sex_set){ 
     // samp-sex has been set, check all values are 'M' or 'F'
     for (size_t j=0; j < samp_sex.size(); j++){
       if (options.possible_sex.find(samp_sex[j]) == options.possible_sex.end()){
@@ -59,7 +59,12 @@ bool SampleInfo::SetCustomReadGroups(const Options& options) {
   for (size_t i=0; i<options.bamfiles.size(); i++) {
     PrintMessageDieOnError("Loading read group  " + read_groups[i] + " for file " + options.bamfiles[i], M_PROGRESS, options.quiet);
     rg_ids_to_sample[options.bamfiles[i]] = read_groups[i];
-    rg_sample_to_sex[read_groups[i]] = samp_sex[i];
+    if (sex_set){ 
+      rg_sample_to_sex[read_groups[i]] = samp_sex[i];
+    }
+    else{
+      rg_sample_to_sex[read_groups[i]] = options.default_sex;
+    }
     rg_samples.insert(read_groups[i]);
   }
   return true;

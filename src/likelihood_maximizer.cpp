@@ -153,7 +153,7 @@ void LikelihoodMaximizer::SetLocusParams(const STRLocusInfo& sli, const double& 
   }
   else{
     local_ploidy = 2;
-    if (sex == male and (chrom == chrY or chrom == chrYnoChr)){
+    if (sex == male and (chrom == "chrY" or chrom == "Y" or chrom == "chrX" or chrom == "X")){
       local_ploidy = 1;
     }
   }
