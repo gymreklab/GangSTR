@@ -118,6 +118,7 @@ Advanced parameters for likelihood model:
 * **`--numbstrap <int>`** Number of bootstrap samples for calculating confidence intervals. (default 100)
 * **`--grid-theshold <int>`** Use optimization rather than grid search to find MLE if search space (grid) contains more alleles than this threshold. Default: 10000
 * **`--rescue-count <int>`** Number of regions that GangSTR attempts to rescue mates from (excluding off-target regions). Default: 0
+* **`--max-proc-read <int>`** Maximum number of processed reads per sample before a region is skipped.
 
 Parameters for local realignment:
 * **`--minscore <int>`** Minimun alignment score for accepting reads (default 75).
