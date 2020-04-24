@@ -56,6 +56,7 @@ void show_help() {
 	   << "\t" << "--targeted                    " << "\t" << "Targeted mode" << "\n"
 	   << "\t" << "--chrom                       " << "\t" << "Only genotype regions on this chromosome" << "\n"
            << "\t" << "--bam-samps   <string>        " << "\t" << "Comma separated list of sample IDs for --bam" << "\n"
+	   << "\t" << "--samp-sex    <string>        " << "\t" << "Comma separated list of sample sex for each sample ID (--bam-samps must be provided)" << "\n"
 	   << "\t" << "--str-info    <string>        " << "\t" << "Tab file with additional per-STR info (see docs)" << "\n"
 	   << "\t" << "--period      <string>        " << "\t" << "Only genotype loci with periods (motif lengths) in this comma-separated list." << "\n"
 	   << "\t" << "--skip-qscore                 " << "\t" << "Skip calculation of Q-score" << "\n"
@@ -114,6 +115,7 @@ void parse_commandline_options(int argc, char* argv[], Options* options) {
     OPT_RESCUE,
     OPT_BAMFILES,
     OPT_BAMSAMP,
+    OPT_SAMPSEX,
     OPT_STRINFO,
     OPT_CHROM,
     OPT_REFFA,
@@ -158,6 +160,7 @@ void parse_commandline_options(int argc, char* argv[], Options* options) {
     {"rescue-count", required_argument, NULL, OPT_RESCUE},
     {"bam",         required_argument,  NULL, OPT_BAMFILES},
     {"bam-samps",   required_argument,  NULL, OPT_BAMSAMP},
+    {"samp-sex",    required_argument,  NULL, OPT_SAMPSEX},
     {"str-info",    required_argument,  NULL, OPT_STRINFO},
     {"chrom",       required_argument,  NULL, OPT_CHROM},
     {"ref",         required_argument,  NULL, OPT_REFFA},
@@ -231,6 +234,9 @@ void parse_commandline_options(int argc, char* argv[], Options* options) {
       break;
     case OPT_BAMSAMP:
       options->rg_sample_string = optarg;
+      break;
+    case OPT_SAMPSEX:
+      options->sample_sex_string = optarg;
       break;
     case OPT_STRINFO:
       options->str_info_file = optarg;
@@ -379,6 +385,10 @@ void parse_commandline_options(int argc, char* argv[], Options* options) {
     PrintMessageDieOnError("--min_score parameter must be in (0, 100) range", M_ERROR, false);
   }
   
+  // Check if bam-samps provided when user uses sam-sex
+  if (options->rg_sample_string.empty() and !options->sample_sex_string.empty()){
+    PrintMessageDieOnError("--sample-sex requires input argument --bam-samps to be set", M_ERROR, false);
+  }
 }
 
 int main(int argc, char* argv[]) {

@@ -150,17 +150,29 @@ void VCFWriter::WriteRecord(Locus& locus) {
       continue;
     }
     gt_str.str("");
-    gt_str << alt_length_to_ind[locus.allele1[samp]] << "/" << alt_length_to_ind[locus.allele2[samp]];
+    if (locus.allele2[samp] != 0){
+      gt_str << alt_length_to_ind[locus.allele1[samp]] << "/" << alt_length_to_ind[locus.allele2[samp]];
+	}
+    else {
+      gt_str << alt_length_to_ind[locus.allele1[samp]];
+    }
     writer_ << "\t"
 	    << gt_str.str() << ":"
 	    << locus.depth[samp] << ":"
-	    << locus.q_scores[samp] << ":"
-	    << locus.allele1[samp] << "," <<  locus.allele2[samp] << ":"
-      	    << locus.lob1[samp] << "-" 
-	    << locus.hib1[samp] << "," 
-	    << locus.lob2[samp] << "-" 
-	    << locus.hib2[samp] << ":"
-      	    << locus.enclosing_reads[samp] << "," << locus.spanning_reads[samp] << "," << locus.frr_reads[samp] << "," << locus.flanking_reads[samp] << ":"
+	    << locus.q_scores[samp] << ":";
+    if (locus.allele2[samp] != 0){
+      writer_ << locus.allele1[samp] << "," <<  locus.allele2[samp] << ":"
+	     << locus.lob1[samp] << "-" 
+	     << locus.hib1[samp] << "," 
+	     << locus.lob2[samp] << "-" 
+	     << locus.hib2[samp] << ":";
+	}
+    else {
+      writer_ << locus.allele1[samp] << ":"
+	     << locus.lob1[samp] << "-" 
+	     << locus.hib1[samp] << ":";
+    }
+    writer_ << locus.enclosing_reads[samp] << "," << locus.spanning_reads[samp] << "," << locus.frr_reads[samp] << "," << locus.flanking_reads[samp] << ":"
 	    << locus.enclosing_reads_dict[samp] << ":"
 	    << locus.flanking_reads_dict[samp] << ":"
 	    << locus.min_neg_lik[samp] << ":"

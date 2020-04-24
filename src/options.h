@@ -23,7 +23,7 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <vector>
 #include <string>
-
+#include <set>
 #include <stdint.h>
 
 class Options {
@@ -34,6 +34,9 @@ class Options {
   // Input/output paths
   std::vector<std::string> bamfiles;
   std::string rg_sample_string;
+  std::string sample_sex_string;
+  std::string default_sex;
+  std::set<std::string> possible_sex;
   std::string reffa;
   std::string regionsfile;
   std::string outprefix;

@@ -40,7 +40,7 @@ Genotyper::Genotyper(RefGenome& _refgenome,
        it != rg_samples.end(); it++) {
     SampleProfile sp;
     if (sample_info->GetSampleProfile(*it, &sp)) {
-      sample_likelihood_maximizers[*it] = new LikelihoodMaximizer(_options, sp, sample_info->GetReadLength());
+      sample_likelihood_maximizers[*it] = new LikelihoodMaximizer(_options, sp, sample_info->GetReadLength(), sample_info->GetSampleSex(*it));
     } else {
       PrintMessageDieOnError("Could not find sample profile for " + *it, M_ERROR, false);
     }
@@ -130,12 +130,12 @@ bool Genotyper::ProcessLocus(BamCramMultiReader* bamreader, Locus* locus) {
       sample_likelihood_maximizers[samp]->SetLocusParams(str_info->GetSTRInfo(locus->chrom, locus->start),
 							 sample_info->GetGCCoverage(samp, gcbin),
 							 sample_info->GetReadLength(), (int32_t)(locus->motif.size()),
-							 ref_count);
+							 ref_count, locus->chrom);
     } else {
       sample_likelihood_maximizers[samp]->SetLocusParams(str_info->GetSTRInfo(locus->chrom, locus->start),
 							 sample_info->GetCoverage(samp),
 							 sample_info->GetReadLength(), (int32_t)(locus->motif.size()),
-							 ref_count);
+							 ref_count, locus->chrom);
     }
     if (!sample_likelihood_maximizers[samp]->InferGridSize() ) {
       PrintMessageDieOnError("Error inferring grid size", M_PROGRESS, options->quiet);

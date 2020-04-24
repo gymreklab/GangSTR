@@ -34,7 +34,7 @@ BamInfoExtract::BamInfoExtract(const Options* options_,
 
 bool BamInfoExtract::GetReadLen(int32_t* read_len){
   *read_len = -1;
-  int32_t flank_size = 20000;
+  int32_t flank_size = 200000;
   int32_t req_streak = 10;
   bool found_read_len = false, has_reads = false;
   // Header has info about chromosome names
@@ -236,8 +236,13 @@ bool BamInfoExtract::GetInsertSizeDistribution(std::map<std::string, SampleProfi
   int num_regions_so_far = 0;
   int region_offset = 1000; // Look this far away from STR
   int region_length = 5000; // Use this length of region to look at
+
   // Requirements to continue with each sample
-  size_t min_reads_per_sample = options->min_reads_per_sample / 2 * options->ploidy;
+  size_t min_reads_per_sample = options->min_reads_per_sample / 2 * (options->ploidy==-1?2:options->ploidy);
+
+  //int break_after_min_above = min_reads_per_sample;
+  //int min;
+  std::map<std::string,int> samp_read_counts;
   // Set up
   std::string read_group, rgid, sample, fname;
   bool found_sample;
@@ -269,6 +274,25 @@ bool BamInfoExtract::GetInsertSizeDistribution(std::map<std::string, SampleProfi
       if (!found_sample) continue;
       if (rg_ids_to_sample.find(rgid) == rg_ids_to_sample.end()) continue;
       sample = rg_ids_to_sample[rgid];
+      /*
+      if (samp_read_counts.find(sample) == samp_read_counts.end()){
+	samp_read_counts.insert(std::pair<std::string,int>(sample,1));
+      }
+      else{
+	samp_read_counts[sample]++;
+	min = 100000000;
+	for (std::pair<std::string,int> element : samp_read_counts){
+	  cerr << element.first << " " << element.second << "\t";
+	  if (element.second < min){
+	    min = element.second;
+	  }
+	  if (min > break_after_min_above){
+	    break;
+	  }
+	}
+	cerr << endl;
+      }
+      */
       // Get template length and assign to that sample
       sample_to_tlens[sample].push_back(abs(alignment.TemplateLength()));
     }

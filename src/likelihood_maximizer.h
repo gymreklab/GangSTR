@@ -47,11 +47,16 @@ struct ReadRecord{
   ReadType read_type;
 };
 
+// constant strings to check for sex chrom
+const std::string male = "M";
+const std::string chrY = "chrY";
+const std::string chrYnoChr = "Y";
+
 class LikelihoodMaximizer {
  friend class Genotyper;
  public:
  LikelihoodMaximizer(const Options& _options, const SampleProfile& sp,
-		     const int32_t& read_len);
+		     const int32_t& read_len, const std::string sex);
  // LikelihoodMaximizer(const LikelihoodMaximizer& lm_obj); // copy constructor
   virtual ~LikelihoodMaximizer();
 
@@ -115,7 +120,7 @@ class LikelihoodMaximizer {
   // Set per-locus params
   void SetLocusParams(const STRLocusInfo& sli, const double& cov,
 		      const int32_t& _read_len, const int32_t _motif_len,
-		      const int32_t& _ref_count);
+		      const int32_t& _ref_count, const std::string chrom);
 
   // Print read pool
   void PrintReadPool();
@@ -126,6 +131,7 @@ class LikelihoodMaximizer {
  protected:
   // Other params -> Made public for gslNegLikelihood to have access
   const Options* options;
+  const std::string sex; // {"M", "F", "U"}
  private:
   double obj_cov; // TODO: This is a placeholder, until we figure out how to pass coverage through sample info
   EnclosingClass enclosing_class_;
@@ -159,6 +165,9 @@ class LikelihoodMaximizer {
   int32_t read_len;
   int32_t motif_len;
   int32_t ref_count;
+  int32_t local_ploidy; // ploidy of current likelihood maximizer 
+  // If input ploidy is set, the value will represent that
+  // If not, this value will be 2 unless on chrY of a male sample
 };
 
 // Helper struct for NLOPT gradient optimizer

@@ -31,9 +31,10 @@ using namespace std;
 
 
 LikelihoodMaximizer::LikelihoodMaximizer(const Options& _options, const SampleProfile& sp,
-					 const int32_t& read_len) {
-  options = &_options; // TODO remove options
+					 const int32_t& read_len, const std::string _sex) : sex(_sex) {
 
+  options = &_options; // TODO remove options
+  local_ploidy = 2;
   enclosing_class_.SetGlobalParams(sp, options->flanklen, options->read_prob_mode, options->hist_mode);
   frr_class_.SetGlobalParams(sp, options->flanklen, options->read_prob_mode, options->hist_mode);
   spanning_class_.SetGlobalParams(sp, options->flanklen, options->read_prob_mode, options->hist_mode);
@@ -123,7 +124,7 @@ void LikelihoodMaximizer::AddOffTargetData(const int32_t& data) {
 
 void LikelihoodMaximizer::SetLocusParams(const STRLocusInfo& sli, const double& cov,
 					 const int32_t& _read_len, const int32_t _motif_len,
-					 const int32_t& _ref_count) {
+					 const int32_t& _ref_count, const std::string chrom) {
   enclosing_class_.SetLocusParams(sli);
   frr_class_.SetLocusParams(sli);
   spanning_class_.SetLocusParams(sli);
@@ -146,6 +147,16 @@ void LikelihoodMaximizer::SetLocusParams(const STRLocusInfo& sli, const double& 
   read_len = _read_len;
   motif_len = _motif_len;
   ref_count = _ref_count;
+  // Set local_ploidy based on ploidy and sex
+  if (options->ploidy != -1){
+    local_ploidy = options->ploidy;
+  }
+  else{
+    local_ploidy = 2;
+    if (sex == male and (chrom == "chrY" or chrom == "Y" or chrom == "chrX" or chrom == "X")){
+      local_ploidy = 1;
+    }
+  }
   locus_params_set = true;
 }
 
@@ -223,7 +234,7 @@ bool LikelihoodMaximizer::GetConfidenceInterval(const int32_t& all1,
   std::vector<int32_t> small_alleles, large_alleles;
   for (int i = 0; i < num_boot_samp + 1; i++){
     ResampleReadPool();
-    if (options->ploidy == 2){
+    if (local_ploidy == 2){
       OptimizeLikelihood(true, 1, allele1,
 			 offtarget_share, 
 			 &boot_al2_1, &boot_al2_2, &min_negLike);
@@ -234,14 +245,16 @@ bool LikelihoodMaximizer::GetConfidenceInterval(const int32_t& all1,
 	boot_al1 = boot_al1_2;
       else if (boot_al1_2 == allele2)
 	boot_al1 = boot_al1_1;
-      else
+      else{
 	cerr<< "Error running bootstrap\n";
+      }
       if (boot_al2_1 == allele1)
 	boot_al2 = boot_al2_2;
       else if (boot_al2_2 == allele1)
 	boot_al2 = boot_al2_1;
-      else
-	std::cerr<< "Error running likelihood optimization\n";
+      else{
+	std::cerr<< "Error running likelihood optimization\n";	
+      }
       double gt_ll1, gt_ll2;
     }
     else{ // haploid
@@ -385,18 +398,18 @@ bool LikelihoodMaximizer::GetGenotypeNegLogLikelihood(const int32_t& allele1,
     }
     frr_class_.GetClassLogLikelihood(allele1, allele2, 
     				     read_len, motif_len, ref_count, 
-    				     options->ploidy, &frr_ll);
+    				     local_ploidy, &frr_ll);
     spanning_class_.GetClassLogLikelihood(allele1, allele2, 
     					  read_len, motif_len, ref_count, 
-    					  options->ploidy, &span_ll);
+    					  local_ploidy, &span_ll);
     enclosing_class_.GetClassLogLikelihood(allele1, allele2, 
 					     read_len, motif_len, ref_count, 
-					   options->ploidy, &encl_ll);
+					   local_ploidy, &encl_ll);
 
     // flanking class overloads GetClassLogLikelihood function
     flanking_class_.FlankingClass::GetClassLogLikelihood(allele1, allele2, 
     							 read_len, motif_len, ref_count, 
-    							 options->ploidy, &flank_ll);
+    							 local_ploidy, &flank_ll);
     // TODO Substituting these lines changes optimization result. Find out why?!
     //if ((options->coverage > 0) && (frr_class_.GetDataSize() > 0)){
     
@@ -406,7 +419,7 @@ bool LikelihoodMaximizer::GetGenotypeNegLogLikelihood(const int32_t& allele1,
 				       read_len, 
 				       motif_len, 
 				       obj_cov,
-				       options->ploidy, 
+				       local_ploidy, 
 				       2 * offtarget_count * offtarget_share, 
 				       &frr_count_ll);
       //cerr << allele1 << ","<< allele2 << "\t"<< frr_count << " " << frr_count_ll << endl; 
@@ -423,17 +436,17 @@ bool LikelihoodMaximizer::GetGenotypeNegLogLikelihood(const int32_t& allele1,
     }
     resampled_frr_class_.GetClassLogLikelihood(allele1, allele2, 
 					       read_len, motif_len, ref_count, 
-					       options->ploidy, &frr_ll);
+					       local_ploidy, &frr_ll);
     resampled_spanning_class_.GetClassLogLikelihood(allele1, allele2, 
 						    read_len, motif_len, ref_count, 
-						    options->ploidy, &span_ll);
+						    local_ploidy, &span_ll);
     resampled_enclosing_class_.GetClassLogLikelihood(allele1, allele2, 
 						     read_len, motif_len, ref_count, 
-						     options->ploidy, &encl_ll);
+						     local_ploidy, &encl_ll);
     // flanking class overloads GetClassLogLikelihood function
     resampled_flanking_class_.FlankingClass::GetClassLogLikelihood(allele1, allele2, 
 								   read_len, motif_len, ref_count, 
-								   options->ploidy, &flank_ll); 
+								   local_ploidy, &flank_ll); 
     
     if (use_cov && obj_cov > 0 && frr_count > 0){
       resampled_frr_class_.GetCountLogLikelihood(allele1, 
@@ -441,7 +454,7 @@ bool LikelihoodMaximizer::GetGenotypeNegLogLikelihood(const int32_t& allele1,
 				       read_len, 
 				       motif_len, 
 				       obj_cov,
-				       options->ploidy, 
+				       local_ploidy, 
 				       2 * offtarget_count * offtarget_share, 
 				       &frr_count_ll);
     
@@ -513,10 +526,17 @@ void LikelihoodMaximizer::GetGridSize(int32_t* min_allele, int32_t* max_allele) 
 }
 
 void LikelihoodMaximizer::InferAlleleList(std::vector<int32_t>* allele_list,
-					  const int32_t& ploidy,
+					  const int32_t& ovwr_ploidy,
 					  const bool& resampled, const int32_t& fix_allele) {
   allele_list->clear();
   enclosing_class_.ExtractEnclosingAlleles(allele_list);
+  int32_t func_ploidy;
+  if (ovwr_ploidy == -1){
+    func_ploidy = local_ploidy;
+  }
+  else{
+    func_ploidy = ovwr_ploidy;
+  }
   if (upper_bound-lower_bound <= grid_opt_threshold) {
     for (int32_t i=lower_bound; i<=upper_bound; i++) {
       allele_list->push_back(i);
@@ -525,7 +545,7 @@ void LikelihoodMaximizer::InferAlleleList(std::vector<int32_t>* allele_list,
     std::vector<int32_t> sublist;
     int32_t a1, a2, result;
     double minf;
-    if (ploidy == 2) {
+    if (func_ploidy == 2) {
       for (std::vector<int32_t>::iterator allele_it = allele_list->begin();
 	   allele_it != allele_list->end();
 	   allele_it++) {	
@@ -548,7 +568,7 @@ void LikelihoodMaximizer::InferAlleleList(std::vector<int32_t>* allele_list,
           allele_list->push_back(*subl_it);
 	}
       }
-    } else if (ploidy == 1) {
+    } else if (func_ploidy == 1) {
       nlopt_1D_optimize(read_len, motif_len, ref_count, 
 			lower_bound, upper_bound, resampled, 
 			options->seed, this, fix_allele, &a1, &result, &minf);
@@ -624,7 +644,7 @@ bool LikelihoodMaximizer::GetExpansionProb(std::vector<double>* prob_vec, const 
   return true;
 }
 
-bool LikelihoodMaximizer::OptimizeLikelihood(const bool& resampled, const int32_t& use_ploidy,
+bool LikelihoodMaximizer::OptimizeLikelihood(const bool& resampled, const int32_t& ovwr_ploidy,
 					     const int32_t& fix_allele,
 					     const double& off_share,
 					     int32_t* allele1, int32_t* allele2, double* min_negLike) {
@@ -636,12 +656,22 @@ bool LikelihoodMaximizer::OptimizeLikelihood(const bool& resampled, const int32_
     //    PrintMessageDieOnError("Skipping locus with likely extreme GC content", M_WARNING);
     return false;
   }
+  // If overwrite ploidy is set to a number, local ploidy is not used. If not, local ploidy used
+  int32_t func_ploidy; 
+  if (ovwr_ploidy == -1){
+    func_ploidy = local_ploidy;
+  }
+  else { 
+    func_ploidy = ovwr_ploidy;
+  }
+  //if (resampled)
+  //  cerr << "func: " << func_ploidy << endl;
 
   offtarget_share = off_share; // perc. of offtarget reads.
 
   // Get list of potential alleles to try
   std::vector<int32_t> allele_list;
-  InferAlleleList(&allele_list, use_ploidy, resampled, fix_allele);
+  InferAlleleList(&allele_list, ovwr_ploidy, resampled, fix_allele);
   /*
   if (!resampled){
     double gt_ll1;
@@ -653,11 +683,12 @@ bool LikelihoodMaximizer::OptimizeLikelihood(const bool& resampled, const int32_
     }
   }
   */
-  if (use_ploidy == 2) {
-    findBestAlleleListTuple(allele_list, use_ploidy, resampled, 0, 
+  
+  if (func_ploidy == 2) {
+    findBestAlleleListTuple(allele_list, func_ploidy, resampled, 0, 
 			    allele1, allele2, min_negLike);
-  } else if (use_ploidy == 1) {
-    findBestAlleleListTuple(allele_list, use_ploidy, resampled, fix_allele, 
+  } else if (func_ploidy == 1) {
+    findBestAlleleListTuple(allele_list, func_ploidy, resampled, fix_allele, 
 			    allele1, allele2, min_negLike);    
   }
   return true;
@@ -665,13 +696,20 @@ bool LikelihoodMaximizer::OptimizeLikelihood(const bool& resampled, const int32_
 
 
 bool LikelihoodMaximizer::findBestAlleleListTuple(std::vector<int32_t> allele_list,
-						  int32_t use_ploidy,
+						  int32_t ovwr_ploidy,
 						  bool resampled, int32_t fix_allele,
 						  int32_t* allele1, int32_t* allele2, double* min_negLike) {
   double gt_ll;
   *min_negLike = 1000000;
   int32_t best_a1 = 0, best_a2 = 0;
-  if (use_ploidy == 2) {
+  int32_t func_ploidy; 
+  if (ovwr_ploidy == -1){
+    func_ploidy = local_ploidy;
+  }
+  else { 
+    func_ploidy = ovwr_ploidy;
+  }
+  if (func_ploidy == 2) {
     for (std::vector<int32_t>::iterator a1_it = allele_list.begin();
             a1_it != allele_list.end();
             a1_it++){
@@ -692,7 +730,7 @@ bool LikelihoodMaximizer::findBestAlleleListTuple(std::vector<int32_t> allele_li
       }
     }
   }
-  else if (use_ploidy == 1) {
+  else if (func_ploidy == 1) {
     best_a2 = fix_allele;
     for (std::vector<int32_t>::iterator a1_it = allele_list.begin();
             a1_it != allele_list.end();

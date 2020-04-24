@@ -59,7 +59,7 @@ bool ReadExtractor::ExtractReads(BamCramMultiReader* bamreader,
   
   int32_t frr = 0, span = 0, encl = 0, flank = 0, offt = 0; // TODO do these need to be per sample?
   if (read_pairs.size() == 0){
-    PrintMessageDieOnError("\tNot enough reads extracted. Aborting..", M_PROGRESS, options.quiet);
+    PrintMessageDieOnError("\tNot enough reads extracted. Skipping locus..", M_PROGRESS, options.quiet);
     return false;
   }
   // Find median bound, and filter out any bound reads with data > 3 * median
