@@ -94,6 +94,8 @@ Required parameters:
 Additional general options:
 * **`--targeted`** Run GangSTR in targeted mode. This mode should be used when targeting disease loci. (as opposed to genome-wide run)
 * **`--chrom <string>`** Only genotype regions on this chromosome.
+* **`--bam-samps <string>`** Comma separated list of sample IDs for --bam
+* **`--samp-sex <string>`** Comma separated list of sample sex for each sample ID (--bam-samps must be provided, see readme for more details)
 * **`--str-info <string>`** Tab file with additional per-STR info (e.g., expansion cutoff. see below for format)
 * **`--period <string>`** Only genotype loci with periods (motif lengths) in this comma-separated list.
 * **`--skip-qscore`** Skip calculation of Q-score (see **Q** field in VCF output).
@@ -283,6 +285,10 @@ GangSTR callsets on publicly available datasets.
 | ----------- | -------------------- | ----------|
 | NA12878, NA12891, NA12892 | hg19 v13.1 | [NA12878_trio_hg19_v13_1_filtered_level1.vcf.gz](https://s3.amazonaws.com/gangstr/callsets/NA12878_trio_hg19_v13_1_filtered_level1.vcf.gz) |
 
-## Known Issues:
-* Multi-sample run with `--bam-samps` may generate innacurate results. This issue is fixed in the repository and will be packaged in our next release.
-* Multi-sample run with manually set insert size (using `--insertmean` and `--insertsdev`) may generate innacurate results. This issue is fixed in the repository and will be packaged in our next release.
+## Calling on sex chromosomes.
+You can call TRs on chrX and chrY using a combination of `--bam-samps` and `--samp-sex`. `--samp-sex` is a list of sex assignments ('F' or 'M') for the list of samples in `--bam-samps`, in the same order. For example if sample1 and sample2 are Male and Female respectively, `--bam-samps sample1,sample2 --samp-sex M,F` as input option.
+
+Currently, GangSTR is not capable of extracting sample sex automatically.
+
+// ## Known Issues:
+// * 
