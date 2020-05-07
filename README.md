@@ -290,5 +290,4 @@ You can call TRs on chrX and chrY using a combination of `--bam-samps` and `--sa
 
 Currently, GangSTR is not capable of extracting sample sex automatically.
 
-// ## Known Issues:
-// * 
+
