@@ -71,6 +71,12 @@ enum FlankMatchState{
   FM_COMPLETE = 2
 };
 
+enum ReadEndMatchState{
+  RE_NOMATCH = 0,
+  RE_PARTIAL = 1,
+  RE_COMPLETE = 2
+};
+
 enum sw_move{
 	SW_END = 0,
 	SW_DIAG = 1,
@@ -108,8 +114,10 @@ bool expansion_aware_realign(const std::string& seq,
 			     int32_t* start_pos, 
 			     int32_t* end_pos, 
 			     int32_t* score,
-			     FlankMatchState* fm_start,
-			     FlankMatchState* fm_end);		      
+			     FlankMatchState* fm_pref,
+			     FlankMatchState* fm_posf,
+			     ReadEndMatchState* re_start,
+			     ReadEndMatchState* re_end);		      
 
 bool smith_waterman(const std::string& seq1,
 		    const std::string& seq2,
@@ -147,8 +155,10 @@ bool classify_realigned_read(const std::string& seq,
 			     const bool& isMapped,
 			     const std::string& pre_flank,
 			     const std::string& post_flank,
-			     const FlankMatchState& fm_start,
-			     const FlankMatchState& fm_end,
+			     const FlankMatchState& fm_pref,
+			     const FlankMatchState& fm_posf,
+			     const ReadEndMatchState& re_start,
+			     const ReadEndMatchState& re_end,
 			     SingleReadType* single_read_class);
 
 float MeanQual(const std::string& quals);
@@ -163,8 +173,10 @@ bool cigar_realignment(BamAlignment& aln,
 		       int32_t* start_pos,
 		       int32_t* end_pos,
 		       int32_t* score,
-		       FlankMatchState* fm_start,
-		       FlankMatchState* fm_end);
+		       FlankMatchState* fm_pref,
+		       FlankMatchState* fm_posf,
+		       ReadEndMatchState* re_start,
+		       ReadEndMatchState* re_end);
 		       
 
 #endif  // SRC_REALIGNMENT_H__
