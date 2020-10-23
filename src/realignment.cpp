@@ -60,6 +60,7 @@ bool find_longest_stretch(const std::string& seq,
   }
   *nCopy_stretch = longest_stretch;
   *nCopy_total = total;
+  return true;
 }
 
 bool expansion_aware_realign(const std::string& seq,
@@ -280,6 +281,7 @@ bool trace_back(const std::vector<std::vector<int32_t> > score_matrix,
       return false;
     }
   }
+  return true;
 }
 
 bool next_move(std::vector<std::vector<int32_t> > score_matrix, 
