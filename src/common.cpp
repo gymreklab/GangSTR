@@ -49,7 +49,7 @@ void PrintMessageDieOnError(const string& msg, MSGTYPE msgtype, bool quiet) {
   }
   stringstream ss;
   ss  << "[GangSTR"
-      << "-" << _GIT_VERSION << "] " << typestring << msg << endl;
+      << "-" << GangSTR_VER << "] " << typestring << msg << endl;
   cerr << ss.str();
 
   if (msgtype == M_ERROR) {

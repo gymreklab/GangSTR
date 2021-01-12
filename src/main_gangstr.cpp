@@ -36,6 +36,7 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 #include "src/str_info.h"
 #include "src/stringops.h"
 #include "src/vcf_writer.h"
+#include "GangSTRConfig.h"
 
 using namespace std;
 
@@ -351,7 +352,7 @@ void parse_commandline_options(int argc, char* argv[], Options* options) {
       options->quiet = true;
       break;
     case OPT_VERSION:
-      cerr << _GIT_VERSION << endl;
+      cerr << GangSTR_VER << endl;
       exit(0);
     case '?':
       show_help();
@@ -396,7 +397,7 @@ int main(int argc, char* argv[]) {
   Options options;
   parse_commandline_options(argc, argv, &options);
   stringstream full_command_ss;
-  full_command_ss << "GangSTR-" << _GIT_VERSION;
+  full_command_ss << "GangSTR-" << GangSTR_VER;
   for (int i = 1; i < argc; i++) {
     full_command_ss << " " << argv[i];
   }

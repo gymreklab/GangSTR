@@ -24,6 +24,8 @@ along with GangSTR.  If not, see <http://www.gnu.org/licenses/>.
 #include <string>
 #include <vector>
 
+#include "GangSTRConfig.h"
+
 // Print msg, exit if error
 enum MSGTYPE {
   M_ERROR = 0,
