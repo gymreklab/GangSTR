@@ -20,7 +20,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 ######################### htslib and dependencies ############################
 
-ExternalProject_Add(nlopt
+ExternalProject_Add(pnlopt
         PREFIX ${CMAKE_BINARY_DIR}/thirdparty/nlopt
         GIT_REPOSITORY "https://github.com/stevengj/nlopt.git"
         GIT_TAG "v2.7.0"
@@ -53,7 +53,7 @@ ExternalProject_Add(htslib
         INSTALL_COMMAND make install prefix=${CMAKE_BINARY_DIR}/thirdparty/htslib
         LOG_DOWNLOAD 1
         )
-ExternalProject_Add(gsl
+ExternalProject_Add(pgsl
         PREFIX ${CMAKE_BINARY_DIR}/thirdparty/gsl
         GIT_REPOSITORY "https://github.com/ampl/gsl.git"
         GIT_TAG "v2.5.0"
@@ -75,7 +75,9 @@ include_directories(${CMAKE_BINARY_DIR}/thirdparty/zlib/include)
 set(zlib_static ${CMAKE_BINARY_DIR}/thirdparty/zlib/lib/libz.a)
 add_dependencies(htslib zlib)
 
-# find_package (Threads REQUIRED)
+set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
+set(THREADS_PREFER_PTHREAD_FLAG TRUE)
+find_package(Threads REQUIRED)
 ######################### gangstr code ############################
 
 add_subdirectory(src)
@@ -85,9 +87,15 @@ add_executable(${PROJECT_NAME} src/main_gangstr.cpp)
 
 target_compile_features(GangSTR PRIVATE cxx_range_for)
 target_include_directories(GangSTR PUBLIC "${PROJECT_BINARY_DIR}")
-target_link_libraries(GangSTR gstr pthread)
+target_link_libraries(GangSTR Threads::Threads)
+target_link_libraries(GangSTR hts)
+target_link_libraries(GangSTR gstr)
+target_link_libraries(GangSTR z)
+target_link_libraries(GangSTR m nlopt)
+target_link_libraries(GangSTR gsl)
+#target_link_libraries(GangSTR gstr pthread)
 #target_link_libraries (GangSTR ${CMAKE_THREAD_LIBS_INIT} gstr )
 install(TARGETS GangSTR DESTINATION bin)
 
 add_dependencies(htslib zlib)
-add_dependencies(gstr htslib nlopt gsl)
+add_dependencies(gstr htslib pnlopt pgsl)
