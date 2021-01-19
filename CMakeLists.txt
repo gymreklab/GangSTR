@@ -85,6 +85,7 @@ add_subdirectory(src)
 # add the executable
 add_executable(${PROJECT_NAME} src/main_gangstr.cpp)
 
+link_directories(${CMAKE_BINARY_DIR}/src ${CMAKE_BINARY_DIR}/thirdparty/zlib/lib ${CMAKE_BINARY_DIR}/thirdparty/gsl/lib ${CMAKE_BINARY_DIR}/thirdparty/nlopt/lib ${CMAKE_BINARY_DIR}/thirdparty/htslib/lib ${CMAKE_BINARY_DIR}/thirdparty/zlib/lib)
 target_compile_features(GangSTR PRIVATE cxx_range_for)
 target_include_directories(GangSTR PUBLIC "${PROJECT_BINARY_DIR}")
 target_link_libraries(GangSTR Threads::Threads)
@@ -93,6 +94,7 @@ target_link_libraries(GangSTR gstr)
 target_link_libraries(GangSTR z)
 target_link_libraries(GangSTR m nlopt)
 target_link_libraries(GangSTR gsl)
+
 #target_link_libraries(GangSTR gstr pthread)
 #target_link_libraries (GangSTR ${CMAKE_THREAD_LIBS_INIT} gstr )
 install(TARGETS GangSTR DESTINATION bin)
