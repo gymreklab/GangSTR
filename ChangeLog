@@ -1,4 +1,6 @@
 # GangSTR releases
+gangstr_v2.5 (Jan 20, 2020):
+	- Changed build system to CMake
 gangstr_v2.0 (February 13, 2019):
 	- second major release
 	- Multi-sample calling
