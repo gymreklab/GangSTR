@@ -30,26 +30,33 @@ For a list of TR references available, see [references](#references) below.
 
 ## Basic Install
 
-GangSTR requires third party packages [nlopt](https://nlopt.readthedocs.io/en/latest/), [gsl](https://www.gnu.org/software/gsl/doc/html/index.html), and [htslib](http://www.htslib.org//).
+<!-- GangSTR requires third party packages [nlopt](https://nlopt.readthedocs.io/en/latest/), [gsl](https://www.gnu.org/software/gsl/doc/html/index.html), and [htslib](http://www.htslib.org//). -->
 
 If you are installing from the tarball (which for most purposes you should be), the following instructions will install all dependencies as well as GangSTR itself. Both UNIX and Mac OSX are supported.
 
-If you are attempting to compile and install directly from a cloned github repository (e.g. if you would like the latest and greatest unreleased feature or would like to contribute a fix or new feature), the following steps will not work and you should follow instructions under "Compiling from git source" below.
+<!-- If you are attempting to compile and install directly from a cloned github repository (e.g. if you would like the latest and greatest unreleased feature or would like to contribute a fix or new feature), the following steps will not work and you should follow instructions under "Compiling from git source" below. -->
 
-These steps have been tested and verfied against the following gcc compiler versions: 4.9.2, 5.4.0, 6.3.0, 7.3.0
+<!-- These steps have been tested and verfied against the following gcc compiler versions: 4.9.2, 5.4.0, 6.3.0, 7.3.0 -->
 
 If you are running as root:
 ```
 tar -xzvf GangSTR-X.X.tar.gz
 cd GangSTR-X.X
-sudo ./install-gangstr.sh
+mkdir build
+cd build
+cmake ..
+make
+sudo cmake --install .
 ```
-
 If you are installing locally (e.g. on a cluster where you don't have root access):
 ```
 tar -xzvf GangSTR-X.X.tar.gz
 cd GangSTR-X.X
-./install-gangstr.sh PREFIX
+mkdir build
+cd build
+cmake ..
+make
+cmake --install . --prefix PREFIX
 ```
 
 
@@ -60,20 +67,16 @@ Typing `GangSTR --help` should show a help message if GangSTR was successfully i
 
 ## Compiling from git source
 
-To compile from git source, first make sure nlopt, gsl, and htslib are installed, then run the following:
+To compile from git source:
 
 ```
 # Clone the repo
 git clone https://github.com/gymreklab/GangSTR
 cd GangSTR/
-
-# Generate the configure script
-./reconf
-
-# Compile and install GangSTR
-./configure
+mkdir build
+cmake ..
 make
-make install
+cmake --install . --prefix PREFIX
 ```
 
 <a name="usage"></a>
