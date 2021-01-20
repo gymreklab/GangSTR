@@ -79,8 +79,6 @@ set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
 set(THREADS_PREFER_PTHREAD_FLAG TRUE)
 find_package(Threads REQUIRED)
 
-set(CURL_LIBRARY "-lcurl") 
-find_package(CURL REQUIRED) 
 
 ######################### gangstr code ############################
 
@@ -100,8 +98,6 @@ target_link_libraries(GangSTR gstr)
 target_link_libraries(GangSTR z)
 target_link_libraries(GangSTR m nlopt)
 target_link_libraries(GangSTR gsl)
-include_directories(${CURL_INCLUDE_DIR})
-target_link_libraries(GangSTR ${CURL_LIBRARIES})
 
 #target_link_libraries(GangSTR gstr pthread)
 #target_link_libraries (GangSTR ${CMAKE_THREAD_LIBS_INIT} gstr )
