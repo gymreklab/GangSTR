@@ -48,7 +48,7 @@ ExternalProject_Add(htslib
         GIT_TAG "1.11"
         UPDATE_COMMAND autoreconf ${CMAKE_BINARY_DIR}/thirdparty/htslib/src/htslib
         BUILD_IN_SOURCE 1
-        CONFIGURE_COMMAND ${CMAKE_BINARY_DIR}/thirdparty/htslib/src/htslib/configure --disable-bz2 --disable-lzma
+        CONFIGURE_COMMAND ${CMAKE_BINARY_DIR}/thirdparty/htslib/src/htslib/configure #--disable-bz2 --disable-lzma
         BUILD_COMMAND make
         INSTALL_COMMAND make install prefix=${CMAKE_BINARY_DIR}/thirdparty/htslib
 	LOG_DOWNLOAD 1
