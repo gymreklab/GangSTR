@@ -26,6 +26,12 @@ The latest GangSTR release is available on the [releases page](https://github.co
 
 For a list of TR references available, see [references](#references) below. 
 
+<a name="prereqs"></a>
+## Prerequisites
+* A recent version of `C`/`C++` compiler supporting `C++11` standard
+* `CMake` version `3.16` or above
+* The following development files in the build system: `libz-dev`, `libbz2-dev`, and `liblzma-dev` (required by htslib)
+
 <a name="install"></a>
 
 ## Basic Install
