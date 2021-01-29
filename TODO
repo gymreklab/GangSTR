@@ -1,11 +1,6 @@
 # New features
 * Ability to read from S3 files
-* Ability to have per-locus stutter model
-* Multi-sample calling
 * multithreading by locus (or use built in multithreading of SSW/nlopt libraries)
 
 # Make compiling easy
-* Automatically check for necessary libraries (cppunit, gsl, nlopt)
-* Make sure lib/htslib gets added to LD_LIBRARY_PATH somehow
-* Shared library issues (error while loading shared libraries: libhts.so.2: cannot open shared object file)
 * Fail gracefully when files (e.g. reference loci) not formatted correctly
