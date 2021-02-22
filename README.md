@@ -241,6 +241,31 @@ FORMAT fields contain information specific to each genotype call. The following 
 
 **QEXP**: Given estimated alleles, the likelihood plane, and an expansion threshold, this field shows three numbers: the probability of both alleles being smaller than the threshold, one allele larger and one smaller than threshold, and both alleles larger than threshold. The expansion threshold should be provided using `--str-info` field.
 
+### Read info file (output)
+By using `--output-readinfo` a file with `.readinfo.tab` extention containing information from the reads extracted for each locus is generated. The columns are ordered as follows:
+
+| **Column number** | **Description** |
+| --------------------| ------------|
+| 1 | Chromosome |
+| 2 | Repeat start position |
+| 3 | Repeat end position |
+| 4 | Read ID (originated from BAM file) |
+| 5 | Read class {\*\*} |
+| 6 | Read class data field {\*\*} |
+| 7 | Found mate (boolean flag) |
+
+#### {\*\*} Read class codes and their corresponding data field 
+Each read in the `.readinfo.tab` file belongs to one of 5 classes. The following table shows what each read class code means and how to interpret the read class data field column. For more information on read classes please refer to manuscript https://doi.org/10.1093/nar/gkz501.
+
+| **Read Class Code** | **Description** | **Data field**
+| --------------------| ------------| ------ |
+| SPAN | Spanning read pair | Fragment length (insert size) of the spanning read pair |
+| SPFLNK | A flanking read that creates a spanning read pair with its mate | Number of repeat copies on the flanking read |
+| BOUND | A flanking read | Number of repeat copies on the flanking read |
+| ENCLOSE | Enclosing read | Number of repeat copies enclosed in the read |
+| FRR | Fully repetitive read | Distance of mate from the repeat region (set to -(read_length) if mate is also FRR) |
+
+
 <a name="references"></a>
 ## GangSTR reference files
 
