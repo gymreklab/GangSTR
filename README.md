@@ -85,6 +85,15 @@ make
 cmake --install . --prefix PREFIX
 ```
 
+<a name="conda"></a>
+## Install using conda
+You can install GangSTR `v2.5.0` using conda (or mamba) package manager.
+```
+conda install -c bioconda -c conda-forge gangstr
+```
+Special thanks to the users in this [thread](https://github.com/gymreklab/GangSTR/issues/48#issuecomment-813718701) for help in setting this up.
+
+
 <a name="usage"></a>
 ## Basic usage
 To run GangSTR using default parameters use the following command:
